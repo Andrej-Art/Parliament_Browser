@@ -7,9 +7,9 @@ Eric war hier
 Andrej war hier 
 
 ---
-## Kurzanleitung
+## Kurzanleitung für Markdown mit Beispielen
 - Liste mit Bindestrich
-- Notiz: Zweimal Enter für einen neuen Absatz, zwei Leerzeichen + 1 Enter
+- Notiz: In Markdown zweimal Enter für einen neuen Absatz, zwei Leerzeichen + 1 Enter
   für einen normalen Zeilenumbruch
 
 So in  
@@ -24,6 +24,10 @@ so.
 *Kursiv*  
 **Fett**  
 ***Kursiv UND Fett***
+
+Wie man auf Windows den "Lange Dateinamen" Fehler umgeht?  
+Einfach das hier in `/.idea/workspace.xml` einfügen:  
+![Windows_Dateinamen](https://cdn.discordapp.com/attachments/1062062247624572988/1062415104605438112/image.png)
 
 Code `epicCode()` im Satz
 
