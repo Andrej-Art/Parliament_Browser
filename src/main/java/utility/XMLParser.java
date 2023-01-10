@@ -32,7 +32,7 @@ public class XMLParser {
      * @return
      * @author Julian Ocker
      */
-    private static /*Data_Kraken*/ deputyParse(String source, String target/*, Data_Kraken data_pack*/) {
+    private static /*Data_Kraken*/ void personParse(String source, String target/*, Data_Kraken data_pack*/) {
 
         ArrayList<String> allFractions = new ArrayList<>(0);
         try {
