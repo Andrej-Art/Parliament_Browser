@@ -30,11 +30,13 @@
     </repositories>
 
     <dependencies>
+
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
             <artifactId>UIMATypeSystem</artifactId>
             <version>${ttlab.typesystem.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
             <artifactId>textimager-uima</artifactId>
@@ -46,6 +48,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.github.texttechnologylab.textimager-uima</groupId>
             <artifactId>textimager-uima-types</artifactId>
@@ -57,6 +60,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.github.texttechnologylab.textimager-uima</groupId>
             <artifactId>textimager-uima-io</artifactId>
@@ -68,6 +72,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.github.texttechnologylab.textimager-uima</groupId>
             <artifactId>textimager-uima-spacy</artifactId>
@@ -79,6 +84,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.github.texttechnologylab.textimager-uima</groupId>
             <artifactId>textimager-uima-gervader</artifactId>
@@ -90,6 +96,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.github.texttechnologylab.textimager-uima</groupId>
             <artifactId>textimager-uima-heideltime</artifactId>
@@ -101,11 +108,34 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
             <artifactId>de.tudarmstadt.ukp.dkpro.core.api.lexmorph-asl</artifactId>
             <version>1.10.0</version>
         </dependency>
+
+        <dependency>
+            <!-- jsoup HTML parser library @ https://jsoup.org/ -->
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.15.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.portals.jetspeed-2</groupId>
+            <artifactId>jetspeed-fileutils-maven-plugin</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+
+
+
     </dependencies>
 
 </project>

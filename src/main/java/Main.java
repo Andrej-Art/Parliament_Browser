@@ -1,25 +1,21 @@
 import java.util.Scanner;
 
 /**
- *
+ * This is an exemplary menu for our test procedures and console outputs.
+ * @author Andrej
  */
-
-
 
 public class Main {
 
     /**
-     *
+     * User menu as switch-case, which allows the user to access our implemented functions.
+     * (Later we don't need this, because everything is handled by the frontend).
      * @param args
      */
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
         String userInput = "";
-
-        /*
-         * below our method calls, like access to the parser, database etc.
-         */
 
         //Print User Menu
         while (!userInput.equals("5")){
