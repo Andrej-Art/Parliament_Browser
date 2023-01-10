@@ -35,5 +35,5 @@ public interface Speech {
      * @return date
      * @author DavidJordan
      */
-   String getDatum();
+   String getDate();
 }
