@@ -66,6 +66,18 @@ public interface Person {
     String getLastName();
 
     /**
+     * Gets the Bundestags Fraction of the Person.
+     * @return fraction
+     */
+    String getFraction();
+
+    /**
+     * Gets the Party the Person belongs to.
+     * @return party
+     */
+    String getParty();
+
+    /**
      * Gets the Person's place of residence.
      * @return place
      * @author DavidJordan
