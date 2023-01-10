@@ -15,7 +15,8 @@ import java.util.ArrayList;
 
 /**
  * Class to analyze the XML files and create objects
- * @author Andrej Artuschenko, Julian Ocker
+ * @author Andrej Artuschenko
+ * @author Julian Ocker
  */
 public class XMLParser {
 
