@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  * !!Unfinished!!
- * Class that implement the Person interface. It maps all "Abgeordnete" and Persons with
+ * Class that implements the Person interface. It maps all "Abgeordnete" and Persons with
  * an ID appearing in the Stammdaten and Protocols.
  * @author DavidJordan
  */
@@ -32,7 +32,7 @@ public class Person_Impl implements Person {
      * !!Important!!  This is only a working idea for a constructor that takes all of the required variables.
      *  We will have to improve this depending on how the Parser and the Scraper (pfpData!) gets the data from the Stammdaten .  If the parser only gets the
      *  data from the Stammdaten XML for the Person class then this could work.  We should all find a solution together that works.
-     *  We will probably have to add optional setters
+     *  We will probably have to add optional setters.
      * @param id
      * @param firstName
      * @param lastName
@@ -74,11 +74,12 @@ public class Person_Impl implements Person {
      * !!Unfinished!!!
      * !!Important!!  This is also a working idea for a constructor to generate the object from the DB document.
      * Please everybody inspect these two interpretations of our results yesterday and make the necessary adjustments
-     * where necessary. I think since we al work on these fundamentally important designs we should all be authors?
+     * where necessary. I think since we all work on these fundamentally important designs we should all be authors?
      * @param document
      * @author DavidJordan
      */
     public Person_Impl(Document document){
+        this.personDoc = document;
         this.id = document.getString("_id");
         this.firstName = document.getString("firstname");
         this.lastName = document.getString("lastName");
