@@ -18,11 +18,13 @@ import java.util.ArrayList;
  * @author Andrej Artuschenko
  * @author Julian Ocker
  */
-public class MyXMLReader {
+public class XMLParser {
 
 
     /**
      * !!Work in Progress!!
+     *
+     * This Funktion
      *
      * @param source
      * @param target
