@@ -32,7 +32,7 @@ public class XMLParser {
      * @return
      * @author Julian Ocker
      */
-    private static Data_Kraken deputyParse(String source, String target, Data_Kraken data_pack) {
+    private static /*Data_Kraken*/ deputyParse(String source, String target/*, Data_Kraken data_pack*/) {
 
         ArrayList<String> allFractions = new ArrayList<>(0);
         try {
@@ -249,9 +249,11 @@ public class XMLParser {
                         funfacts.add(job);
                         funfacts.add(publicInterest);
 
-                        if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null)) )
-                            data_pack.addDeputy(deputyFirstName, deputyLastName, deputyTitle, deputyID, WPFractionList.get(i).get(i), funfacts);
-                        data_pack.addPartyToSpeaker(deputyID, party);
+                        if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null)) ) {
+                            //data_pack.addDeputy(deputyFirstName, deputyLastName, deputyTitle, deputyID, WPFractionList.get(i).get(i), funfacts);
+                        }
+                        //data_pack.addPartyToSpeaker(deputyID, party);
+
                         boolean check = true;
                         // creating the fraction if it doesn't exist
                         for (int j = 0; j < allFractions.size(); j++) {
@@ -261,10 +263,10 @@ public class XMLParser {
                         }
                         if(check){
                             allFractions.add(WPFractionList.get(i).get(i));
-                            data_pack.addFraction(WPFractionList.get(i).get(i));
+                            //data_pack.addFraction(WPFractionList.get(i).get(i));
                         }
 
-                        data_pack.addPartyToFraction(WPFractionList.get(i).get(i), party);
+                        //data_pack.addPartyToFraction(WPFractionList.get(i).get(i), party);
 
                     }
 
@@ -282,14 +284,14 @@ public class XMLParser {
         } catch (IOException e) {
             e.printStackTrace();
 
-        } catch (SAXException e) {
+        } /*catch (SAXException e) {
             e.printStackTrace();
 
-        } catch (Exception e) {
+        } */ catch (Exception e) {
             e.printStackTrace();
 
         }
-        return data_pack;
+        //return data_pack;
     }
 
 }
