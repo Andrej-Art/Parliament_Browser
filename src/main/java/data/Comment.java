@@ -1,5 +1,7 @@
 package data;
 
+import java.util.ArrayList;
+
 /**
  * Interface that represents a Comment from a Parliament Protocol. Provides
  * the methods to access the relevant data.
@@ -34,6 +36,13 @@ public interface Comment {
      * @author DavidJordan
      */
     String getCommentator();
+
+    /**
+     * Gets a list of names of the Bundestags-Fractions who made the Comment.
+     * @return fractions
+     * @author DavidJordan
+     */
+    ArrayList<String> getFractions();
 
     /**
      * Gets the text content of the Comment
