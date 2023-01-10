@@ -1,3 +1,5 @@
+import utility.Scraper;
+
 import java.util.Scanner;
 
 /**
