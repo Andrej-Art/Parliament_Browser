@@ -24,7 +24,7 @@ public class XMLParser {
     /**
      * !!Work in Progress!!
      *
-     * This Funktion
+     * This method reads the Stammdaten-file and creates instances of the person-Class
      *
      * @param source
      * @param target
