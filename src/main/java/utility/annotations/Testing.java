@@ -1,4 +1,4 @@
-package utility;
+package utility.annotations;
 
 /**
  * This annotation marks a class or method which is solely used for testing,
