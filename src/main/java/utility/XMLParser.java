@@ -351,6 +351,7 @@ public class XMLParser {
      * from the Picture database of the Deutsche Bundestag.
      * The website-URL: https://bilddatenbank.bundestag.de
      * @author Andrej Artuschenko
+     * @Unfinished
      */
     public String[] producePictureUrl(String firstName, String lastName) {
 
