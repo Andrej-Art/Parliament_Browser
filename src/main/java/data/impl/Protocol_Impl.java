@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  * Class that implements the Protocol Interface. Provides Constructors for parameter-based instantiation of the variables.
- * And for instatiation from a BSON Document.
+ * And for instatiation from a BSON Document. Test to check if previous commit was successful.
  * @author DavidJordan
  */
 public class Protocol_Impl implements Protocol {
