@@ -354,6 +354,17 @@ public class XMLParser {
      */
     public String[] producePictureUrl(String firstName, String lastName) {
 
+        //Initializing pictureArray Variable
+        String[] pictureArray = new String[8];
+
+        // Parsing the Picture database of the Deutsche Bundestag.
+        try{
+            // build the URL for the Bilddatenbank for each relevant person
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // This will be a picture-array
         return new String[0];
 
