@@ -5,7 +5,7 @@ import org.apache.uima.fit.factory.AggregateBuilder;
 import org.hucompute.textimager.fasttext.labelannotator.LabelAnnotatorDocker;
 import org.hucompute.textimager.uima.gervader.GerVaderSentiment;
 import org.hucompute.textimager.uima.spacy.SpaCyMultiTagger3;
-import org.jetbrains.annotations.NotNull;
+import utility.annotations.Testing;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -38,7 +38,7 @@ public class UIMAResources {
      */
     public static AggregateBuilder getAggregateBuilder() throws UIMAException {
         AggregateBuilder builder = new AggregateBuilder();
-        URL posmap = UIMAResources.class.getClassLoader().getResource("backend/am_posmap.txt");
+        URL posmap = UIMAResources.class.getClassLoader().getResource("am_posmap.txt");
 
         builder.add(createEngineDescription(SpaCyMultiTagger3.class,
                 SpaCyMultiTagger3.PARAM_REST_ENDPOINT, "http://spacy.lehre.texttechnologylab.org"
@@ -72,10 +72,10 @@ public class UIMAResources {
      * @author Eric Lakhter
      */
     public static String[] getDDCCategories() throws FileNotFoundException {
-        BufferedReader br = new BufferedReader(new FileReader(UIMAResources.class.getClassLoader().getResource("backend/ddc3-names-de.csv").getPath()));
+        BufferedReader br = new BufferedReader(new FileReader(UIMAResources.class.getClassLoader().getResource("ddc3-names-de.csv").getPath()));
         return br.lines()                           // stream of the lines of the csv file
                 .filter(s -> !s.isEmpty())          // remove all empty lines
-                .map(s -> s.split("\t")[1])   // tabulator is the delimiter in the file, we need the second column
+                .map(s -> s.split("\t")[1])         // tabulator is the delimiter in the file, we need the second column
                 .toArray(String[]::new);            // convert stream to String array
     }
 }
