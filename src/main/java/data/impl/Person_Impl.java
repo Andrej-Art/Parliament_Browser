@@ -74,8 +74,8 @@ public class Person_Impl implements Person {
      * !!Unfinished!!!
      * !!Important!!  This is also a working idea for a constructor to generate the object from the DB document.
      * Please everybody inspect these two interpretations of our results yesterday and make the necessary adjustments
-     * where necessary. I think since we all work on these fundamentally important designs we should all be authors?
-     * @param document
+     * where necessary. Whoever needs setters for specific variables, please add those and modify the constructor accordingly.
+     * @param document The BSON document retrieved from the database.
      * @author DavidJordan
      */
     public Person_Impl(Document document){

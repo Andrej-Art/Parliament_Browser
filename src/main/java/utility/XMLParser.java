@@ -3,6 +3,7 @@ package utility;
 
 import jdk.internal.org.xml.sax.SAXException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -12,11 +13,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to analyze the XML files and create objects
  * @author Andrej Artuschenko
  * @author Julian Ocker
+ * @author DavidJordan
  */
 public class XMLParser {
 
@@ -293,6 +296,57 @@ public class XMLParser {
         }
         //return data_pack;
     }
+
+
+    /**
+     * A helper method to extract all Nodes of a given name from the XML Document which is parsed.
+     * It recursively scans the document for all occurrences. It is a modified version of a function by
+     * G.Abrami.
+     * @param node  The Node from which the function starts to recursively scan the xml tree
+     * @param name  The name of the Nodes that will be extracted from the Sub-Tree
+     * @return nodeList  A List of the Nodes with the given name
+     * @author DavidJordan, (G.Abrami)
+     */
+    public static List<Node> getNodesByName(Node node, String name) {
+        // list to store the selected nodes
+        List<Node> nodeList = new ArrayList<>(0);
+        // add node to list if it has the desired name
+        if (node != null && node.getNodeName().equals(name) ) {
+            nodeList.add(node);
+        }
+        //check if the node has children. This leads to the subtree of the provided node being searched in the following
+        else {
+            if(node != null && node.hasChildNodes()){
+                // for each of the children perform the following recursive action
+                for (int i = 0; i < node.getChildNodes().getLength(); i++) {
+                    // recursively call this function on each child, adding all the accumulating nodes
+                    nodeList.addAll(getNodesByName(node.getChildNodes().item(i), name));
+                }
+            } else{ if(node != null && node.getNodeName().equals(name)) nodeList.add(node);}
+        }
+        return nodeList;
+    }
+
+    /**
+     * The complementary helper Method to the getNodesByName Method which calls it in the method body
+     * and extracts the first ocurrence in the resulting List of Nodes. If the List of Nodes is empty, it returns
+     * null.
+     * @param node The root node of the Document from which the subtree is scanned
+     * @param name The Node name to scan for
+     * @return Node
+     * @author DavidJordan, (G. Abrami)
+     */
+    public static Node getSingleNode(Node node, String name) {
+        //Scan the subtree recursively
+        List<Node> list = getNodesByName(node, name);
+        if (!list.isEmpty()){
+            // Return the first node if present
+            return list.stream().findFirst().get();
+        }
+        return null;
+    }
+
+
 
 }
 
