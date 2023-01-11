@@ -346,6 +346,19 @@ public class XMLParser {
         return null;
     }
 
+    /**
+     * Method to produce the Picture Array of a speaker with all relevant Data (URL, Meta-Data)
+     * from the Picture database of the Deutsche Bundestag.
+     * The website-URL: https://bilddatenbank.bundestag.de
+     * @author Andrej Artuschenko
+     */
+    public String[] producePictureUrl(String firstName, String lastName) {
+
+        // This will be a picture-array
+        return new String[0];
+
+    }
+
 
 
 }
