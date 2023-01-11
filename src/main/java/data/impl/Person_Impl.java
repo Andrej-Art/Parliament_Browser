@@ -28,11 +28,8 @@ public class Person_Impl implements Person {
     }
 
     /**
-     * !!Unfinished!!!
-     * !!Important!!  This is only a working idea for a constructor that takes all of the required variables.
-     *  We will have to improve this depending on how the Parser and the Scraper (pfpData!) gets the data from the Stammdaten .  If the parser only gets the
-     *  data from the Stammdaten XML for the Person class then this could work.  We should all find a solution together that works.
-     *  We will probably have to add optional setters.
+     * !! To Be Completed during Completion of the Parser and DB Handler !!
+     *  Additional Setters  and according changes to constructors to be added by Julian
      * @param id
      * @param firstName
      * @param lastName
