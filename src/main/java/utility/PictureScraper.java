@@ -1,10 +1,11 @@
 package utility;
 
+import utility.annotations.*;
+
 /**
- * @Testing
- * @Unfinished
  * @author Andrej Artuschenko
  */
-
+@Testing
+@Unfinished
 public class PictureScraper {
 }

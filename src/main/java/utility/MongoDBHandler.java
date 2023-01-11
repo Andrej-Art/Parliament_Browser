@@ -20,7 +20,7 @@ public class MongoDBHandler {
 
     /**
      * Connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
-     * @throws IOException if an error handling the properties file occurred.
+     * @throws IOException if an error occurred while handling the properties file.
      * @author Eric Lakhter
      */
     public MongoDBHandler() throws IOException {
@@ -33,5 +33,15 @@ public class MongoDBHandler {
                 ":" + prop.getProperty("remote_port") +
                 "/?authSource=" + prop.getProperty("remote_user"));
         db = client.getDatabase(prop.getProperty("remote_database"));
+    }
+
+    /**
+     * This method enables other classes to access the database for testing.
+     * @return The connected database.
+     * @author Eric Lakhter
+     */
+    @Testing
+    public MongoDatabase getDB() {
+        return db;
     }
 }
