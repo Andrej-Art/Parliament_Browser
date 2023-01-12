@@ -24,7 +24,6 @@ public class MongoDBHandler {
      * @author Eric Lakhter
      */
     public MongoDBHandler() throws IOException {
-        System.out.println("butter");
         Properties prop = new Properties();
         prop.load(new FileInputStream(MongoDBHandler.class.getClassLoader().getResource("PRG_WiSe22_Group_9_4.txt").getPath()));
         MongoClient client = MongoClients.create(
