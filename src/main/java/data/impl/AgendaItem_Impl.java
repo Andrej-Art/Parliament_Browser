@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class AgendaItem_Impl implements AgendaItem {
 
     private Document AgendaItemDoc;
-    private String id, date, subject;
+    private String _id, date, subject;
     private ArrayList<String> speechIDs;
 
     /**
@@ -25,7 +25,7 @@ public class AgendaItem_Impl implements AgendaItem {
      * @author DavidJordan
      */
     public AgendaItem_Impl(String id, String date, String subject, ArrayList<String> speechIDs){
-        this.id = id;
+        this._id = id;
         this.date = date;
         this.subject = subject;
         this.speechIDs = speechIDs;
@@ -38,7 +38,7 @@ public class AgendaItem_Impl implements AgendaItem {
      */
     public AgendaItem_Impl(Document document){
         this.AgendaItemDoc = document;
-        this.id = document.getString("_id");
+        this._id = document.getString("_id");
         this.date = document.getString("date");
         this.subject = document.getString("subject");
         this.speechIDs = (ArrayList<String>) document.get("speechIDs");
@@ -48,7 +48,7 @@ public class AgendaItem_Impl implements AgendaItem {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override

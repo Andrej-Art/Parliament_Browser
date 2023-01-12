@@ -17,7 +17,7 @@ public class Person_Impl implements Person {
     private Document personDoc;
 
     //Class Variables
-    private String id, firstName, lastName, role, title, fraction, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
+    private String _id, firstName, lastName, role, title, fraction, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
     private ArrayList<String> electionPeriods;
 
     /**
@@ -49,7 +49,7 @@ public class Person_Impl implements Person {
      */
     public Person_Impl(String id, String firstName, String lastName, String role, String title, String fraction, String party, String place,
                        String pfpURL, String pfpMetadata, String gender, String birthDate, String deathDate, String birthPlace, ArrayList<String> electionPeriods) {
-        this.id = id;
+        this._id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
@@ -77,7 +77,7 @@ public class Person_Impl implements Person {
      */
     public Person_Impl(Document document){
         this.personDoc = document;
-        this.id = document.getString("_id");
+        this._id = document.getString("_id");
         this.firstName = document.getString("firstname");
         this.lastName = document.getString("lastName");
         this.role = document.getString("role");
@@ -101,7 +101,7 @@ public class Person_Impl implements Person {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override

@@ -14,7 +14,7 @@ public class Protocol_Impl implements Protocol {
 
     private Document protocolDoc;
 
-    private String id, date, beginTime, endTime;
+    private String _id, date, beginTime, endTime;
 
     private int electionPeriod, protocolNumber;
 
@@ -34,7 +34,7 @@ public class Protocol_Impl implements Protocol {
      * @author DavidJordan
      */
     public Protocol_Impl(String id, String date, String beginTime, String endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems){
-        this.id = id;
+        this._id = id;
         this.date = date;
         this.beginTime =beginTime;
         this.endTime = endTime;
@@ -51,7 +51,7 @@ public class Protocol_Impl implements Protocol {
      */
     public Protocol_Impl(Document document){
         this.protocolDoc = document;
-        this.id = document.getString("_id");
+        this._id = document.getString("_id");
         this.date = document.getString("date");
         this.beginTime = document.getString("beginTime");
         this.endTime = document.getString("endTime");
@@ -64,7 +64,7 @@ public class Protocol_Impl implements Protocol {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override

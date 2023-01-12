@@ -11,7 +11,7 @@ import org.bson.Document;
 public class Speech_Impl implements Speech {
 
     private Document speechDoc;
-    private String id, speakerID, text, date;
+    private String _id, speakerID, text, date;
 
     /**
      * Full {@code Speech} Constructor to be used when parsed data is entered.
@@ -22,7 +22,7 @@ public class Speech_Impl implements Speech {
      * @author DavidJordan
      */
     public Speech_Impl(String id, String speakerID, String text, String date){
-        this.id = id;
+        this._id = id;
         this.speakerID = speakerID;
         this.text = text;
         this.date = date;
@@ -35,7 +35,7 @@ public class Speech_Impl implements Speech {
      */
     public Speech_Impl(Document document){
         this.speechDoc = document;
-        this.id = document.getString("_id");
+        this._id = document.getString("_id");
         this.speakerID = document.getString("speakerID");
         this.text = document.getString("text");
         this.date = document.getString("date");
@@ -43,7 +43,7 @@ public class Speech_Impl implements Speech {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override
