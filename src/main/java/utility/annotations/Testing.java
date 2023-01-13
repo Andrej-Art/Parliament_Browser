@@ -1,5 +1,7 @@
 package utility.annotations;
 
+import java.lang.annotation.Documented;
+
 /**
  * This annotation marks a class or method which is solely used for testing,
  * going unused in the finished product.
@@ -14,5 +16,6 @@ package utility.annotations;
  * }</pre>
  * @author Eric Lakhter
  */
+@Documented
 public @interface Testing {
 }

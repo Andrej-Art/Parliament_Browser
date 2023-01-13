@@ -9,6 +9,8 @@ import data.Speech;
 import data.impl.Person_Impl;
 import data.impl.Speech_Impl;
 import org.bson.Document;
+import com.mongodb.client.*;
+import org.bson.Document;
 import utility.annotations.*;
 
 import java.io.FileInputStream;
@@ -17,8 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static com.mongodb.client.model.Filters.*;
+
 /**
- * When instanced, the {@code MongoDBHandler} connects to this group's MongoDB.
+ * When instanced, the {@code MongoDBHandler} connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
  * All methods which manipulate or query data in the database are found here.
  * @author Eric Lakhter
  * @author DavidJordan
@@ -134,4 +138,51 @@ public class MongoDBHandler {
 
 
 
+
+    /**
+     * Returns the text belonging to either a speech or comment ID.
+     * @param col Collection to collect from. Must be either {@code speech} or {@code comment}.
+     * @param id The ID to look for.
+     * @return {@code text} String.
+     * @author Eric Lakhter
+     */
+    public String getText(String col, String id) throws NullPointerException {
+        Document result = db.getCollection(col).find(new Document("_id", id)).iterator().tryNext();
+        if (result == null) throw new NullPointerException("The Document with _id = " + id + " does not exist in this collection.");
+        return result.getString("text");
+    }
+
+    /**
+     * Adds a full CAS XML String to a collection.
+     * @param col Collection to insert in. Must be either {@code speech_cas} or {@code comment_cas}.
+     * @param id Speech/Comment ID.
+     * @param cas The CAS String.
+     * @author Eric Lakhter
+     */
+    public void addCAS(String col, String id, String cas) {
+        db.getCollection(col).insertOne(new Document("_id", id).append("cas", cas));
+    }
+
+    /**
+     * Checks if a Document specified by the {@code id} has a given {@code field}.
+     * @param col Collection to search in.
+     * @param id Document key.
+     * @param field Field name.
+     * @return {@code true} if the field exists, {@code false} otherwise.
+     * @author Eric Lakhter
+     */
+    public boolean checkIfHasNonEmptyField(String col, String id, String field) {
+        return db.getCollection(col).find(and(new Document("_id", id), ne(field, null))).iterator().hasNext();
+    }
+
+    /**
+     * Checks if a Document exists in a collection.
+     * @param col Collection to search in.
+     * @param id Document key.
+     * @return {@code true} if the Document exists, {@code false} otherwise.
+     * @author Eric Lakhter
+     */
+    public boolean checkIfDocumentExists(String col, String id) {
+        return db.getCollection(col).find(new Document("_id", id)).iterator().hasNext();
+    }
 }
