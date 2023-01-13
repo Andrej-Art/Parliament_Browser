@@ -5,6 +5,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
@@ -188,7 +190,45 @@ public class MongoDBHandler {
             this.getCollection("speech").replaceOne(speechQuery, newSpeech);
             return true;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println("Update failed.");
+        }
+        return false;
+    }
+
+    /**
+     * Method to update a specified field in a DBObject with a specified id, in a specified collection
+     * @param id the _id of the Object to be updated
+     * @param fieldName  the name of the field
+     * @param collection  the collection containing it
+     * @param newFieldValue  the new field value to be entered
+     * @return boolean denoting success or failure of the update
+     * @author DavidJordan
+     */
+    public boolean updateField(String id, String fieldName, String collection, String newFieldValue){
+
+        try {
+            db.getCollection(collection).updateOne(Filters.eq("_id", id), Updates.set(fieldName, newFieldValue));
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to update specified field with value.");
+        }
+        return false;
+    }
+
+    /**
+     * Method to replace a MongoDB Document with a specified id with the provided Document.
+     * @param document the Document that will be used to replace it
+     * @param collection the collection where the target document is
+     * @param id the id of the Document to be replaced
+     * @return boolean denoting the success of the replacement process
+     * @author DavidJordan
+     */
+    public boolean replaceOneDoc(Document document, String collection, String id){
+        try {
+            db.getCollection(collection).replaceOne(new Document("_id", id), document);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to replace the specified document.");
         }
         return false;
     }
