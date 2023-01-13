@@ -6,6 +6,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import data.Speech;
+import data.impl.AgendaItem_Impl;
+import data.impl.Comment_Impl;
 import data.impl.Person_Impl;
 import data.impl.Speech_Impl;
 import org.bson.Document;
@@ -99,23 +101,6 @@ public class MongoDBHandler {
     }
 
 
-    /**
-     * Untested Method to insert a List of Speech_Impl objects into the db
-     * I still have to determine if GSON.toJson correctly
-     * assigns the id to the "_id" field in the DB. In the past I always did the conversion manually.
-     *
-     * @param speeches
-     * @author DavidJordan
-     */
-    @Unfinished
-    public void insertSpeeches(List<Speech_Impl> speeches){
-        Gson gson = new Gson();
-        ArrayList<Document>  mongoSpeeches = new ArrayList<>(0);
-        for(Speech_Impl speech : speeches){
-            mongoSpeeches.add(Document.parse(gson.toJson(speech)));
-        }
-        this.getCollection("speech").insertMany(mongoSpeeches);
-    }
 
     /**
      * Untested Method to insert a List of Person_Impl objects into the db
@@ -134,6 +119,78 @@ public class MongoDBHandler {
             mongoPersons.add(Document.parse(gson.toJson(person)));
         }
         this.getCollection("person").insertMany(mongoPersons);
+    }
+
+
+    /**
+     * Method to insert a List of Speech_Impl objects into the db in serialised form. WITHOUT the UIMA fields sofar.
+     * They will either be added by another method or we'll have to use something else than the suggested method below.
+     *
+     *
+     * @param speeches
+     * @author DavidJordan
+     */
+    @Unfinished
+    public void insertSpeeches(List<Speech_Impl> speeches){
+        Gson gson = new Gson();
+        ArrayList<Document>  mongoSpeeches = new ArrayList<>(0);
+        for(Speech_Impl speech : speeches){
+            mongoSpeeches.add(Document.parse(gson.toJson(speech)));
+        }
+        this.getCollection("speech").insertMany(mongoSpeeches);
+    }
+
+
+
+    /**
+     * Method to insert a list of agendaItems, using GSON to serialise the AgItem Objects.
+     * @param agendaItems
+     * @author DavidJordan
+     */
+    public void insertAgendaItems(List<AgendaItem_Impl> agendaItems) {
+        Gson gson = new Gson();
+        ArrayList<Document> mongoAgendaItems = new ArrayList<>(0);
+        for (AgendaItem_Impl agendaItem : agendaItems) {
+            mongoAgendaItems.add(Document.parse(gson.toJson(agendaItem)));
+        }
+        this.getCollection("agendaItem").insertMany(mongoAgendaItems);
+    }
+
+    /**
+     * Method to insert a list of comments, using GSON to serialise the Comment Objects.
+     * @param comments
+     * @author DavidJordan
+     */
+    public void insertComments(List<Comment_Impl> comments) {
+        Gson gson = new Gson();
+        ArrayList<Document> mongoComments = new ArrayList<>(0);
+        for (Comment_Impl comment : comments) {
+            mongoComments.add(Document.parse(gson.toJson(comment)));
+        }
+        this.getCollection("comment").insertMany(mongoComments);
+    }
+
+    /**
+     * TODO // It needs to be decided between us when and how the UIMA fields are added to the collection. Since
+     *   at the moment we only insert without UIMA fields.
+     * @param speech
+     * @return boolean to show if update was successful
+     */
+    @Unfinished
+    @Testing
+    public boolean update(Speech_Impl speech){
+        Gson gson = new Gson();
+        Document speechQuery = new Document().append("_id", speech.getID());
+
+        Document newSpeech = Document.parse(gson.toJson(speech));
+
+        try {
+            this.getCollection("speech").replaceOne(speechQuery, newSpeech);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 
 
