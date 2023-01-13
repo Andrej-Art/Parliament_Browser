@@ -1,10 +1,12 @@
 package utility;
 
 import com.google.gson.Gson;
+import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
 import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
@@ -13,15 +15,21 @@ import data.impl.Speech_Impl;
 import org.bson.Document;
 import com.mongodb.client.*;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import utility.annotations.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import static com.mongodb.client.model.Accumulators.sum;
+import static com.mongodb.client.model.Aggregates.group;
+import static com.mongodb.client.model.Aggregates.sort;
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Sorts.descending;
 
 /**
  * When instanced, the {@code MongoDBHandler} connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
@@ -242,4 +250,73 @@ public class MongoDBHandler {
     public boolean checkIfDocumentExists(String col, String id) {
         return db.getCollection(col).find(new Document("_id", id)).iterator().hasNext();
     }
+    /**
+     * returns all Speakers with their speeches count.
+     * @author Edvin Nise
+     */
+    public void getSpeechesBySpeakerCount() {
+        Bson groupSpeaker = group(new Document("rednerID", "$rednerID"),
+                sum("SpeechesCount", 1));
+        Bson sortDesc = sort(descending("SpeechesCount"));
+        db.getCollection("test_speech").aggregate(Arrays.asList(groupSpeaker, sortDesc))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+
+    }
+    /**
+     * returns count of all Tokens
+     * @author Edvin Nise
+     */
+    public void getTokenCount() {
+        Bson unwind = Aggregates.unwind("$token");
+        Bson groupToken = group(new Document("Token", "$token"),
+                sum("tokenCount", 1));
+        Bson sortDesc = sort(descending("tokenCount"));
+        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, groupToken, sortDesc))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+
+    }
+
+    /**
+     * returns sorted Person Entities with their respective count
+     * @author Edvin Nise
+     */
+    public void getPersonEntities() {
+        Bson unwind = Aggregates.unwind("$personEntity");
+        Bson groupPersonEntity = group(new Document("PersonEntity", "$personEntity"),
+                sum("PersonEntityCount", 1));
+        Bson sortDesc = sort(descending("PersonEntityCount"));
+        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, groupPersonEntity, sortDesc))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+    /**
+     * returns sorted Organisation Entities with their respective count
+     * @author Edvin Nise
+     */
+    public void getOrganisationEntities() {
+        Bson unwind = Aggregates.unwind("$organisationEntity");
+        Bson groupOrganisationEntity = group(new Document("OrganisationEntity", "$organisationEntity"),
+                sum("OrganisationEntityCount", 1));
+        Bson sortDesc = sort(descending("OrganisationEntityCount"));
+        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, groupOrganisationEntity, sortDesc))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+    /**
+     * returns sorted Location Entities with their respective count
+     * @author Edvin Nise
+     */
+    public void getLocationEntities() {
+        Bson unwind = Aggregates.unwind("$locationEntity");
+        Bson groupLocationEntity = group(new Document("LocationEntity", "$locationEntity"),
+                sum("LocationEntityCount", 1));
+        Bson sortDesc = sort(descending("LocationEntityCount"));
+        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, groupLocationEntity, sortDesc))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+
+
 }
