@@ -15,7 +15,7 @@ public class Comment_Impl implements Comment {
     // The BSON Document
     private Document commentDoc;
 
-    private String id, speechID, speakerID, commentator, text, date;
+    private String _id, speechID, speakerID, commentator, text, date;
 
     private ArrayList<String> fractions;
 
@@ -31,7 +31,7 @@ public class Comment_Impl implements Comment {
      * @author DavidJordan
      */
     public Comment_Impl(String id, String speechID, String speakerID, String commentator, String text, String date, ArrayList<String> fractions){
-        this.id = id;
+        this._id = id;
         this.speechID = speechID;
         this.speakerID = speakerID;
         this.commentator = commentator;
@@ -47,7 +47,7 @@ public class Comment_Impl implements Comment {
      */
     public Comment_Impl(Document document){
         this.commentDoc = document;
-        this.id = document.getString("_id");
+        this._id = document.getString("_id");
         this.speechID = document.getString("speechID");
         this.speakerID = document.getString("speakerID");
         this.commentator = document.getString("commentator");
@@ -59,7 +59,7 @@ public class Comment_Impl implements Comment {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override

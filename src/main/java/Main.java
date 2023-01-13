@@ -1,5 +1,12 @@
+
+import com.google.gson.Gson;
+import data.impl.Person_Impl;
+import org.bson.Document;
+import utility.MongoDBHandler;
 import utility.Scraper;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -32,6 +39,7 @@ public class Main {
 
             //Receiving user input
             switch (userInput){
+
                 case "1":
                     System.out.println("All protocols and necessary files will be downloaded.");
                     Scraper.downloadAllXMLs();

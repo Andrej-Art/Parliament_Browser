@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="abschlussprojekt" />
+        <module name="parliament_browser_9_donnerstag_4" />
       </profile>
     </annotationProcessing>
   </component>
