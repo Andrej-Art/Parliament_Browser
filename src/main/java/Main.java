@@ -1,5 +1,8 @@
+import utility.PictureScraper;
 import utility.Scraper;
+import utility.PictureScraper;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -14,7 +17,7 @@ public class Main {
      * (Later we don't need this, because everything is handled by the frontend).
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         Scanner scanner = new Scanner(System.in);
         String userInput = "";
@@ -27,6 +30,7 @@ public class Main {
                     "(3) Start NLP analysis\n" +
                     "(4) Clear Database\n" +
                     "(5) Exit\n" +
+                    "(6) Scraping Pictures of Persons\n" +
                     "----------------------------------------------");
             userInput = scanner.nextLine();
 
@@ -70,6 +74,9 @@ public class Main {
                 case "5":
                     System.out.println("Programm will be terminated.");
                     break;
+
+                case "6":
+                    PictureScraper.producePictureUrl("Angela", "Merkel");
 
                 default:
                     System.out.println("Invalid input");
