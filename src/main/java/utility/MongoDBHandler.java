@@ -68,7 +68,7 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public MongoCollection<Document> getCollection(String col){
-        return this.db.getCollection(col);
+        return db.getCollection(col);
     }
 
     /**
@@ -78,7 +78,7 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public boolean collectionExists(String col){
-        for(String colName : this.db.listCollectionNames()){
+        for(String colName : db.listCollectionNames()){
             if (colName.equals(col)){
                 return true;
             }
@@ -94,13 +94,11 @@ public class MongoDBHandler {
      */
     public boolean createCollection(String col){
         if(!collectionExists(col)){
-            this.db.createCollection(col);
+            db.createCollection(col);
             return true;
         }
         return false;
     }
-
-
 
     /**
      * Untested Method to insert a List of Person_Impl objects into the db
@@ -173,6 +171,8 @@ public class MongoDBHandler {
     /**
      * TODO // It needs to be decided between us when and how the UIMA fields are added to the collection. Since
      *   at the moment we only insert without UIMA fields.
+     *
+     * Method to update a speech document in the DB with a speech Java object as parameter.
      * @param speech
      * @return boolean to show if update was successful
      */
