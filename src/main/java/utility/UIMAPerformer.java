@@ -1,10 +1,12 @@
 package utility;
 
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.util.XmlCasSerializer;
 import org.hucompute.textimager.fasttext.labelannotator.LabelAnnotatorDocker;
@@ -15,6 +17,8 @@ import utility.annotations.*;
 
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
@@ -33,7 +37,7 @@ public class UIMAPerformer {
      * Sets up the necessary resources to perform UIMA analysis on texts.
      * @param mongoDBHandler Required MongoDB connection.
      * @throws UIMAException If an error occurs while building the {@code AnalysisEngine}.
-     * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/backend/}.
+     * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/}.
      */
     public UIMAPerformer(MongoDBHandler mongoDBHandler) throws UIMAException, FileNotFoundException {
         this.mongoDBHandler = mongoDBHandler;
@@ -101,6 +105,16 @@ public class UIMAPerformer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         XmlCasSerializer.serialize(jcas.getCas(), baos);
         mongoDBHandler.addCAS(col + "_cas", id, baos.toString());
+
+        // Tokens
+        // does nothing
+        Collection<Token> token_list = JCasUtil.select(jcas, Token.class);
+        ArrayList<String> token_lemma_list = new ArrayList<>(0);
+        ArrayList<String> token_type_list = new ArrayList<>(0);
+        for (Token token : token_list) {
+            token_lemma_list.add(token.getLemmaValue());
+            token_type_list.add(token.getPos().getCoarseValue());
+        }
     }
 
     /*
@@ -145,7 +159,7 @@ public class UIMAPerformer {
      * <p>The CategoryCoveredTagged DDC number matches the respective String index, e.g.
      * {@code __label_ddc__320} matches index 320, which would be "Politikwissenschaft".
      * @return {@code String} array containing all DDC categories in order as specified by {@code ddc3-names-de.csv}.
-     * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/backend/}.
+     * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/}.
      * @author Eric Lakhter
      */
     private String[] getDDCCategories() throws FileNotFoundException {
