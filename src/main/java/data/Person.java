@@ -78,7 +78,7 @@ public interface Person {
     String getParty();
 
     /**
-     * Gets the Person's place of residence.
+     * Gets the Person's place of residence. The "Ortszusatz"
      * @return place
      * @author DavidJordan
      */

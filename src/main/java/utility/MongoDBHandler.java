@@ -1,12 +1,14 @@
 package utility;
 
 import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Filter;
 
 import static com.mongodb.client.model.Accumulators.sum;
 import static com.mongodb.client.model.Aggregates.group;
@@ -94,6 +97,27 @@ public class MongoDBHandler {
         return false;
     }
 
+
+    /**
+     * Gets a Document with the specified id from the specified collection
+     * @param id the _id of the specified Document
+     * @param collection the collection name
+     * @return the found Document
+     * @author DavidJordan
+     */
+    public Document getDocument(String id, String collection){
+        Document document = new Document();
+        try {
+            Document queryDoc = new Document().append("_id", id);
+            for (Document value : this.getCollection(collection).find(queryDoc)) {
+                document = value;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return document;
+    }
+
     /**
      * Basic Method to create a collection
      * @param col
@@ -109,10 +133,8 @@ public class MongoDBHandler {
     }
 
     /**
-     * Untested Method to insert a List of Person_Impl objects into the db
-     *  I still have to determine if GSON.toJson correctly
-     *  assigns the id to the "_id" field in the DB. In the past I always did the conversion manually.
-     *
+     * Method to convert a List of Java Person_Impl object to BSON format using Gson to serialise them
+     * and then insert them into the database
      * @param persons
      * @author DavidJordan
      *
@@ -129,10 +151,8 @@ public class MongoDBHandler {
 
 
     /**
-     * Method to insert a List of Speech_Impl objects into the db in serialised form. WITHOUT the UIMA fields sofar.
-     * They will either be added by another method or we'll have to use something else than the suggested method below.
-     *
-     *
+     * Method to convert a List of Java Speech_Impl object to BSON format using Gson to serialise them
+     * and then insert them into the database.
      * @param speeches
      * @author DavidJordan
      */
@@ -149,7 +169,8 @@ public class MongoDBHandler {
 
 
     /**
-     * Method to insert a list of agendaItems, using GSON to serialise the AgItem Objects.
+     * Method to convert a List of Java AgendaItem_Impl object to BSON format using Gson to serialise them
+     * and then insert them into the database
      * @param agendaItems
      * @author DavidJordan
      */
@@ -163,7 +184,8 @@ public class MongoDBHandler {
     }
 
     /**
-     * Method to insert a list of comments, using GSON to serialise the Comment Objects.
+     * Method to convert a List of Java Person_Impl object to BSON format using Gson to serialise them
+     * and then insert them into the database
      * @param comments
      * @author DavidJordan
      */
@@ -177,26 +199,40 @@ public class MongoDBHandler {
     }
 
     /**
-     * TODO // It needs to be decided between us when and how the UIMA fields are added to the collection. Since
-     *   at the moment we only insert without UIMA fields.
-     *
      * Method to update a speech document in the DB with a speech Java object as parameter.
      * @param speech
      * @return boolean to show if update was successful
+     * @author DavidJordan
      */
-    @Unfinished
     @Testing
     public boolean update(Speech_Impl speech){
         Gson gson = new Gson();
         Document speechQuery = new Document().append("_id", speech.getID());
-
         Document newSpeech = Document.parse(gson.toJson(speech));
 
         try {
             this.getCollection("speech").replaceOne(speechQuery, newSpeech);
             return true;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+           e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Updates a Document in the database, by replacing it with the given Document
+     * @param document the document that will replace the Document with the specified id
+     * @param collection  the collection to get from the database
+     * @param id  the id of the Document to be replaced
+     * @return boolean
+     * @author DavidJordan
+     */
+    public boolean update(Document document, String collection, String id){
+        try {
+            this.getCollection(collection).replaceOne(Filters.eq("_id", id), document);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
