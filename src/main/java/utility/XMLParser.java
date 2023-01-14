@@ -52,9 +52,8 @@ public class XMLParser {
 
 
     /**
-     * !!Work in Progress!!
      *
-     * This method reads the Stammdaten-file and creates instances of the person-Class
+     * This method reads the Stammdaten-file and creates instances of the person-Class.
      *
      * @param data_pack
      * @return
@@ -63,7 +62,6 @@ public class XMLParser {
     public static /*Data_Kraken*/ void personParse(/*, Data_Kraken data_pack*/) {
         System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
         String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
-        ArrayList<String> allFractions = new ArrayList<>(0);
         try {
             //gett the File and make it accessible
             File input_file = new File(path);
@@ -179,7 +177,7 @@ public class XMLParser {
                         }
 
                     }
-
+                    // Here the fractions of a person get fetched.
                     if (attributes.item(i).getNodeName().equals("WAHLPERIODEN")) {
                         NodeList periodsAttributes = attributes.item(i).getChildNodes();
 
@@ -245,7 +243,7 @@ public class XMLParser {
                     }
 
                 }
-                
+                //Here the picture is fetched and the Instance of Person is created
                 if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null) ) ) {
                     String[] picture = new String[0];
                     picture= producePictureUrl(deputyFirstName, deputyLastName);
