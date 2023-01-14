@@ -13,7 +13,6 @@ import java.io.IOException;
  * @author Andrej Artuschenko
  */
 @Testing
-@Unfinished
 public class PictureScraper {
 
     /**
