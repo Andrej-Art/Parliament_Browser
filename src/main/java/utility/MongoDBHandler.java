@@ -1,21 +1,16 @@
 package utility;
 
 import com.google.gson.Gson;
-import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
-import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
 import data.impl.Person_Impl;
 import data.impl.Speech_Impl;
-import org.bson.Document;
-import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import utility.annotations.*;
@@ -26,11 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Filter;
 
-import static com.mongodb.client.model.Accumulators.sum;
-import static com.mongodb.client.model.Aggregates.group;
-import static com.mongodb.client.model.Aggregates.sort;
+import static com.mongodb.client.model.Accumulators.*;
+import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
 
@@ -229,7 +222,7 @@ public class MongoDBHandler {
      */
     public boolean update(Document document, String collection, String id){
         try {
-            this.getCollection(collection).replaceOne(Filters.eq("_id", id), document);
+            this.getCollection(collection).replaceOne(eq("_id", id), document);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
