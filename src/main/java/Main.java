@@ -49,6 +49,7 @@ public class Main {
                 case "2":
                     System.out.println("Database will be created.");
                     XMLParser.personParse();
+                    break;
 
                 case "3":
                     System.out.println("NLP analysis is performed...");
