@@ -1,8 +1,13 @@
 import utility.PictureScraper;
+import marmot.util.Sys;
+import org.apache.catalina.util.URL;
 import utility.Scraper;
 import utility.PictureScraper;
+import utility.XMLParser;
 
 import java.io.IOException;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.Scanner;
 
 /**
@@ -17,7 +22,7 @@ public class Main {
      * (Later we don't need this, because everything is handled by the frontend).
      * @param args
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,MalformedURLException {
 
         Scanner scanner = new Scanner(System.in);
         String userInput = "";
@@ -43,7 +48,7 @@ public class Main {
 
                 case "2":
                     System.out.println("Database will be created.");
-                    break;
+                    XMLParser.personParse();
 
                 case "3":
                     System.out.println("NLP analysis is performed...");

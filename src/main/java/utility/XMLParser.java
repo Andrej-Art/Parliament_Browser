@@ -29,18 +29,17 @@ public class XMLParser {
      *
      * This method reads the Stammdaten-file and creates instances of the person-Class
      *
-     * @param source
-     * @param target
      * @param data_pack
      * @return
      * @author Julian Ocker
      */
-    private static /*Data_Kraken*/ void personParse(String source, String target/*, Data_Kraken data_pack*/) {
-
+    public static /*Data_Kraken*/ void personParse(/*, Data_Kraken data_pack*/) {
+        System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
+        String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
         ArrayList<String> allFractions = new ArrayList<>(0);
         try {
             //gett the File and make it accessible
-            File input_file = new File(source + "" + target);
+            File input_file = new File(path);
             DocumentBuilderFactory dbfFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dbBuilder = dbfFactory.newDocumentBuilder();
             Document dProtocol = dbBuilder.parse(input_file);
@@ -54,6 +53,8 @@ public class XMLParser {
                 String deputyLastName = null;
                 String deputyTitle = null;
                 String party = null;
+                String fraction19 = null;
+                String fraction20 = null;
                 String deputyAkadTitle = null;
                 String deputyPoliticStart = null;
                 String deputyPoliticEnd = null;
@@ -70,6 +71,7 @@ public class XMLParser {
                 ArrayList<String> WPList = new ArrayList<>(0);
                 ArrayList<String> fractionList = new ArrayList<>(0);
                 ArrayList<ArrayList<String>> WPFractionList = new ArrayList<>(0);
+                boolean noDoubleRepresantativeInsurance = true;
 
                 // pathing to get the personal data of a represantative
                 for (int i = 0; i < attributes.getLength(); i++) {
@@ -114,59 +116,37 @@ public class XMLParser {
                         NodeList biographicAttributes = attributes.item(i).getChildNodes();
                         for (int j = 0; j < biographicAttributes.getLength(); j++) {
                             if (biographicAttributes.item(j).getNodeName().equals("GEBURTSDATUM")) {
-
                                 birthdate = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("GEBURTSORT")) {
-
                                 birthplace = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("GEBURTSLAND")) {
-
                                 birthnation = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("STERBEDATUM")) {
-
                                 deathdate = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("GESCHLECHT")) {
-
                                 sex = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("FAMILIENSTAND")) {
-
                                 familyFactor = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("RELIGION")) {
-
                                 religion = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("BERUF")) {
-
                                 job = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("VITA_KURZ")) {
-
                                 vita = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("VEROEFFENTLICHUNGSPFLICHTIGES")) {
-
                                 publicInterest = biographicAttributes.item(j).getTextContent();
-
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("PARTEI_KURZ")) {
-
                                 party = biographicAttributes.item(j).getTextContent();
-
                             }
 
                         }
@@ -180,10 +160,12 @@ public class XMLParser {
                             if (periodsAttributes.item(j).getNodeName().equals("WAHLPERIODE")) {
                                 NodeList periodAttributes = periodsAttributes.item(j).getChildNodes();
 
+                                String electionPeriod = null;
+
                                 for (int k = 0; k < periodAttributes.getLength(); k++) {
                                     if (periodAttributes.item(k).getNodeName().equals("WP")) {
-
                                         WPList.add(periodAttributes.item(k).getTextContent());
+                                        electionPeriod = periodAttributes.item(k).getTextContent();
                                     }
 
                                     if (periodAttributes.item(k).getNodeName().equals("INSTITUTIONEN")) {
@@ -207,7 +189,11 @@ public class XMLParser {
                                                     }
 
                                                     if (InstitiutionAttributes.item(m).getNodeName().equals("INS_LANG") && check) {
-
+                                                        if (electionPeriod.equals("19")) {
+                                                            fraction19 = InstitiutionAttributes.item(m).getTextContent();
+                                                        } else if (electionPeriod.equals("20")){
+                                                            fraction20 = InstitiutionAttributes.item(m).getTextContent();
+                                                        }
                                                         fractionList.add(InstitiutionAttributes.item(m).getTextContent());
                                                         check = false;
 
@@ -232,47 +218,9 @@ public class XMLParser {
                     }
 
                 }
-
-                // combining the extracted information to initialize a parliamentary represantative and Fraction
-                for (int i = 0; i < WPList.size(); i++) {
-
-                    if (WPList.get(i).equals("19")) {
-                        ArrayList<String> funfacts = new ArrayList<>(0);
-                        funfacts.add(deputyAkadTitle);
-                        funfacts.add(deputyPoliticStart);
-                        funfacts.add(deputyPoliticEnd);
-                        funfacts.add(birthdate);
-                        funfacts.add(birthplace);
-                        funfacts.add(birthnation);
-                        funfacts.add(deathdate);
-                        funfacts.add(sex);
-                        funfacts.add(familyFactor);
-                        funfacts.add(religion);
-                        funfacts.add(vita);
-                        funfacts.add(job);
-                        funfacts.add(publicInterest);
-
-                        if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null)) ) {
-                            //data_pack.addDeputy(deputyFirstName, deputyLastName, deputyTitle, deputyID, WPFractionList.get(i).get(i), funfacts);
-                        }
-                        //data_pack.addPartyToSpeaker(deputyID, party);
-
-                        boolean check = true;
-                        // creating the fraction if it doesn't exist
-                        for (int j = 0; j < allFractions.size(); j++) {
-                            if(allFractions.get(j).equals(WPFractionList.get(i).get(i))){
-                                check = false;
-                            }
-                        }
-                        if(check){
-                            allFractions.add(WPFractionList.get(i).get(i));
-                            //data_pack.addFraction(WPFractionList.get(i).get(i));
-                        }
-
-                        //data_pack.addPartyToFraction(WPFractionList.get(i).get(i), party);
-
-                    }
-
+                
+                if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null) ) ) {
+                    //data_pack.addDeputy(deputyFirstName, deputyLastName, deputyTitle, deputyID, WPFractionList.get(i).get(i), party);
                 }
 
             }
@@ -305,7 +253,7 @@ public class XMLParser {
      * @param node  The Node from which the function starts to recursively scan the xml tree
      * @param name  The name of the Nodes that will be extracted from the Sub-Tree
      * @return nodeList  A List of the Nodes with the given name
-     * @author DavidJordan, (G.Abrami)
+     * @author DavidJordan, (Giuseppe Abrami)
      */
     public static List<Node> getNodesByName(Node node, String name) {
         // list to store the selected nodes
@@ -334,7 +282,7 @@ public class XMLParser {
      * @param node The root node of the Document from which the subtree is scanned
      * @param name The Node name to scan for
      * @return Node
-     * @author DavidJordan, (G. Abrami)
+     * @author DavidJordan, (Giuseppe Abrami)
      */
     public static Node getSingleNode(Node node, String name) {
         //Scan the subtree recursively

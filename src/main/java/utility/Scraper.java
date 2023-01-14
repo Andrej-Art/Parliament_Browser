@@ -34,6 +34,8 @@ public class Scraper {
      */
     public static void downloadAllXMLs() {
 
+        String path = Scraper.class.getClassLoader().getResource("").getPath();
+
         try {
             /*
              * Here a connection to the Bundestag website is established, where the required documents are located.
@@ -54,7 +56,7 @@ public class Scraper {
                         // source: https://jsoup.org/apidocs/org/jsoup/nodes/Node.html#absUrl%28java.lang.String%29
                         // abs = absolute key
                         URL dtdURL = new URL(dtdElem.attr("abs:href"));
-                        File dtdFile = new File("ProtokollXMLs/dbtplenarprotokoll.dtd");
+                        File dtdFile = new File(path + "/ProtokollXMLs/Protokolle/dbtplenarprotokoll.dtd");
                         System.out.println("Downloading the DTD-file from " + dtdURL + " at " + dtdFile);
 
                         FileUtils.copyURLToFile(dtdURL, dtdFile);
@@ -73,7 +75,7 @@ public class Scraper {
                         URL mdbURL = new URL(mdbElem.attr("abs:href"));
 
                         // place downloaded data in the newly created folder
-                        File mdbFile = new File("ProtokollXMLs/MdB-Stammdaten-data.zip");
+                        File mdbFile = new File(path + "/ProtokollXMLs/MdB-Stammdaten-data.zip");
                         System.out.println("Downloading mdb-Stammdateen from " + mdbURL + " at " + mdbFile);
                         FileUtils.copyURLToFile(mdbURL, mdbFile);
 
@@ -85,8 +87,8 @@ public class Scraper {
                      * Unzip mdb-Stammdaten and save in folder
                      * source: https://stackoverflow.com/questions/10633595/java-zip-how-to-unzip-folder
                      */
-                    ZipFile zipFile = new ZipFile("ProtokollXMLs/MdB-Stammdaten-data.zip");
-                    zipFile.extractAll("ProtokollXMLs/MdB-Stammdaten-data/");
+                    ZipFile zipFile = new ZipFile(path + "/ProtokollXMLs/MdB-Stammdaten-data.zip");
+                    zipFile.extractAll(path + "/ProtokollXMLs/MdB-Stammdaten-data/");
                 }
             }
 
@@ -139,6 +141,7 @@ public class Scraper {
      * Download exact 10 xml-protocols from the section
      */
     private static int downloadTenXML(String url) {
+        String path = Scraper.class.getClassLoader().getResource("").getPath();
         int downloadCounter = 0;
         try {
             // inspect the website and access body elements using tbody where the xml protocols are stored
@@ -149,7 +152,7 @@ public class Scraper {
                 for (int a = xmlrows.size() - 1; a >= 0; a--) {
                     try {
                         URL xmlURL = new URL(xmlrows.get(a).attr("abs:href"));
-                        File xmlFile = new File("ProtokollXMLs/" + getFileName(xmlrows.get(a).attr("abs:href")) + ".xml");
+                        File xmlFile = new File(path + "/ProtokollXMLs/Protokolle/" + getFileName(xmlrows.get(a).attr("abs:href")) + ".xml");
                         System.out.println("Downloading XML from " + xmlURL + " at " + xmlFile);
                         FileUtils.copyURLToFile(xmlURL, xmlFile);
                         downloadCounter += 1;
