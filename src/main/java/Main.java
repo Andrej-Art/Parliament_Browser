@@ -76,7 +76,7 @@ public class Main {
                     break;
 
                 case "6":
-                    PictureScraper.producePictureUrl("Angela", "Merkel");
+                    PictureScraper.producePictureUrl("Alice", "Weidel");
 
                 default:
                     System.out.println("Invalid input");

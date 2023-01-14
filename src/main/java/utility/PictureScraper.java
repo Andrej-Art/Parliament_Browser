@@ -23,20 +23,20 @@ public class PictureScraper {
      */
 
     /*
-        Assumption: we are looking for portraits.
+        Assumption: we are looking for pictures with the event "Reichstagsgebäude/Plenarsaal".
+        After several test procedures, we have obtained the most consistent results for this.
 
          This is the URL for portraits
-         https://bilddatenbank.bundestag.de/search/picture-result?query=&filterQuery%5Bereignis%5D%5B0%5D=Porträt%2FPortrait&sortVal=3
+         https://bilddatenbank.bundestag.de/search/picture-result?query=&filterQuery%5Bort%5D%5B0%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
 
          when we search for a specific person, we get the following URL:
-         https://bilddatenbank.bundestag.de/search/picture-result?query=Angela+Merkel&filterQuery%5Bereignis%5D%5B%5D=Porträt%2FPortrait&sortVal=3
+         https://bilddatenbank.bundestag.de/search/picture-result?query=Angela+Merkel&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
          in html: <img alt = Merkel, Angela ... >
      */
 
     public static String[] producePictureUrl(String firstName, String lastName) {
 
         String[] pictureArray = new String[8];
-
 
         // with replaceAll you can replace all spaces with a plus
         firstName = firstName.replaceAll(" ", "+");
@@ -46,19 +46,16 @@ public class PictureScraper {
         String fullName = lastName + "%2C+" + firstName;
 
         // URL of the website
-        String urlWebsite = "https://bilddatenbank.bundestag.de/search/picture-result?filterQuery%5Bname%5D%5B%5D=" + fullName + "&filterQuery%5Bereignis%5D%5B%5D=Portr%C3%A4t%2FPortrait&sortVal=3";
+        String urlWebsite = "https://bilddatenbank.bundestag.de/search/picture-result?query=" + fullName + "&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3";
         /*
-        https://bilddatenbank.bundestag.de/search/picture-result?filterQuery%5Bname%5D%5B%5D=Merkel,+Angela&filterQuery%5Bereignis%5D%5B%5D=Portr%C3%A4t%2FPortrait&sortVal=3
+        https://bilddatenbank.bundestag.de/search/picture-result?query=marco+buschmann&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
         */
         // Connection to website
         try {
             Document doc = Jsoup.connect(urlWebsite).get();
-            System.out.println("wir sind online");
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         //Check if the Bilddatenbank-Site has results
         Document picDatabase = null;
         try {
@@ -66,6 +63,7 @@ public class PictureScraper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         /**
         // search after pTag where we can find the message
         Elements errors = picDatabase.select("p");
@@ -77,16 +75,14 @@ public class PictureScraper {
         }
          */
 
-
         // if they are no errors in the Bilddatenbank
         String[] metadata = new String[0];
        try {
             /*
             We always fetch the first element.
-            To get access to the image and the relevant meta-data we neet the attribute data-fancybox
+            To get access to the image and the relevant meta-data we need the attribute data-fancybox.
              */
             org.jsoup.nodes.Element firstPictureInDatabase = picDatabase.getElementsByAttributeValue("data-fancybox", "group").first();
-            System.out.println("wir haben die fancybox erfasst");
             //href to get the HTML of the jpg
             Document firstPictureHTML = null;
             try {
@@ -108,8 +104,11 @@ public class PictureScraper {
         } catch (Exception e) {
            e.printStackTrace();
        }
-        System.out.println(pictureArray[1]);
 
+       //Only for Test-Output in the console
+        for(int i=0; i<1000; i++ ){
+            System.out.println(pictureArray[i]);
+        }
 
         return pictureArray;
 
