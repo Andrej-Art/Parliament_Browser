@@ -1,10 +1,10 @@
 package utility;
 
 
-import jdk.internal.org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,8 +12,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class to analyze the XML files and create objects
@@ -272,6 +275,126 @@ public class XMLParser {
         //return data_pack;
     }
 
+    /**
+     * This Method parses a protocol for the Agenda-Item- and Protocol-Data, creates Instances of the AgendaItem_Impl and Protocol_Impl classes
+     * and calls the speechParse()-Method
+     *
+     * @author Julian Ocker
+     */
+    public static void protocolParse (){
+        String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
+        // declaring the Variables neede
+        String startTime = "";
+        String endTime = "";
+        String protocolID = "";
+        String WP = "";
+        LocalDate protocolDate = null;
+        String protocolTitle = "";
+        ArrayList<String> agendaItems = new ArrayList<String>(0);
+        ArrayList<String> sessionLeader = new ArrayList<String>(0);
+        ArrayList<String> addons = new ArrayList<String>(0);
+        ArrayList<String> ivzAgendaItems = new ArrayList<>(0);
+        ArrayList<String> ivzAgendaTitle = new ArrayList<>(0);
+
+        try {
+            File input_file = new File(path);
+            DocumentBuilderFactory dbfFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dbBuilder = dbfFactory.newDocumentBuilder();
+            Document dProtocol = dbBuilder.parse(input_file);
+            NodeList testList = dProtocol.getElementsByTagName("dbtplenarprotokoll").item(0).getChildNodes();
+
+            for (int i = 0; i < testList.getLength(); i++) {
+                if (testList.item(i).getNodeName().equals("vorspann")) {
+                    NodeList preList = testList.item(i).getChildNodes();
+
+                    for (int j = 0; j < preList.getLength(); j++) {
+                        if (preList.item(j).getNodeName().equals("kopfdaten")) {
+                            NodeList headList = preList.item(j).getChildNodes();
+
+                            for (int k = 0; k < headList.getLength(); k++) {
+                                if (headList.item(k).getNodeName().equals("plenarprotokoll-nummer")) {
+                                    NodeList plProtoNoList = headList.item(k).getChildNodes();
+
+                                    for (int l = 0; l < plProtoNoList.getLength(); l++) {
+                                        if (plProtoNoList.item(l).getNodeName().equals("wahlperiode")) {
+                                            WP = plProtoNoList.item(l).getTextContent();
+                                        }
+                                        if (plProtoNoList.item(l).getNodeName().equals("sitzungsnr")) {
+                                            protocolID = plProtoNoList.item(l).getTextContent();
+                                        }
+
+                                    }
+
+                                }
+
+                                if (headList.item(k).getNodeName().equals("veranstaltungsdaten")) {
+                                    NodeList dateList = headList.item(k).getChildNodes();
+                                    for (int l = 0; l < dateList.getLength(); l++) {
+                                        if (dateList.item(l).getNodeName().equals("datum")) {
+                                            /**
+                                             * geklaut von Quelle:
+                                             * https://www.baeldung.com/java-string-to-date
+                                             */
+                                            String dateString = dateList.item(l).getAttributes().getNamedItem("date").getTextContent();
+                                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
+                                            protocolDate = LocalDate.parse(dateString, formatter);
+
+
+                                        }
+                                    }
+
+                                }
+
+                                if (headList.item(k).getNodeName().equals("sitzungstitel")) {
+                                    protocolTitle = headList.item(k).getTextContent();
+
+                                }
+
+                            }
+
+                        }
+
+                        if (preList.item(j).getNodeName().equals("inhaltsverzeichnis")) {
+                            NodeList headList = preList.item(j).getChildNodes();
+
+                            List<ArrayList<String>> e = getAgendaItem(headList, ivzAgendaItems, ivzAgendaTitle);
+                            ivzAgendaItems = e.get(0);
+                            ivzAgendaTitle = e.get(1);
+
+
+                        }
+
+                    }
+
+                }
+
+
+
+
+
+
+            }
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private static List<ArrayList<String>> getAgendaItem(NodeList headList, ArrayList<String> ivzAgendaItems, ArrayList<String> ivzAgendaTitle) {
+    }
+
+    /**
+     * This Method parses a protocol for the Speech- and Comment-Data and creates Instances of the Speech_Impl and Comment_Impl classes.
+     *
+     * @author Julian Ocker
+     */
+     public static void speechParse(){
+
+     }
 
     /**
      * A helper method to extract all Nodes of a given name from the XML Document which is parsed.
