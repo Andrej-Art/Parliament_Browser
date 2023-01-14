@@ -26,7 +26,7 @@ public class PictureScraper {
         Assumption: we are looking for pictures with the event "Reichstagsgebäude/Plenarsaal".
         After several test procedures, we have obtained the most consistent results for this.
 
-         This is the URL for portraits
+         This is the URL for Reichstagsgebäude/Plenarsaal:
          https://bilddatenbank.bundestag.de/search/picture-result?query=&filterQuery%5Bort%5D%5B0%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
 
          when we search for a specific person, we get the following URL:
