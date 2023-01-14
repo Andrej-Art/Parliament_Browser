@@ -25,6 +25,33 @@ public class XMLParser {
 
 
     /**
+     * Method to produce the Picture Array of a speaker with all relevant Data (URL, Meta-Data)
+     * from the Picture database of the Deutsche Bundestag.
+     * The website-URL: https://bilddatenbank.bundestag.de
+     * @author Andrej Artuschenko
+     * @Unfinished
+     */
+    public static String[] producePictureUrl(String firstName, String lastName) {
+
+        //Initializing pictureArray Variable
+        String[] pictureArray = new String[8];
+
+        // Parsing the Picture database of the Deutsche Bundestag.
+        try{
+            // build the URL for the Bilddatenbank for each relevant person
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // This will be a picture-array
+        return new String[0];
+
+    }
+
+
+
+    /**
      * !!Work in Progress!!
      *
      * This method reads the Stammdaten-file and creates instances of the person-Class
@@ -220,6 +247,8 @@ public class XMLParser {
                 }
                 
                 if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null) ) ) {
+                    String[] picture = new String[0];
+                    picture= producePictureUrl(deputyFirstName, deputyLastName);
                     //data_pack.addDeputy(deputyFirstName, deputyLastName, deputyTitle, deputyID, WPFractionList.get(i).get(i), party);
                 }
 
@@ -294,30 +323,6 @@ public class XMLParser {
         return null;
     }
 
-    /**
-     * Method to produce the Picture Array of a speaker with all relevant Data (URL, Meta-Data)
-     * from the Picture database of the Deutsche Bundestag.
-     * The website-URL: https://bilddatenbank.bundestag.de
-     * @author Andrej Artuschenko
-     * @Unfinished
-     */
-    public String[] producePictureUrl(String firstName, String lastName) {
-
-        //Initializing pictureArray Variable
-        String[] pictureArray = new String[8];
-
-        // Parsing the Picture database of the Deutsche Bundestag.
-        try{
-            // build the URL for the Bilddatenbank for each relevant person
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // This will be a picture-array
-        return new String[0];
-
-    }
 
 
 
