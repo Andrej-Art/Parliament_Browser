@@ -1,5 +1,7 @@
 package data;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -52,10 +54,10 @@ public interface Comment {
     String getText();
 
     /**
-     * Gets the String representation date of the protocol in which the comment was made.
+     * Gets the ISO date representation of the protocol in which the comment was made.
      * @return date
      * @author DavidJordan
      */
-    String getDate();
+    LocalDate getDate();
 
 }

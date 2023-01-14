@@ -1,6 +1,7 @@
 package data;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * Interface to represent a Speech from a Parliament Protocol. Provides the methods
@@ -35,5 +36,5 @@ public interface Speech {
      * @return date
      * @author DavidJordan
      */
-   String getDate();
+    LocalDate getDate();
 }

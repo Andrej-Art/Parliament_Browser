@@ -3,6 +3,8 @@ package data.impl;
 import data.Comment;
 import org.bson.Document;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +17,8 @@ public class Comment_Impl implements Comment {
     // The BSON Document
     private Document commentDoc;
 
-    private String _id, speechID, speakerID, commentator, text, date;
+    private String _id, speechID, speakerID, commentator, text;
+    LocalDate date;
 
     private ArrayList<String> fractions;
 
@@ -30,7 +33,7 @@ public class Comment_Impl implements Comment {
      * @param fractions the fractions involved in making the comment
      * @author DavidJordan
      */
-    public Comment_Impl(String id, String speechID, String speakerID, String commentator, String text, String date, ArrayList<String> fractions){
+    public Comment_Impl(String id, String speechID, String speakerID, String commentator, String text, LocalDate date, ArrayList<String> fractions){
         this._id = id;
         this.speechID = speechID;
         this.speakerID = speakerID;
@@ -52,7 +55,7 @@ public class Comment_Impl implements Comment {
         this.speakerID = document.getString("speakerID");
         this.commentator = document.getString("commentator");
         this.text = document.getString("text");
-        this.date = document.getString("date");
+        this.date = (LocalDate) document.get("date");
         this.fractions = (ArrayList<String>) document.get("fractions");
     }
 
@@ -88,7 +91,7 @@ public class Comment_Impl implements Comment {
     }
 
     @Override
-    public String getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 }

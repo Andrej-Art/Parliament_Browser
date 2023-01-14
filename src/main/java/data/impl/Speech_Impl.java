@@ -3,6 +3,9 @@ package data.impl;
 import data.Speech;
 import org.bson.Document;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 /**
  * Class that implements the Speech interface. Provides different constructors to enable
  * generation of the data from both an XML or from a BSON document.
@@ -11,17 +14,18 @@ import org.bson.Document;
 public class Speech_Impl implements Speech {
 
     private Document speechDoc;
-    private String _id, speakerID, text, date;
+    private String _id, speakerID, text;
+    private LocalDate date;
 
     /**
      * Full {@code Speech} Constructor to be used when parsed data is entered.
      * @param id The
      * @param speakerID  The "RednerID" of the Speaker
      * @param text The raw Speech text
-     * @param date The String value of the Date of the Speech.
+     * @param date The ISO date of the Speech.
      * @author DavidJordan
      */
-    public Speech_Impl(String id, String speakerID, String text, String date){
+    public Speech_Impl(String id, String speakerID, String text, LocalDate date){
         this._id = id;
         this.speakerID = speakerID;
         this.text = text;
@@ -38,7 +42,7 @@ public class Speech_Impl implements Speech {
         this._id = document.getString("_id");
         this.speakerID = document.getString("speakerID");
         this.text = document.getString("text");
-        this.date = document.getString("date");
+        this.date = (LocalDate) document.get("date");
     }
 
     @Override
@@ -57,7 +61,7 @@ public class Speech_Impl implements Speech {
     }
 
     @Override
-    public String getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 }

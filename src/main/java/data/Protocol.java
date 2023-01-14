@@ -1,5 +1,7 @@
 package data;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -30,7 +32,7 @@ public interface Protocol {
      * @return date
      * @author DavidJordan
      */
-    String getDate();
+    LocalDate getDate();
 
     /**
      * Gets the number of the Protocol in the given election period.
@@ -44,17 +46,17 @@ public interface Protocol {
      * @return beginTime
      * @author DavidJordan
      */
-    String getBeginTime();
+    LocalTime getBeginTime();
 
     /**
      * Gets the String representation of the time when the recorded session ends.
      * @return endTime
      * @author DavidJordan
      */
-    String getEndTime();
+    LocalTime getEndTime();
 
     /**
-     * Gets a List of all the session leaders in this protocoll.
+     * Gets a List of all the session leaders in this protocol.
      * @return sessionLeaders
      * @author DavidJordan
      */
