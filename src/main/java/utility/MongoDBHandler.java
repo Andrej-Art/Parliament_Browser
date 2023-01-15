@@ -159,18 +159,17 @@ public class MongoDBHandler {
 
 
     /**
-     * Method to convert a List of Java Speech_Impl object to BSON format using Gson to serialise them
-     * and then insert them into the database.
-     * @param speech
-     * @param fullCas
-     * @param tokens
-     * @param sentences
-     * @param namedEntities
-     * @param sentiment
-     * @param mainTopic
+     * Method to insert a speech and its associated NLP data into three seperate collections into the MongoDB.
+     * @param speech The Java object of the speech
+     * @param fullCas the full CAS String of th NLP Analysis
+     * @param tokens The List of MongoTokens
+     * @param sentences the List of MongoSentences
+     * @param namedEntities The List of MongoNamedEntities
+     * @param sentiment the Speech sentiment value
+     * @param mainTopic the speech's main topic
      * @author DavidJordan
      */
-    @Unfinished // doesn't insert anything yet
+    @Unfinished
     public void insertSpeech(
             Speech speech,
             String fullCas,
@@ -179,20 +178,61 @@ public class MongoDBHandler {
             List<MongoNamedEntity> namedEntities,
             double sentiment,
             String mainTopic) {
-        /*
-            _id + redner_id + text + datum + sentences + sentiment + main_topic
-             + named_entities_per + named_entities_org + named_entities_loc go into "speech"
-
-            _id + fullCas go into "speech_cas"
-
-            _id + tokens go into "speech_tokens"
-         */
+        // Converting the Named Entities into serialised JSON Strings according to their type
         Gson gson = new Gson();
-        Document mongoSpeech = Document.parse(gson.toJson(speech));
-        db.getCollection("speech").insertOne(mongoSpeech);
+        List<Document> namedEntitiesPER = new ArrayList<>(0);
+        List<Document> namedEntitiesLOC = new ArrayList<>(0);
+        List<Document> namedEntitiesORG = new ArrayList<>(0);
+        for(MongoNamedEntity namedEntity: namedEntities){
+            if(namedEntity.getEntityType().equals("PER")){
+                namedEntitiesPER.add(Document.parse(gson.toJson(namedEntity)));
+            }
+            else if(namedEntity.getEntityType().equals("LOC")){
+                namedEntitiesLOC.add(Document.parse(gson.toJson(namedEntity)));
+            }
+            else if(namedEntity.getEntityType().equals("ORG")){
+                namedEntitiesORG.add(Document.parse(gson.toJson(namedEntity)));
+            }
+        }
+        // Converting the sentences into a Document to insert into the "sentences" field
+        List<Document> sentencesDocs = new ArrayList<>(0);
+        for(MongoSentence mongoSentence: sentences){
+            sentencesDocs.add(Document.parse(gson.toJson(mongoSentence)));
+        }
+        // Creating the speech document to insert into the DB
+        Document speechDocument = new Document()
+                .append("_id", speech.getID())
+                .append("speaker_id", speech.getSpeakerID())
+                .append("text", speech.getText())
+                .append("date", speech.getDate())
+                .append("sentences", sentencesDocs)
+                .append("sentiment", sentiment)
+                .append("main_topic", mainTopic)
+                .append("named_entities_per", namedEntitiesPER)
+                .append("named_entities_org", namedEntitiesORG)
+                .append("named_entities_loc", namedEntitiesLOC);
+        //Inserting finished speech document into the speech collection
+        this.getCollection("speech").insertOne(speechDocument);
+
+        // Inserting the full speech CAS into seperate collection
+        Document speechCasDoc = new Document()
+                .append("_id", speech.getID())
+                .append("full_cas", fullCas);
+        //Inserting into speech_cas collection
+        this.getCollection("speech_cas").insertOne(speechCasDoc);
+
+        //Serialising the tokens
+        List<Document> speechTokensDocs = new ArrayList<>(0);
+        for (MongoToken mongoToken: tokens){
+            speechTokensDocs.add(Document.parse(gson.toJson(mongoToken)));
+        }
+        // Adding to speech_tokens collection
+        Document speechTokenDoc = new Document()
+                .append("_id", speech.getID())
+                .append("speaker_id", speech.getSpeakerID())
+                .append("date", speech.getDate())
+                .append("tokens", speechTokensDocs);
     }
-
-
 
     /**
      * Method to convert a List of Java AgendaItem_Impl object to BSON format using Gson to serialise them
@@ -265,7 +305,7 @@ public class MongoDBHandler {
                 this.getCollection(collection).replaceOne(eq("_id", id), document);
                 return true;
             } catch (Exception e) {
-                System.out.println("Update could not be performed. Invalid input.");
+                System.err.println("Update could not be performed. Invalid input.");
                 e.printStackTrace();
                 return false;
             }
