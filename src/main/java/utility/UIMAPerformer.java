@@ -182,7 +182,7 @@ public class UIMAPerformer {
      * @author Eric Lakhter
      */
     public double getAverageSentiment(JCas jcas) {
-        try {/**/
+        try {
             return new ArrayList<>(JCasUtil.select(jcas, Sentiment.class))
                     .get(1)
                     .getSentiment();

@@ -2,6 +2,7 @@ package utility;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import utility.annotations.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,10 +15,9 @@ import java.io.IOException;
  * I don't want to get in Julian's way with the Stammdaten-Parser.
  *
  * @author Andrej
- * @Testing
- * @Unfinished
  */
-
+ @Testing
+ @Unfinished
 public class XMLProtocolParser {
     //Create New Instance of DocumentBuilderFactory
     static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

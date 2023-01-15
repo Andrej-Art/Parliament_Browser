@@ -7,7 +7,7 @@ protocol:
     date                LocalDate
     begin               LocalTime
     end                 LocalTime
-    dauer               LocalTime
+    dauer               long
     # -------------->   String personID
     session_leaders     [personID, personID, ...]
     # -------------->   String agendeItemID
@@ -45,18 +45,18 @@ speech:
     datum               LocalDate
     # -------------->   int anfang, int ende, double sentiment
     sentences           [[anfang, ende, sentiment], ...]
+    sentiment           double
     main_topic          String
     # -------------->   int anfang, int ende
     named_entities_per  [[anfang, ende], ...]
     named_entities_org  [[anfang, ende], ...]
     named_entities_loc  [[anfang, ende], ...]
-    sentiment           double
 
 speech_cas:
     _id                 String
     full_cas            String (<XMI> bla bla bla)
 
-speech_token:
+speech_tokens:
     _id                 String
     redner_id           String
     date               LocalDate
@@ -73,7 +73,7 @@ comment:
     redner_id           String
     commentator_id      String
     text                String
-    date               LocalDate
+    date                LocalDate
     sentiment           double
 
 ########################################################################################################################

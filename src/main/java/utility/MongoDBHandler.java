@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
 import data.impl.Person_Impl;
@@ -15,6 +16,9 @@ import data.impl.Speech_Impl;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import utility.annotations.*;
+import utility.uima.MongoNamedEntity;
+import utility.uima.MongoSentence;
+import utility.uima.MongoToken;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,7 +38,7 @@ import static com.mongodb.client.model.Sorts.descending;
  * @author Eric Lakhter
  * @author DavidJordan
  */
-@Unfinished
+@Unfinished //This class is unfinished
 public class MongoDBHandler {
     private final MongoDatabase db;
 
@@ -67,7 +71,7 @@ public class MongoDBHandler {
 
 
     /**
-     * Basic method to get a collection throught the MongoDBHandler
+     * Basic method to get a collection through the MongoDBHandler
      * @param col
      * @return the Collection
      * @author DavidJordan
@@ -78,7 +82,7 @@ public class MongoDBHandler {
 
     /**
      * Basic method to check whether a given collection already exists in the Database
-     * @param col colection name
+     * @param col collection name
      * @return true if it exists
      * @author DavidJordan
      */
@@ -142,7 +146,6 @@ public class MongoDBHandler {
      * and then insert them into the database
      * @param persons
      * @author DavidJordan
-     *
      */
     @Unfinished
     public void insertPersons(List<Person_Impl> persons) {
@@ -158,16 +161,35 @@ public class MongoDBHandler {
     /**
      * Method to convert a List of Java Speech_Impl object to BSON format using Gson to serialise them
      * and then insert them into the database.
-     * @param speeches
+     * @param speech
+     * @param fullCas
+     * @param tokens
+     * @param sentences
+     * @param namedEntities
+     * @param sentiment
+     * @param mainTopic
      * @author DavidJordan
      */
-    public void insertSpeeches(List<Speech_Impl> speeches){
+    @Unfinished // doesn't insert anything yet
+    public void insertSpeech(
+            Speech speech,
+            String fullCas,
+            List<MongoToken> tokens,
+            List<MongoSentence> sentences,
+            List<MongoNamedEntity> namedEntities,
+            double sentiment,
+            String mainTopic) {
+        /*
+            _id + redner_id + text + datum + sentences + sentiment + main_topic
+             + named_entities_per + named_entities_org + named_entities_loc go into "speech"
+
+            _id + fullCas go into "speech_cas"
+
+            _id + tokens go into "speech_tokens"
+         */
         Gson gson = new Gson();
-        ArrayList<Document>  mongoSpeeches = new ArrayList<>(0);
-        for(Speech_Impl speech : speeches){
-            mongoSpeeches.add(Document.parse(gson.toJson(speech)));
-        }
-        this.getCollection("speech").insertMany(mongoSpeeches);
+        Document mongoSpeech = Document.parse(gson.toJson(speech));
+        db.getCollection("speech").insertOne(mongoSpeech);
     }
 
 
