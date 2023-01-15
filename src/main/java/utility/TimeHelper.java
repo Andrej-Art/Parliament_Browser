@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.Locale;
 
 /**
@@ -12,6 +13,8 @@ import java.util.Locale;
  *
  * @author Eric Lakhter
  */
+// Abstract class with static methods; used like this:
+// LocalDate date = TimeHelper.convertToISOdate("01.01.1970");
 public abstract class TimeHelper {
     private static final DateTimeFormatter DATE_FORMAT_INPUT = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
     private static final DateTimeFormatter CLOCK_FORMAT_INPUT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
@@ -45,7 +48,7 @@ public abstract class TimeHelper {
      * @return The time between {@code begin} and {@code end} in minutes.
      * @author Eric Lakhter
      */
-    public static long durationBetweenTimes(LocalTime begin, LocalTime end) {
+    public static long durationBetweenTimesInMinutes(Temporal begin, Temporal end) {
         long dauer = ChronoUnit.MINUTES.between(begin, end);
         if (dauer <= 0) {  // eg. beginn = 11:00; ende = 09:00
             dauer += 1440; // minutes in a day
