@@ -1,9 +1,7 @@
-import utility.PictureScraper;
+import utility.*;
 import marmot.util.Sys;
 import org.apache.catalina.util.URL;
-import utility.Scraper;
 import utility.PictureScraper;
-import utility.XMLParser;
 
 import java.io.IOException;
 import java.io.File;
@@ -31,11 +29,12 @@ public class Main {
         while (!userInput.equals("5")){
             System.out.println("----------Parliament Sentiment Radar----------\n" +
                     "(1) Downloading protocols\n" +
-                    "(2) Create database\n" +
-                    "(3) Start NLP analysis\n" +
-                    "(4) Clear Database\n" +
-                    "(5) Exit\n" +
+                    "(2) Parsing Protocols\n" +
+                    "(3) Create database\n" +
+                    "(4) Start NLP analysis\n" +
+                    "(5) Clear Database\n" +
                     "(6) Scraping Pictures of Persons\n" +
+                    "(7) Exit\n" +
                     "----------------------------------------------");
             userInput = scanner.nextLine();
 
@@ -47,15 +46,20 @@ public class Main {
                     break;
 
                 case "2":
+                    System.out.println("Parsing the protocols");
+                    XMLProtocolParser.speechParse2();
+
+
+                case "3":
                     System.out.println("Database will be created.");
                     XMLParser.personParse();
                     break;
 
-                case "3":
+                case "4":
                     System.out.println("NLP analysis is performed...");
                     break;
 
-                case "4":
+                case "5":
                     System.out.println("Do you really want to empty the database?\n" +
                             "----------------------------------------------\n" +
                             "(1) Continue\n (2)Abort");
@@ -77,12 +81,14 @@ public class Main {
                     }
                     break;
 
-                case "5":
+                case "6":
+                    PictureScraper.producePictureUrl("Alice", "Weidel");
+                    break;
+
+                case "7":
                     System.out.println("Programm will be terminated.");
                     break;
 
-                case "6":
-                    PictureScraper.producePictureUrl("Alice", "Weidel");
 
                 default:
                     System.out.println("Invalid input");

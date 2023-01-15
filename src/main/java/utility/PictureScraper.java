@@ -5,7 +5,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import utility.annotations.Testing;
-import utility.annotations.Unfinished;
 
 import java.io.IOException;
 
@@ -47,6 +46,7 @@ public class PictureScraper {
         // URL of the website
         String urlWebsite = "https://bilddatenbank.bundestag.de/search/picture-result?query=" + fullName + "&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3";
         /*
+        For Example:
         https://bilddatenbank.bundestag.de/search/picture-result?query=marco+buschmann&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
         */
         // Connection to website
@@ -63,7 +63,7 @@ public class PictureScraper {
             e.printStackTrace();
         }
 
-        /**
+        /*
         // search after pTag where we can find the message
         Elements errors = picDatabase.select("p");
         boolean error = false;
@@ -105,9 +105,11 @@ public class PictureScraper {
        }
 
        //Only for Test-Output in the console
-        for(int i=0; i<1000; i++ ){
+        for(int i=0; i<pictureArray.length; i++ ){
             System.out.println(pictureArray[i]);
         }
+
+
 
         return pictureArray;
 
