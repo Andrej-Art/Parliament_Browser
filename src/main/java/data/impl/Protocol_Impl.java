@@ -3,6 +3,8 @@ package data.impl;
 import data.Protocol;
 import org.bson.Document;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -14,7 +16,9 @@ public class Protocol_Impl implements Protocol {
 
     private Document protocolDoc;
 
-    private String id, date, beginTime, endTime;
+    private String _id;
+    private LocalTime beginTime, endTime;
+    private LocalDate date;
 
     private int electionPeriod, protocolNumber;
 
@@ -33,8 +37,8 @@ public class Protocol_Impl implements Protocol {
      * @param agendaItems The List of IDs of the AgendaItems featured in this Protocol
      * @author DavidJordan
      */
-    public Protocol_Impl(String id, String date, String beginTime, String endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems){
-        this.id = id;
+    public Protocol_Impl(String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems){
+        this._id = id;
         this.date = date;
         this.beginTime =beginTime;
         this.endTime = endTime;
@@ -51,10 +55,10 @@ public class Protocol_Impl implements Protocol {
      */
     public Protocol_Impl(Document document){
         this.protocolDoc = document;
-        this.id = document.getString("_id");
-        this.date = document.getString("date");
-        this.beginTime = document.getString("beginTime");
-        this.endTime = document.getString("endTime");
+        this._id = document.getString("_id");
+        this.date = (LocalDate) document.get("date");
+        this.beginTime = (LocalTime) document.get("beginTime");
+        this.endTime = (LocalTime) document.get("endTime");
         this.electionPeriod = document.getInteger("electionPeriod");
         this.protocolNumber = document.getInteger("protocolNumber");
         this.sessionLeaders = (ArrayList<String>) document.get("sessionLeaders");
@@ -64,7 +68,7 @@ public class Protocol_Impl implements Protocol {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override
@@ -73,7 +77,7 @@ public class Protocol_Impl implements Protocol {
     }
 
     @Override
-    public String getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 
@@ -83,12 +87,12 @@ public class Protocol_Impl implements Protocol {
     }
 
     @Override
-    public String getBeginTime() {
+    public LocalTime getBeginTime() {
         return this.beginTime;
     }
 
     @Override
-    public String getEndTime() {
+    public LocalTime getEndTime() {
         return this.endTime;
     }
 

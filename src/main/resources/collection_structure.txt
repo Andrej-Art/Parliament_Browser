@@ -1,0 +1,87 @@
+# _id ist legislaturperiode/protokollnummer, z.B. "19/70"
+
+protocol:
+    _id                 String
+    election_period     int
+    protocol_number     int
+    date                LocalDate
+    begin               LocalTime
+    end                 LocalTime
+    dauer               LocalTime
+    # -------------->   String personID
+    session_leaders     [personID, personID, ...]
+    # -------------->   String agendeItemID
+    agenda_item_ids     [agendeItemID, agendeItemID, ...]
+
+########################################################################################################################
+
+# _id ist legislaturperiode/protokollnummer/tagesordnungspunktname, z.B. "19/70/Tagesordnungspunkt 1"
+
+agenda_item:
+    _id                 String
+    election_period     int
+    protocol_number     int
+    date                LocalDate
+    # -------------->   String speechID
+    speech_ids          [speechID, speechID, ...]
+
+########################################################################################################################
+
+# _id ist RednerID
+
+person:
+    _id                 String
+    - Alle 20 millionen anderen redner-info felder -
+
+########################################################################################################################
+
+# _id ist RedeID
+# eigene collections für volles CAS und tokens während der größe
+
+speech:
+    _id                 String
+    redner_id           String
+    text                String
+    datum               LocalDate
+    # -------------->   int anfang, int ende, double sentiment
+    sentences           [[anfang, ende, sentiment], ...]
+    main_topic          String
+    # -------------->   int anfang, int ende
+    named_entities_per  [[anfang, ende], ...]
+    named_entities_org  [[anfang, ende], ...]
+    named_entities_loc  [[anfang, ende], ...]
+    sentiment           double
+
+speech_cas:
+    _id                 String
+    full_cas            String (<XMI> bla bla bla)
+
+speech_token:
+    _id                 String
+    redner_id           String
+    date               LocalDate
+    # -------------->   int start, int end, String lemmaValue, String pos
+    tokens              [[start, end, lemmaValue, pos], [start, end, lemmaValue, POS], ...]
+
+########################################################################################################################
+
+# _id ist KommentarID
+
+comment:
+    _id                 String
+    rede_id             String
+    redner_id           String
+    commentator_id      String
+    text                String
+    date               LocalDate
+    sentiment           double
+
+########################################################################################################################
+
+# _id ist Username
+# rights sind entweder "admin", "manager" oder "user"
+
+user:
+    _id                 String
+    password            String
+    rights              String

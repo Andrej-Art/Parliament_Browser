@@ -17,7 +17,7 @@ public class Person_Impl implements Person {
     private Document personDoc;
 
     //Class Variables
-    private String id, firstName, lastName, role, title, fraction, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
+    private String _id, firstName, lastName, role, title, fraction, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
     private ArrayList<String> electionPeriods;
 
     /**
@@ -46,8 +46,8 @@ public class Person_Impl implements Person {
      * @author DavidJordan
      */
     public Person_Impl(String id, String firstName, String lastName, String role, String title, String fraction, String party, String place,
-                       String gender, String birthDate, String deathDate, String birthPlace, ArrayList<String> electionPeriods) {
-        this.id = id;
+                       String pfpURL, String pfpMetadata, String gender, String birthDate, String deathDate, String birthPlace, ArrayList<String> electionPeriods) {
+        this._id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
@@ -64,8 +64,8 @@ public class Person_Impl implements Person {
     }
 
     /**
-     * !!Unfinished!!!
-     * !!Important!!  This is also a working idea for a constructor to generate the object from the DB document.
+     *
+     * This is also a working idea for a constructor to generate the object from the DB document.
      * Please everybody inspect these two interpretations of our results yesterday and make the necessary adjustments
      * where necessary. Whoever needs setters for specific variables, please add those and modify the constructor accordingly.
      * @param document The BSON document retrieved from the database.
@@ -73,7 +73,7 @@ public class Person_Impl implements Person {
      */
     public Person_Impl(Document document){
         this.personDoc = document;
-        this.id = document.getString("_id");
+        this._id = document.getString("_id");
         this.firstName = document.getString("firstname");
         this.lastName = document.getString("lastName");
         this.role = document.getString("role");
@@ -111,7 +111,7 @@ public class Person_Impl implements Person {
 
     @Override
     public String getID() {
-        return this.id;
+        return this._id;
     }
 
     @Override
