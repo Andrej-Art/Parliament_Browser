@@ -7,6 +7,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
 import data.impl.Person_Impl;
@@ -117,12 +118,23 @@ public class MongoDBHandler {
      * @return true if it was created
      * @author DavidJordan
      */
-    public boolean createCollection(String col){
+    public void createCollection(String col){
         if(!collectionExists(col)){
             db.createCollection(col);
-            return true;
+            System.out.println("Collection " + col + "was created.");
         }
-        return false;
+        else{
+            System.out.println("Collection " + col + "was not created because it already exists.");
+        }
+    }
+
+    public void deleteDocument(String col, String id){
+        if(checkIfDocumentExists(col, id)){
+            this.getCollection(col).deleteOne(Filters.eq("_id", id));
+        }
+        else {
+            System.out.println(" Document  with _id:" + " id was not found in collection: " + col);
+        }
     }
 
     /**
@@ -149,7 +161,6 @@ public class MongoDBHandler {
      * @param speeches
      * @author DavidJordan
      */
-    @Unfinished
     public void insertSpeeches(List<Speech_Impl> speeches){
         Gson gson = new Gson();
         ArrayList<Document>  mongoSpeeches = new ArrayList<>(0);
@@ -218,7 +229,7 @@ public class MongoDBHandler {
      * @param document the document that will replace the Document with the specified id
      * @param collection  the collection to get from the database
      * @param id  the id of the Document to be replaced
-     * @return boolean
+     * @return boolean true if update was sucessful false if not
      * @author DavidJordan
      */
     public boolean update(Document document, String collection, String id){
@@ -250,7 +261,7 @@ public class MongoDBHandler {
      * @author Eric Lakhter
      * @modified DavidJordan
      */
-    private void applyDateFiltersToAggregation(List<Bson> pipeline, String dateFilterOne, String dateFilterTwo) {
+    public void applyDateFiltersToAggregation(List<Bson> pipeline, String dateFilterOne, String dateFilterTwo) {
         if (!dateFilterOne.isEmpty()) {
             Bson matchDate = dateFilterTwo.isEmpty() ?
                     match(new Document("datum", dateFilterOne)) :
