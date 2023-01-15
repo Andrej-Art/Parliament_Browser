@@ -162,7 +162,7 @@ public class MongoDBHandler {
      * Method to insert a speech and its associated NLP data into three seperate collections into the MongoDB.
      * @param speech The Java object of the speech
      * @param fullCas the full CAS String of th NLP Analysis
-     * @param tokens The List of MongoTokens
+     * @param tokens The List of MongoTokens of the speech
      * @param sentences the List of MongoSentences
      * @param namedEntities The List of MongoNamedEntities
      * @param sentiment the Speech sentiment value
