@@ -77,7 +77,7 @@ public class MongoDBHandler {
 
     /**
      * Basic method to check whether a given collection already exists in the Database
-     * @param col
+     * @param col colection name
      * @return true if it exists
      * @author DavidJordan
      */
@@ -113,7 +113,7 @@ public class MongoDBHandler {
 
     /**
      * Basic Method to create a collection
-     * @param col
+     * @param col collection name
      * @return true if it was created
      * @author DavidJordan
      */
@@ -221,14 +221,43 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public boolean update(Document document, String collection, String id){
-        try {
-            this.getCollection(collection).replaceOne(eq("_id", id), document);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        if(!checkIfDocumentExists(collection, id)){
+            System.out.println("Unable to perform update, because the target Document with id: " + id +  " does not exist in col: " + collection);
+            return false;
         }
-        return false;
+        else{
+            try {
+                this.getCollection(collection).replaceOne(eq("_id", id), document);
+                return true;
+            } catch (Exception e) {
+                System.out.println("Update could not be performed. Invalid input.");
+                e.printStackTrace();
+                return false;
+            }
+        }
     }
+
+
+    /**
+     * Adds potential date filters in front of an aggregation pipeline.
+     * @param pipeline The pipeline to be modified.
+     * @param dateFilterOne If {@code (dateFilterTwo.isEmpty() == true)} this is a specific date,
+     *                      else it's the lower bound for a date range to be filtered for.
+     * @param dateFilterTwo Higher bound for dates to be filtered for. Gets ignored if {@code (dateFilterOne.isEmpty() == true)}.
+     *                      <p>If {@code (dateFilterTwo < dateFilterOne)} then the query result will be empty.
+     * @author Eric Lakhter
+     * @modified DavidJordan
+     */
+    private void applyDateFiltersToAggregation(List<Bson> pipeline, String dateFilterOne, String dateFilterTwo) {
+        if (!dateFilterOne.isEmpty()) {
+            Bson matchDate = dateFilterTwo.isEmpty() ?
+                    match(new Document("datum", dateFilterOne)) :
+                    match(and(Arrays.asList(gte("datum", dateFilterOne), lte("datum", dateFilterTwo))));
+            pipeline.add(0, matchDate);
+        }
+    }
+
 
 
 
