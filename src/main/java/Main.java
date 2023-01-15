@@ -1,4 +1,3 @@
-
 import com.google.gson.Gson;
 import data.impl.Person_Impl;
 import org.bson.Document;
@@ -7,6 +6,14 @@ import utility.Scraper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import utility.*;
+import marmot.util.Sys;
+import org.apache.catalina.util.URL;
+import utility.PictureScraper;
+
+import java.io.File;
+import java.net.MalformedURLException;
+
 import java.util.Scanner;
 
 /**
@@ -21,7 +28,7 @@ public class Main {
      * (Later we don't need this, because everything is handled by the frontend).
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException,MalformedURLException {
 
         Scanner scanner = new Scanner(System.in);
         String userInput = "";
@@ -30,10 +37,12 @@ public class Main {
         while (!userInput.equals("5")){
             System.out.println("----------Parliament Sentiment Radar----------\n" +
                     "(1) Downloading protocols\n" +
-                    "(2) Create database\n" +
-                    "(3) Start NLP analysis\n" +
-                    "(4) Clear Database\n" +
-                    "(5) Exit\n" +
+                    "(2) Parsing Protocols\n" +
+                    "(3) Create database\n" +
+                    "(4) Start NLP analysis\n" +
+                    "(5) Clear Database\n" +
+                    "(6) Scraping Pictures of Persons\n" +
+                    "(7) Exit\n" +
                     "----------------------------------------------");
             userInput = scanner.nextLine();
 
@@ -46,14 +55,20 @@ public class Main {
                     break;
 
                 case "2":
-                    System.out.println("Database will be created.");
-                    break;
+                    System.out.println("Parsing the protocols");
+                    XMLProtocolParser.speechParse2();
+
 
                 case "3":
-                    System.out.println("NLP analysis is performed...");
+                    System.out.println("Database will be created.");
+                    XMLParser.personParse();
                     break;
 
                 case "4":
+                    System.out.println("NLP analysis is performed...");
+                    break;
+
+                case "5":
                     System.out.println("Do you really want to empty the database?\n" +
                             "----------------------------------------------\n" +
                             "(1) Continue\n (2)Abort");
@@ -75,9 +90,14 @@ public class Main {
                     }
                     break;
 
-                case "5":
+                case "6":
+                    PictureScraper.producePictureUrl("Alice", "Weidel");
+                    break;
+
+                case "7":
                     System.out.println("Programm will be terminated.");
                     break;
+
 
                 default:
                     System.out.println("Invalid input");

@@ -38,8 +38,6 @@ public class Person_Impl implements Person {
      * @param fraction
      * @param party
      * @param place
-     * @param pfpURL
-     * @param pfpMetadata
      * @param gender
      * @param birthDate
      * @param deathDate
@@ -57,8 +55,6 @@ public class Person_Impl implements Person {
         this.fraction = fraction;
         this.party = party;
         this.place = place;
-        this.pfpURL = pfpURL;
-        this.pfpMetadata = pfpMetadata;
         this.gender = gender;
         this.birthDate = birthDate;
         this.deathDate = deathDate;
@@ -95,9 +91,23 @@ public class Person_Impl implements Person {
 
     }
 
+    /**
+     * This method allows to define the content of the String pfpURL
+     * @param url
+     * @author Julian Ocker
+     */
+    public void setPfpURL(String url){
+        this.pfpURL = url;
+    }
 
-
-
+    /**
+     * This method allows to define the content of the String pfpMetadata
+     * @param metadata
+     * @author Julian Ocker
+     */
+    public void setPfpMetadata(String metadata){
+        this.pfpMetadata = metadata;
+    }
 
     @Override
     public String getID() {
