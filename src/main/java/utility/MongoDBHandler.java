@@ -38,9 +38,10 @@ import static com.mongodb.client.model.Sorts.descending;
  * @author Eric Lakhter
  * @author DavidJordan
  */
-@Unfinished //This class is unfinished
+@Unfinished("This class is unfinished")
 public class MongoDBHandler {
     private final MongoDatabase db;
+    private final Gson gson = new Gson();
 
     /**
      * Connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
@@ -147,9 +148,8 @@ public class MongoDBHandler {
      * @param persons
      * @author DavidJordan
      */
-    @Unfinished
+    @Unfinished("Reason")
     public void insertPersons(List<Person_Impl> persons) {
-        Gson gson = new Gson();
         ArrayList<Document> mongoPersons = new ArrayList<>(0);
         for (Person_Impl person : persons) {
             mongoPersons.add(Document.parse(gson.toJson(person)));
@@ -169,7 +169,7 @@ public class MongoDBHandler {
      * @param mainTopic the speech's main topic
      * @author DavidJordan
      */
-    @Unfinished
+    @Unfinished("Reason")
     public void insertSpeech(
             Speech speech,
             String fullCas,
@@ -179,19 +179,17 @@ public class MongoDBHandler {
             double sentiment,
             String mainTopic) {
         // Converting the Named Entities into serialised JSON Strings according to their type
-        Gson gson = new Gson();
         List<Document> namedEntitiesPER = new ArrayList<>(0);
         List<Document> namedEntitiesLOC = new ArrayList<>(0);
         List<Document> namedEntitiesORG = new ArrayList<>(0);
         for(MongoNamedEntity namedEntity: namedEntities){
-            if(namedEntity.getEntityType().equals("PER")){
-                namedEntitiesPER.add(Document.parse(gson.toJson(namedEntity)));
-            }
-            else if(namedEntity.getEntityType().equals("LOC")){
-                namedEntitiesLOC.add(Document.parse(gson.toJson(namedEntity)));
-            }
-            else if(namedEntity.getEntityType().equals("ORG")){
-                namedEntitiesORG.add(Document.parse(gson.toJson(namedEntity)));
+            switch (namedEntity.getEntityType()) { // no default necessary
+                case "PER":
+                    namedEntitiesPER.add(Document.parse(gson.toJson(namedEntity))); break;
+                case "LOC":
+                    namedEntitiesLOC.add(Document.parse(gson.toJson(namedEntity))); break;
+                case "ORG":
+                    namedEntitiesORG.add(Document.parse(gson.toJson(namedEntity))); break;
             }
         }
         // Converting the sentences into a Document to insert into the "sentences" field
@@ -241,7 +239,6 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public void insertAgendaItems(List<AgendaItem_Impl> agendaItems) {
-        Gson gson = new Gson();
         ArrayList<Document> mongoAgendaItems = new ArrayList<>(0);
         for (AgendaItem_Impl agendaItem : agendaItems) {
             mongoAgendaItems.add(Document.parse(gson.toJson(agendaItem)));
@@ -256,7 +253,6 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public void insertComments(List<Comment_Impl> comments) {
-        Gson gson = new Gson();
         ArrayList<Document> mongoComments = new ArrayList<>(0);
         for (Comment_Impl comment : comments) {
             mongoComments.add(Document.parse(gson.toJson(comment)));
@@ -272,7 +268,6 @@ public class MongoDBHandler {
      */
     @Testing
     public boolean update(Speech_Impl speech){
-        Gson gson = new Gson();
         Document speechQuery = new Document().append("_id", speech.getID());
         Document newSpeech = Document.parse(gson.toJson(speech));
 

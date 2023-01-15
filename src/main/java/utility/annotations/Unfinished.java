@@ -10,7 +10,7 @@ import java.lang.annotation.Documented;
  * <span style="color:lime">/**
  *  * This gets an object.
  *  *&#47;</span>
- * <span style="color:yellow">@Unfinished</span>
+ * <span style="color:yellow">@Unfinished</span>("Returns null")
  * public Object getSomething() {
  *     return null; // TOD&#79;
  * }</pre>
@@ -18,4 +18,9 @@ import java.lang.annotation.Documented;
  */
 @Documented
 public @interface Unfinished {
+    /**
+     * A short description that says why the class/method isn't finished yet.
+     * @return The reason as to why this isn't finished.
+     */
+    String reason();
 }

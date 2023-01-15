@@ -251,17 +251,18 @@ public class UIMAPerformer {
      * @see #serializeToDB(String, String, String)
      * @author Eric Lakhter
      */
-    @Unfinished // Only inserts the full CAS so far
+    @Unfinished("Only inserts the full CAS so far")
     private void serializeData(String col, String id, String text) throws UIMAException, IOException, SAXException {
         JCas jcas = getJCas(text);
         String fullCas = getFullCas(jcas);
-        mongoDBHandler.addCAS(col + "_cas", id, fullCas);
 
         List<MongoToken> tokens = getTokens(jcas);
         List<MongoSentence> sentences = getSentences(jcas);
         List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
         String mainTopic = getMainTopic(jcas);
         double avgSentiment = getAverageSentiment(jcas);
+
+        mongoDBHandler.addCAS(col + "_cas", id, fullCas);
     }
 
     /*
