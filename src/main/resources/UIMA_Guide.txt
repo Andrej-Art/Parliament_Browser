@@ -10,9 +10,9 @@
 // XMLProtocolParser:
 // after parsing a speech:
 
-    // "text" is the name of the variable containing the full speech text
+    // "speechText" is the name of the variable containing the full speech text
     // "speech" is the name of a speech object
-    JCas jcas = uima.getJCas(text);
+    JCas jcas = uima.getJCas(speechText);
     String fullCas = uima.getFullCas(jcas);
     List<MongoToken> tokens = uima.getTokens(jcas);
     List<MongoSentence> sentences= uima.getSentences(jcas);
@@ -27,4 +27,12 @@
             namedEntities,
             sentiment,
             mainTopic
+    );
+
+// for comments only the sentiment is important
+
+    double sentiment = uima.getAverageSentiment(uima.getJCas(commentText));
+    mongoDBHandler.insertSpeech(
+            comment,
+            sentiment
     );
