@@ -212,6 +212,7 @@ public class MongoDBHandler {
         return false;
     }
 
+
     /**
      * Updates a Document in the database, by replacing it with the given Document
      * @param document the document that will replace the Document with the specified id
@@ -257,9 +258,6 @@ public class MongoDBHandler {
             pipeline.add(0, matchDate);
         }
     }
-
-
-
 
 
     /**
