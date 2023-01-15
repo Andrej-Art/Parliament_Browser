@@ -24,6 +24,7 @@ import utility.uima.MongoToken;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -147,7 +148,7 @@ public class UIMAPerformer {
     public List<MongoNamedEntity> getNamedEntities(JCas jcas) {
         List<MongoNamedEntity> mongoNamedEntities = new ArrayList<>(0);
         for (CategoryCoveredTagged cct : JCasUtil.select(jcas, CategoryCoveredTagged.class)) {
-            mongoNamedEntities.add(new MongoNamedEntity(cct.getBegin(), cct.getEnd(), cct.getValue()));
+            mongoNamedEntities.add(new MongoNamedEntity(cct.getBegin(), cct.getEnd(), cct. getValue(), cct.getCoveredText()));
         }
         return mongoNamedEntities;
     }
