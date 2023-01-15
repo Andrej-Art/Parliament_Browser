@@ -41,6 +41,7 @@ import static com.mongodb.client.model.Sorts.descending;
 @Unfinished //This class is unfinished
 public class MongoDBHandler {
     private final MongoDatabase db;
+    private final Gson gson = new Gson();
 
     /**
      * Connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
@@ -149,7 +150,6 @@ public class MongoDBHandler {
      */
     @Unfinished
     public void insertPersons(List<Person_Impl> persons) {
-        Gson gson = new Gson();
         ArrayList<Document> mongoPersons = new ArrayList<>(0);
         for (Person_Impl person : persons) {
             mongoPersons.add(Document.parse(gson.toJson(person)));
@@ -157,6 +157,19 @@ public class MongoDBHandler {
         this.getCollection("person").insertMany(mongoPersons);
     }
 
+    /**
+     * Method to convert a List of Java AgendaItem_Impl object to BSON format using Gson to serialise them
+     * and then insert them into the database
+     * @param agendaItems
+     * @author DavidJordan
+     */
+    public void insertAgendaItems(List<AgendaItem_Impl> agendaItems) {
+        ArrayList<Document> mongoAgendaItems = new ArrayList<>(0);
+        for (AgendaItem_Impl agendaItem : agendaItems) {
+            mongoAgendaItems.add(Document.parse(gson.toJson(agendaItem)));
+        }
+        this.getCollection("agendaItem").insertMany(mongoAgendaItems);
+    }
 
     /**
      * Method to convert a List of Java Speech_Impl object to BSON format using Gson to serialise them
@@ -187,26 +200,8 @@ public class MongoDBHandler {
 
             _id + tokens go into "speech_tokens"
          */
-        Gson gson = new Gson();
         Document mongoSpeech = Document.parse(gson.toJson(speech));
         db.getCollection("speech").insertOne(mongoSpeech);
-    }
-
-
-
-    /**
-     * Method to convert a List of Java AgendaItem_Impl object to BSON format using Gson to serialise them
-     * and then insert them into the database
-     * @param agendaItems
-     * @author DavidJordan
-     */
-    public void insertAgendaItems(List<AgendaItem_Impl> agendaItems) {
-        Gson gson = new Gson();
-        ArrayList<Document> mongoAgendaItems = new ArrayList<>(0);
-        for (AgendaItem_Impl agendaItem : agendaItems) {
-            mongoAgendaItems.add(Document.parse(gson.toJson(agendaItem)));
-        }
-        this.getCollection("agendaItem").insertMany(mongoAgendaItems);
     }
 
     /**
@@ -216,7 +211,6 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public void insertComments(List<Comment_Impl> comments) {
-        Gson gson = new Gson();
         ArrayList<Document> mongoComments = new ArrayList<>(0);
         for (Comment_Impl comment : comments) {
             mongoComments.add(Document.parse(gson.toJson(comment)));
@@ -232,7 +226,6 @@ public class MongoDBHandler {
      */
     @Testing
     public boolean update(Speech_Impl speech){
-        Gson gson = new Gson();
         Document speechQuery = new Document().append("_id", speech.getID());
         Document newSpeech = Document.parse(gson.toJson(speech));
 
