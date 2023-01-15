@@ -1,5 +1,6 @@
 package data;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -10,9 +11,9 @@ import java.util.ArrayList;
 public interface AgendaItem {
 
     /**
-     * Gets the ID of this AgendaItem which is a concatenation of
-     * the ProtocolId + "/" + AgendaItemID
-     * @return id
+     * Gets the ID of this AgendaItem which is a String concatenation of the following form:
+     * electionPeriod/protocolNumber/tagesordnungspunktname, z.B. "19/70/Tagesordnungspunkt 1"
+     * @return id the unique ID of this AgendaItem
      * @author DavidJordan
      */
     String getID();
@@ -22,7 +23,7 @@ public interface AgendaItem {
      * @return date
      * @author DavidJordan
      */
-    String getDate();
+    LocalDate getDate();
 
     /**
      * Gets a list of all the IDs of the speeches contained in this Agenda Item.

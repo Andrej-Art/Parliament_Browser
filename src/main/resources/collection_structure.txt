@@ -4,7 +4,7 @@ protocol:
     _id                 String
     election_period     int
     protocol_number     int
-    date                LocalTime
+    date                LocalDate
     begin               LocalTime
     end                 LocalTime
     dauer               LocalTime
@@ -21,7 +21,7 @@ agenda_item:
     _id                 String
     election_period     int
     protocol_number     int
-    date                LocalTime
+    date                LocalDate
     # -------------->   String speechID
     speech_ids          [speechID, speechID, ...]
 
@@ -42,7 +42,7 @@ speech:
     _id                 String
     redner_id           String
     text                String
-    datum               LocalTime
+    datum               LocalDate
     # -------------->   int anfang, int ende, double sentiment
     sentences           [[anfang, ende, sentiment], ...]
     main_topic          String
@@ -59,7 +59,7 @@ speech_cas:
 speech_token:
     _id                 String
     redner_id           String
-    datum               LocalTime
+    date               LocalDate
     # -------------->   int start, int end, String lemmaValue, String pos
     tokens              [[start, end, lemmaValue, pos], [start, end, lemmaValue, POS], ...]
 
@@ -73,7 +73,7 @@ comment:
     redner_id           String
     commentator_id      String
     text                String
-    datum               LocalTime
+    date               LocalDate
     sentiment           double
 
 ########################################################################################################################

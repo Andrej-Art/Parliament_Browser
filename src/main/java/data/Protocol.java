@@ -13,7 +13,7 @@ public interface Protocol {
 
 
     /**
-     * Gets the Protocol's ID consisting of the
+     * Gets the Protocol's ID consisting of the String concatenation:
      * electionPeriod + "/" + protocollNumber
      * @return id
      * @author DavidJordan
@@ -28,7 +28,7 @@ public interface Protocol {
     int getElectionPeriod();
 
     /**
-     * Gets the Date of when the Protocol's Session took place.
+     * Gets the LocalDate of when the Protocol's Session took place.
      * @return date
      * @author DavidJordan
      */
@@ -42,14 +42,14 @@ public interface Protocol {
     int getProtocolNumber();
 
     /**
-     * Gets the String representation of the time when the recorded session begins.
+     * Gets the LocalTime of the time when the recorded session begins.
      * @return beginTime
      * @author DavidJordan
      */
     LocalTime getBeginTime();
 
     /**
-     * Gets the String representation of the time when the recorded session ends.
+     * Gets LocalTime of the time when the recorded session ends.
      * @return endTime
      * @author DavidJordan
      */

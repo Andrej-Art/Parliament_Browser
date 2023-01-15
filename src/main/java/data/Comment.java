@@ -33,11 +33,11 @@ public interface Comment {
     String getSpeakerID();
 
     /**
-     * Gets the name of the person making this comment if it was made by an individual.
-     * @return commentator
+     * Gets the id of the person making this comment if it was made by an individual.
+     * @return commentatorID
      * @author DavidJordan
      */
-    String getCommentator();
+    String getCommentatorID();
 
     /**
      * Gets a list of names of the Bundestags-Fractions who made the Comment.

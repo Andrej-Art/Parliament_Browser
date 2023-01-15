@@ -3,6 +3,8 @@ package data.impl;
 import data.AgendaItem;
 import org.bson.Document;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +15,9 @@ import java.util.ArrayList;
 public class AgendaItem_Impl implements AgendaItem {
 
     private Document AgendaItemDoc;
-    private String _id, date, subject;
+    private String _id, subject;
+
+    private LocalDate date;
     private ArrayList<String> speechIDs;
 
     /**
@@ -24,10 +28,10 @@ public class AgendaItem_Impl implements AgendaItem {
      * @param speechIDs A List of all Ids of the speeches in the Item
      * @author DavidJordan
      */
-    public AgendaItem_Impl(String id, String date, String subject, ArrayList<String> speechIDs){
+    public AgendaItem_Impl(String id, LocalDate date, String subject, ArrayList<String> speechIDs){
         this._id = id;
         this.date = date;
-        this.subject = subject;
+        this.subject = subject; //Unclear if we get this from the xml protocol or the UIMA analysis, we assume here that we parse it from the xml file
         this.speechIDs = speechIDs;
     }
 
@@ -39,7 +43,7 @@ public class AgendaItem_Impl implements AgendaItem {
     public AgendaItem_Impl(Document document){
         this.AgendaItemDoc = document;
         this._id = document.getString("_id");
-        this.date = document.getString("date");
+        this.date = (LocalDate) document.get("date");
         this.subject = document.getString("subject");
         this.speechIDs = (ArrayList<String>) document.get("speechIDs");
     }
@@ -52,7 +56,7 @@ public class AgendaItem_Impl implements AgendaItem {
     }
 
     @Override
-    public String getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 

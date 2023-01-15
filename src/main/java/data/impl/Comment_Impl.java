@@ -17,7 +17,7 @@ public class Comment_Impl implements Comment {
     // The BSON Document
     private Document commentDoc;
 
-    private String _id, speechID, speakerID, commentator, text;
+    private String _id, speechID, speakerID, commentatorID, text;
     LocalDate date;
 
     private ArrayList<String> fractions;
@@ -27,17 +27,17 @@ public class Comment_Impl implements Comment {
      * @param id the ID of the Comment
      * @param speechID the ID of the Speech
      * @param speakerID the ID of the Speaker receiving the comment
-     * @param commentator the name of the commentator
+     * @param commentatorID the ID of the commentator
      * @param text the raw text of the comment
-     * @param date  the date when the comment was made
-     * @param fractions the fractions involved in making the comment
+     * @param date  the LocalDate when the comment was made
+     * @param fractions the list of fractions involved in making the comment
      * @author DavidJordan
      */
-    public Comment_Impl(String id, String speechID, String speakerID, String commentator, String text, LocalDate date, ArrayList<String> fractions){
+    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, String text, LocalDate date, ArrayList<String> fractions){
         this._id = id;
         this.speechID = speechID;
         this.speakerID = speakerID;
-        this.commentator = commentator;
+        this.commentatorID = commentatorID;
         this.text = text;
         this.date = date;
         this.fractions = fractions;
@@ -53,7 +53,7 @@ public class Comment_Impl implements Comment {
         this._id = document.getString("_id");
         this.speechID = document.getString("speechID");
         this.speakerID = document.getString("speakerID");
-        this.commentator = document.getString("commentator");
+        this.commentatorID = document.getString("commentator");
         this.text = document.getString("text");
         this.date = (LocalDate) document.get("date");
         this.fractions = (ArrayList<String>) document.get("fractions");
@@ -76,8 +76,8 @@ public class Comment_Impl implements Comment {
     }
 
     @Override
-    public String getCommentator() {
-        return this.commentator;
+    public String getCommentatorID() {
+        return this.commentatorID;
     }
 
     @Override

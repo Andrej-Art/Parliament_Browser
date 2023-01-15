@@ -17,7 +17,7 @@ public class Protocol_Impl implements Protocol {
     private Document protocolDoc;
 
     private String _id;
-    LocalTime beginTime, endTime;
+    private LocalTime beginTime, endTime;
     private LocalDate date;
 
     private int electionPeriod, protocolNumber;
