@@ -12,6 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class XMLProtocolParser {
             //access to our downloaded protocol-files
             File[] files = new File("ProtokollXMLs/").listFiles();
 
-            // iterating over all cml-protocols
+            // iterating over all xml-protocols
             for (int i = files.length - 1; i >= 0; i--) {
                 File file = files[i];
                 //check if the file is a xml-file
@@ -133,7 +134,7 @@ public class XMLProtocolParser {
                                         }
                                     }
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
-                                    addToSpeechMap(speechID, speakerID, speechText, addStatus, topid);
+                                    addToSpeechMap(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
                                 }
                             }
                         }
@@ -144,6 +145,7 @@ public class XMLProtocolParser {
             ex.printStackTrace();
         }
     }
+
 
 
     /**
@@ -191,9 +193,34 @@ public class XMLProtocolParser {
         return elementList;
     }
 
-    public static int addToSpeechMap(String speechID, String speakerID, String speechText, boolean addStatus, String topid,){
-        new Speech_Impl(speechID, speakerID, speechText, topid);
-        return 0;
+
+    /**
+     *
+     * @author Andrej Artuschenko
+     * @param speechID
+     * @param speakerID
+     * @param speechText
+     * @param date
+     */
+
+    public static void addToSpeechMap(String speechID, String speakerID, String speechText, LocalDate date){
+        new Speech_Impl(speechID, speakerID, speechText, date);
+
+        System.out.println(speechID);
+        System.out.println(speakerID);
+        System.out.println(speechText);
+        System.out.println(date);
+        System.out.println("----------------------");
     }
+
+    /**
+     * Get the Speech Map
+     * @author Andrej Artuschenko
+     * @return Map<String, Speech_File_Impl>
+     */
+    public Map<String, Speech_Impl> getSpeechMap() {
+        return speechMap;
+    }
+
 
 }
