@@ -24,6 +24,7 @@ import utility.uima.MongoToken;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -147,7 +148,7 @@ public class UIMAPerformer {
     public List<MongoNamedEntity> getNamedEntities(JCas jcas) {
         List<MongoNamedEntity> mongoNamedEntities = new ArrayList<>(0);
         for (CategoryCoveredTagged cct : JCasUtil.select(jcas, CategoryCoveredTagged.class)) {
-            mongoNamedEntities.add(new MongoNamedEntity(cct.getBegin(), cct.getEnd(), cct.getValue()));
+            mongoNamedEntities.add(new MongoNamedEntity(cct.getBegin(), cct.getEnd(), cct. getValue(), cct.getCoveredText()));
         }
         return mongoNamedEntities;
     }
@@ -233,7 +234,7 @@ public class UIMAPerformer {
      * @see #serializeToDB(String, String, String)
      * @author Eric Lakhter
      */
-    @Testing // actually only validates test_speech and test_comment right now
+    @Unfinished("actually validates test_speech and test_comment right now")
     private void validateQuery(String col, String id) throws IOException {
         if (!(col.equals("test_speech") || col.equals("test_comment")))
             throw new IOException("Target collection must be either \"speech\" or \"comment\"");
@@ -250,17 +251,18 @@ public class UIMAPerformer {
      * @see #serializeToDB(String, String, String)
      * @author Eric Lakhter
      */
-    @Unfinished // Only inserts the full CAS so far
+    @Unfinished("Only inserts the full CAS so far")
     private void serializeData(String col, String id, String text) throws UIMAException, IOException, SAXException {
         JCas jcas = getJCas(text);
         String fullCas = getFullCas(jcas);
-        mongoDBHandler.addCAS(col + "_cas", id, fullCas);
 
         List<MongoToken> tokens = getTokens(jcas);
         List<MongoSentence> sentences = getSentences(jcas);
         List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
         String mainTopic = getMainTopic(jcas);
         double avgSentiment = getAverageSentiment(jcas);
+
+        mongoDBHandler.addCAS(col + "_cas", id, fullCas);
     }
 
     /*

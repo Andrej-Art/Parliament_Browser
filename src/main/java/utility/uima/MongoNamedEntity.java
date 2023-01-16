@@ -9,11 +9,13 @@ public class MongoNamedEntity {
     private final int startPos;
     private final int endPos;
     private final String entityType;
+    private final String coveredText;
 
-    public MongoNamedEntity(int startPos, int endPos, String entityType) {
+    public MongoNamedEntity(int startPos, int endPos, String entityType, String coveredText) {
         this.startPos = startPos;
         this.endPos = endPos;
         this.entityType = entityType;
+        this.coveredText = coveredText;
     }
 
     public int getStartPos() {
@@ -26,5 +28,9 @@ public class MongoNamedEntity {
 
     public String getEntityType() {
         return entityType;
+    }
+
+    public String getCoveredText() {
+        return coveredText;
     }
 }

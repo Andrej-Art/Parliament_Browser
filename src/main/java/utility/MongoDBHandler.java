@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import data.Comment;
 import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
@@ -38,7 +39,7 @@ import static com.mongodb.client.model.Sorts.descending;
  * @author Eric Lakhter
  * @author DavidJordan
  */
-@Unfinished //This class is unfinished
+@Unfinished("This class is unfinished")
 public class MongoDBHandler {
     private final MongoDatabase db;
     private final Gson gson = new Gson();
@@ -148,13 +149,88 @@ public class MongoDBHandler {
      * @param persons
      * @author DavidJordan
      */
-    @Unfinished
+    @Unfinished("Reason")
     public void insertPersons(List<Person_Impl> persons) {
         ArrayList<Document> mongoPersons = new ArrayList<>(0);
         for (Person_Impl person : persons) {
             mongoPersons.add(Document.parse(gson.toJson(person)));
         }
         this.getCollection("person").insertMany(mongoPersons);
+    }
+
+
+    /**
+     * Method to insert a speech and its associated NLP data into three seperate collections into the MongoDB.
+     * @param speech The Java object of the speech
+     * @param fullCas the full CAS String of th NLP Analysis
+     * @param tokens The List of MongoTokens of the speech
+     * @param sentences the List of MongoSentences
+     * @param namedEntities The List of MongoNamedEntities
+     * @param sentiment the Speech sentiment value
+     * @param mainTopic the speech's main topic
+     * @author DavidJordan
+     */
+    @Unfinished("Reason")
+    public void insertSpeech(
+            Speech speech,
+            String fullCas,
+            List<MongoToken> tokens,
+            List<MongoSentence> sentences,
+            List<MongoNamedEntity> namedEntities,
+            double sentiment,
+            String mainTopic) {
+        // Converting the Named Entities into serialised JSON Strings according to their type
+        List<Document> namedEntitiesPER = new ArrayList<>(0);
+        List<Document> namedEntitiesLOC = new ArrayList<>(0);
+        List<Document> namedEntitiesORG = new ArrayList<>(0);
+        for(MongoNamedEntity namedEntity: namedEntities){
+            switch (namedEntity.getEntityType()) { // no default necessary
+                case "PER":
+                    namedEntitiesPER.add(Document.parse(gson.toJson(namedEntity))); break;
+                case "LOC":
+                    namedEntitiesLOC.add(Document.parse(gson.toJson(namedEntity))); break;
+                case "ORG":
+                    namedEntitiesORG.add(Document.parse(gson.toJson(namedEntity))); break;
+            }
+        }
+        // Converting the sentences into a Document to insert into the "sentences" field
+        List<Document> sentencesDocs = new ArrayList<>(0);
+        for(MongoSentence mongoSentence: sentences){
+            sentencesDocs.add(Document.parse(gson.toJson(mongoSentence)));
+        }
+        // Creating the speech document to insert into the DB
+        Document speechDocument = new Document()
+                .append("_id", speech.getID())
+                .append("speaker_id", speech.getSpeakerID())
+                .append("text", speech.getText())
+                .append("date", speech.getDate())
+                .append("sentences", sentencesDocs)
+                .append("sentiment", sentiment)
+                .append("main_topic", mainTopic)
+                .append("named_entities_per", namedEntitiesPER)
+                .append("named_entities_org", namedEntitiesORG)
+                .append("named_entities_loc", namedEntitiesLOC);
+        //Inserting finished speech document into the speech collection
+        this.getCollection("speech").insertOne(speechDocument);
+
+        // Inserting the full speech CAS into seperate collection
+        Document speechCasDoc = new Document()
+                .append("_id", speech.getID())
+                .append("full_cas", fullCas);
+        //Inserting into speech_cas collection
+        this.getCollection("speech_cas").insertOne(speechCasDoc);
+
+        //Serialising the tokens
+        List<Document> speechTokensDocs = new ArrayList<>(0);
+        for (MongoToken mongoToken: tokens){
+            speechTokensDocs.add(Document.parse(gson.toJson(mongoToken)));
+        }
+        // Adding to speech_tokens collection
+        Document speechTokenDoc = new Document()
+                .append("_id", speech.getID())
+                .append("speaker_id", speech.getSpeakerID())
+                .append("date", speech.getDate())
+                .append("tokens", speechTokensDocs);
     }
 
     /**
@@ -172,70 +248,24 @@ public class MongoDBHandler {
     }
 
     /**
-     * Method to convert a List of Java Speech_Impl object to BSON format using Gson to serialise them
-     * and then insert them into the database.
-     * @param speech
-     * @param fullCas
-     * @param tokens
-     * @param sentences
-     * @param namedEntities
-     * @param sentiment
-     * @param mainTopic
+     * Method to insert a comment and its sentiment value into the "comment" collection
+     * of the database.
+     * @param comment The comment Object
+     * @param sentiment The sentiment value of the comment
      * @author DavidJordan
      */
-    @Unfinished // doesn't insert anything yet
-    public void insertSpeech(
-            Speech speech,
-            String fullCas,
-            List<MongoToken> tokens,
-            List<MongoSentence> sentences,
-            List<MongoNamedEntity> namedEntities,
-            double sentiment,
-            String mainTopic) {
-        /*
-            _id + redner_id + text + datum + sentences + sentiment + main_topic
-             + named_entities_per + named_entities_org + named_entities_loc go into "speech"
-
-            _id + fullCas go into "speech_cas"
-
-            _id + tokens go into "speech_tokens"
-         */
-        Document mongoSpeech = Document.parse(gson.toJson(speech));
-        db.getCollection("speech").insertOne(mongoSpeech);
-    }
-
-    /**
-     * Method to convert a List of Java Person_Impl object to BSON format using Gson to serialise them
-     * and then insert them into the database
-     * @param comments
-     * @author DavidJordan
-     */
-    public void insertComments(List<Comment_Impl> comments) {
-        ArrayList<Document> mongoComments = new ArrayList<>(0);
-        for (Comment_Impl comment : comments) {
-            mongoComments.add(Document.parse(gson.toJson(comment)));
-        }
-        this.getCollection("comment").insertMany(mongoComments);
-    }
-
-    /**
-     * Method to update a speech document in the DB with a speech Java object as parameter.
-     * @param speech
-     * @return boolean to show if update was successful
-     * @author DavidJordan
-     */
-    @Testing
-    public boolean update(Speech_Impl speech){
-        Document speechQuery = new Document().append("_id", speech.getID());
-        Document newSpeech = Document.parse(gson.toJson(speech));
-
-        try {
-            this.getCollection("speech").replaceOne(speechQuery, newSpeech);
-            return true;
-        } catch (Exception e) {
-           e.printStackTrace();
-        }
-        return false;
+    public void insertComment(Comment comment, double sentiment) {
+        //Create the  Comment Document
+        Document commentDoc = new Document()
+                .append("_id", comment.getID())
+                .append("speech_id", comment.getSpeechID())
+                .append("speaker_id", comment.getSpeakerID())
+                .append("commentator_id", comment.getCommentatorID())
+                .append("text", comment.getText())
+                .append("date", comment.getDate())
+                .append("sentiment", sentiment);
+        // Insert it into the comment collection
+        this.getCollection("comment").insertOne(commentDoc);
     }
 
 
@@ -258,7 +288,7 @@ public class MongoDBHandler {
                 this.getCollection(collection).replaceOne(eq("_id", id), document);
                 return true;
             } catch (Exception e) {
-                System.out.println("Update could not be performed. Invalid input.");
+                System.err.println("Update could not be performed. Invalid input.");
                 e.printStackTrace();
                 return false;
             }
