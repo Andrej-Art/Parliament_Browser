@@ -57,6 +57,7 @@ public class Main {
                 case "2":
                     System.out.println("Parsing the protocols");
                     XMLProtocolParser.speechParse2();
+                    break;
 
 
                 case "3":
