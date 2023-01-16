@@ -43,14 +43,14 @@ speech:
     speaker_id          String
     text                String
     datum               LocalDate
-    # -------------->   int anfang, int ende, double sentiment
-    sentences           [[anfang, ende, sentiment], ...]
+    # -------------->   int start_pos, int end_pos, double sentiment
+    sentences           [[start_pos, end_pos, sentiment], ...]
     sentiment           double
     main_topic          String
-    # -------------->   int anfang, int ende
-    named_entities_per  [[anfang, ende], ...]
-    named_entities_org  [[anfang, ende], ...]
-    named_entities_loc  [[anfang, ende], ...]
+    # -------------->   int start_pos, int end_pos, String covered_text
+    named_entities_per  [[start_pos, end_pos, covered_text], ...]
+    named_entities_org  [[start_pos, end_pos, covered_text], ...]
+    named_entities_loc  [[start_pos, end_pos, covered_text], ...]
 
 speech_cas:
     _id                 String
