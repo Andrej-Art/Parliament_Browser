@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import data.Comment;
 import data.Speech;
 import data.impl.AgendaItem_Impl;
 import data.impl.Comment_Impl;
@@ -247,37 +248,24 @@ public class MongoDBHandler {
     }
 
     /**
-     * Method to convert a List of Java Person_Impl object to BSON format using Gson to serialise them
-     * and then insert them into the database
-     * @param comments
+     * Method to insert a comment and its sentiment value into the "comment" collection
+     * of the database.
+     * @param comment The comment Object
+     * @param sentiment The sentiment value of the comment
      * @author DavidJordan
      */
-    public void insertComments(List<Comment_Impl> comments) {
-        ArrayList<Document> mongoComments = new ArrayList<>(0);
-        for (Comment_Impl comment : comments) {
-            mongoComments.add(Document.parse(gson.toJson(comment)));
-        }
-        this.getCollection("comment").insertMany(mongoComments);
-    }
-
-    /**
-     * Method to update a speech document in the DB with a speech Java object as parameter.
-     * @param speech
-     * @return boolean to show if update was successful
-     * @author DavidJordan
-     */
-    @Testing
-    public boolean update(Speech_Impl speech){
-        Document speechQuery = new Document().append("_id", speech.getID());
-        Document newSpeech = Document.parse(gson.toJson(speech));
-
-        try {
-            this.getCollection("speech").replaceOne(speechQuery, newSpeech);
-            return true;
-        } catch (Exception e) {
-           e.printStackTrace();
-        }
-        return false;
+    public void insertComment(Comment comment, double sentiment) {
+        //Create the  Comment Document
+        Document commentDoc = new Document()
+                .append("_id", comment.getID())
+                .append("speech_id", comment.getSpeechID())
+                .append("speaker_id", comment.getSpeakerID())
+                .append("commentator_id", comment.getCommentatorID())
+                .append("text", comment.getText())
+                .append("date", comment.getDate())
+                .append("sentiment", sentiment);
+        // Insert it into the comment collection
+        this.getCollection("comment").insertOne(commentDoc);
     }
 
 
