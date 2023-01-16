@@ -40,7 +40,7 @@ person:
 
 speech:
     _id                 String
-    redner_id           String
+    speaker_id          String
     text                String
     datum               LocalDate
     # -------------->   int anfang, int ende, double sentiment
@@ -58,8 +58,8 @@ speech_cas:
 
 speech_tokens:
     _id                 String
-    redner_id           String
-    date               LocalDate
+    speaker_id          String
+    date                LocalDate
     # -------------->   int start, int end, String lemmaValue, String pos
     tokens              [[start, end, lemmaValue, pos], [start, end, lemmaValue, POS], ...]
 
@@ -69,8 +69,8 @@ speech_tokens:
 
 comment:
     _id                 String
-    rede_id             String
-    redner_id           String
+    speech_id           String
+    speaker_id          String
     commentator_id      String
     text                String
     date                LocalDate
