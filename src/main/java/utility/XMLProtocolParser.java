@@ -1,5 +1,6 @@
 package utility;
 
+import data.impl.Comment_Impl;
 import data.impl.Speech_Impl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -29,6 +30,8 @@ import java.util.Map;
 public class XMLProtocolParser {
 
     private Map<String, Speech_Impl> speechMap;
+    private Map<String, Comment_Impl> commentMap;
+
     //Create New Instance of DocumentBuilderFactory
     static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -92,11 +95,13 @@ public class XMLProtocolParser {
                                     String speechID = speech.getAttribute("id");
                                     String speakerID = "";
                                     String speechText = "";
+                                    //List for comments (every speech get a list of comments)
                                     List<String> commentList = new ArrayList<>();
                                     boolean addStatus = false;
 
                                     //Go through all ChildNodes of a speech
                                     List<Element> speechChildNodeList = getChildElementList(speech);
+                                    String commentID = null;
                                     for (Element speechChild : speechChildNodeList) {
                                         switch (speechChild.getTagName()) {
                                             //If its a <name>-Tag -> So its not a speaker (set addStatus = false) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
@@ -131,10 +136,27 @@ public class XMLProtocolParser {
                                                     }
                                                 }
                                                 break;
+
+                                            case "kommentar":
+                                                String comment = speechChild.getTextContent();
+                                                commentList.add(comment);
+
+                                                System.out.println(speechText);
+
+                                                for (int c = 0; c <= commentList.size(); c++) {
+                                                    commentID = speechID + "/" + c;
+                                                    System.out.println(commentID);
+                                                }
+                                                System.out.println("-----------------");
+
+
+                                                break;
                                         }
                                     }
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                     addToSpeechMap(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
+                                    //addToCommentMap(commentID, speechID, speakerID, )
+
                                 }
                             }
                         }
@@ -174,7 +196,7 @@ public class XMLProtocolParser {
     }
 
     /**
-     * Get the Child Elementlist of a parentElement (Same logic as in the methof getElementList)
+     * Get the Child Elementlist of a parentElement (Same logic as in the method getElementList)
      *
      * @param parentNode
      * @return List<Element>
@@ -206,21 +228,40 @@ public class XMLProtocolParser {
     public static void addToSpeechMap(String speechID, String speakerID, String speechText, LocalDate date){
         new Speech_Impl(speechID, speakerID, speechText, date);
 
+        /*
         System.out.println(speechID);
         System.out.println(speakerID);
         System.out.println(speechText);
         System.out.println(date);
         System.out.println("----------------------");
+
+         */
     }
 
     /**
      * Get the Speech Map
      * @author Andrej Artuschenko
-     * @return Map<String, Speech_File_Impl>
+     * @return Map<String, Speech_Impl>
      */
     public Map<String, Speech_Impl> getSpeechMap() {
         return speechMap;
     }
+
+    /*
+    public static void addToCommentMap(String commentID, String speechID, String speakerID, String commentatorID, String commentText, LocalDate date, String fraction) {
+        new Comment_Impl(commentID, speechID, speakerID, commentatorID, commentText, date, fraction);
+    }
+
+     */
+
+
+
+    /**
+     * Get the Comment Map
+     * @author Andrej Artuschenko
+     * @return Map<String, Speech_Impl>
+     */
+    public  Map<String, Comment_Impl> getCommentMap() {return commentMap;}
 
 
 }
