@@ -3,10 +3,7 @@ package utility;
 import com.google.gson.Gson;
 import com.mongodb.Block;
 import com.mongodb.MongoWriteException;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import data.*;
@@ -426,7 +423,7 @@ public class MongoDBHandler {
      * @return boolean true if update was sucessful false if not
      * @author DavidJordan
      */
-    public boolean update(Document document, String collection, String id){
+    public boolean updateDocument(Document document, String collection, String id){
 
         if(!checkIfDocumentExists(collection, id)){
             System.out.println("Unable to perform update, because the target Document with id: " + id +  " does not exist in col: " + collection);
@@ -440,6 +437,38 @@ public class MongoDBHandler {
                 System.err.println("Update could not be performed. Invalid input.");
                 e.printStackTrace();
                 return false;
+            }
+        }
+    }
+
+    /**
+     * Adds a document to an existing collection
+     * @param document
+     * @param collection
+     * @author DavidJordan
+     */
+    public void addDocument(Document document, String collection){
+        if(collectionExists(collection)){
+            try {
+                this.getCollection(collection).insertOne(document);
+            } catch (MongoWriteException e) {
+                System.err.println("Failed to add Document to collection.");
+            }
+        }
+    }
+
+    /**
+     * Adds a documents to an existing collection
+     * @param documents
+     * @param collection
+     * @author DavidJordan
+     */
+    public void addDocuments(List<Document> documents, String collection){
+        if(collectionExists(collection) && documents != null){
+            try {
+                this.getCollection(collection).insertMany(documents);
+            } catch (MongoWriteException e) {
+                System.err.println("Failed to add Documents to collection.");
             }
         }
     }
@@ -462,6 +491,32 @@ public class MongoDBHandler {
                     match(and(Arrays.asList(gte("datum", dateFilterOne), lte("datum", dateFilterTwo))));
             pipeline.add(0, matchDate);
         }
+    }
+
+    /**
+     * @param collection the collection to be aggregation-queried, may not be null or the empty string
+     * @param pipeline  the aggregation pipeline stages, may not contain null valued stages
+     * @return MongoIterable of BSON Documents
+     * @author DavidJordan
+     * @author Eric Lakhter
+     */
+    public Iterable<Document> aggregateIterate(String collection, Bson... pipeline) {
+        // Validating the collection name
+        if (collection == null || collection.trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid collection name");
+        }
+        // Validating the pipeline
+        if (pipeline == null || pipeline.length == 0) {
+            throw new IllegalArgumentException("Invalid pipeline of length = 0");
+        }
+        for (Bson stage : pipeline) {
+            if (stage == null) {
+                throw new IllegalArgumentException("Invalid pipeline stage whith value: null");
+            }
+        }
+
+        MongoIterable<Document> result = this.getCollection(collection).aggregate(Arrays.asList(pipeline));
+        return result;
     }
 
 
