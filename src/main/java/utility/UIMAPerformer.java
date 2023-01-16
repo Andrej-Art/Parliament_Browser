@@ -61,7 +61,6 @@ public class UIMAPerformer {
      * Returns the JCas containing the analyzed text.
      * @param text The text to analyze.
      * @return JCas holding the analysis.
-     * @throws UIMAException If an Error occurs during JCas creation.
      * @see #getFullCas(JCas)
      * @see #getTokens(JCas) 
      * @see #getSentences(JCas) 
@@ -70,10 +69,14 @@ public class UIMAPerformer {
      * @see #getAverageSentiment(JCas)
      * @author Eric Lakhter
      */
-    public JCas getJCas(String text) throws UIMAException {
-        JCas jcas = JCasFactory.createText(text, "de");
-        SimplePipeline.runPipeline(jcas, analysisEngine);
-        return jcas;
+    public JCas getJCas(String text) {
+        try {
+            JCas jcas = JCasFactory.createText(text, "de");
+            SimplePipeline.runPipeline(jcas, analysisEngine);
+            return jcas;
+        } catch (UIMAException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -83,10 +86,14 @@ public class UIMAPerformer {
      * @see #getJCas(String)
      * @author Eric Lakhter
      */
-    public String getFullCas(JCas jcas) throws IOException, SAXException {
+    public String getFullCas(JCas jcas) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XmlCasSerializer.serialize(jcas.getCas(), baos);
-        return baos.toString();
+        try {
+            XmlCasSerializer.serialize(jcas.getCas(), baos);
+            return baos.toString();
+        } catch (SAXException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

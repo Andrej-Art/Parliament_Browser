@@ -98,16 +98,16 @@ public class MongoDBHandler {
 
     /**
      * Gets a Document with the specified id from the specified collection
+     * @param col the collection name
      * @param id the _id of the specified Document
-     * @param collection the collection name
      * @return the found Document
      * @author DavidJordan
      */
-    public Document getDocument(String id, String collection){
+    public Document getDocument(String col, String id){
         Document document = new Document();
         try {
             Document queryDoc = new Document().append("_id", id);
-            for (Document value : this.getCollection(collection).find(queryDoc)) {
+            for (Document value : this.getCollection(col).find(queryDoc)) {
                 document = value;
             }
         } catch (Exception e) {
@@ -119,7 +119,6 @@ public class MongoDBHandler {
     /**
      * Basic Method to create a collection
      * @param col collection name
-     * @return true if it was created
      * @author DavidJordan
      */
     public void createCollection(String col){
@@ -185,7 +184,7 @@ public class MongoDBHandler {
        Document personDoc =  Document.parse(gson.toJson(person));
 
         try {
-            this.getCollection("person").insertOne(personDoc);
+            getCollection("person").insertOne(personDoc);
         } catch (MongoWriteException e) {
             System.err.println("Insert of person failed.");
         }
@@ -215,7 +214,7 @@ public class MongoDBHandler {
      * @throws WrongInputException
      * @author DavidJordan
      */
-    public void insertProtocols(ArrayList<Protocol> protocols) throws WrongInputException {
+    public void insertProtocols(List<Protocol> protocols) throws WrongInputException {
         if (protocols == null || protocols.isEmpty()){
             throw new WrongInputException("Input is null or empty.");
         }
