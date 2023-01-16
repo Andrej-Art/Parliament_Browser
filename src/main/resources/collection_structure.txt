@@ -43,10 +43,10 @@ speech:
     speaker_id          String
     text                String
     datum               LocalDate
-    # -------------->   int start_pos, int end_pos, double sentiment
-    sentences           [[start_pos, end_pos, sentiment], ...]
     sentiment           double
     main_topic          String
+    # -------------->   int start_pos, int end_pos, double sentiment
+    sentences           [[start_pos, end_pos, sentiment], ...]
     # -------------->   int start_pos, int end_pos, String covered_text
     named_entities_per  [[start_pos, end_pos, covered_text], ...]
     named_entities_org  [[start_pos, end_pos, covered_text], ...]
