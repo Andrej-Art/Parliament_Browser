@@ -22,5 +22,5 @@ public @interface Unfinished {
      * A short description that says why the class/method isn't finished yet.
      * @return The reason as to why this isn't finished.
      */
-    String reason();
+    String value();
 }

@@ -234,7 +234,7 @@ public class UIMAPerformer {
      * @see #serializeToDB(String, String, String)
      * @author Eric Lakhter
      */
-    @Testing // actually only validates test_speech and test_comment right now
+    @Unfinished("actually validates test_speech and test_comment right now")
     private void validateQuery(String col, String id) throws IOException {
         if (!(col.equals("test_speech") || col.equals("test_comment")))
             throw new IOException("Target collection must be either \"speech\" or \"comment\"");
