@@ -34,7 +34,6 @@ import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDesc
 
 /**
  * This class contains all methods required to perform NLP on speeches and comments.
- *
  * @author Eric Lakhter
  */
 public class UIMAPerformer {
