@@ -17,10 +17,7 @@ import utility.uima.ProcessedSpeech;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static com.mongodb.client.model.Accumulators.*;
 import static com.mongodb.client.model.Aggregates.*;
@@ -501,6 +498,8 @@ public class MongoDBHandler {
     }
 
 
+
+
     /**
      * Adds potential date filters in front of an aggregation pipeline.
      * @param pipeline The pipeline to be modified.
@@ -659,6 +658,66 @@ public class MongoDBHandler {
         db.getCollection("test_speech").aggregate(Arrays.asList(unwind, groupLocationEntity, sortDesc))
                 .allowDiskUse(false)
                 .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+
+    /**
+     * returns the count for all Parts of Speech
+     * @author Edvin Nise
+     */
+    @Unfinished("waiting for final structure of collection")
+    public void getPOSCount() {
+        Bson unwind = Aggregates.unwind("$tokenWithPos");
+        Bson project = Aggregates.project(new Document("POSValue", new Document("$arrayElemAt", Arrays.asList("$tokenWithPos", 1))));
+        Bson groupPOSValue = group(new Document("POSValue", "$POSValue"), sum("POSValueCount", 1));
+        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, project, groupPOSValue))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+
+    /**
+     * returns who commented on which speaker
+     * @author Edvin Nise
+     */
+    @Unfinished("waiting for correct structure of collection")
+    public void commentatorToSpeaker() {
+        Bson project = project(new Document("commentatorID", 1)
+                .append("CommentatorFirstName", "$CommentatorPerson.first_name")
+                .append("CommentatorLastName", "$CommentatorPerson.last_name")
+                .append("SpeakerFirstName", "$SpeakerPerson.first_name")
+                .append("SpeakerLastName", "$SpeakerPerson.last_name"));
+        Bson lookupCommentator = lookup("test_person", "commentatorID", "_id", "CommentatorPerson");
+        Bson lookupSpeaker = lookup("test_person", "rednerID", "_id", "SpeakerPerson");
+        Bson unwindCommentator = unwind("$CommentatorPerson");
+        Bson unwindSpeaker = unwind("$SpeakerPerson");
+        db.getCollection("test_comment").aggregate(Arrays.asList(lookupCommentator, lookupSpeaker,unwindCommentator, unwindSpeaker, project))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println("Abgeordneter "
+                        + procBlock.getString("CommentatorFirstName") + " " + procBlock.getString("CommentatorLastName")
+                        + " kommentierte "
+                        + procBlock.getString("SpeakerFirstName") + " " + procBlock.getString("SpeakerLastName")));
+    }
+
+    /**
+     * returns Hashmap with Speaker and List of Topics
+     * @author Edvin Nise
+     */
+    @Unfinished("Waiting for structure of collection")
+    public HashMap<String, ArrayList<String>> matchSpeakerToDDC() {
+        HashMap<String, ArrayList<String>> speakerWithDDCMap = new HashMap<>();
+
+        Bson lookup = lookup("test_person", "rednerID", "_id", "Speaker");
+        Bson unwind = unwind("$Speaker");
+        Bson project = project(new Document("Abgeordneter",
+                new Document("$concat", Arrays.asList("$Speaker.first_name", " ", "$Speaker.last_name")))
+                .append("DDCCategory" , 1));
+        Bson group = new Document("$group", new Document()
+                        .append("_id", "$Abgeordneter")
+                        .append("DDCKategorien", new Document("$push", "$DDCCategory")));
+
+        db.getCollection("test_speech").aggregate(Arrays.asList(lookup, unwind, project, group))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> speakerWithDDCMap.put(procBlock.getString("_id"),  ((ArrayList<String>) procBlock.get("DDCKategorien"))));
+       return speakerWithDDCMap;
     }
 
 }
