@@ -2,6 +2,7 @@ package utility;
 
 import com.google.gson.Gson;
 import com.mongodb.Block;
+import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
 import com.mongodb.client.model.*;
@@ -380,9 +381,10 @@ public class MongoDBHandler {
 //            speechTokenDocs.add();
 //        }
 
-//        db.getCollection("speech").insertMany(speechDocs, imo);
-//        db.getCollection("speech_cas").insertMany(speechCasDocs, imo);
-//        db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);
+        // MongoBulkWriteExceptions catch the harmless exceptions, they are necessary like this
+//        try {db.getCollection("speech").insertMany(speechDocs, imo);} catch (MongoBulkWriteException ignored) {}
+//        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);} catch (MongoBulkWriteException ignored) {}
+//        try {db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);} catch (MongoBulkWriteException ignored) {}
     }
 
     /**

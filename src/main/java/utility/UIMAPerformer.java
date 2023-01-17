@@ -26,6 +26,7 @@ import utility.uima.ProcessedSpeech;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -168,7 +169,6 @@ public class UIMAPerformer {
     public List<MongoNamedEntity> getNamedEntities(JCas jcas) {
         List<MongoNamedEntity> mongoNamedEntities = new ArrayList<>(0);
         for (NamedEntity ne : JCasUtil.select(jcas, NamedEntity.class)) {
-            System.out.println(ne.getValue());
             mongoNamedEntities.add(new MongoNamedEntity(ne.getBegin(), ne.getEnd(), ne.getValue(), ne.getCoveredText()));
         }
         return mongoNamedEntities;
