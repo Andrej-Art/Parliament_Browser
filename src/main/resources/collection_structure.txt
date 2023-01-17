@@ -31,6 +31,7 @@ agenda_item:
 
 person:
     _id                 String
+    VollerName          String
     - Alle 20 millionen anderen redner-info felder -
 
 ########################################################################################################################
