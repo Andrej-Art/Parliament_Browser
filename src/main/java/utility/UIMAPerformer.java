@@ -1,5 +1,6 @@
 package utility;
 
+import data.Speech;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import org.apache.uima.UIMAException;
@@ -15,16 +16,16 @@ import org.hucompute.textimager.uima.gervader.GerVaderSentiment;
 import org.hucompute.textimager.uima.spacy.SpaCyMultiTagger3;
 import org.hucompute.textimager.uima.type.Sentiment;
 import org.hucompute.textimager.uima.type.category.CategoryCoveredTagged;
+import org.texttechnologylab.annotation.NamedEntity;
 import org.xml.sax.SAXException;
-import utility.annotations.*;
 import utility.uima.MongoNamedEntity;
 import utility.uima.MongoSentence;
 import utility.uima.MongoToken;
+import utility.uima.ProcessedSpeech;
 
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -37,20 +38,32 @@ import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDesc
  */
 public class UIMAPerformer {
 
-    private final MongoDBHandler mongoDBHandler;
     private final AnalysisEngine analysisEngine;
     private final String[] ddcCategories;
 
     /**
      * Sets up the necessary resources to perform UIMA analysis on texts.
-     * @param mongoDBHandler Required MongoDB connection.
      * @throws UIMAException If an error occurs while building the {@code AnalysisEngine}.
      * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/}.
      */
-    public UIMAPerformer(MongoDBHandler mongoDBHandler) throws UIMAException, FileNotFoundException {
-        this.mongoDBHandler = mongoDBHandler;
+    public UIMAPerformer() throws UIMAException, FileNotFoundException {
         analysisEngine = generateAnalysisEngine();
         ddcCategories = generateDDCCategories();
+    }
+
+    /*
+        Methods for serialization of all data at once
+     */
+
+    public ProcessedSpeech processSpeech(Speech speech) {
+        JCas jcas = getJCas(speech.getText());
+        String fullCas = getFullCas(jcas);
+        List<MongoToken> tokens = getTokens(jcas);
+        List<MongoSentence> sentences= getSentences(jcas);
+        List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
+        double sentiment = getAverageSentiment(jcas);
+        String mainTopic = getMainTopic(jcas);
+        return new ProcessedSpeech(speech, fullCas, sentiment, mainTopic, tokens, sentences, namedEntities);
     }
 
     /*
@@ -154,8 +167,9 @@ public class UIMAPerformer {
      */
     public List<MongoNamedEntity> getNamedEntities(JCas jcas) {
         List<MongoNamedEntity> mongoNamedEntities = new ArrayList<>(0);
-        for (CategoryCoveredTagged cct : JCasUtil.select(jcas, CategoryCoveredTagged.class)) {
-            mongoNamedEntities.add(new MongoNamedEntity(cct.getBegin(), cct.getEnd(), cct. getValue(), cct.getCoveredText()));
+        for (NamedEntity ne : JCasUtil.select(jcas, NamedEntity.class)) {
+            System.out.println(ne.getValue());
+            mongoNamedEntities.add(new MongoNamedEntity(ne.getBegin(), ne.getEnd(), ne.getValue(), ne.getCoveredText()));
         }
         return mongoNamedEntities;
     }
@@ -197,79 +211,6 @@ public class UIMAPerformer {
         } catch (IndexOutOfBoundsException e) {
             return 0.0;
         }
-    }
-
-    /*
-        Methods for serialization of all data at once
-     */
-
-    /**
-     * Fetches a speech or a comment specified by collection and ID.
-     * @param col Target collection. Must be either "speech" or "comment".
-     * @param id ID of the text to fetch.
-     * @throws IOException If {@code col} does not equal "speech" or "comment" or ID doesn't exist.
-     * @see #validateQuery(String, String)
-     * @see #serializeData(String, String, String)
-     * @author Eric Lakhter
-     */
-    public void serializeFromDB(String col, String id) throws UIMAException, IOException, SAXException {
-        validateQuery(col, id);
-        serializeData(col, id, mongoDBHandler.getText(col, id));
-    }
-
-    /**
-     * Updates a speech or comment ID with their respective UIMA data.
-     * @param col Target collection. Must be either "speech" or "comment".
-     * @param id Target ID which indicates where to put the data.
-     * @param text The text to analyze.
-     * @throws IOException If {@code col} does not equal "speech" or "comment" or ID doesn't exist.
-     * @see #validateQuery(String, String)
-     * @see #serializeData(String, String, String)
-     * @author Eric Lakhter
-     */
-    public void serializeToDB(String col, String id, String text) throws UIMAException, IOException, SAXException {
-        validateQuery(col, id);
-        serializeData(col, id, text);
-    }
-
-    /**
-     * Checks if collection names and ID values are valid.
-     * @param col Target collection. Must be either "speech" or "comment".
-     * @param id Target ID which indicates where to put the data.
-     * @throws IOException If either of the conditions aren't met.
-     * @see #serializeFromDB(String, String)
-     * @see #serializeToDB(String, String, String)
-     * @author Eric Lakhter
-     */
-    @Unfinished("actually validates test_speech and test_comment right now")
-    private void validateQuery(String col, String id) throws IOException {
-        if (!(col.equals("test_speech") || col.equals("test_comment")))
-            throw new IOException("Target collection must be either \"speech\" or \"comment\"");
-        if (!mongoDBHandler.checkIfDocumentExists(col, id))
-            throw new IOException("Document with the given ID doesn't exist");
-    }
-
-    /**
-     * After passing validation, the text gets analyzed and inserted into the DB.
-     * @param col Target collection. Must be either "speech" or "comment".
-     * @param id Target ID which indicates where to put the data.
-     * @param text The text to analyze.
-     * @see #serializeFromDB(String, String)
-     * @see #serializeToDB(String, String, String)
-     * @author Eric Lakhter
-     */
-    @Unfinished("Only inserts the full CAS so far")
-    private void serializeData(String col, String id, String text) throws UIMAException, IOException, SAXException {
-        JCas jcas = getJCas(text);
-        String fullCas = getFullCas(jcas);
-
-        List<MongoToken> tokens = getTokens(jcas);
-        List<MongoSentence> sentences = getSentences(jcas);
-        List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
-        String mainTopic = getMainTopic(jcas);
-        double avgSentiment = getAverageSentiment(jcas);
-
-        mongoDBHandler.addCAS(col + "_cas", id, fullCas);
     }
 
     /*

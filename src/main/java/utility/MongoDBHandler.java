@@ -4,13 +4,8 @@ import com.google.gson.Gson;
 import com.mongodb.Block;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.*;
 import data.*;
-import data.impl.AgendaItem_Impl;
-import data.impl.Comment_Impl;
-import data.impl.Person_Impl;
-import data.impl.Speech_Impl;
 import exceptions.WrongInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -18,6 +13,7 @@ import utility.annotations.*;
 import utility.uima.MongoNamedEntity;
 import utility.uima.MongoSentence;
 import utility.uima.MongoToken;
+import utility.uima.ProcessedSpeech;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,6 +36,7 @@ import static com.mongodb.client.model.Sorts.descending;
 @Unfinished("This class is unfinished")
 public class MongoDBHandler {
     private final MongoDatabase db;
+    private final InsertManyOptions imo =  new InsertManyOptions().ordered(false);
     private final Gson gson = new Gson();
 
     /**
@@ -355,6 +352,37 @@ public class MongoDBHandler {
         } catch (MongoWriteException e) {
             System.err.println("Failed to insert speech with id : " + speech.getID() + " into speech_token collection.");
         }
+    }
+
+    /**
+     * Inserts a list of processed speeches into the DB.
+     * @param processedSpeeches List of processed speeches.
+     * @author
+     */
+    @Unfinished("Needs to actually insertMany() the speeches")
+    public void insertSpeeches(List<ProcessedSpeech> processedSpeeches) {
+        // Here goes code which transforms ProcessedSpeech into documents
+        // Check out :
+        // ProcessedSpeech.toSpeechCollectionJson();    for the speech collection
+        // ProcessedSpeech.getFullCas();                for the speech_cas
+        // ProcessedSpeech.getTokens();                 for the speech_tokens
+        //
+        // toSpeechCollectionJson saves the date in yyyy-MM-dd format;
+        // need to compare to how Gson parsed classes are saved in the db
+
+//        List<Document> speechDocs = new ArrayList<>();
+//        List<Document> speechCasDocs = new ArrayList<>();
+//        List<Document> speechTokenDocs = new ArrayList<>();
+
+//        for (ProcessedSpeech speech : processedSpeeches) {
+//            speechDocs.add();
+//            speechCasDocs.add();
+//            speechTokenDocs.add();
+//        }
+
+//        db.getCollection("speech").insertMany(speechDocs, imo);
+//        db.getCollection("speech_cas").insertMany(speechCasDocs, imo);
+//        db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);
     }
 
     /**

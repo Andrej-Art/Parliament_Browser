@@ -1,0 +1,9 @@
+// New and upgraded functionality
+// UIMAPerformer doesn't need MongoDBHandler anymore
+// "speeches" is a list of Speech
+
+List<ProcessedSpeech> processedSpeeches = new ArrayList<>();
+for (Speech speech : speeches) {
+    processedSpeeches.add(uima.processSpeech(speech));
+}
+mongoDBHandler.insertSpeeches(processedSpeeches);
