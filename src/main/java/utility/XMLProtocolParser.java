@@ -2,6 +2,7 @@ package utility;
 
 import data.impl.Comment_Impl;
 import data.impl.Speech_Impl;
+import data.impl.Person_Impl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -17,6 +18,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is currently only for testing purposes. At the end there will be one class for parsing.
@@ -30,6 +33,7 @@ import java.util.Map;
 public class XMLProtocolParser {
 
     private Map<String, Speech_Impl> speechMap;
+    private Map<String, Person_Impl> speakerMap;
     private Map<String, Comment_Impl> commentMap;
 
     //Create New Instance of DocumentBuilderFactory
@@ -77,16 +81,25 @@ public class XMLProtocolParser {
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
                             Element sessionInfoElement = (Element) sessionInfoNode;
 
+                            //here we get all relevant information about the protocol
                             int protocolNumber = Integer.parseInt(sessionInfoElement.getAttribute("sitzung-nr"));
                             int electionPeriod = Integer.parseInt(sessionInfoElement.getAttribute("wahlperiode"));
                             String sessionDate = (sessionInfoElement.getAttribute("sitzung-datum"));
+
+                            //using the methods from the TimeHelper class we can convert the date and time
                             TimeHelper.convertToISOdate(sessionDate);
+                            String beginTime = (sessionInfoElement.getAttribute("sitzung-start-uhrzeit"));
+                            String endTime = (sessionInfoElement.getAttribute("sitzung-ende-uhrzeit"));
+                            TimeHelper.convertToISOtime(beginTime);
+                            TimeHelper.convertToISOtime(endTime);
+                            System.out.println(beginTime +" bis "+ endTime);
+
 
                             //Iterate through all Tagesordnungspunkte
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
-                                System.out.println(topid);
+                                //System.out.println(topid);
 
                                 //Go through all Speeches
                                 List<Element> speechElementList = getElementList(aiElement, "rede");
@@ -139,30 +152,113 @@ public class XMLProtocolParser {
 
                                             case "kommentar":
                                                 String comment = speechChild.getTextContent();
+
+                                                //Remove first bracket
+                                                comment = comment.replaceFirst("\\(","");
+
+                                                //Remove last bracket
+                                                String reComment = new StringBuilder(comment).reverse().toString();
+                                                reComment = reComment.replaceFirst("\\)","");
+                                                comment = new StringBuilder(reComment).reverse().toString();
+
+                                                /*
+                                                hier wird eine Liste fullName benötigt (ähnlich wie beim
+                                                PictureScraper soll hier der volle Name übergeben werden.
+                                                Jedes Mal, wenn eckige Klammern vorkommern, wird geprüft,
+                                                ob vor den Klammern der Name vorkommt.
+                                                 */
+                                                String fullName = "Renate Künast" ;
+                                                System.out.println(comment.indexOf(fullName) < comment.indexOf("["));
+
+                                                //String rauslesen aus den eckigen Klammen, um Partei zu erhalten
+                                                /*
+                                                String partyComment = commentList.get().substring();
+                                                substring(comment.indexOf("[")+1, comment.indexOf("]"));
+                                                System.out.println(partyComment);
+
+                                                 */
+
+
+
+                                                //System.out.println(comment + comment.contains("["));
+
                                                 commentList.add(comment);
 
-                                                System.out.println(speechText);
 
                                                 for (int c = 0; c <= commentList.size(); c++) {
                                                     commentID = speechID + "/" + c;
-                                                    System.out.println(commentID);
+                                                    String partyComment = commentList.get(c).substring(comment.indexOf("[")+1, comment.indexOf("]"));
+                                                    System.out.println(partyComment);
                                                 }
-                                                System.out.println("-----------------");
 
-
+                                                break;
+                                            default:
                                                 break;
                                         }
                                     }
+
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                     addToSpeechMap(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
-                                    //addToCommentMap(commentID, speechID, speakerID, )
+                                    Speech_Impl speech2 = new Speech_Impl(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
+                                    //addToCommentMap(commentID, speechID, speakerID, commentID);
 
+                                }
+                            }
+                            //System.out.println("\tPersons werden gesammelt...");
+
+                            List<Element> speakerElementList = getElementList(sessionInfoElement, "redner");
+                            for(Element speakerElement: speakerElementList) {
+                                String[] speakerProperties = new String[10];
+                                List<Element> nameElementList = getElementList(speakerElement, "name");
+                                for (Element name : nameElementList) {
+                                    List<Element> childElementList = getChildElementList(name);
+                                    for (Element nameChild : childElementList) {
+                                        switch (nameChild.getTagName()) {
+                                            case "titel":
+                                                speakerProperties[1] = nameChild.getTextContent();
+                                                break;
+                                            case "vorname":
+                                                speakerProperties[2] = nameChild.getTextContent();
+                                                break;
+                                            case "namenszusatz":
+                                                speakerProperties[3] = nameChild.getTextContent();
+                                                break;
+                                            case "nachname":
+                                                speakerProperties[4] = nameChild.getTextContent();
+                                                break;
+                                            case "ortszusatz":
+                                                speakerProperties[5] = nameChild.getTextContent();
+                                                break;
+                                            case "fraktion":
+                                                speakerProperties[6] = nameChild.getTextContent();
+                                                break;
+                                            case "rolle":
+                                                List<Element> roleElementList = getChildElementList(nameChild);
+                                                for(Element role: roleElementList){
+                                                    if (role.getTagName().equals("rolle_kurz")) {
+                                                        speakerProperties[7] = role.getTextContent();
+                                                    }
+                                                }
+                                                break;
+                                            case "bdland":
+                                                speakerProperties[8] = nameChild.getTextContent();
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                    // aus den Protokollen: id, Titel, Vorname, namenszusatz, nachname, ortszusatz,
+                                    //fraktion, rolle
+
+                                    // aus den Stammdaten muss folgendes rein: Partei, Place
+                                  // Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1]);
                                 }
                             }
                         }
                     }
                 }
             }
+
         } catch (ParserConfigurationException | IOException | SAXException ex) {
             ex.printStackTrace();
         }
@@ -245,7 +341,9 @@ public class XMLProtocolParser {
      */
     public Map<String, Speech_Impl> getSpeechMap() {
         return speechMap;
+
     }
+
 
     /*
     public static void addToCommentMap(String commentID, String speechID, String speakerID, String commentatorID, String commentText, LocalDate date, String fraction) {
@@ -253,7 +351,6 @@ public class XMLProtocolParser {
     }
 
      */
-
 
 
     /**
@@ -265,3 +362,4 @@ public class XMLProtocolParser {
 
 
 }
+
