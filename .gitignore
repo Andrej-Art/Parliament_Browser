@@ -1,0 +1,10 @@
+# .idea dir
+/.idea/
+
+# test dir
+/src/main/java/test/
+
+# target dir
+/target/
+
+abschlussprojekt.iml
