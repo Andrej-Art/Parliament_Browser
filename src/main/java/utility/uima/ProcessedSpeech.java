@@ -10,8 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * The {@code ProcessedSpeech} class. It's only use is to be converted into a document via Gson.
- *
+ * The {@code ProcessedSpeech} class. Its use is to be parsed into a {@code org.bson.Document} via the {@link ProcessedSpeech#toSpeechCollectionJson()} method.
  * @author Eric Lakhter
  */
 public class ProcessedSpeech {
