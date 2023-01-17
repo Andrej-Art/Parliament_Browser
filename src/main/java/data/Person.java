@@ -1,11 +1,10 @@
 package data;
 
-import java.util.ArrayList;
-
 /**
  * Interface representing all Persons appearing in the Parliament Protocols and the
  * Abgeordneten Stammdaten.
  * @author DavidJordan
+ * @author Julian Ocker
  */
 public interface Person {
 
@@ -17,25 +16,13 @@ public interface Person {
     String getID();
 
     /**
-     * Gets a List of the election Periods in which this Person was present.
+     * Gets a List of the election picture data in which this Person was present.
+     *
      * @return electionPeriods
      * @author DavidJordan
      */
-    ArrayList<String> getElectionPeriods();
+    String[] getPicture();
 
-    /**
-     * Gets the URL of the Persons Picture:
-     * @return pfpURL
-     * @author DavidJordan
-     */
-    String getPfpURL();
-
-    /**
-     * Gets the Metadata of the Persons Picture.
-     * @return pfpMetadata
-     * @author DavidJordan
-     */
-    String getPfpMetadata();
 
     /**
      * Gets the Person's role if he/she fills a role.
@@ -66,14 +53,24 @@ public interface Person {
     String getLastName();
 
     /**
-     * Gets the Bundestags Fraction of the Person.
+     * Gets the Bundestags Fraction of the Person in the Election Period 20.
      * @return fraction
+     * @author Julian Ocker
      */
-    String getFraction();
+    String getFraction20();
+
+
+    /**
+     * Gets the Bundestags Fraction of the Person in the Election Period 19.
+     * @return fraction
+     * @author Julian Ocker
+     */
+    String getFraction19();
 
     /**
      * Gets the Party the Person belongs to.
      * @return party
+     * @author DavidJordan
      */
     String getParty();
 

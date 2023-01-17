@@ -10,6 +10,7 @@ import java.util.ArrayList;
  * Class that implements the Person interface. It maps all "Abgeordnete" and Persons with
  * an ID appearing in the Stammdaten and Protocols.
  * @author DavidJordan
+ * @author Julian Ocker
  */
 public class Person_Impl implements Person {
 
@@ -17,50 +18,30 @@ public class Person_Impl implements Person {
     private Document personDoc;
 
     //Class Variables
-    private String _id, firstName, lastName, role, title, fraction, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
-    private ArrayList<String> electionPeriods;
+    private String _id, firstName, lastName, role, title, fraction19, fraction20, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
+    private String[] picture;
 
     /**
      * Default Constructor.
      * @author DavidJordan
+     * @author Julian Ocker
      */
-    public Person_Impl() {
-    }
-
-    /**
-     * !! To Be Completed during Completion of the Parser and DB Handler !!
-     *  Additional Setters  and according changes to constructors to be added by Julian
-     * @param id
-     * @param firstName
-     * @param lastName
-     * @param role
-     * @param title
-     * @param fraction
-     * @param party
-     * @param place
-     * @param gender
-     * @param birthDate
-     * @param deathDate
-     * @param birthPlace
-     * @param electionPeriods
-     * @author DavidJordan
-     */
-    public Person_Impl(String id, String firstName, String lastName, String role, String title, String fraction, String party, String place,
-                       String pfpURL, String pfpMetadata, String gender, String birthDate, String deathDate, String birthPlace, ArrayList<String> electionPeriods) {
+    public Person_Impl(String id, String firstName, String lastName, String role, String title, String place,String fraction19,
+                       String fraction20, String party, String[] pictureArray, String gender, String birthDate, String deathDate, String birthPlace) {
         this._id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
         this.title = title;
-        this.fraction = fraction;
+        this.fraction19 = fraction19;
+        this.fraction20 = fraction20;
         this.party = party;
         this.place = place;
         this.gender = gender;
         this.birthDate = birthDate;
         this.deathDate = deathDate;
         this.birthPlace = birthPlace;
-        this.electionPeriods = electionPeriods;
-
+        this.picture = pictureArray;
     }
 
     /**
@@ -70,6 +51,7 @@ public class Person_Impl implements Person {
      * where necessary. Whoever needs setters for specific variables, please add those and modify the constructor accordingly.
      * @param document The BSON document retrieved from the database.
      * @author DavidJordan
+     * @author Julian Ocker
      */
     public Person_Impl(Document document){
         this.personDoc = document;
@@ -78,35 +60,16 @@ public class Person_Impl implements Person {
         this.lastName = document.getString("lastName");
         this.role = document.getString("role");
         this.title = document.getString("title");
-        this.fraction = document.getString("fraction");
+        this.fraction19 = document.getString("fraction19");
+        this.fraction19 = document.getString("fraction20");
         this.party = document.getString("party");
         this.place = document.getString("place");
-        this.pfpURL = document.getString("pfpURL");
-        this.pfpMetadata = document.getString("pfpMetadata");
         this.gender = document.getString("gender");
         this.birthDate = document.getString("birthDate");
         this.deathDate = document.getString("deathDate");
         this.birthPlace = document.getString("birthPlace");
-        this.electionPeriods = (ArrayList<String>) document.get("electionPeriods");
+        this.picture = (String[]) document.get("picture");
 
-    }
-
-    /**
-     * This method allows to define the content of the String pfpURL
-     * @param url
-     * @author Julian Ocker
-     */
-    public void setPfpURL(String url){
-        this.pfpURL = url;
-    }
-
-    /**
-     * This method allows to define the content of the String pfpMetadata
-     * @param metadata
-     * @author Julian Ocker
-     */
-    public void setPfpMetadata(String metadata){
-        this.pfpMetadata = metadata;
     }
 
     @Override
@@ -115,18 +78,8 @@ public class Person_Impl implements Person {
     }
 
     @Override
-    public ArrayList<String> getElectionPeriods() {
-        return this.electionPeriods;
-    }
-
-    @Override
-    public String getPfpURL() {
-        return this.pfpURL;
-    }
-
-    @Override
-    public String getPfpMetadata() {
-        return this.pfpMetadata;
+    public String[] getPicture() {
+        return this.picture;
     }
 
     @Override
@@ -150,8 +103,12 @@ public class Person_Impl implements Person {
     }
 
     @Override
-    public String getFraction() {
-        return this.fraction;
+    public String getFraction19() {
+        return this.fraction19;
+    }
+
+    public String getFraction20() {
+        return this.fraction20;
     }
 
     @Override

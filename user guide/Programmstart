@@ -5,7 +5,7 @@
 Das Programm ist als IntelliJ-Applikation konzipiert.
 
 
-Zur Ermöglichung des Starts Konfigurieren Sie ihre Applikation bitte mit der JDK-Version coretto-1.8 und Geben Sie Main als Main Klasse an.
+Zur Ermöglichung des Starts Konfigurieren Sie ihre Applikation bitte mit der JDK-Version coretto-1.8 und geben Sie Main als Main Klasse an.
 Sie müssen keine Argumente übergeben. Bitte wählen Sie aber bei Modify options Shorten command line.
 Wählen sie bei dem neu hinzugefügten Dropdownmenüpunkt JAR manifest aus.
 

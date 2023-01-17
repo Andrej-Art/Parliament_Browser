@@ -1,6 +1,9 @@
 package utility;
 
 
+import data.impl.AgendaItem_Impl;
+import data.impl.Person_Impl;
+import data.impl.Protocol_Impl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,7 +29,14 @@ import java.util.Locale;
  */
 public class XMLParser {
 
+    // Here the persons are saved for the duration of the parsing
+    static ArrayList<Person_Impl> persons = new ArrayList<>(0);
 
+    // Here the protocols are saved for the duration of the parsing
+    static ArrayList<Protocol_Impl> protocols = new ArrayList<>(0);
+
+    // Here the agenda items are saved for the duration of the parsing
+    static ArrayList<AgendaItem_Impl> agendaItems = new ArrayList<>(0);
 
     /**
      *
@@ -35,7 +45,7 @@ public class XMLParser {
      * @return
      * @author Julian Ocker
      */
-    public static /*Data_Kraken*/ void personParse(/*, Data_Kraken data_pack*/) {
+    public static void personParse() {
         System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
         String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
         try {
@@ -49,26 +59,27 @@ public class XMLParser {
 
                 //declaring Variables that should remain unchanged throughout one Iteration
                 NodeList attributes = testList.item(h).getChildNodes();
-                String deputyID = null;
-                String deputyFirstName = null;
-                String deputyLastName = null;
-                String deputyTitle = null;
+                String id = null;
+                String firstName = null;
+                String lastName = null;
+                String title = null;
                 String party = null;
                 String fraction19 = null;
                 String fraction20 = null;
                 String deputyAkadTitle = null;
                 String deputyPoliticStart = null;
                 String deputyPoliticEnd = null;
-                String birthdate = null;
-                String birthplace = null;
+                String birthDate = null;
+                String birthPlace = null;
                 String birthnation = null;
-                String deathdate = null;
-                String sex = null;
+                String deathDate = null;
+                String gender = null;
                 String familyFactor = null;
                 String religion = null;
                 String vita = null;
                 String job = null;
                 String publicInterest = null;
+                String place = null;
                 ArrayList<String> WPList = new ArrayList<>(0);
                 ArrayList<String> fractionList = new ArrayList<>(0);
                 ArrayList<ArrayList<String>> WPFractionList = new ArrayList<>(0);
@@ -77,7 +88,7 @@ public class XMLParser {
                 // pathing to get the personal data of a represantative
                 for (int i = 0; i < attributes.getLength(); i++) {
                     if (attributes.item(i).getNodeName().equals("ID")) {
-                        deputyID = attributes.item(i).getTextContent();
+                        id = attributes.item(i).getTextContent();
                     }
                     if (attributes.item(i).getNodeName().equals("NAMEN")) {
                         NodeList namesAttributes = attributes.item(i).getChildNodes();
@@ -88,13 +99,16 @@ public class XMLParser {
                                 for (int k = 0; k < nameAttributes.getLength(); k++) {
 
                                     if (nameAttributes.item(k).getNodeName().equals("VORNAME")) {
-                                        deputyFirstName = nameAttributes.item(k).getTextContent();
+                                        firstName = nameAttributes.item(k).getTextContent();
                                     }
                                     if (nameAttributes.item(k).getNodeName().equals("NACHNAME")) {
-                                        deputyLastName = nameAttributes.item(k).getTextContent();
+                                        lastName = nameAttributes.item(k).getTextContent();
+                                    }
+                                    if (nameAttributes.item(k).getNodeName().equals("ORTSZUSATZ")) {
+                                        place = nameAttributes.item(k).getTextContent();
                                     }
                                     if (nameAttributes.item(k).getNodeName().equals("ANREDE_TITEL")) {
-                                        deputyTitle = nameAttributes.item(k).getTextContent();
+                                        title = nameAttributes.item(k).getTextContent();
                                     }
                                     if (nameAttributes.item(k).getNodeName().equals("AKAD_TITEL")) {
                                         deputyAkadTitle = nameAttributes.item(k).getTextContent();
@@ -113,23 +127,24 @@ public class XMLParser {
                         }
 
                     }
+                    // Here personal information get fetched.
                     if (attributes.item(i).getNodeName().equals("BIOGRAFISCHE_ANGABEN")) {
                         NodeList biographicAttributes = attributes.item(i).getChildNodes();
                         for (int j = 0; j < biographicAttributes.getLength(); j++) {
                             if (biographicAttributes.item(j).getNodeName().equals("GEBURTSDATUM")) {
-                                birthdate = biographicAttributes.item(j).getTextContent();
+                                birthDate = biographicAttributes.item(j).getTextContent();
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("GEBURTSORT")) {
-                                birthplace = biographicAttributes.item(j).getTextContent();
+                                birthPlace = biographicAttributes.item(j).getTextContent();
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("GEBURTSLAND")) {
                                 birthnation = biographicAttributes.item(j).getTextContent();
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("STERBEDATUM")) {
-                                deathdate = biographicAttributes.item(j).getTextContent();
+                                deathDate = biographicAttributes.item(j).getTextContent();
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("GESCHLECHT")) {
-                                sex = biographicAttributes.item(j).getTextContent();
+                                gender = biographicAttributes.item(j).getTextContent();
                             }
                             if (biographicAttributes.item(j).getNodeName().equals("FAMILIENSTAND")) {
                                 familyFactor = biographicAttributes.item(j).getTextContent();
@@ -220,9 +235,10 @@ public class XMLParser {
 
                 }
                 //Here the picture is fetched and the Instance of Person is created
-                if(!(deputyFirstName.equals(null)) || !(deputyLastName.equals(null)) || !(deputyID.equals(null) ) ) {
-                    String[] pictureArray= PictureScraper.producePictureUrl(deputyFirstName, deputyLastName);
-                    //data_pack.addDeputy(deputyFirstName, deputyLastName, deputyTitle, deputyID, WPFractionList.get(i).get(i), party);
+                if(!(firstName.equals(null)) || !(lastName.equals(null)) || !(id.equals(null) ) ) {
+                    String[] pictureArray= PictureScraper.producePictureUrl(firstName, lastName);
+                    Person_Impl person = new Person_Impl(id,firstName,lastName, null,title,place,fraction19,fraction20,party,pictureArray,gender,birthDate,deathDate,birthPlace);
+                    persons.add(person);
                 }
 
             }
@@ -237,15 +253,16 @@ public class XMLParser {
         } catch (IOException e) {
             e.printStackTrace();
 
-        } /*catch (SAXException e) {
+        } catch (SAXException e) {
             e.printStackTrace();
 
-        } */ catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
 
         }
-        //return data_pack;
     }
+
+
 
     /**
      * This Method parses a protocol for the Agenda-Item- and Protocol-Data, creates Instances of the AgendaItem_Impl and Protocol_Impl classes
@@ -294,9 +311,7 @@ public class XMLParser {
                                         if (plProtoNoList.item(l).getNodeName().equals("sitzungsnr")) {
                                             protocolID = plProtoNoList.item(l).getTextContent();
                                         }
-
                                     }
-
                                 }
 
                                 if (headList.item(k).getNodeName().equals("veranstaltungsdaten")) {
@@ -314,16 +329,13 @@ public class XMLParser {
 
                                         }
                                     }
-
                                 }
 
                                 if (headList.item(k).getNodeName().equals("sitzungstitel")) {
                                     protocolTitle = headList.item(k).getTextContent();
 
                                 }
-
                             }
-
                         }
 
                         if (preList.item(j).getNodeName().equals("inhaltsverzeichnis")) {
@@ -356,18 +368,9 @@ public class XMLParser {
 
     }
 
-    private static List<ArrayList<String>> getAgendaItem(NodeList headList, ArrayList<String> ivzAgendaItems, ArrayList<String> ivzAgendaTitle) {
-        return null;
+    private static void getAgendaItem(NodeList headList, ArrayList<String> ivzAgendaItems, ArrayList<String> ivzAgendaTitle) {
     }
 
-    /**
-     * This Method parses a protocol for the Speech- and Comment-Data and creates Instances of the Speech_Impl and Comment_Impl classes.
-     *
-     * @author Julian Ocker
-     */
-     public static void speechParse(){
-
-     }
 
     /**
      * A helper method to extract all Nodes of a given name from the XML Document which is parsed.
