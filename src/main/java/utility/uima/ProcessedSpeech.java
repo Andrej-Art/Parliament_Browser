@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * The {@code ProcessedSpeech} class. Its use is to be parsed into a {@code org.bson.Document} via the {@link ProcessedSpeech#toSpeechCollectionJson()} method.
  * @author Eric Lakhter
+ * @modified DavidJordan
  */
 public class ProcessedSpeech {
     private final String _id, speakerID, text;
@@ -49,6 +50,33 @@ public class ProcessedSpeech {
      */
     public String getFullCas() {
         return fullCas;
+    }
+
+    /**
+     * Returns the speech's id  as String
+     * @return the _id of the speech
+     * @author DavidJordan
+     */
+    public String getID(){
+        return _id;
+    }
+
+    /**
+     * Returns the speaker's ID
+     * @return speakerID
+     * @author DavidJordan
+     */
+    public String getSpeakerID(){
+        return speakerID;
+    }
+
+    /**
+     * Returns the date
+     * @return date
+     * @author DavidJordan
+     */
+    public LocalDate getDate(){
+        return date;
     }
 
     /**

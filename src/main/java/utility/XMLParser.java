@@ -22,7 +22,7 @@ import java.util.Locale;
  * Class to analyze the XML files and create objects
  * @author Andrej Artuschenko
  * @author Julian Ocker
- * @author DavidJordan
+ *
  */
 public class XMLParser {
 
@@ -303,7 +303,7 @@ public class XMLParser {
                                     NodeList dateList = headList.item(k).getChildNodes();
                                     for (int l = 0; l < dateList.getLength(); l++) {
                                         if (dateList.item(l).getNodeName().equals("datum")) {
-                                            /**
+                                            /*
                                              * geklaut von Quelle:
                                              * https://www.baeldung.com/java-string-to-date
                                              */

@@ -65,15 +65,6 @@ public class MongoDBHandler {
     }
 
 
-    /**
-     * Basic method to get a collection through the MongoDBHandler
-     * @param col
-     * @return the Collection
-     * @author DavidJordan
-     */
-    public MongoCollection<Document> getCollection(String col){
-        return db.getCollection(col);
-    }
 
     /**
      * Basic method to check whether a given collection already exists in the Database
@@ -102,7 +93,7 @@ public class MongoDBHandler {
         Document document = new Document();
         try {
             Document queryDoc = new Document().append("_id", id);
-            for (Document value : this.getCollection(col).find(queryDoc)) {
+            for (Document value : db.getCollection(col).find(queryDoc)) {
                 document = value;
             }
         } catch (Exception e) {
@@ -134,7 +125,7 @@ public class MongoDBHandler {
      */
     public void deleteDocument(String col, String id){
         if(checkIfDocumentExists(col, id)){
-            this.getCollection(col).deleteOne(Filters.eq("_id", id));
+            db.getCollection(col).deleteOne(Filters.eq("_id", id));
         }
         else {
             System.out.println(" Document  with _id:" + " id was not found in collection: " + col);
@@ -160,7 +151,7 @@ public class MongoDBHandler {
             mongoPersons.add(Document.parse(gson.toJson(person)));
         }
         try {
-            this.getCollection("person").insertMany(mongoPersons);
+            db.getCollection("person").insertMany(mongoPersons);
         } catch (MongoWriteException e) {
             System.err.println("Insert of person failed.");
         }
@@ -179,7 +170,7 @@ public class MongoDBHandler {
        Document personDoc =  Document.parse(gson.toJson(person));
 
         try {
-            getCollection("person").insertOne(personDoc);
+            db.getCollection("person").insertOne(personDoc);
         } catch (MongoWriteException e) {
             System.err.println("Insert of person failed.");
         }
@@ -197,7 +188,7 @@ public class MongoDBHandler {
         Document protocolDoc = Document.parse(gson.toJson(protocol));
 
         try {
-            this.getCollection("protocol").insertOne(protocolDoc);
+            db.getCollection("protocol").insertOne(protocolDoc);
         } catch (MongoWriteException e) {
             System.err.println("Insert of protocol failed.");
         }
@@ -222,14 +213,14 @@ public class MongoDBHandler {
         }
 
         try {
-            this.getCollection("protocol").insertMany(protocolDocs);
+            db.getCollection("protocol").insertMany(protocolDocs);
         } catch (MongoWriteException e) {
             System.err.println("Insert of protocols failed.");
         }
     }
 
     /**
-     * Method to insert a
+     * Method to insert a User
      * @param id The Username of the User
      * @param password  The password of the user
      * @param rights  The rights that the user has when using his account
@@ -243,145 +234,76 @@ public class MongoDBHandler {
                 .append("rights", rights);
         // Insert it into the DB
         try {
-            this.getCollection("user").insertOne(userDoc);
+            db.getCollection("user").insertOne(userDoc);
         } catch (MongoWriteException e) {
             System.err.println("User: " + id + " could not be inserted.");
         }
     }
 
 
+
     /**
-     * Method to insert a speech and its associated NLP data into three seperate collections into the MongoDB.
-     * @param speech The Java object of the speech
-     * @param fullCas the full CAS String of th NLP Analysis
-     * @param tokens The List of MongoTokens of the speech
-     * @param sentences the List of MongoSentences
-     * @param namedEntities The List of MongoNamedEntities
-     * @param sentiment the Speech sentiment value
-     * @param mainTopic the speech's main topic
-     * @throws WrongInputException
+     * Method to insert a single ProcessedSpeech Object into the database. Inserts a different representation
+     * into speech, speech_cas, and speech_tokens  collections respectively.
+     * @param processedSpeech
      * @author DavidJordan
      */
-    public void insertSpeech(
-            Speech speech,
-            String fullCas,
-            List<MongoToken> tokens,
-            List<MongoSentence> sentences,
-            List<MongoNamedEntity> namedEntities,
-            double sentiment,
-            String mainTopic) throws WrongInputException {
-        //validate the Input
-        if(speech == null || fullCas == null || tokens == null || sentences == null || namedEntities == null ){
-            throw new WrongInputException("Input contains null value(s).");
-        }
+    public void insertSpeech(ProcessedSpeech processedSpeech){
+        //Insert single processedSpeech into speech collection
+        try {db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechCollectionJson()));}
+        catch(MongoWriteException ignored){};
 
-        // Convert the Named Entities into serialised JSON Strings according to their type
-        List<Document> namedEntitiesPER = new ArrayList<>(0);
-        List<Document> namedEntitiesLOC = new ArrayList<>(0);
-        List<Document> namedEntitiesORG = new ArrayList<>(0);
-        for(MongoNamedEntity namedEntity: namedEntities){
-            if(namedEntity == null){
-                throw new IllegalArgumentException("named entity is null.");
-            }
-            switch (namedEntity.getEntityType()) { // no default necessary
-                case "PER":
-                    namedEntitiesPER.add(Document.parse(gson.toJson(namedEntity))); break;
-                case "LOC":
-                    namedEntitiesLOC.add(Document.parse(gson.toJson(namedEntity))); break;
-                case "ORG":
-                    namedEntitiesORG.add(Document.parse(gson.toJson(namedEntity))); break;
-            }
-        }
-        // Converting the sentences into a Document to insert into the "sentences" field
-        List<Document> sentencesDocs = new ArrayList<>(0);
-        for(MongoSentence mongoSentence: sentences){
-            if(mongoSentence == null){
-                throw new IllegalArgumentException("sentence is null.");
-            }
-            sentencesDocs.add(Document.parse(gson.toJson(mongoSentence)));
-        }
-        // Creating the speech document to insert into the DB
-        Document speechDocument = new Document()
-                .append("_id", speech.getID())
-                .append("speaker_id", speech.getSpeakerID())
-                .append("text", speech.getText())
-                .append("date", speech.getDate())
-                .append("sentences", sentencesDocs)
-                .append("sentiment", sentiment)
-                .append("main_topic", mainTopic)
-                .append("named_entities_per", namedEntitiesPER)
-                .append("named_entities_org", namedEntitiesORG)
-                .append("named_entities_loc", namedEntitiesLOC);
-        //Inserting finished speech document into the speech collection
-        try {
-            this.getCollection("speech").insertOne(speechDocument);
-        } catch (MongoWriteException e) {
-            System.err.println("Failed to insert speech with id : " + speech.getID() + " into speech collection.");
-        }
+        //Insert single document into speech_cas collection
+        Document speechCASDoc = new Document()
+                .append("_id", processedSpeech.getID())
+                .append("full_cas", processedSpeech.getFullCas());
+        try {db.getCollection("speech_cas").insertOne(speechCASDoc);}
+        catch(MongoWriteException ignored){};
 
-        // Inserting the full speech CAS into seperate collection
-        Document speechCasDoc = new Document()
-                .append("_id", speech.getID())
-                .append("full_cas", fullCas);
-        //Inserting into speech_cas collection
-        try {
-            this.getCollection("speech_cas").insertOne(speechCasDoc);
-        } catch (MongoWriteException e) {
-            System.err.println("Failed to insert speech with id : " + speech.getID() + " into speech_cas collection.");
-        }
-
-        //Serialising the tokens
-        List<Document> speechTokensDocs = new ArrayList<>(0);
-        for (MongoToken mongoToken: tokens){
-            if(mongoToken == null){
-                throw new IllegalArgumentException("mongotoken is null.");
-            }
-            speechTokensDocs.add(Document.parse(gson.toJson(mongoToken)));
-        }
-        // Adding to speech_tokens collection
-        Document speechTokenDoc = new Document()
-                .append("_id", speech.getID())
-                .append("speaker_id", speech.getSpeakerID())
-                .append("date", speech.getDate())
-                .append("tokens", speechTokensDocs);
-        //Insert into speech_tokens collection
-        try {
-            this.getCollection("speech_tokens").insertOne(speechTokenDoc);
-        } catch (MongoWriteException e) {
-            System.err.println("Failed to insert speech with id : " + speech.getID() + " into speech_token collection.");
-        }
+        //Insert single document into speech_tokens collection
+        Document speechTokensDoc = new Document()
+                .append("_id", processedSpeech.getID())
+                .append("speaker_id", processedSpeech.getSpeakerID())
+                .append("tokens", processedSpeech.getTokens());
+        try {db.getCollection("speech_tokens").insertOne(speechTokensDoc);}
+        catch(MongoWriteException ignored){};
     }
 
     /**
      * Inserts a list of processed speeches into the DB.
      * @param processedSpeeches List of processed speeches.
-     * @author
+     * @author DavidJordan
+     * @author Eric_Lakhter
      */
-    @Unfinished("Needs to actually insertMany() the speeches")
     public void insertSpeeches(List<ProcessedSpeech> processedSpeeches) {
-        // Here goes code which transforms ProcessedSpeech into documents
-        // Check out :
-        // ProcessedSpeech.toSpeechCollectionJson();    for the speech collection
-        // ProcessedSpeech.getFullCas();                for the speech_cas
-        // ProcessedSpeech.getTokens();                 for the speech_tokens
-        //
-        // toSpeechCollectionJson saves the date in yyyy-MM-dd format;
-        // need to compare to how Gson parsed classes are saved in the db
 
-//        List<Document> speechDocs = new ArrayList<>();
-//        List<Document> speechCasDocs = new ArrayList<>();
-//        List<Document> speechTokenDocs = new ArrayList<>();
+        List<Document> speechDocs = new ArrayList<>(0);
+        List<Document> speechCasDocs = new ArrayList<>(0);
+        List<Document> speechTokenDocs = new ArrayList<>(0);
 
-//        for (ProcessedSpeech speech : processedSpeeches) {
-//            speechDocs.add();
-//            speechCasDocs.add();
-//            speechTokenDocs.add();
-//        }
+        for(ProcessedSpeech processedSpeech: processedSpeeches){
+            //parse into Bson Document and add to list
+            speechDocs.add(Document.parse(processedSpeech.toSpeechCollectionJson()));
 
-        // MongoBulkWriteExceptions catch the harmless exceptions, they are necessary like this
-//        try {db.getCollection("speech").insertMany(speechDocs, imo);} catch (MongoBulkWriteException ignored) {}
-//        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);} catch (MongoBulkWriteException ignored) {}
-//        try {db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);} catch (MongoBulkWriteException ignored) {}
+            //Create Document for speech_cas and add to list
+            Document speechCASDoc = new Document()
+                    .append("_id", processedSpeech.getID())
+                    .append("full_cas", processedSpeech.getFullCas());
+            speechCasDocs.add(speechCASDoc);
+
+            //Create Document for speech_tokens collection and add to list
+            Document speechTokensDoc = new Document()
+                    .append("_id", processedSpeech.getID())
+                    .append("speaker_id", processedSpeech.getSpeakerID())
+                    .append("tokens", processedSpeech.getTokens());
+            speechTokenDocs.add(speechTokensDoc);
+        }
+
+        // MongoBulkWriteExceptions are caught when inserting the Lists
+        try {db.getCollection("speech").insertMany(speechDocs, imo);} catch (MongoBulkWriteException ignored) {};
+        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);} catch (MongoBulkWriteException ignored) {};
+        try {db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);} catch (MongoBulkWriteException ignored) {};
+
     }
 
     /**
@@ -403,7 +325,7 @@ public class MongoDBHandler {
             mongoAgendaItems.add(Document.parse(gson.toJson(agendaItem)));
         }
         try {
-            this.getCollection("agendaItem").insertMany(mongoAgendaItems);
+            db.getCollection("agendaItem").insertMany(mongoAgendaItems);
         } catch (MongoWriteException e) {
             System.err.println("Insert of agendaItems failed.");
         }
@@ -434,7 +356,7 @@ public class MongoDBHandler {
         // Insert it into the comment collection
 
         try {
-            this.getCollection("comment").insertOne(commentDoc);
+            db.getCollection("comment").insertOne(commentDoc);
         } catch (MongoWriteException e) {
             System.err.println("Insert of comment with id: " + comment.getID() + "could not be performed.");
         }
@@ -457,7 +379,7 @@ public class MongoDBHandler {
         }
         else{
             try {
-                this.getCollection(collection).replaceOne(eq("_id", id), document);
+                db.getCollection(collection).replaceOne(eq("_id", id), document);
                 return true;
             } catch (Exception e) {
                 System.err.println("Update could not be performed. Invalid input.");
@@ -476,7 +398,7 @@ public class MongoDBHandler {
     public void addDocument(Document document, String collection){
         if(collectionExists(collection)){
             try {
-                this.getCollection(collection).insertOne(document);
+                db.getCollection(collection).insertOne(document);
             } catch (MongoWriteException e) {
                 System.err.println("Failed to add Document to collection.");
             }
@@ -492,7 +414,7 @@ public class MongoDBHandler {
     public void addDocuments(List<Document> documents, String collection){
         if(collectionExists(collection) && documents != null){
             try {
-                this.getCollection(collection).insertMany(documents);
+                db.getCollection(collection).insertMany(documents);
             } catch (MongoWriteException e) {
                 System.err.println("Failed to add Documents to collection.");
             }
@@ -543,7 +465,7 @@ public class MongoDBHandler {
             }
         }
 
-        MongoIterable<Document> result = this.getCollection(collection).aggregate(Arrays.asList(pipeline));
+        MongoIterable<Document> result = db.getCollection(collection).aggregate(Arrays.asList(pipeline));
         return result;
     }
 

@@ -18,7 +18,7 @@ public class Comment_Impl implements Comment {
     private Document commentDoc;
 
     private String _id, speechID, speakerID, commentatorID, text;
-    LocalDate date;
+    private LocalDate date;
 
     private ArrayList<String> fractions;
 
