@@ -41,7 +41,7 @@ public class Poll_Impl implements Poll {
      */
     public Poll_Impl(String _id, int[] spd, int[] cxu, int[] b90, int[] fdp, int[] afd, int[] linke, int[] independent) throws WrongInputException {
         if (spd.length != 4 || cxu.length != 4 || b90.length != 4 || fdp.length != 4 || afd.length != 4 || linke.length != 4 || independent.length != 4)
-            throw new WrongInputException("At least one of the poll results has the wrong format");
+            throw new WrongInputException("At least one of the fraction results doesn't have the right amount of fields.");
         this._id = _id;
         this.spd = spd;
         this.cxu = cxu;
