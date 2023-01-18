@@ -18,7 +18,7 @@ public class Person_Impl implements Person {
     private Document personDoc;
 
     //Class Variables
-    private String _id, firstName, lastName, role, title, fraction19, fraction20, party, place, pfpURL, pfpMetadata, gender,  birthDate, deathDate, birthPlace;
+    private String _id, firstName, lastName, role, title, fraction19, fraction20, party, place, gender,  birthDate, deathDate, birthPlace;
     private String[] picture;
 
     /**

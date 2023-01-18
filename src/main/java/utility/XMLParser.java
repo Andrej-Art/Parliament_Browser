@@ -18,14 +18,16 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 /**
  * Class to analyze the XML files and create objects
+ *
  * @author Andrej Artuschenko
  * @author Julian Ocker
- *
+ * @author DavidJordan
  */
 public class XMLParser {
 
@@ -39,7 +41,6 @@ public class XMLParser {
     static ArrayList<AgendaItem_Impl> agendaItems = new ArrayList<>(0);
 
     /**
-     *
      * This method reads the Stammdaten-file and creates instances of the person-Class.
      *
      * @return
@@ -207,7 +208,7 @@ public class XMLParser {
                                                     if (InstitiutionAttributes.item(m).getNodeName().equals("INS_LANG") && check) {
                                                         if (electionPeriod.equals("19")) {
                                                             fraction19 = InstitiutionAttributes.item(m).getTextContent();
-                                                        } else if (electionPeriod.equals("20")){
+                                                        } else if (electionPeriod.equals("20")) {
                                                             fraction20 = InstitiutionAttributes.item(m).getTextContent();
                                                         }
                                                         fractionList.add(InstitiutionAttributes.item(m).getTextContent());
@@ -235,9 +236,9 @@ public class XMLParser {
 
                 }
                 //Here the picture is fetched and the Instance of Person is created
-                if(!(firstName.equals(null)) || !(lastName.equals(null)) || !(id.equals(null) ) ) {
-                    String[] pictureArray= PictureScraper.producePictureUrl(firstName, lastName);
-                    Person_Impl person = new Person_Impl(id,firstName,lastName, null,title,place,fraction19,fraction20,party,pictureArray,gender,birthDate,deathDate,birthPlace);
+                if (!(firstName.equals(null)) || !(lastName.equals(null)) || !(id.equals(null))) {
+                    String[] pictureArray = PictureScraper.producePictureUrl(firstName, lastName);
+                    Person_Impl person = new Person_Impl(id, firstName, lastName, null, title, place, fraction19, fraction20, party, pictureArray, gender, birthDate, deathDate, birthPlace);
                     persons.add(person);
                 }
 
@@ -263,6 +264,43 @@ public class XMLParser {
     }
 
 
+    /**
+     * Method to get the Title and the ID of the Agenda Items
+     *
+     * @param headList
+     * @param ivzAgendaItems
+     * @param ivzAgendaTitle
+     * @return
+     * @author Julian Ocker
+     */
+    private static List<ArrayList<String>> getAgendaItem(NodeList headList, ArrayList<String> ivzAgendaItems, ArrayList<String> ivzAgendaTitle) {
+
+        for (int k = 0; k < headList.getLength(); k++) {
+            if (headList.item(k).getNodeName().equals("ivz-block")) {
+                NodeList contentRegister = headList.item(k).getChildNodes();
+                //System.out.println(headList.item(k).getTextContent());
+                boolean check = false;
+                for (int l = 0; l < contentRegister.getLength(); l++) {
+                    if (contentRegister.item(l).getNodeName().equals("ivz-block-titel")) {
+
+                        ivzAgendaItems.add(contentRegister.item(l).getTextContent());
+                        check = true;
+                    }
+                    if (check && contentRegister.item(l).getNodeName().equals("ivz-eintrag")) {
+
+                        ivzAgendaTitle.add(contentRegister.item(l).getTextContent());
+                        check = false;
+                    }
+
+                }
+
+            }
+
+        }
+
+        return Arrays.asList(ivzAgendaItems, ivzAgendaTitle);
+    }
+
 
     /**
      * This Method parses a protocol for the Agenda-Item- and Protocol-Data, creates Instances of the AgendaItem_Impl and Protocol_Impl classes
@@ -270,27 +308,27 @@ public class XMLParser {
      *
      * @author Julian Ocker
      */
-    public static void protocolParse (){
-        String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
-        // declaring the Variables neede
-        String startTime = "";
+    private void protocolParse(String source, String target) {
+
+        // declaring the Variables needed
+        String beginTime = "";
         String endTime = "";
+        String protocolNumber = "";
+        String electionPeriod = "";
         String protocolID = "";
-        String WP = "";
-        LocalDate protocolDate = null;
         String protocolTitle = "";
-        ArrayList<String> agendaItems = new ArrayList<String>(0);
-        ArrayList<String> sessionLeader = new ArrayList<String>(0);
-        ArrayList<String> addons = new ArrayList<String>(0);
+        LocalDate date = null;
         ArrayList<String> ivzAgendaItems = new ArrayList<>(0);
         ArrayList<String> ivzAgendaTitle = new ArrayList<>(0);
 
         try {
-            File input_file = new File(path);
+            File input_file = new File(source + "" + target);
             DocumentBuilderFactory dbfFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dbBuilder = dbfFactory.newDocumentBuilder();
             Document dProtocol = dbBuilder.parse(input_file);
             NodeList testList = dProtocol.getElementsByTagName("dbtplenarprotokoll").item(0).getChildNodes();
+            ArrayList agendaItemsStr = new ArrayList<>(0);
+            ArrayList<String> sessionLeaders = new ArrayList<>(0);
 
             for (int i = 0; i < testList.getLength(); i++) {
                 if (testList.item(i).getNodeName().equals("vorspann")) {
@@ -306,36 +344,43 @@ public class XMLParser {
 
                                     for (int l = 0; l < plProtoNoList.getLength(); l++) {
                                         if (plProtoNoList.item(l).getNodeName().equals("wahlperiode")) {
-                                            WP = plProtoNoList.item(l).getTextContent();
+                                            electionPeriod = plProtoNoList.item(l).getTextContent();
                                         }
                                         if (plProtoNoList.item(l).getNodeName().equals("sitzungsnr")) {
-                                            protocolID = plProtoNoList.item(l).getTextContent();
+                                            protocolNumber = plProtoNoList.item(l).getTextContent();
                                         }
+
                                     }
+
                                 }
+
+                                protocolID = electionPeriod + "/" + protocolNumber;
 
                                 if (headList.item(k).getNodeName().equals("veranstaltungsdaten")) {
                                     NodeList dateList = headList.item(k).getChildNodes();
                                     for (int l = 0; l < dateList.getLength(); l++) {
                                         if (dateList.item(l).getNodeName().equals("datum")) {
-                                            /*
+                                            /**
                                              * geklaut von Quelle:
                                              * https://www.baeldung.com/java-string-to-date
                                              */
                                             String dateString = dateList.item(l).getAttributes().getNamedItem("date").getTextContent();
                                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
-                                            protocolDate = LocalDate.parse(dateString, formatter);
+                                            date = LocalDate.parse(dateString, formatter);
 
 
                                         }
                                     }
+
                                 }
 
                                 if (headList.item(k).getNodeName().equals("sitzungstitel")) {
                                     protocolTitle = headList.item(k).getTextContent();
 
                                 }
+
                             }
+
                         }
 
                         if (preList.item(j).getNodeName().equals("inhaltsverzeichnis")) {
@@ -352,23 +397,115 @@ public class XMLParser {
 
                 }
 
+                if (testList.item(i).getNodeName().equals("sitzungsverlauf")) {
+                    NodeList preList = testList.item(i).getChildNodes();
+
+                    for (int j = 0; j < preList.getLength(); j++) {
+                        if (preList.item(j).getNodeName().equals("sitzungsbeginn")) {
+                            beginTime = preList.item(j).getAttributes().getNamedItem("sitzung-start-uhrzeit").getTextContent();
+                        }
+                        if (preList.item(j).getNodeName().equals("tagesordnungspunkt")) {
+
+                            //Für Tagesordnunspunkte nötige Variablen werden definiert/ zurückgesetzt
+                            ArrayList<String> heldSpeechList = new ArrayList<String>(0);
+                            String agendaItemSubID = new String();
+                            String agendaItemTitle = "Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere";
+
+                            for (int k = 0; k < preList.item(j).getAttributes().getLength(); k++) {
+
+                                agendaItemSubID = preList.item(j).getAttributes().item(k).getTextContent();
+
+                                for (int l = 0; l < ivzAgendaItems.size(); l++) {
+                                    if (ivzAgendaItems.equals(agendaItemSubID)) {
+
+                                        agendaItemTitle = ivzAgendaTitle.get(l);
+
+                                    }
+
+                                }
+                                if (agendaItemTitle.equals("Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere")) {
+
+                                    agendaItemTitle = agendaItemSubID;
+
+                                }
+
+                            }
+                            NodeList speechesList = preList.item(j).getChildNodes();
+                            for (int k = 0; k < speechesList.getLength(); k++) {
+                                if (speechesList.item(k).getNodeName().equals("rede")) {
+                                    String speechID = new String();
+                                    for (int l = 0; l < speechesList.item(k).getAttributes().getLength(); l++) {
+                                        speechID = speechesList.item(k).getAttributes().item(l).getTextContent();
+                                        heldSpeechList.add(speechID);
+                                    }
+                                }
+
+                                NodeList speechDetailsList = speechesList.item(k).getChildNodes();
+                                for (int l = 0; l < speechDetailsList.getLength(); l++) {
+                                    if (speechDetailsList.item(l).getNodeName().equals("p")) {
+                                        if (speechDetailsList.item(l).getNodeName().equals("name")) {
+
+                                            boolean check = true;
+
+                                            for (int m = 0; m < sessionLeaders.size(); m++) {
 
 
+                                                if (sessionLeaders.get(m).equals(speechDetailsList.item(l).getTextContent())) {
+                                                    check = false;
 
+                                                }
+                                            }
 
+                                            if (check) {
+                                                for (int m = 0; m < persons.size(); m++) {
+                                                    if (speechDetailsList.item(l).getTextContent().contains(persons.get(m).getFirstName())&&
+                                                            speechDetailsList.item(l).getTextContent().contains(persons.get(m).getLastName())){
+                                                            sessionLeaders.add(persons.get(m).getID());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            String agendaItemID = protocolID + agendaItemSubID;
 
+                            // hier wird ein Tagesordnungspunkt abgespeichert String id, String date, String subject, ArrayList<String> speechIDs
+                            AgendaItem_Impl angendaItem = new AgendaItem_Impl(agendaItemID, date, electionPeriod, null);
+
+                        }
+
+                        if (preList.item(j).getNodeName().equals("sitzungsende")) {
+                            endTime = preList.item(j).getAttributes().getNamedItem("sitzung-ende-uhrzeit").getTextContent();
+
+                        }
+                    }
+                }
             }
+
+            // hier wird ein Protokol abgespeichert.
+            //String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems
+            Protocol_Impl protocol = new Protocol_Impl(protocolID, date, TimeHelper.convertToISOtime(beginTime),
+                    TimeHelper.convertToISOtime(endTime), Integer.valueOf(electionPeriod),
+                    Integer.valueOf(protocolNumber), null, agendaItemsStr);
+
+
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+
         } catch (SAXException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
         }
-
-    }
-
-    private static void getAgendaItem(NodeList headList, ArrayList<String> ivzAgendaItems, ArrayList<String> ivzAgendaTitle) {
     }
 
 
@@ -376,8 +513,9 @@ public class XMLParser {
      * A helper method to extract all Nodes of a given name from the XML Document which is parsed.
      * It recursively scans the document for all occurrences. It is a modified version of a function by
      * G.Abrami.
-     * @param node  The Node from which the function starts to recursively scan the xml tree
-     * @param name  The name of the Nodes that will be extracted from the Sub-Tree
+     *
+     * @param node The Node from which the function starts to recursively scan the xml tree
+     * @param name The name of the Nodes that will be extracted from the Sub-Tree
      * @return nodeList  A List of the Nodes with the given name
      * @author DavidJordan, (Giuseppe Abrami)
      */
@@ -385,18 +523,20 @@ public class XMLParser {
         // list to store the selected nodes
         List<Node> nodeList = new ArrayList<>(0);
         // add node to list if it has the desired name
-        if (node != null && node.getNodeName().equals(name) ) {
+        if (node != null && node.getNodeName().equals(name)) {
             nodeList.add(node);
         }
         //check if the node has children. This leads to the subtree of the provided node being searched in the following
         else {
-            if(node != null && node.hasChildNodes()){
+            if (node != null && node.hasChildNodes()) {
                 // for each of the children perform the following recursive action
                 for (int i = 0; i < node.getChildNodes().getLength(); i++) {
                     // recursively call this function on each child, adding all the accumulating nodes
                     nodeList.addAll(getNodesByName(node.getChildNodes().item(i), name));
                 }
-            } else{ if(node != null && node.getNodeName().equals(name)) nodeList.add(node);}
+            } else {
+                if (node != null && node.getNodeName().equals(name)) nodeList.add(node);
+            }
         }
         return nodeList;
     }
@@ -405,6 +545,7 @@ public class XMLParser {
      * The complementary helper Method to the getNodesByName Method which calls it in the method body
      * and extracts the first ocurrence in the resulting List of Nodes. If the List of Nodes is empty, it returns
      * null.
+     *
      * @param node The root node of the Document from which the subtree is scanned
      * @param name The Node name to scan for
      * @return Node
@@ -413,7 +554,7 @@ public class XMLParser {
     public static Node getSingleNode(Node node, String name) {
         //Scan the subtree recursively
         List<Node> list = getNodesByName(node, name);
-        if (!list.isEmpty()){
+        if (!list.isEmpty()) {
             // Return the first node if present
             return list.stream().findFirst().get();
         }
