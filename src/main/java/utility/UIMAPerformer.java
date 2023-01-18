@@ -61,9 +61,9 @@ public class UIMAPerformer {
         JCas jcas = getJCas(speech.getText());
         String fullCas = getFullCas(jcas);
         double sentiment = getAverageSentiment(jcas);
-        String mainTopic = null; //getMainTopic(jcas);
+        String mainTopic = getMainTopic(jcas);
         List<MongoToken> tokens = getTokens(jcas);
-        List<MongoSentence> sentences= getSentences(jcas);
+        List<MongoSentence> sentences = getSentences(jcas);
         List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
         return new ProcessedSpeech(speech, fullCas, sentiment, mainTopic, tokens, sentences, namedEntities);
     }
