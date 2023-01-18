@@ -58,7 +58,7 @@ public class PollScraper {
                 e.printStackTrace();
             } catch (NoPollException e) {
                 System.err.println(e.getMessage() + " noPollCounter is at " + ++noPollCounter);
-                // if 15 polls in a row don't exist it's a safe bet that there won't be any more
+                // if 15 polls in a row don't exist it's a safe bet that there won't be more
                 // there is a 10 poll gap between ID 422 and 431
                 if (noPollCounter > 14) hasMorePolls = false;
             }
@@ -113,11 +113,6 @@ public class PollScraper {
             pollMap.get(currentFraction)[2] = Integer.parseInt(results[2]);
             pollMap.get(currentFraction)[3] = Integer.parseInt(results[3]);
         }
-
-//        System.out.println();
-//        for (Map.Entry<String, int[]> stringEntry : pollMap.entrySet()) {
-//            System.out.println(stringEntry.getKey() + " = " +Arrays.toString(stringEntry.getValue()));
-//        }
 
         return new Poll_Impl(id,
                 date,
