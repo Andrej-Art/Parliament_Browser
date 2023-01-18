@@ -16,7 +16,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,7 @@ public class XMLProtocolParser {
     private Map<String, Speech_Impl> speechMap;
     private Map<String, Person_Impl> speakerMap;
     private Map<String, Comment_Impl> commentMap;
+    private Map<String, Protocol_Impl> protocolMap;
 
     //Create New Instance of DocumentBuilderFactory
     static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -78,6 +81,12 @@ public class XMLProtocolParser {
                     //get the root element of the protocol --> (dbtplenarprotokoll)
                     NodeList sessionInfoNodes = xmlDoc.getElementsByTagName("dbtplenarprotokoll");
                     //iterate threw all dbtplenarptotokoll nodes
+
+
+                    ArrayList <String> sessionLeaders = new ArrayList<>();
+
+
+
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
                         Node sessionInfoNode = sessionInfoNodes.item(a);
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -89,20 +98,23 @@ public class XMLProtocolParser {
                             int protocolNumber = Integer.parseInt(sessionInfoElement.getAttribute("sitzung-nr"));
                             int electionPeriod = Integer.parseInt(sessionInfoElement.getAttribute("wahlperiode"));
                             String _id = (electionPeriod + "/" + protocolNumber);
-                            //System.out.println(_id);
-                            String sessionDate = (sessionInfoElement.getAttribute("sitzung-datum"));
+                            System.out.println(_id);
 
                             //using the methods from the TimeHelper class we can convert the date and time
-                            TimeHelper.convertToISOdate(sessionDate);
+                            String sessionDate = (sessionInfoElement.getAttribute("sitzung-datum"));
+                            LocalDate date = TimeHelper.convertToISOdate(sessionDate);
                             String beginTime = (sessionInfoElement.getAttribute("sitzung-start-uhrzeit"));
+                            LocalTime begin = TimeHelper.convertToISOtime(beginTime);
                             String endTime = (sessionInfoElement.getAttribute("sitzung-ende-uhrzeit"));
-                            TimeHelper.convertToISOtime(beginTime);
-                            TimeHelper.convertToISOtime(endTime);
+                            LocalTime end = TimeHelper.convertToISOtime(endTime);
+                            long sessionDuration = TimeHelper.durationBetweenTimesInMinutes(begin, end);
 
                             //Iterate through all Tagesordnungspunkte
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
+                                ArrayList<String> agendaItemIDS = new ArrayList<>();
+                                agendaItemIDS.add(topid);
                                 System.out.println(topid);
 
                                 //Go through all Speeches
@@ -115,10 +127,13 @@ public class XMLProtocolParser {
 
                                     String speakerID = "";
                                     String speechText = "";
-                                    String sessionLeader= "";
+                                    //String sessionLeader= "";
                                     //List for comments (every speech get a list of comments)
                                     List<String> commentList = new ArrayList<>();
                                     boolean addStatus = false;
+                                    int sameSpeechCounter = 0;
+
+
 
                                     //Go through all ChildNodes of a speech
                                     List<Element> speechChildNodeList = getChildElementList(speech);
@@ -132,7 +147,16 @@ public class XMLProtocolParser {
                                                 commentList.clear();
                                                 addStatus = false;
                                                 // @Testing //Get sessionLeader
-                                                sessionLeader= speechChild.getTextContent();
+                                                String sessionLeader = speechChild.getTextContent();
+                                                //sessionLeaders.add(sessionLeader);
+
+                                                //System.out.println(sessionLeaders);
+                                                if(sessionLeaders.contains(sessionLeader))
+                                                {}
+                                                else sessionLeaders.add(sessionLeader);
+                                                //System.out.println(sessionLeaders);
+
+
 
 
                                                 break;
@@ -202,12 +226,14 @@ public class XMLProtocolParser {
                                                 commentList.add(comment);
 
 
+
                                                 break;
 
 
                                             default:
                                                 break;
                                         }
+
                                         /*
                                         for (int p = 0; p <= speechElementList.size(); p++){
                                             for (int c = 0; c <= commentList.size(); c++) {
@@ -225,7 +251,17 @@ public class XMLProtocolParser {
                                     addToSpeechMap(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
                                     Speech_Impl speech2 = new Speech_Impl(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
                                     //Protocol_Impl protocol = new Protocol_Impl(_id, sessionDate, beginTime, endTime, electionPeriod, protocolNumber, sessionLeader, topid);
-                                    //Protocol_Impl protocol = new Protocol_Impl(_id, sessionDate, beginTime, endTime, electionPeriod, protocolNumber, sessionLeaders, topid);
+                                    Protocol_Impl protocol = new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
+                                   // Comment_Impl comment = new Comment_Impl(CommentID, speechID, speakerID, commentatorID, commentText, date,)
+
+                                    //System.out.println(protocol + " "+protocol.getSessionLeaders());
+                                    //Comment_Impl comment = new Comment_Impl(commentID, speakerID);
+                                    /*
+                                        private String _id, speechID, speakerID, commentatorID, text;
+                                            private LocalDate date;
+
+                                                private ArrayList<String> fractions;
+                                     */
 
 
                                     //addToCommentMap(commentID, speechID, speakerID, commentID);
