@@ -62,8 +62,6 @@ public class MongoDBHandler {
         return db;
     }
 
-
-
     /**
      * Basic method to check whether a given collection already exists in the Database
      * @param col collection name

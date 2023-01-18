@@ -5,11 +5,12 @@ import data.impl.Poll_Impl;
 import exceptions.NoPollException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import utility.annotations.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * The {@code PollScraper} class finds the german Bundestag's polls and converts them into Poll objects.
@@ -27,7 +28,7 @@ public class PollScraper {
         Polls (seemingly) start at ID 0: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=0
         The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
         and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
-        Negative number polls all seem to have one default result (and since we are iterating from i = 0 upward we won't
+        Polls with ID = 0 and lower all seem to have one default result (and since we are iterating from i = 1 upward we won't
         ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
      */
 
@@ -46,7 +47,7 @@ public class PollScraper {
         List<Poll> polls = new ArrayList<>();
 
         boolean hasMorePolls = true;
-        for (int i = 0; hasMorePolls; i++) {
+        for (int i = 1; hasMorePolls; i++) {
             try {
                 polls.add(getOnePoll(i));
             } catch (IOException e) {
@@ -67,9 +68,15 @@ public class PollScraper {
      * @throws NoPollException If the poll with the given ID cannot be found.
      * @author Eric Lakhter
      */
-    @Unfinished("It's almost 4 am")
+    @Unfinished("Need to find out the poll ID (Meaning the related Drucksache)")
     public static Poll getOnePoll(int id) throws NoPollException, IOException {
-        if (id < 0) throw new NoPollException("There are no polls with an ID < 0");
+        // Gatekeep
+        if (id < 1) throw new NoPollException("There are no polls with an ID < 1");
+
+        Document pollHTML = Jsoup.connect("https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=" + id).get();
+
+        Elements pollElements = pollHTML.getElementsByClass("bt-teaser-chart-solo");
+        if (pollElements.isEmpty()) throw new NoPollException("The poll with ID " + id + " doesn't exist.");
 
         // Ganz ehrlich, ich weiß noch nicht, ob die ID ein einziger String ist oder lieber eine liste oder sonst was,
         // auf jeder Abstimmungsseite scheinen mehrere Drucksachen verlinkt zu sein (Für gewöhnlich 2, manchmal auch 3).
@@ -82,6 +89,7 @@ public class PollScraper {
         // - 20/4729 erwähnt 20/3879, 20/4229
         // Abhängig davon wie die Drucksachen in den Protokollen erwähnt sind brauchen wir entweder alle,
         // oder es ist immer eindeutig welche wir nehmen müssen.
+
         String _id = "";
         /*
             Each index represents a party's votes:
@@ -90,23 +98,36 @@ public class PollScraper {
             [2]: # of ABSTAINED votes
             [3]: # of DIDN'T VOTE vote
          */
-        int[] spd = new int[]{0, 0, 0, 0};
-        int[] cxu = new int[]{0, 0, 0, 0};
-        int[] b90 = new int[]{0, 0, 0, 0};
-        int[] fdp = new int[]{0, 0, 0, 0};
-        int[] afd = new int[]{0, 0, 0, 0};
-        int[] linke = new int[]{0, 0, 0, 0};
-        int[] independent = new int[]{0, 0, 0, 0};
+        Map<String, int[]> pollMap = new HashMap<>();
+        pollMap.put("SPD",              new int[]{0, 0, 0, 0});
+        pollMap.put("CDU/CSU",          new int[]{0, 0, 0, 0});
+        pollMap.put("B90/GRÜNE",        new int[]{0, 0, 0, 0});
+        pollMap.put("FDP",              new int[]{0, 0, 0, 0});
+        pollMap.put("AfD",              new int[]{0, 0, 0, 0});
+        pollMap.put("DIE LINKE.",       new int[]{0, 0, 0, 0});
+        pollMap.put("fraktionslose",    new int[]{0, 0, 0, 0});
 
-        Document pollHTML = Jsoup.connect("https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=" + id).get();
+        for (Element ele : pollElements) {
+            String currentFraction = ele.attr("data-value");
+            String[] results = ele.child(1).child(0).attr("data-chart-values").split(",");
+            pollMap.get(currentFraction)[0] = Integer.parseInt(results[0]);
+            pollMap.get(currentFraction)[1] = Integer.parseInt(results[1]);
+            pollMap.get(currentFraction)[2] = Integer.parseInt(results[2]);
+            pollMap.get(currentFraction)[3] = Integer.parseInt(results[3]);
+        }
 
-        System.out.println(pollHTML.html());
+        System.out.println();
+        for (Map.Entry<String, int[]> stringEntry : pollMap.entrySet()) {
+            System.out.println(stringEntry.getKey() + " = " +Arrays.toString(stringEntry.getValue()));
+        }
 
-        // magic happens here
-
-
-        // need to throw NoPollException if the poll # is too high
-
-        return new Poll_Impl(_id, spd, cxu, b90, fdp, afd, linke, independent);
+        return new Poll_Impl(_id,
+                pollMap.get("SPD"),
+                pollMap.get("CDU/CSU"),
+                pollMap.get("B90/GRÜNE"),
+                pollMap.get("FDP"),
+                pollMap.get("AfD"),
+                pollMap.get("DIE LINKE."),
+                pollMap.get("fraktionslose"));
     }
 }
