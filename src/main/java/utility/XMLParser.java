@@ -266,7 +266,7 @@ public class XMLParser {
 
 
     /**
-     * Method to get the Title and the ID of the Agenda Items
+     * Method to get the Title and the ID of the Agenda Items.
      *
      * @param headList
      * @param ivzAgendaItems
@@ -309,8 +309,9 @@ public class XMLParser {
      *
      * @author Julian Ocker
      */
-    private void protocolParse(String source, String target) {
+    public void protocolParse(Integer firstProtocol, Integer lastProtocol) throws IOException {
         personParse();
+
         // declaring the Variables needed
         String beginTime = "";
         String endTime = "";
@@ -322,190 +323,195 @@ public class XMLParser {
         ArrayList<String> ivzAgendaItems = new ArrayList<>(0);
         ArrayList<String> ivzAgendaTitle = new ArrayList<>(0);
 
-        try {
-            File input_file = new File(source + "" + target);
-            DocumentBuilderFactory dbfFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dbBuilder = dbfFactory.newDocumentBuilder();
-            Document dProtocol = dbBuilder.parse(input_file);
-            NodeList testList = dProtocol.getElementsByTagName("dbtplenarprotokoll").item(0).getChildNodes();
-            ArrayList agendaItemsStr = new ArrayList<>(0);
-            ArrayList<String> sessionLeaders = new ArrayList<>(0);
+        System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/Protokolle/").getPath());
+        String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/Protokolle/").getPath();
+        for (int out = firstProtocol; out < lastProtocol+1; out++) {
 
-            for (int i = 0; i < testList.getLength(); i++) {
-                if (testList.item(i).getNodeName().equals("vorspann")) {
-                    NodeList preList = testList.item(i).getChildNodes();
+            try {
+                File input_file = new File(path + out + ".xml" );
+                DocumentBuilderFactory dbfFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dbBuilder = dbfFactory.newDocumentBuilder();
+                Document dProtocol = dbBuilder.parse(input_file);
+                NodeList testList = dProtocol.getElementsByTagName("dbtplenarprotokoll").item(0).getChildNodes();
+                ArrayList agendaItemsStr = new ArrayList<>(0);
+                ArrayList<String> sessionLeaders = new ArrayList<>(0);
 
-                    for (int j = 0; j < preList.getLength(); j++) {
-                        if (preList.item(j).getNodeName().equals("kopfdaten")) {
-                            NodeList headList = preList.item(j).getChildNodes();
+                for (int i = 0; i < testList.getLength(); i++) {
+                    if (testList.item(i).getNodeName().equals("vorspann")) {
+                        NodeList preList = testList.item(i).getChildNodes();
 
-                            for (int k = 0; k < headList.getLength(); k++) {
-                                if (headList.item(k).getNodeName().equals("plenarprotokoll-nummer")) {
-                                    NodeList plProtoNoList = headList.item(k).getChildNodes();
+                        for (int j = 0; j < preList.getLength(); j++) {
+                            if (preList.item(j).getNodeName().equals("kopfdaten")) {
+                                NodeList headList = preList.item(j).getChildNodes();
 
-                                    for (int l = 0; l < plProtoNoList.getLength(); l++) {
-                                        if (plProtoNoList.item(l).getNodeName().equals("wahlperiode")) {
-                                            electionPeriod = plProtoNoList.item(l).getTextContent();
-                                        }
-                                        if (plProtoNoList.item(l).getNodeName().equals("sitzungsnr")) {
-                                            protocolNumber = plProtoNoList.item(l).getTextContent();
+                                for (int k = 0; k < headList.getLength(); k++) {
+                                    if (headList.item(k).getNodeName().equals("plenarprotokoll-nummer")) {
+                                        NodeList plProtoNoList = headList.item(k).getChildNodes();
+
+                                        for (int l = 0; l < plProtoNoList.getLength(); l++) {
+                                            if (plProtoNoList.item(l).getNodeName().equals("wahlperiode")) {
+                                                electionPeriod = plProtoNoList.item(l).getTextContent();
+                                            }
+                                            if (plProtoNoList.item(l).getNodeName().equals("sitzungsnr")) {
+                                                protocolNumber = plProtoNoList.item(l).getTextContent();
+                                            }
+
                                         }
 
                                     }
 
-                                }
+                                    protocolID = electionPeriod + "/" + protocolNumber;
 
-                                protocolID = electionPeriod + "/" + protocolNumber;
-
-                                if (headList.item(k).getNodeName().equals("veranstaltungsdaten")) {
-                                    NodeList dateList = headList.item(k).getChildNodes();
-                                    for (int l = 0; l < dateList.getLength(); l++) {
-                                        if (dateList.item(l).getNodeName().equals("datum")) {
-                                            /**
-                                             * geklaut von Quelle:
-                                             * https://www.baeldung.com/java-string-to-date
-                                             */
-                                            String dateString = dateList.item(l).getAttributes().getNamedItem("date").getTextContent();
-                                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
-                                            date = LocalDate.parse(dateString, formatter);
+                                    if (headList.item(k).getNodeName().equals("veranstaltungsdaten")) {
+                                        NodeList dateList = headList.item(k).getChildNodes();
+                                        for (int l = 0; l < dateList.getLength(); l++) {
+                                            if (dateList.item(l).getNodeName().equals("datum")) {
+                                                /**
+                                                 * geklaut von Quelle:
+                                                 * https://www.baeldung.com/java-string-to-date
+                                                 */
+                                                String dateString = dateList.item(l).getAttributes().getNamedItem("date").getTextContent();
+                                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
+                                                date = LocalDate.parse(dateString, formatter);
 
 
+                                            }
                                         }
+
                                     }
 
-                                }
+                                    if (headList.item(k).getNodeName().equals("sitzungstitel")) {
+                                        protocolTitle = headList.item(k).getTextContent();
 
-                                if (headList.item(k).getNodeName().equals("sitzungstitel")) {
-                                    protocolTitle = headList.item(k).getTextContent();
+                                    }
 
                                 }
 
                             }
 
-                        }
+                            if (preList.item(j).getNodeName().equals("inhaltsverzeichnis")) {
+                                NodeList headList = preList.item(j).getChildNodes();
 
-                        if (preList.item(j).getNodeName().equals("inhaltsverzeichnis")) {
-                            NodeList headList = preList.item(j).getChildNodes();
+                                List<ArrayList<String>> e = getAgendaItem(headList, ivzAgendaItems, ivzAgendaTitle);
+                                ivzAgendaItems = e.get(0);
+                                ivzAgendaTitle = e.get(1);
 
-                            List<ArrayList<String>> e = getAgendaItem(headList, ivzAgendaItems, ivzAgendaTitle);
-                            ivzAgendaItems = e.get(0);
-                            ivzAgendaTitle = e.get(1);
 
+                            }
 
                         }
 
                     }
 
-                }
+                    if (testList.item(i).getNodeName().equals("sitzungsverlauf")) {
+                        NodeList preList = testList.item(i).getChildNodes();
 
-                if (testList.item(i).getNodeName().equals("sitzungsverlauf")) {
-                    NodeList preList = testList.item(i).getChildNodes();
-
-                    for (int j = 0; j < preList.getLength(); j++) {
-                        if (preList.item(j).getNodeName().equals("sitzungsbeginn")) {
-                            beginTime = preList.item(j).getAttributes().getNamedItem("sitzung-start-uhrzeit").getTextContent();
-                        }
-                        if (preList.item(j).getNodeName().equals("tagesordnungspunkt")) {
-
-                            //Für Tagesordnunspunkte nötige Variablen werden definiert/ zurückgesetzt
-                            ArrayList<String> heldSpeechList = new ArrayList<String>(0);
-                            String agendaItemSubID = new String();
-                            String agendaItemTitle = "Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere";
-
-                            for (int k = 0; k < preList.item(j).getAttributes().getLength(); k++) {
-
-                                agendaItemSubID = preList.item(j).getAttributes().item(k).getTextContent();
-
-                                for (int l = 0; l < ivzAgendaItems.size(); l++) {
-                                    if (ivzAgendaItems.equals(agendaItemSubID)) {
-
-                                        agendaItemTitle = ivzAgendaTitle.get(l);
-
-                                    }
-
-                                }
-                                if (agendaItemTitle.equals("Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere")) {
-
-                                    agendaItemTitle = agendaItemSubID;
-
-                                }
-
+                        for (int j = 0; j < preList.getLength(); j++) {
+                            if (preList.item(j).getNodeName().equals("sitzungsbeginn")) {
+                                beginTime = preList.item(j).getAttributes().getNamedItem("sitzung-start-uhrzeit").getTextContent();
                             }
-                            NodeList speechesList = preList.item(j).getChildNodes();
-                            for (int k = 0; k < speechesList.getLength(); k++) {
-                                if (speechesList.item(k).getNodeName().equals("rede")) {
-                                    String speechID = new String();
-                                    for (int l = 0; l < speechesList.item(k).getAttributes().getLength(); l++) {
-                                        speechID = speechesList.item(k).getAttributes().item(l).getTextContent();
-                                        heldSpeechList.add(speechID);
+                            if (preList.item(j).getNodeName().equals("tagesordnungspunkt")) {
+
+                                //Für Tagesordnunspunkte nötige Variablen werden definiert/ zurückgesetzt
+                                ArrayList<String> heldSpeechList = new ArrayList<String>(0);
+                                String agendaItemSubID = new String();
+                                String agendaItemTitle = "Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere";
+
+                                for (int k = 0; k < preList.item(j).getAttributes().getLength(); k++) {
+
+                                    agendaItemSubID = preList.item(j).getAttributes().item(k).getTextContent();
+
+                                    for (int l = 0; l < ivzAgendaItems.size(); l++) {
+                                        if (ivzAgendaItems.equals(agendaItemSubID)) {
+
+                                            agendaItemTitle = ivzAgendaTitle.get(l);
+
+                                        }
+
                                     }
+                                    if (agendaItemTitle.equals("Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere")) {
+
+                                        agendaItemTitle = agendaItemSubID;
+
+                                    }
+
                                 }
+                                NodeList speechesList = preList.item(j).getChildNodes();
+                                for (int k = 0; k < speechesList.getLength(); k++) {
+                                    if (speechesList.item(k).getNodeName().equals("rede")) {
+                                        String speechID = new String();
+                                        for (int l = 0; l < speechesList.item(k).getAttributes().getLength(); l++) {
+                                            speechID = speechesList.item(k).getAttributes().item(l).getTextContent();
+                                            heldSpeechList.add(speechID);
+                                        }
+                                    }
 
-                                NodeList speechDetailsList = speechesList.item(k).getChildNodes();
-                                for (int l = 0; l < speechDetailsList.getLength(); l++) {
-                                    if (speechDetailsList.item(l).getNodeName().equals("p")) {
-                                        if (speechDetailsList.item(l).getNodeName().equals("name")) {
+                                    NodeList speechDetailsList = speechesList.item(k).getChildNodes();
+                                    for (int l = 0; l < speechDetailsList.getLength(); l++) {
+                                        if (speechDetailsList.item(l).getNodeName().equals("p")) {
+                                            if (speechDetailsList.item(l).getNodeName().equals("name")) {
 
-                                            boolean check = true;
+                                                boolean check = true;
 
-                                            for (int m = 0; m < sessionLeaders.size(); m++) {
+                                                for (int m = 0; m < sessionLeaders.size(); m++) {
 
 
-                                                if (sessionLeaders.get(m).equals(speechDetailsList.item(l).getTextContent())) {
-                                                    check = false;
+                                                    if (sessionLeaders.get(m).equals(speechDetailsList.item(l).getTextContent())) {
+                                                        check = false;
 
+                                                    }
                                                 }
-                                            }
 
-                                            if (check) {
-                                                for (int m = 0; m < persons.size(); m++) {
-                                                    if (speechDetailsList.item(l).getTextContent().contains(persons.get(m).getFirstName())&&
-                                                            speechDetailsList.item(l).getTextContent().contains(persons.get(m).getLastName())){
+                                                if (check) {
+                                                    for (int m = 0; m < persons.size(); m++) {
+                                                        if (speechDetailsList.item(l).getTextContent().contains(persons.get(m).getFirstName()) &&
+                                                                speechDetailsList.item(l).getTextContent().contains(persons.get(m).getLastName())) {
                                                             sessionLeaders.add(persons.get(m).getID());
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                                String agendaItemID = protocolID + agendaItemSubID;
+
+                                // hier wird ein Tagesordnungspunkt abgespeichert String id, String date, String subject, ArrayList<String> speechIDs
+                                AgendaItem_Impl angendaItem = new AgendaItem_Impl(agendaItemID, date, electionPeriod, heldSpeechList);
+                                agendaItems.add(angendaItem);
                             }
-                            String agendaItemID = protocolID + agendaItemSubID;
 
-                            // hier wird ein Tagesordnungspunkt abgespeichert String id, String date, String subject, ArrayList<String> speechIDs
-                            AgendaItem_Impl angendaItem = new AgendaItem_Impl(agendaItemID, date, electionPeriod, heldSpeechList);
-                            agendaItems.add(angendaItem);
-                        }
+                            if (preList.item(j).getNodeName().equals("sitzungsende")) {
+                                endTime = preList.item(j).getAttributes().getNamedItem("sitzung-ende-uhrzeit").getTextContent();
 
-                        if (preList.item(j).getNodeName().equals("sitzungsende")) {
-                            endTime = preList.item(j).getAttributes().getNamedItem("sitzung-ende-uhrzeit").getTextContent();
-
+                            }
                         }
                     }
                 }
+
+                // hier wird ein Protokol abgespeichert.
+                //String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems
+                Protocol_Impl protocol = new Protocol_Impl(protocolID, date, TimeHelper.convertToISOtime(beginTime),
+                        TimeHelper.convertToISOtime(endTime), Integer.valueOf(electionPeriod),
+                        Integer.valueOf(protocolNumber), sessionLeaders, agendaItemsStr);
+                protocols.add(protocol);
+
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+
+            } catch (SAXException e) {
+                e.printStackTrace();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+
             }
-
-            // hier wird ein Protokol abgespeichert.
-            //String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems
-            Protocol_Impl protocol = new Protocol_Impl(protocolID, date, TimeHelper.convertToISOtime(beginTime),
-                    TimeHelper.convertToISOtime(endTime), Integer.valueOf(electionPeriod),
-                    Integer.valueOf(protocolNumber), sessionLeaders, agendaItemsStr);
-            protocols.add(protocol);
-
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        } catch (SAXException e) {
-            e.printStackTrace();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
         }
     }
 
