@@ -8,6 +8,7 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import data.*;
 import exceptions.WrongInputException;
+import org.bson.BsonRegularExpression;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import utility.annotations.*;
@@ -521,7 +522,7 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     public void getSpeechesBySpeakerCount() {
-        Bson groupSpeaker = group(new Document("rednerID", "$rednerID"),
+        Bson groupSpeaker = group(new Document("speaker_id", "$speaker_id"),
                 sum("SpeechesCount", 1));
         Bson sortDesc = sort(descending("SpeechesCount"));
         db.getCollection("test_speech").aggregate(Arrays.asList(groupSpeaker, sortDesc))
@@ -603,22 +604,28 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("waiting for correct structure of collection")
-    public void commentatorToSpeaker() {
-        Bson project = project(new Document("commentatorID", 1)
-                .append("CommentatorFirstName", "$CommentatorPerson.first_name")
-                .append("CommentatorLastName", "$CommentatorPerson.last_name")
-                .append("SpeakerFirstName", "$SpeakerPerson.first_name")
-                .append("SpeakerLastName", "$SpeakerPerson.last_name"));
-        Bson lookupCommentator = lookup("test_person", "commentatorID", "_id", "CommentatorPerson");
-        Bson lookupSpeaker = lookup("test_person", "rednerID", "_id", "SpeakerPerson");
+    public ArrayList<ArrayList<Object>> commentatorToSpeaker() {
+        ArrayList<ArrayList<Object>> commentatorToSpeakerData = new ArrayList<>();
+
+        Bson lookupCommentator = lookup("test_person", "commentator_id", "_id", "CommentatorPerson");
+        Bson lookupSpeaker = lookup("test_person", "speaker_id", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
+        Bson project = project(new Document("CommentatorName", "$CommentatorPerson.full_name")
+                .append("SpeakerName", "$SpeakerPerson.full_name")
+                .append("sentiment", 1));
+
+        // Index [0] = CommentatorName, [1] = SpeakerName, [2] = Comment sentiment
         db.getCollection("test_comment").aggregate(Arrays.asList(lookupCommentator, lookupSpeaker,unwindCommentator, unwindSpeaker, project))
                 .allowDiskUse(false)
-                .forEach((Block<? super Document>) procBlock -> System.out.println("Abgeordneter "
-                        + procBlock.getString("CommentatorFirstName") + " " + procBlock.getString("CommentatorLastName")
-                        + " kommentierte "
-                        + procBlock.getString("SpeakerFirstName") + " " + procBlock.getString("SpeakerLastName")));
+                .forEach((Block<? super Document>) procBlock -> {
+                    ArrayList<Object> data = new ArrayList<>();
+                    data.add(procBlock.getString("CommentatorName"));
+                    data.add(procBlock.getString("SpeakerName"));
+                    data.add(procBlock.getDouble("sentiment"));
+                    commentatorToSpeakerData.add(data);
+                });
+        return commentatorToSpeakerData;
     }
 
     /**
@@ -629,19 +636,88 @@ public class MongoDBHandler {
     public HashMap<String, ArrayList<String>> matchSpeakerToDDC() {
         HashMap<String, ArrayList<String>> speakerWithDDCMap = new HashMap<>();
 
-        Bson lookup = lookup("test_person", "rednerID", "_id", "Speaker");
+        Bson lookup = lookup("test_person", "speakerID", "_id", "Speaker");
         Bson unwind = unwind("$Speaker");
-        Bson project = project(new Document("Abgeordneter",
-                new Document("$concat", Arrays.asList("$Speaker.first_name", " ", "$Speaker.last_name")))
-                .append("DDCCategory" , 1));
+        Bson project = project(new Document("Abgeordneter", "$Speaker.full_name")
+                .append("main_topic" , 1));
         Bson group = new Document("$group", new Document()
                         .append("_id", "$Abgeordneter")
-                        .append("DDCKategorien", new Document("$push", "$DDCCategory")));
+                        .append("DDCKategorien", new Document("$push", "$main_topic")));
 
-        db.getCollection("test_speech").aggregate(Arrays.asList(lookup, unwind, project, group))
+        db.getCollection("test_speech_edvin").aggregate(Arrays.asList(lookup, unwind, project, group))
                 .allowDiskUse(false)
                 .forEach((Block<? super Document>) procBlock -> speakerWithDDCMap.put(procBlock.getString("_id"),  ((ArrayList<String>) procBlock.get("DDCKategorien"))));
+        System.out.println(speakerWithDDCMap);
        return speakerWithDDCMap;
+    }
+
+    /**
+     * find all speeches that follow the search pattern
+     * @author Edvin Nise
+     * @param filter
+     */
+    @Unfinished("Need to know what data we will need for the visualisation")
+    public void findSpeech(String filter) {
+        Bson match = match(new Document("$text", new Document("$search", filter)));
+        Bson project = project(new Document("_id", 1));
+        db.getCollection("test_speech_edvin").aggregate(Arrays.asList(match, project))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+
+    /**
+     * returns all required Data for visualisation of a speech
+     * @param redeID
+     * @author Edvin Nise
+     */
+    public void allSpeechData(String redeID) {
+        Bson match = match(new Document("_id", new Document("$eq", redeID)));
+        Bson lookupSpeaker = lookup("test_person", "speakerID", "_id", "Speaker");
+        Bson lookupComments = lookup("test_comment", "_id", "speech_id", "comments");
+        Bson unwindSpeaker = unwind("$Speaker");
+        Bson unwindComments = unwind("$comments");
+        Bson lookupCommentator = lookup("test_person", "comments.commentator_id", "_id", "CommentatorData");
+        Bson unwindCommentatorData = unwind("$CommentatorData");
+        Bson addFieldMergedCommentWithData = new Document("$addFields",
+                new Document("CommentatorWithComments",
+                        new Document("$mergeObjects", Arrays.asList("$comments", "$CommentatorData"))));
+        Bson project = project(new Document("comments", 0)
+                .append("CommentatorData", 0));
+
+        db.getCollection("test_speech_edvin").aggregate(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker,
+                unwindComments, lookupCommentator, unwindCommentatorData, addFieldMergedCommentWithData, project))
+                .allowDiskUse(false)
+                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    }
+
+    /**
+     * returns named or unnamed vote results
+     * @author Edvin Nise
+     */
+    @Unfinished("Dont know where we save this data")
+    public void getVoteResults() {
+
+    }
+
+    /**
+     * create a text index for a collection by indexing a specific field
+     * @param col
+     * @param field
+     * @author Edvin Nise
+     */
+    public void createTextIndex(String col, String field) {
+        db.getCollection(col).createIndex(Indexes.text(field));
+        System.out.println("Created text index " + field + "_text successfully!");
+    }
+
+    /**
+     * drops the text index of a given collection
+     * @param col
+     * @param field
+     * @author Edvin Nise
+     */
+    public void dropTextIndex(String col, String field){
+        db.getCollection(col).dropIndex(field + "_text");
     }
 
 }
