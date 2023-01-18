@@ -25,16 +25,19 @@ public class PollScraper {
     /*
         Current last poll is https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=830
         The page's source has elements which directly correspond to the poll results.
-        Polls (seemingly) start at ID 0: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=0
+        Polls (seemingly) start at ID 1: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=1
         The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
         and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
-        Polls with ID = 0 and lower all seem to have one default result (and since we are iterating from i = 1 upward we won't
+        Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i = 1 upward we won't
         ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
+        Some IDs seem to be missing, e.g. 470. The noPollCounter variable controls whether missing polls are
+        consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
      */
 
-    /**
-     * Private to restrict other classes from instantiating a PollScraper.
-     */
+    // Counts how many polls in a row don't exist.
+    private static int noPollCounter = 0;
+
+    // Private to restrict other classes from instantiating a PollScraper.
     private PollScraper() {}
 
     /**
@@ -51,10 +54,12 @@ public class PollScraper {
             try {
                 polls.add(getOnePoll(i));
             } catch (IOException e) {
-                System.err.println("There was a problem with poll ID #" + i + ":" + e.getMessage());
+                System.err.println("There was a problem with poll ID #" + i + ": " + e.getMessage());
                 e.printStackTrace();
             } catch (NoPollException e) {
-                hasMorePolls = false;
+                System.err.println(e.getMessage() + " noPollCounter is at " + ++noPollCounter);
+                // if 3 polls in a row don't exist it's a safe bet that there won't be any more
+                if (noPollCounter > 2) hasMorePolls = false;
             }
         }
 
@@ -70,13 +75,14 @@ public class PollScraper {
      */
     @Unfinished("Need to find out the poll ID (Meaning the related Drucksache)")
     public static Poll getOnePoll(int id) throws NoPollException, IOException {
-        // Gatekeep
         if (id < 1) throw new NoPollException("There are no polls with an ID < 1");
 
         Document pollHTML = Jsoup.connect("https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=" + id).get();
-
         Elements pollElements = pollHTML.getElementsByClass("bt-teaser-chart-solo");
+
         if (pollElements.isEmpty()) throw new NoPollException("The poll with ID " + id + " doesn't exist.");
+
+        noPollCounter = 0;
 
         // Ganz ehrlich, ich weiß noch nicht, ob die ID ein einziger String ist oder lieber eine liste oder sonst was,
         // auf jeder Abstimmungsseite scheinen mehrere Drucksachen verlinkt zu sein (Für gewöhnlich 2, manchmal auch 3).
@@ -116,10 +122,10 @@ public class PollScraper {
             pollMap.get(currentFraction)[3] = Integer.parseInt(results[3]);
         }
 
-        System.out.println();
-        for (Map.Entry<String, int[]> stringEntry : pollMap.entrySet()) {
-            System.out.println(stringEntry.getKey() + " = " +Arrays.toString(stringEntry.getValue()));
-        }
+//        System.out.println();
+//        for (Map.Entry<String, int[]> stringEntry : pollMap.entrySet()) {
+//            System.out.println(stringEntry.getKey() + " = " +Arrays.toString(stringEntry.getValue()));
+//        }
 
         return new Poll_Impl(_id,
                 pollMap.get("SPD"),

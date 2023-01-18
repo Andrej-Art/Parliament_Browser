@@ -17,9 +17,8 @@ public class TimeHelper {
     private static final DateTimeFormatter DATE_FORMAT_INPUT = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
     private static final DateTimeFormatter CLOCK_FORMAT_INPUT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
 
-    /**
-     * Private to restrict other classes from instantiating a TimeHelper.
-     */
+
+     // Private to restrict other classes from instantiating a TimeHelper.
     private TimeHelper(){}
 
     /**
