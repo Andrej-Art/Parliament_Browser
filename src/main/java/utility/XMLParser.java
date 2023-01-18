@@ -355,9 +355,7 @@ public class XMLParser {
                                             if (plProtoNoList.item(l).getNodeName().equals("sitzungsnr")) {
                                                 protocolNumber = plProtoNoList.item(l).getTextContent();
                                             }
-
                                         }
-
                                     }
 
                                     protocolID = electionPeriod + "/" + protocolNumber;
@@ -374,19 +372,15 @@ public class XMLParser {
                                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
                                                 date = LocalDate.parse(dateString, formatter);
 
-
                                             }
                                         }
-
                                     }
 
                                     if (headList.item(k).getNodeName().equals("sitzungstitel")) {
                                         protocolTitle = headList.item(k).getTextContent();
 
                                     }
-
                                 }
-
                             }
 
                             if (preList.item(j).getNodeName().equals("inhaltsverzeichnis")) {
@@ -396,11 +390,8 @@ public class XMLParser {
                                 ivzAgendaItems = e.get(0);
                                 ivzAgendaTitle = e.get(1);
 
-
                             }
-
                         }
-
                     }
 
                     if (testList.item(i).getNodeName().equals("sitzungsverlauf")) {
@@ -427,14 +418,12 @@ public class XMLParser {
                                             agendaItemTitle = ivzAgendaTitle.get(l);
 
                                         }
-
                                     }
                                     if (agendaItemTitle.equals("Ich bin ein hässliches Lelek das keiner mag weil ich nicht ordentlich funktioniere")) {
 
                                         agendaItemTitle = agendaItemSubID;
 
                                     }
-
                                 }
                                 NodeList speechesList = preList.item(j).getChildNodes();
                                 for (int k = 0; k < speechesList.getLength(); k++) {
@@ -476,7 +465,7 @@ public class XMLParser {
                                 }
                                 String agendaItemID = protocolID + agendaItemSubID;
 
-                                // hier wird ein Tagesordnungspunkt abgespeichert String id, String date, String subject, ArrayList<String> speechIDs
+                                // hier wird ein Tagesordnungspunkt abgespeichert
                                 AgendaItem_Impl angendaItem = new AgendaItem_Impl(agendaItemID, date, electionPeriod, heldSpeechList);
                                 agendaItems.add(angendaItem);
                             }
@@ -490,7 +479,6 @@ public class XMLParser {
                 }
 
                 // hier wird ein Protokol abgespeichert.
-                //String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems
                 Protocol_Impl protocol = new Protocol_Impl(protocolID, date, TimeHelper.convertToISOtime(beginTime),
                         TimeHelper.convertToISOtime(endTime), Integer.valueOf(electionPeriod),
                         Integer.valueOf(protocolNumber), sessionLeaders, agendaItemsStr);
