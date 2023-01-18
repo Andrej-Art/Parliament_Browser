@@ -1,6 +1,8 @@
 package utility;
 
 import data.Speech;
+import utility.uima.ProcessedSpeech;
+import de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import org.apache.uima.UIMAException;
@@ -16,19 +18,14 @@ import org.hucompute.textimager.uima.gervader.GerVaderSentiment;
 import org.hucompute.textimager.uima.spacy.SpaCyMultiTagger3;
 import org.hucompute.textimager.uima.type.Sentiment;
 import org.hucompute.textimager.uima.type.category.CategoryCoveredTagged;
-import org.texttechnologylab.annotation.NamedEntity;
 import org.xml.sax.SAXException;
-import utility.uima.MongoNamedEntity;
-import utility.uima.MongoSentence;
-import utility.uima.MongoToken;
-import utility.uima.ProcessedSpeech;
+import utility.uima.*;
 
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
@@ -58,11 +55,11 @@ public class UIMAPerformer {
     public ProcessedSpeech processSpeech(Speech speech) {
         JCas jcas = getJCas(speech.getText());
         String fullCas = getFullCas(jcas);
+        double sentiment = getAverageSentiment(jcas);
+        String mainTopic = getMainTopic(jcas);
         List<MongoToken> tokens = getTokens(jcas);
         List<MongoSentence> sentences= getSentences(jcas);
         List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
-        double sentiment = getAverageSentiment(jcas);
-        String mainTopic = getMainTopic(jcas);
         return new ProcessedSpeech(speech, fullCas, sentiment, mainTopic, tokens, sentences, namedEntities);
     }
 
@@ -75,11 +72,11 @@ public class UIMAPerformer {
      * @param text The text to analyze.
      * @return JCas holding the analysis.
      * @see #getFullCas(JCas)
-     * @see #getTokens(JCas) 
-     * @see #getSentences(JCas) 
-     * @see #getNamedEntities(JCas) 
      * @see #getMainTopic(JCas)
      * @see #getAverageSentiment(JCas)
+     * @see #getTokens(JCas) 
+     * @see #getSentences(JCas) 
+     * @see #getNamedEntities(JCas)
      * @author Eric Lakhter
      */
     public JCas getJCas(String text) {
@@ -127,6 +124,37 @@ public class UIMAPerformer {
     }
 
     /**
+     * Returns the DDC category with the highest score in the text.
+     * @param jcas JCas containing the text.
+     * @return DDC category name.
+     * @see #getJCas(String)
+     * @author Eric Lakhter
+     */
+    public String getMainTopic(JCas jcas) {
+        Iterator<CategoryCoveredTagged> cct = JCasUtil.select(jcas, CategoryCoveredTagged.class).iterator();
+        return cct.hasNext() ?
+                ddcCategories[Integer.parseInt(cct.next().getValue().substring(13))]
+                : null;
+    }
+
+    /**
+     * Returns the average text sentiment.
+     * @param jcas JCas containing the text
+     * @return Average sentiment.
+     * @see #getJCas(String)
+     * @author Eric Lakhter
+     */
+    public double getAverageSentiment(JCas jcas) {
+        try {
+            return new ArrayList<>(JCasUtil.select(jcas, Sentiment.class))
+                    .get(1)
+                    .getSentiment();
+        } catch (IndexOutOfBoundsException e) {
+            return 0.0;
+        }
+    }
+
+    /**
      * Extracts all Sentences from a JCas.
      * @param jcas JCas with Sentences.
      * @return {@code List<}{@link MongoSentence}{@code >} consisting of all text sentences.
@@ -137,10 +165,11 @@ public class UIMAPerformer {
         List<Sentence> sentences = new ArrayList<>(JCasUtil.select(jcas, Sentence.class));
         List<Sentiment> sentiments = new ArrayList<>(JCasUtil.select(jcas, Sentiment.class));
         List<MongoSentence> mongoSentences = new ArrayList<>(0);
+
+        // if the text is empty, the sentiment list has 1 entry
+        // if there is 1 sentence, the sentiment list has 2 entries
+        // if there are more sentences, the sentiment list has at least 4 entries
         switch (sentences.size()) {
-            // if the text is empty, the sentiment list has 1 entry
-            // if there is 1 sentence, the sentiment list has 2 entries
-            // if there are more entries, the sentiment list has at least 4 entries
             case 0:
                 break;
             case 1:
@@ -171,45 +200,6 @@ public class UIMAPerformer {
             mongoNamedEntities.add(new MongoNamedEntity(ne.getBegin(), ne.getEnd(), ne.getValue(), ne.getCoveredText()));
         }
         return mongoNamedEntities;
-    }
-
-    /**
-     * Returns the DDC category with the highest score in the text.
-     * @param jcas JCas containing the text.
-     * @return DDC category name.
-     * @see #getJCas(String)
-     * @author Eric Lakhter
-     */
-    public String getMainTopic(JCas jcas) {
-        try { // If the text is empty, there is no saved category ranking so the next() method throws an exception
-            return ddcCategories[Integer.parseInt(
-                    JCasUtil.select(jcas, CategoryCoveredTagged.class)
-                            .iterator()
-                            .next()
-                            .getValue()
-                            .substring(13)
-            )];
-        } catch (NoSuchElementException e) {
-            return null;
-        }
-
-    }
-
-    /**
-     * Returns the average text sentiment.
-     * @param jcas JCas containing the text
-     * @return Average sentiment.
-     * @see #getJCas(String)
-     * @author Eric Lakhter
-     */
-    public double getAverageSentiment(JCas jcas) {
-        try {
-            return new ArrayList<>(JCasUtil.select(jcas, Sentiment.class))
-                    .get(1)
-                    .getSentiment();
-        } catch (IndexOutOfBoundsException e) {
-            return 0.0;
-        }
     }
 
     /*

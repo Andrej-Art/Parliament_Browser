@@ -11,9 +11,6 @@ import exceptions.WrongInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import utility.annotations.*;
-import utility.uima.MongoNamedEntity;
-import utility.uima.MongoSentence;
-import utility.uima.MongoToken;
 import utility.uima.ProcessedSpeech;
 
 import java.io.FileInputStream;
@@ -250,23 +247,16 @@ public class MongoDBHandler {
      */
     public void insertSpeech(ProcessedSpeech processedSpeech){
         //Insert single processedSpeech into speech collection
-        try {db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechCollectionJson()));}
-        catch(MongoWriteException ignored){};
+        try {db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()));}
+        catch(MongoWriteException ignored){}
 
         //Insert single document into speech_cas collection
-        Document speechCASDoc = new Document()
-                .append("_id", processedSpeech.getID())
-                .append("full_cas", processedSpeech.getFullCas());
-        try {db.getCollection("speech_cas").insertOne(speechCASDoc);}
-        catch(MongoWriteException ignored){};
+        try {db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()));}
+        catch(MongoWriteException ignored){}
 
         //Insert single document into speech_tokens collection
-        Document speechTokensDoc = new Document()
-                .append("_id", processedSpeech.getID())
-                .append("speaker_id", processedSpeech.getSpeakerID())
-                .append("tokens", processedSpeech.getTokens());
-        try {db.getCollection("speech_tokens").insertOne(speechTokensDoc);}
-        catch(MongoWriteException ignored){};
+        try {db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()));}
+        catch(MongoWriteException ignored){}
     }
 
     /**
@@ -283,26 +273,22 @@ public class MongoDBHandler {
 
         for(ProcessedSpeech processedSpeech: processedSpeeches){
             //parse into Bson Document and add to list
-            speechDocs.add(Document.parse(processedSpeech.toSpeechCollectionJson()));
+            speechDocs.add(Document.parse(processedSpeech.toSpeechJson()));
 
-            //Create Document for speech_cas and add to list
-            Document speechCASDoc = new Document()
-                    .append("_id", processedSpeech.getID())
-                    .append("full_cas", processedSpeech.getFullCas());
-            speechCasDocs.add(speechCASDoc);
+            //parse into Bson Document for speech_cas and add to list
+            speechCasDocs.add(Document.parse(processedSpeech.toSpeechCasJson()));
 
-            //Create Document for speech_tokens collection and add to list
-            Document speechTokensDoc = new Document()
-                    .append("_id", processedSpeech.getID())
-                    .append("speaker_id", processedSpeech.getSpeakerID())
-                    .append("tokens", processedSpeech.getTokens());
-            speechTokenDocs.add(speechTokensDoc);
+            //parse into Bson Document for speech_tokens collection and add to list
+            speechTokenDocs.add(Document.parse(processedSpeech.toSpeechTokensJson()));
         }
 
         // MongoBulkWriteExceptions are caught when inserting the Lists
-        try {db.getCollection("speech").insertMany(speechDocs, imo);} catch (MongoBulkWriteException ignored) {};
-        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);} catch (MongoBulkWriteException ignored) {};
-        try {db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);} catch (MongoBulkWriteException ignored) {};
+        try {db.getCollection("speech").insertMany(speechDocs, imo);}
+        catch (MongoBulkWriteException ignored) {}
+        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);}
+        catch (MongoBulkWriteException ignored) {}
+        try {db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);}
+        catch (MongoBulkWriteException ignored) {}
 
     }
 
@@ -362,13 +348,26 @@ public class MongoDBHandler {
         }
     }
 
+    /**
+     * Inserts a list of polls into the {@code poll} collection.
+     * @param polls List of Poll objects.
+     * @author Eric Lakhter
+     */
+    public void insertPolls(List<Poll> polls) {
+        List<Document> pollDocs = new ArrayList<>();
+        for (Poll poll : polls) {
+            pollDocs.add(Document.parse(poll.toJson()));
+        }
+        try {db.getCollection("poll").insertMany(pollDocs, imo);}
+        catch (MongoBulkWriteException ignored) {}
+    }
 
     /**
      * Updates a Document in the database, by replacing it with the given Document
      * @param document the document that will replace the Document with the specified id
      * @param collection  the collection to get from the database
      * @param id  the id of the Document to be replaced
-     * @return boolean true if update was sucessful false if not
+     * @return boolean true if update was successful, false if not
      * @author DavidJordan
      */
     public boolean updateDocument(Document document, String collection, String id){
@@ -516,6 +515,7 @@ public class MongoDBHandler {
     public boolean checkIfDocumentExists(String col, String id) {
         return db.getCollection(col).find(new Document("_id", id)).iterator().hasNext();
     }
+
     /**
      * returns all Speakers with their speeches count.
      * @author Edvin Nise
