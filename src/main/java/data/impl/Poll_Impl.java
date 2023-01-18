@@ -3,7 +3,7 @@ package data.impl;
 import data.Poll;
 import exceptions.WrongInputException;
 
-import java.io.IOException;
+import java.time.LocalDate;
 
 /**
  * The {@code Poll} class contains the results of a poll for each fraction.
@@ -11,7 +11,8 @@ import java.io.IOException;
  * @author Eric Lakhter
  */
 public class Poll_Impl implements Poll {
-    private final String _id;
+    private final int _id;
+    private final LocalDate date;
     private final int[] spd;
     private final int[] cxu;
     private final int[] b90;
@@ -39,10 +40,11 @@ public class Poll_Impl implements Poll {
      * @param independent Array with independent results.
      * @throws WrongInputException if any of the arrays has a length != 4.
      */
-    public Poll_Impl(String _id, int[] spd, int[] cxu, int[] b90, int[] fdp, int[] afd, int[] linke, int[] independent) throws WrongInputException {
+    public Poll_Impl(int _id, LocalDate date, int[] spd, int[] cxu, int[] b90, int[] fdp, int[] afd, int[] linke, int[] independent) throws WrongInputException {
         if (spd.length != 4 || cxu.length != 4 || b90.length != 4 || fdp.length != 4 || afd.length != 4 || linke.length != 4 || independent.length != 4)
             throw new WrongInputException("At least one of the fraction results doesn't have the right amount of fields.");
         this._id = _id;
+        this.date = date;
         this.spd = spd;
         this.cxu = cxu;
         this.b90 = b90;
@@ -54,7 +56,7 @@ public class Poll_Impl implements Poll {
 
     @Override
     public String toJson(){
-        return "{\n  _id:\"" + _id + "\"," +
+        return "{\n  _id:" + _id + ",date:\"" + date + "\"," +
                 "\n  SPDYes:" + spd[0] + ",SPDNo:" + spd[1] + ",SPDAbstained:" + spd[2] + ",SPDNoVotes:"  + spd[3] + "," +
                 "\n  CxUYes:" + cxu[0] + ",CxUNo:" + cxu[1] + ",CxUAbstained:" + cxu[2] + ",CxUNoVotes:"  + cxu[3] + "," +
                 "\n  B90Yes:" + b90[0] + ",B90No:" + b90[1] + ",B90Abstained:" + b90[2] + ",B90NoVotes:"  + b90[3] + "," +

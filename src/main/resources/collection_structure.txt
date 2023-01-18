@@ -96,6 +96,7 @@ user:
 
 poll:
     _id                 String
+    date                LocalDate
     SPDYes              int
     SPDNo               int
     SPDAbstained        int

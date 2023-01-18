@@ -14,7 +14,10 @@ import java.util.Locale;
  * @author Eric Lakhter
  */
 public class TimeHelper {
-    private static final DateTimeFormatter DATE_FORMAT_INPUT = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
+    // Used in protocols
+    private static final DateTimeFormatter DATE_FORMAT_INPUT_1 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
+    // Used on the german Bundestag's website
+    private static final DateTimeFormatter DATE_FORMAT_INPUT_2 = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMANY);
     private static final DateTimeFormatter CLOCK_FORMAT_INPUT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
 
 
@@ -22,17 +25,36 @@ public class TimeHelper {
     private TimeHelper(){}
 
     /**
-     * Converts dates of the pattern {@code dd.MM.yyyy} to the ISO-8601 calendar system.
+     * Converts dates of the pattern {@code dd.MM.yyyy} to a LocalDate.
      * @param date Date String.
      * @return Respective {@code LocalDate}.
      * @author Eric Lakhter
      */
     public static LocalDate convertToISOdate(String date){
-        return LocalDate.parse(date, DATE_FORMAT_INPUT);
+        return convertToISOdate(date, 1);
     }
 
     /**
-     * Converts times of the pattern {@code H:mm} to the ISO-8601 calendar system.
+     * Converts date Strings to a LocalDate.
+     * @param date Date String.
+     * @param mode Undefined modes behave like mode 1.<br>
+     *             - 1 means that dates of the pattern {@code dd.MM.yyyy} get converted.<br>
+     *             - 2 means that dates of the pattern {@code d. MMMM yyyy} get converted.
+     * @return Respective {@code LocalDate}.
+     * @author Eric Lakhter
+     */
+    public static LocalDate convertToISOdate(String date, int mode){
+        switch (mode) {
+            case 2:
+                return LocalDate.parse(date, DATE_FORMAT_INPUT_2);
+            case 1:
+            default:
+                return LocalDate.parse(date, DATE_FORMAT_INPUT_1);
+        }
+    }
+
+    /**
+     * Converts times of the pattern {@code H:mm} to a LocalTime.
      * @param time Time String.
      * @return Respective {@code LocalTime}.
      * @author Eric Lakhter
@@ -52,7 +74,7 @@ public class TimeHelper {
      */
     public static long durationBetweenTimesInMinutes(Temporal begin, Temporal end) {
         long dauer = ChronoUnit.MINUTES.between(begin, end);
-        if (dauer <= 0) {  // eg. beginn = 11:00; ende = 09:00
+        if (dauer <= 0) {  // eg. begin = 11:00; end = 09:00
             dauer += 1440; // minutes in a day
         }
         return dauer;
