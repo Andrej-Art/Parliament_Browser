@@ -156,11 +156,7 @@ public class XMLProtocolParser {
                                                 else sessionLeaders.add(sessionLeader);
                                                 //System.out.println(sessionLeaders);
 
-
-
-
                                                 break;
-
 
                                             //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
@@ -223,12 +219,10 @@ public class XMLProtocolParser {
 
                                                 //System.out.println(comment + comment.contains("["));
 
-                                                commentList.add(comment);
-
-
-
+                                                if(commentList.contains(comment))
+                                                {}
+                                                else commentList.add(comment);
                                                 break;
-
 
                                             default:
                                                 break;
@@ -253,6 +247,8 @@ public class XMLProtocolParser {
                                     //Protocol_Impl protocol = new Protocol_Impl(_id, sessionDate, beginTime, endTime, electionPeriod, protocolNumber, sessionLeader, topid);
                                     Protocol_Impl protocol = new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
                                    // Comment_Impl comment = new Comment_Impl(CommentID, speechID, speakerID, commentatorID, commentText, date,)
+                                    System.out.println(commentList);
+
 
                                     //System.out.println(protocol + " "+protocol.getSessionLeaders());
                                     //Comment_Impl comment = new Comment_Impl(commentID, speakerID);
