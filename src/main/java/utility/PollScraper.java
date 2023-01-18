@@ -40,7 +40,8 @@ public class PollScraper {
     private PollScraper() {}
 
     /**
-     * Iterates over all polls on the german Bundestag's webpage and returns them.
+     * Iterates over all polls on the german Bundestag's webpage and returns them.<br>
+     * Collecting all the poll data takes a few minutes.
      * @return A list of {@link Poll} objects.
      * @see #getOnePoll(int)
      * @author Eric Lakhter
@@ -57,8 +58,9 @@ public class PollScraper {
                 e.printStackTrace();
             } catch (NoPollException e) {
                 System.err.println(e.getMessage() + " noPollCounter is at " + ++noPollCounter);
-                // if 3 polls in a row don't exist it's a safe bet that there won't be any more
-                if (noPollCounter > 2) hasMorePolls = false;
+                // if 15 polls in a row don't exist it's a safe bet that there won't be any more
+                // there is a 10 poll gap between ID 422 and 431
+                if (noPollCounter > 14) hasMorePolls = false;
             }
         }
 
