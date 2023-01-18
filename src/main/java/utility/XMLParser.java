@@ -4,6 +4,7 @@ package utility;
 import data.impl.AgendaItem_Impl;
 import data.impl.Person_Impl;
 import data.impl.Protocol_Impl;
+import org.apache.commons.math.linear.ArrayRealVector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -309,7 +310,7 @@ public class XMLParser {
      * @author Julian Ocker
      */
     private void protocolParse(String source, String target) {
-
+        personParse();
         // declaring the Variables needed
         String beginTime = "";
         String endTime = "";
@@ -471,8 +472,8 @@ public class XMLParser {
                             String agendaItemID = protocolID + agendaItemSubID;
 
                             // hier wird ein Tagesordnungspunkt abgespeichert String id, String date, String subject, ArrayList<String> speechIDs
-                            AgendaItem_Impl angendaItem = new AgendaItem_Impl(agendaItemID, date, electionPeriod, null);
-
+                            AgendaItem_Impl angendaItem = new AgendaItem_Impl(agendaItemID, date, electionPeriod, heldSpeechList);
+                            agendaItems.add(angendaItem);
                         }
 
                         if (preList.item(j).getNodeName().equals("sitzungsende")) {
@@ -487,8 +488,8 @@ public class XMLParser {
             //String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems
             Protocol_Impl protocol = new Protocol_Impl(protocolID, date, TimeHelper.convertToISOtime(beginTime),
                     TimeHelper.convertToISOtime(endTime), Integer.valueOf(electionPeriod),
-                    Integer.valueOf(protocolNumber), null, agendaItemsStr);
-
+                    Integer.valueOf(protocolNumber), sessionLeaders, agendaItemsStr);
+            protocols.add(protocol);
 
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
