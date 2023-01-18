@@ -7,9 +7,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import utility.annotations.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -20,7 +20,6 @@ import java.util.*;
  * @see Poll
  * @author Eric Lakhter
  */
-@Unfinished("Doesn't actually scrape anything yet")
 public class PollScraper {
     /*
         Current last poll is https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=830
@@ -41,7 +40,8 @@ public class PollScraper {
     private PollScraper() {}
 
     /**
-     * Iterates over all polls on the german Bundestag's webpage and returns them.
+     * Iterates over all polls on the german Bundestag's webpage and returns them.<br>
+     * Collecting all the poll data takes a few minutes.
      * @return A list of {@link Poll} objects.
      * @see #getOnePoll(int)
      * @author Eric Lakhter
@@ -58,8 +58,9 @@ public class PollScraper {
                 e.printStackTrace();
             } catch (NoPollException e) {
                 System.err.println(e.getMessage() + " noPollCounter is at " + ++noPollCounter);
-                // if 3 polls in a row don't exist it's a safe bet that there won't be any more
-                if (noPollCounter > 2) hasMorePolls = false;
+                // if 15 polls in a row don't exist it's a safe bet that there won't be more
+                // there is a 10 poll gap between ID 422 and 431
+                if (noPollCounter > 14) hasMorePolls = false;
             }
         }
 
@@ -73,8 +74,8 @@ public class PollScraper {
      * @throws NoPollException If the poll with the given ID cannot be found.
      * @author Eric Lakhter
      */
-    @Unfinished("Need to find out the poll ID (Meaning the related Drucksache)")
     public static Poll getOnePoll(int id) throws NoPollException, IOException {
+
         if (id < 1) throw new NoPollException("There are no polls with an ID < 1");
 
         Document pollHTML = Jsoup.connect("https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=" + id).get();
@@ -82,21 +83,12 @@ public class PollScraper {
 
         if (pollElements.isEmpty()) throw new NoPollException("The poll with ID " + id + " doesn't exist.");
 
+        // If pollElements isn't empty poll results were found
         noPollCounter = 0;
 
-        // Ganz ehrlich, ich weiß noch nicht, ob die ID ein einziger String ist oder lieber eine liste oder sonst was,
-        // auf jeder Abstimmungsseite scheinen mehrere Drucksachen verlinkt zu sein (Für gewöhnlich 2, manchmal auch 3).
-        // Allerdings scheint es auch so, dass die zweite die erste in ihrem Inneren erwähnt, die dritte erwähnt die
-        // zweite Drucksache usw.
-        // Bsp. https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=828
-        // Erwähnte Drucksachen (in derselben Reihenfolge wie auf der Seite): 20/3879, 20/4229 und 20/4729
-        // - 20/3879 erwähnt keine
-        // - 20/4229 erwähnt 20/3879
-        // - 20/4729 erwähnt 20/3879, 20/4229
-        // Abhängig davon wie die Drucksachen in den Protokollen erwähnt sind brauchen wir entweder alle,
-        // oder es ist immer eindeutig welche wir nehmen müssen.
+        LocalDate date = TimeHelper.convertToISOdate(
+                pollHTML.getElementsByClass("bt-dachzeile").first().text(), 2);
 
-        String _id = "";
         /*
             Each index represents a party's votes:
             [0]: # of YES votes
@@ -122,12 +114,8 @@ public class PollScraper {
             pollMap.get(currentFraction)[3] = Integer.parseInt(results[3]);
         }
 
-//        System.out.println();
-//        for (Map.Entry<String, int[]> stringEntry : pollMap.entrySet()) {
-//            System.out.println(stringEntry.getKey() + " = " +Arrays.toString(stringEntry.getValue()));
-//        }
-
-        return new Poll_Impl(_id,
+        return new Poll_Impl(id,
+                date,
                 pollMap.get("SPD"),
                 pollMap.get("CDU/CSU"),
                 pollMap.get("B90/GRÜNE"),
