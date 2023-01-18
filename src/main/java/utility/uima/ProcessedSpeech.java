@@ -54,7 +54,8 @@ public class ProcessedSpeech {
 
     /**
      * Converts almost all fields (excluding {@code fullCas} and {@code tokens})
-     * into a String compatible with {@code org.bson.Document.parse()}.
+     * into a String compatible with {@code org.bson.Document.parse()}.<br>
+     * Intended to go into the {@code speech} collection.
      * @return JSON String.
      * @author Eric Lakhter
      */
@@ -124,7 +125,8 @@ public class ProcessedSpeech {
 
     /**
      * Converts all Speech fields + {@code fullCas}
-     * into a String compatible with {@code org.bson.Document.parse()}.
+     * into a String compatible with {@code org.bson.Document.parse()}.<br>
+     * Intended to go into the {@code speech_cas} collection.
      * @return JSON String.
      * @author Eric Lakhter
      */
@@ -139,7 +141,8 @@ public class ProcessedSpeech {
 
     /**
      * Converts almost all fields (excluding {@code fullCas} and {@code tokens})
-     * into a String compatible with {@code org.bson.Document.parse()}.
+     * into a String compatible with {@code org.bson.Document.parse()}.<br>
+     * Intended to go into the {@code speech_tokens} collection.
      * @return JSON String.
      * @author Eric Lakhter
      */

@@ -22,7 +22,7 @@ public class Poll_Impl implements Poll {
 
     /**
      * Constructor for a new Poll. The results can be read with the {@link #toJson} method.<br>
-     * Each array contains the result in this order:
+     * Each array should contain the result in this order:
      * <ul>
      *     <li>[0]: # of <b>YES</b> votes</li>
      *     <li>[1]: # of <b>NO</b> votes</li>

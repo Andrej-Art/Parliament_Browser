@@ -17,11 +17,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Class to analyze the XML files and create objects
@@ -364,13 +362,9 @@ public class XMLParser {
                                         NodeList dateList = headList.item(k).getChildNodes();
                                         for (int l = 0; l < dateList.getLength(); l++) {
                                             if (dateList.item(l).getNodeName().equals("datum")) {
-                                                /**
-                                                 * geklaut von Quelle:
-                                                 * https://www.baeldung.com/java-string-to-date
-                                                 */
-                                                String dateString = dateList.item(l).getAttributes().getNamedItem("date").getTextContent();
-                                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
-                                                date = LocalDate.parse(dateString, formatter);
+
+                                                date = TimeHelper.convertToISOdate(
+                                                        dateList.item(l).getAttributes().getNamedItem("date").getTextContent());
 
                                             }
                                         }
