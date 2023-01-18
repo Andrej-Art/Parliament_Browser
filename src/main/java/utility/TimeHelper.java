@@ -13,11 +13,14 @@ import java.util.Locale;
  *
  * @author Eric Lakhter
  */
-// Abstract class with static methods; used like this:
-// LocalDate date = TimeHelper.convertToISOdate("01.01.1970");
-public abstract class TimeHelper {
+public class TimeHelper {
     private static final DateTimeFormatter DATE_FORMAT_INPUT = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
     private static final DateTimeFormatter CLOCK_FORMAT_INPUT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
+
+    /**
+     * Private to restrict other classes from instantiating a TimeHelper.
+     */
+    private TimeHelper(){}
 
     /**
      * Converts dates of the pattern {@code dd.MM.yyyy} to the ISO-8601 calendar system.

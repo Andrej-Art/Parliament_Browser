@@ -5,18 +5,18 @@ import data.impl.Poll_Impl;
 import exceptions.NoPollException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import utility.annotations.Testing;
-import utility.annotations.Unfinished;
+import utility.annotations.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The {@code PollScraper} class finds the german Bundestag's polls and converts them into {@link Poll} objects.
+ * The {@code PollScraper} class finds the german Bundestag's polls and converts them into Poll objects.
  * <p>Notice: <a href="https://www.bundestag.de/parlament/plenum/abstimmung/">https://www.bundestag.de/parlament/plenum/abstimmung/</a>
  * and <a href="https://www.bundestag.de/abstimmung">https://www.bundestag.de/abstimmung</a> are effectively the same page,
  * but the poll results are only saved on the first path.
+ * @see Poll
  * @author Eric Lakhter
  */
 @Unfinished("Doesn't actually scrape anything yet")
@@ -30,6 +30,11 @@ public class PollScraper {
         Negative number polls all seem to have one default result (and since we are iterating from i = 0 upward we won't
         ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
      */
+
+    /**
+     * Private to restrict other classes from instantiating a PollScraper.
+     */
+    private PollScraper() {}
 
     /**
      * Iterates over all polls on the german Bundestag's webpage and returns them.
@@ -95,7 +100,7 @@ public class PollScraper {
 
         Document pollHTML = Jsoup.connect("https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=" + id).get();
 
-//        System.out.println(pollHTML.html());
+        System.out.println(pollHTML.html());
 
         // magic happens here
 
