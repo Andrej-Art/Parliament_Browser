@@ -52,11 +52,16 @@ public class UIMAPerformer {
         Methods for serialization of all data at once
      */
 
+    /**
+     * Processes a {@code Speech} and returns an object ready for insertion into the MongoDB.
+     * @param speech The speech to be processed.
+     * @return A processed speech without getters but 3 different {@code toJson()} methods.
+     */
     public ProcessedSpeech processSpeech(Speech speech) {
         JCas jcas = getJCas(speech.getText());
         String fullCas = getFullCas(jcas);
         double sentiment = getAverageSentiment(jcas);
-        String mainTopic = getMainTopic(jcas);
+        String mainTopic = null; //getMainTopic(jcas);
         List<MongoToken> tokens = getTokens(jcas);
         List<MongoSentence> sentences= getSentences(jcas);
         List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
@@ -97,8 +102,8 @@ public class UIMAPerformer {
      * @author Eric Lakhter
      */
     public String getFullCas(JCas jcas) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             XmlCasSerializer.serialize(jcas.getCas(), baos);
             return baos.toString();
         } catch (SAXException | IOException e) {
@@ -117,7 +122,7 @@ public class UIMAPerformer {
         List<MongoToken> mongoTokens = new ArrayList<>(0);
         for (Token token : JCasUtil.select(jcas, Token.class)) {
             mongoTokens.add(new MongoToken(
-                    token.getBegin(), token.getEnd(), token.getLemmaValue(), token.getPosValue()
+                    token.getBegin(), token.getEnd(), token.getLemmaValue(), token.getPos().getCoarseValue()
             ));
         }
         return mongoTokens;

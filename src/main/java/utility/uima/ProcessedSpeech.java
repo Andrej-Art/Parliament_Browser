@@ -158,11 +158,11 @@ public class ProcessedSpeech {
                     .append(token.getStartPos())
                     .append(",endPos:")
                     .append(token.getEndPos())
-                    .append(",lemmaValue:")
+                    .append(",lemmaValue:\"")
                     .append(token.getLemmaValue())
-                    .append(",POS:")
+                    .append("\",POS:\"")
                     .append(token.getPOS())
-                    .append("},");
+                    .append("\"},");
         }
         tokenString.append("\n  ],");
         jsonString.append(tokenString).append("\n}");
