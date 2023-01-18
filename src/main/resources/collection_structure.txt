@@ -2,16 +2,16 @@
 
 protocol:
     _id                 String
-    election_period     int
-    protocol_number     int
+    electionPeriod      int
+    protocolNumber      int
     date                LocalDate
     begin               LocalTime
     end                 LocalTime
-    dauer               long
+    duration            long
     # -------------->   String personID
-    session_leaders     [personID, personID, ...]
+    sessionLeaders      [personID, personID, ...]
     # -------------->   String agendeItemID
-    agenda_item_ids     [agendeItemID, agendeItemID, ...]
+    agendaItemIDs       [agendeItemID, agendeItemID, ...]
 
 ########################################################################################################################
 
@@ -19,11 +19,11 @@ protocol:
 
 agenda_item:
     _id                 String
-    election_period     int
-    protocol_number     int
+    electionPeriod      int
+    protocolNumber      int
     date                LocalDate
     # -------------->   String speechID
-    speech_ids          [speechID, speechID, ...]
+    speechIDs           [speechID, speechID, ...]
 
 ########################################################################################################################
 
@@ -31,7 +31,7 @@ agenda_item:
 
 person:
     _id                 String
-    VollerName          String
+    fullName            String
     - Alle 20 millionen anderen redner-info felder -
 
 ########################################################################################################################
@@ -41,28 +41,30 @@ person:
 
 speech:
     _id                 String
-    speaker_id          String
+    speakerID           String
     text                String
-    datum               LocalDate
+    date                LocalDate
     sentiment           double
-    main_topic          String
-    # -------------->   int start_pos, int end_pos, double sentiment
-    sentences           [[start_pos, end_pos, sentiment], ...]
-    # -------------->   int start_pos, int end_pos, String covered_text
-    named_entities_per  [[start_pos, end_pos, covered_text], ...]
-    named_entities_org  [[start_pos, end_pos, covered_text], ...]
-    named_entities_loc  [[start_pos, end_pos, covered_text], ...]
+    mainTopic           String
+    # -------------->   int startPos, int endPos, double sentiment
+    sentences           [[startPos, endPos, sentiment], ...]
+    # -------------->   int startPos, int endPos, String coveredText
+    namedEntitiesPer    [[startPos, endPos, coveredText], ...]
+    namedEntitiesOrg    [[startPos, endPos, coveredText], ...]
+    namedEntitiesLoc    [[startPos, endPos, coveredText], ...]
 
 speech_cas:
     _id                 String
-    full_cas            String (<XMI> bla bla bla)
+    speakerID           String
+    date                LocalDate
+    fullCas             String (<XMI> bla bla bla)
 
 speech_tokens:
     _id                 String
-    speaker_id          String
+    speakerID           String
     date                LocalDate
-    # -------------->   int start, int end, String lemmaValue, String pos
-    tokens              [[start, end, lemmaValue, pos], [start, end, lemmaValue, POS], ...]
+    # -------------->   int start, int end, String lemmaValue, String POS
+    tokens              [[start, end, lemmaValue, POS], [start, end, lemmaValue, POS], ...]
 
 ########################################################################################################################
 
@@ -70,11 +72,12 @@ speech_tokens:
 
 comment:
     _id                 String
-    speech_id           String
-    speaker_id          String
-    commentator_id      String
+    speechID            String
+    speakerID           String
+    commentatorID       String
     text                String
     date                LocalDate
+    pos                 int
     sentiment           double
 
 ########################################################################################################################
@@ -86,3 +89,38 @@ user:
     _id                 String
     password            String
     rights              String
+
+########################################################################################################################
+
+# _id ist Drucksachennummer
+
+poll:
+    _id                 String
+    SPDYes              int
+    SPDNo               int
+    SPDAbstained        int
+    SPDnoVote           int
+    CxUYes              int
+    CxUNo               int
+    CxUAbstained        int
+    CxUNoVotes          int
+    B90Yes              int
+    B90No               int
+    B90Abstained        int
+    B90NoVotes          int
+    FDPYes              int
+    FDPNo               int
+    FDPAbstained        int
+    FDPNoVotes          int
+    AfDYes              int
+    AfDNo               int
+    AfDAbstained        int
+    AfDNoVotes          int
+    LINKEYes            int
+    LINKENo             int
+    LINKEAbstained      int
+    LINKENoVotes        int
+    independentYes      int
+    independentNo       int
+    independentAbstained    int
+    independentNoVotes  int

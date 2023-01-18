@@ -30,7 +30,7 @@ public class MongoToken {
         return lemmaValue;
     }
 
-    public String getPos() {
+    public String getPOS() {
         return pos;
     }
 }
