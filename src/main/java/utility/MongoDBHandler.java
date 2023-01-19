@@ -439,6 +439,41 @@ public class MongoDBHandler {
         }
     }
 
+    /**
+     * Adds potential person/fraction filters in front of a pipeline performed on either the speech or comment collection.
+     * If both person and fraction filters exist, person has priority while fraction gets ignored.
+     * <p> If enabled, the project stage leaves the pipeline with a collection containing the
+     * {@code _id, redeID, rednerID, neededFieldOne, neededFieldTwo} and if filtering for fractions a
+     * {@code persondata} field matching the {@code rednerID} form the person collection.
+     * @param pipeline The pipeline to be modified.
+     * @param personFilter The person ID to be filtered for.
+     * @param fractionFilter the fraction to be filtered for.
+     * @param neededField Potential field names to be added to the projection. No projection will be performed if
+     *                    no needed fields are given.
+     * @author Eric Lakhter
+     * @modified DavidJordan
+     */
+    private void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String personFilter, String fractionFilter, String... neededField) {
+        Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
+        for (String field : neededField) {
+            projectDoc.append(field, 1);
+        }
+
+        Bson project = project(projectDoc);
+
+        if (!personFilter.isEmpty()) {
+            pipeline.add(0, match(new Document("speakerID", personFilter)));
+        } else if (!fractionFilter.isEmpty()) {
+            pipeline.add(0, match(new Document("persondata.fraction", fractionFilter)));
+            pipeline.add(0, unwind("$persondata"));
+            pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
+        }
+
+        if (neededField.length != 0) {
+            pipeline.add(0, project);
+        }
+    }
+
 
 
     /**
