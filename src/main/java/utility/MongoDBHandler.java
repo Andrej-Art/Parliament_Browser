@@ -8,7 +8,6 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import data.*;
 import exceptions.WrongInputException;
-import org.bson.BsonRegularExpression;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import utility.annotations.*;
@@ -17,6 +16,7 @@ import utility.uima.ProcessedSpeech;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Accumulators.*;
 import static com.mongodb.client.model.Aggregates.*;
@@ -484,6 +484,24 @@ public class MongoDBHandler {
      */
     public boolean checkIfDocumentExists(String col, String id) {
         return db.getCollection(col).find(new Document("_id", id)).iterator().hasNext();
+    }
+
+    /**
+     * Token ranking for line chart
+     * @param ranks Top n tokens
+     * @author Eric Lakhter
+     */
+    public void testPipeline(int ranks){
+        Bson unwind = unwind("$tokens");
+        Bson group = group("$tokens.lemmaValue", sum("count", 1));
+        Bson sort = sort(descending("count"));
+//        Bson rankMode = limit(ranks);
+        Bson rankMode = match(gte("count", ranks));
+        MongoIterable<Document> result = db.getCollection("test_speech_token_edvin")
+                .aggregate(Arrays.asList(unwind, group, sort, rankMode));
+        for (Document doc : result) {
+            System.out.println(doc.toJson());
+        }
     }
 
     /**
