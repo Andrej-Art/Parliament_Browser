@@ -6,6 +6,8 @@ import org.bson.Document;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that implements the Speech interface. Provides different constructors to enable
@@ -17,6 +19,7 @@ public class Speech_Impl implements Speech {
     private Document speechDoc;
     private String _id, speakerID, text;
     private LocalDate date;
+    private List<String[]> commentData;
 
     /**
      * Full {@code Speech} Constructor to be used when parsed data is entered.
@@ -31,6 +34,24 @@ public class Speech_Impl implements Speech {
         this.speakerID = speakerID;
         this.text = text;
         this.date = date;
+        this.commentData = new ArrayList<>();
+    }
+
+    /**
+     * Full {@code Speech} Constructor to be used when parsed data is entered.
+     * @param id The
+     * @param speakerID  The "RednerID" of the Speaker
+     * @param text The raw Speech text
+     * @param date The ISO date of the Speech.
+     * @param commentData The comment data for this speech.
+     * @author DavidJordan
+     */
+    public Speech_Impl(String id, String speakerID, String text, LocalDate date, List<String[]> commentData){
+        this._id = id;
+        this.speakerID = speakerID;
+        this.text = text;
+        this.date = date;
+        this.commentData = commentData;
     }
 
     /**
@@ -64,5 +85,10 @@ public class Speech_Impl implements Speech {
     @Override
     public LocalDate getDate() {
         return this.date;
+    }
+
+    @Override
+    public List<String[]> getCommentData() {
+        return this.commentData;
     }
 }
