@@ -439,6 +439,8 @@ public class MongoDBHandler {
         }
     }
 
+
+
     /**
      * Returns the text belonging to either a speech or comment ID.
      * @param col Collection to collect from. Must be either {@code speech} or {@code comment}.

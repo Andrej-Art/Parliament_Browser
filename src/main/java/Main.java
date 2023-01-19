@@ -49,6 +49,9 @@ public class Main {
             //Receiving user input
             switch (userInput){
 
+                case "test":
+
+
                 case "1":
                     System.out.println("All protocols and necessary files will be downloaded.");
                     Scraper.downloadAllXMLs();

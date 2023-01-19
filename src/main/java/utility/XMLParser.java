@@ -45,7 +45,7 @@ public class XMLParser {
      * @return
      * @author Julian Ocker
      */
-    public static void personParse() {
+    public static /*Data_Kraken*/ void personParse(/*, Data_Kraken data_pack*/) {
         System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
         String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
         try {

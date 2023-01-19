@@ -65,7 +65,7 @@ public class Scraper {
                     }
                 }
 
-                /**
+                /*
                  * case for mdb-Stammdaten
                  */
 
