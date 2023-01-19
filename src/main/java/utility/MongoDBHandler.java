@@ -282,11 +282,11 @@ public class MongoDBHandler {
         }
 
         // MongoBulkWriteExceptions are caught when inserting the Lists
-        try {db.getCollection("test_speech_edvin").insertMany(speechDocs, imo);}
+        try {db.getCollection("speech").insertMany(speechDocs, imo);}
         catch (MongoBulkWriteException ignored) {}
-        try {db.getCollection("test_speech_cas_edvin").insertMany(speechCasDocs, imo);}
+        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);}
         catch (MongoBulkWriteException ignored) {}
-        try {db.getCollection("test_speech_token_edvin").insertMany(speechTokenDocs, imo);}
+        try {db.getCollection("speech_token").insertMany(speechTokenDocs, imo);}
         catch (MongoBulkWriteException ignored) {}
 
     }
