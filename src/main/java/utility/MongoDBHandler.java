@@ -443,8 +443,8 @@ public class MongoDBHandler {
      * Adds potential person/fraction filters in front of a pipeline performed on either the speech or comment collection.
      * If both person and fraction filters exist, person has priority while fraction gets ignored.
      * <p> If enabled, the project stage leaves the pipeline with a collection containing the
-     * {@code _id, redeID, rednerID, neededFieldOne, neededFieldTwo} and if filtering for fractions a
-     * {@code persondata} field matching the {@code rednerID} form the person collection.
+     * {@code _id, speechID, speakerID, neededFieldOne, neededFieldTwo} and if filtering for fractions a
+     * {@code persondata} field matching the {@code speakerID} form the person collection.
      * @param pipeline The pipeline to be modified.
      * @param personFilter The person ID to be filtered for.
      * @param fractionFilter the fraction to be filtered for.
