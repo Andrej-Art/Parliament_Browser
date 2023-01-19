@@ -420,8 +420,6 @@ public class MongoDBHandler {
     }
 
 
-
-
     /**
      * Adds potential date filters in front of an aggregation pipeline.
      * @param pipeline The pipeline to be modified.
