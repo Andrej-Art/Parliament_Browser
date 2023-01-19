@@ -20,6 +20,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -36,27 +37,32 @@ import java.util.regex.Pattern;
 
 public class XMLProtocolParser {
 
-    private Map<String, Speech_Impl> speechMap;
+    //private Map <Object, Speech_Impl>speechMap;
+    HashMap<Object, Speech_Impl> speechMap = new HashMap<>();
+
+
+
     private Map<String, Person_Impl> speakerMap;
     private Map<String, Comment_Impl> commentMap;
     private Map<String, Protocol_Impl> protocolMap;
+
 
     //Create New Instance of DocumentBuilderFactory
     static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
     public static void speechParse2() {
 
-        /*
+        //Reset Maps
+        //speechMap = new HashMap<>();
+
 
          //Create connection to mongoDB
          MongoDBHandler mongoDBHandler = null;
          try {
-         mongoDBHandler = new MongoDBHandler();
+             mongoDBHandler = new MongoDBHandler();
          } catch (IOException e) {
          e.printStackTrace();
          }
-         */
-
 
         try {
 
@@ -64,6 +70,8 @@ public class XMLProtocolParser {
             DocumentBuilder db = dbf.newDocumentBuilder();
             //access to our downloaded protocol-files
             File[] files = new File("ProtokollXMLs/").listFiles();
+
+
 
             // iterating over all xml-protocols
             for (int i = files.length - 1; i >= 0; i--) {
@@ -82,8 +90,13 @@ public class XMLProtocolParser {
                     NodeList sessionInfoNodes = xmlDoc.getElementsByTagName("dbtplenarprotokoll");
                     //iterate threw all dbtplenarptotokoll nodes
 
+                    /*
+
 
                     ArrayList <String> sessionLeaders = new ArrayList<>();
+                    ArrayList<String> agendaItemIDS = new ArrayList<>();
+
+                     */
 
 
 
@@ -98,7 +111,7 @@ public class XMLProtocolParser {
                             int protocolNumber = Integer.parseInt(sessionInfoElement.getAttribute("sitzung-nr"));
                             int electionPeriod = Integer.parseInt(sessionInfoElement.getAttribute("wahlperiode"));
                             String _id = (electionPeriod + "/" + protocolNumber);
-                            System.out.println(_id);
+                            //System.out.println(_id);
 
                             //using the methods from the TimeHelper class we can convert the date and time
                             String sessionDate = (sessionInfoElement.getAttribute("sitzung-datum"));
@@ -111,11 +124,20 @@ public class XMLProtocolParser {
 
                             //Iterate through all Tagesordnungspunkte
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
+
+                            // ################################################### !!!!! Aufpassen wo sollen die Listen hin?
+                            ArrayList <String> sessionLeaders = new ArrayList<>();
+                            ArrayList<String> agendaItemIDS = new ArrayList<>();
+                            // ####################################################
+
+
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
-                                ArrayList<String> agendaItemIDS = new ArrayList<>();
-                                agendaItemIDS.add(topid);
-                                System.out.println(topid);
+                                //ArrayList<String> agendaItemIDS = new ArrayList<>();
+                                if(agendaItemIDS.contains(topid))
+                                {}
+                                else agendaItemIDS.add(topid);
+                                //System.out.println(topid);
 
                                 //Go through all Speeches
                                 List<Element> speechElementList = getElementList(aiElement, "rede");
@@ -134,7 +156,6 @@ public class XMLProtocolParser {
                                     int sameSpeechCounter = 0;
 
 
-
                                     //Go through all ChildNodes of a speech
                                     List<Element> speechChildNodeList = getChildElementList(speech);
                                     String commentID = null;
@@ -148,12 +169,14 @@ public class XMLProtocolParser {
                                                 addStatus = false;
                                                 // @Testing //Get sessionLeader
                                                 String sessionLeader = speechChild.getTextContent();
-                                                //sessionLeaders.add(sessionLeader);
 
-                                                //System.out.println(sessionLeaders);
-                                                if(sessionLeaders.contains(sessionLeader))
-                                                {}
-                                                else sessionLeaders.add(sessionLeader);
+                                                //removes ":" after each session leader
+                                                sessionLeader = sessionLeader.replaceFirst("\\:", "");
+
+
+                                                // Adds missing session leaders to the list
+                                                if (sessionLeaders.contains(sessionLeader)) {
+                                                } else sessionLeaders.add(sessionLeader);
                                                 //System.out.println(sessionLeaders);
 
                                                 break;
@@ -187,11 +210,11 @@ public class XMLProtocolParser {
                                                 String comment = speechChild.getTextContent();
 
                                                 //Remove first bracket of comment
-                                                comment = comment.replaceFirst("\\(","");
+                                                comment = comment.replaceFirst("\\(", "");
 
                                                 //Remove last bracket of comment
                                                 String reComment = new StringBuilder(comment).reverse().toString();
-                                                reComment = reComment.replaceFirst("\\)","");
+                                                reComment = reComment.replaceFirst("\\)", "");
                                                 comment = new StringBuilder(reComment).reverse().toString();
 
                                                 /*
@@ -216,12 +239,11 @@ public class XMLProtocolParser {
                                                  */
 
 
-
                                                 //System.out.println(comment + comment.contains("["));
 
-                                                if(commentList.contains(comment))
-                                                {}
-                                                else commentList.add(comment);
+                                                if (commentList.contains(comment)) {
+                                                } else commentList.add(comment);
+
                                                 break;
 
                                             default:
@@ -243,11 +265,27 @@ public class XMLProtocolParser {
 
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                     addToSpeechMap(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
-                                    Speech_Impl speech2 = new Speech_Impl(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
+                                    addToProtocolMap(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
+                                    //Speech_Impl speech2 = new Speech_Impl(speechID, speakerID, speechText, TimeHelper.convertToISOdate(sessionDate));
                                     //Protocol_Impl protocol = new Protocol_Impl(_id, sessionDate, beginTime, endTime, electionPeriod, protocolNumber, sessionLeader, topid);
-                                    Protocol_Impl protocol = new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
-                                   // Comment_Impl comment = new Comment_Impl(CommentID, speechID, speakerID, commentatorID, commentText, date,)
-                                    System.out.println(commentList);
+                                    //Protocol_Impl protocol = new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
+
+
+
+
+
+
+                                   /*
+                                   #####################################################################################
+
+                                   speeches haben unterschiedliche Zeichenlänge und werden nicht wiederholt
+                                   System.out.println(speech2.getText().length());
+
+
+                                    */
+
+
+                                    // Comment_Impl comment = new Comment_Impl(CommentID, speechID, speakerID, commentatorID, commentText, date,
 
 
                                     //System.out.println(protocol + " "+protocol.getSessionLeaders());
@@ -382,16 +420,51 @@ public class XMLProtocolParser {
      */
 
     public static void addToSpeechMap(String speechID, String speakerID, String speechText, LocalDate date){
-        new Speech_Impl(speechID, speakerID, speechText, date);
+
+        /**
+
+        if ((!(speakerID.equals(""))) && (!(speechText.equals("")))) {
+            speechMap.put(speechID, speakerID, speechText, date);
+
+        }
+         */
+        //new Speech_Impl(speechID, speakerID, speechText, date);
+       // speechMap.put(new Speech_Impl(speechID, speakerID, speechText, date));
 
         /*
         System.out.println(speechID);
         System.out.println(speakerID);
         System.out.println(speechText);
         System.out.println(date);
-        System.out.println("----------------------");
+        System.out.println("------------------------------------------------------------------");
 
          */
+
+        /*
+        Note: die kommentare/Ansagen der Sitzungsleiter sind eine eigene "Speech" und haben eine eigene.
+        speechID erhalten. Sie haben keinen Eintrag für speakerID (das müsste noch befüllt werden).
+         */
+
+
+
+    }
+
+    public static void addToProtocolMap(String _id,LocalDate date,LocalTime begin,LocalTime end,long sessionDuration,int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders,ArrayList<String> agendaItemIDS){
+        new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
+
+
+        System.out.println(_id);
+        System.out.println(date);
+        System.out.println(begin);
+        System.out.println(end);
+        System.out.println(sessionDuration);
+        System.out.println(electionPeriod);
+        System.out.println(protocolNumber);
+        System.out.println(sessionLeaders);
+        System.out.println(agendaItemIDS);
+        System.out.println("--------------------------------------------------------------------------------------------");
+
+
     }
 
     /**
@@ -399,10 +472,28 @@ public class XMLProtocolParser {
      * @author Andrej Artuschenko
      * @return Map<String, Speech_Impl>
      */
-    public Map<String, Speech_Impl> getSpeechMap() {
+    /*
+    public static Map<String, Speech_Impl> getSpeechMap() {
         return speechMap;
 
     }
+
+     */
+    /*
+    public static Map<Object, Speech_Impl> getSpeechMap(){
+        return speechMap;
+    }
+
+     */
+
+
+
+
+
+    public Map<String, Protocol_Impl> getProtocolMap(){
+        return protocolMap;
+    }
+
 
 
     /*
