@@ -10,11 +10,11 @@ import java.util.List;
  * via the {@link ProcessedSpeech#toSpeechJson()} method. The full CAS String and the tokens
  * which aren't part of the JSON String can be requested with their respective getters.
  * @author Eric Lakhter
- * @modified DavidJordan
  */
 public class ProcessedSpeech {
     private final String _id, speakerID, text;
     private final LocalDate date;
+    private final List<String[]> commentData;
     private final String fullCas;
     private final double sentiment;
     private final String mainTopic;
@@ -44,6 +44,7 @@ public class ProcessedSpeech {
         this.speakerID = speech.getSpeakerID();
         this.text = speech.getText();
         this.date = speech.getDate();
+        this.commentData = speech.getCommentData();
         this.fullCas = fullCas;
         this.sentiment = sentiment;
         this.mainTopic = mainTopic;
@@ -60,15 +61,28 @@ public class ProcessedSpeech {
      * @author Eric Lakhter
      */
     public String toSpeechJson() {
-        StringBuilder jsonString = new StringBuilder("{\n  _id:\"" + _id
-                + "\",\n  speakerID:\"" + speakerID
-                + "\",\n  text:\"" + text
-                + "\",\n  date:\"" + date
-                + "\",\n  sentiment:" + sentiment +
-                ",\n  mainTopic:\"" + mainTopic + "\"");
+        StringBuilder jsonString = new StringBuilder(
+                "{\n  _id:\"" + _id + "\","
+                + "\n  speakerID:\"" + speakerID + "\","
+                + "\n  text:\"" + text + "\","
+                + "\n  date:\"" + date + "\",");
+
+        // build comment data field
+        StringBuilder commentDataString = new StringBuilder("\n  commentData:[");
+        for (String[] commentDatum : commentData) {
+            commentDataString.append("\n    {_id:\"")
+                    .append(commentDatum[0])
+                    .append("\",startPos:")
+                    .append(commentDatum[1])
+                    .append("},");
+        }
+        commentDataString.append("\n  ],");
+        jsonString.append(commentDataString);
+
+        jsonString.append("\n  sentiment:").append(sentiment).append(",\n  mainTopic:\"").append(mainTopic).append("\",");
 
         // build sentences field
-        StringBuilder sentenceString = new StringBuilder(",\n  sentences:[");
+        StringBuilder sentenceString = new StringBuilder("\n  sentences:[");
         for (MongoSentence sentence : sentences) {
             sentenceString.append("\n    {startPos:")
                     .append(sentence.getStartPos())

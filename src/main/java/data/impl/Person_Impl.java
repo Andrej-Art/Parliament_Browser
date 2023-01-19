@@ -45,7 +45,6 @@ public class Person_Impl implements Person {
     }
 
     /**
-     *
      * This is also a working idea for a constructor to generate the object from the DB document.
      * Please everybody inspect these two interpretations of our results yesterday and make the necessary adjustments
      * where necessary. Whoever needs setters for specific variables, please add those and modify the constructor accordingly.
@@ -61,7 +60,7 @@ public class Person_Impl implements Person {
         this.role = document.getString("role");
         this.title = document.getString("title");
         this.fraction19 = document.getString("fraction19");
-        this.fraction19 = document.getString("fraction20");
+        this.fraction20 = document.getString("fraction20");
         this.party = document.getString("party");
         this.place = document.getString("place");
         this.gender = document.getString("gender");

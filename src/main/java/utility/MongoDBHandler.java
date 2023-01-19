@@ -282,11 +282,11 @@ public class MongoDBHandler {
         }
 
         // MongoBulkWriteExceptions are caught when inserting the Lists
-        try {db.getCollection("speech").insertMany(speechDocs, imo);}
+        try {db.getCollection("test_speech_edvin").insertMany(speechDocs, imo);}
         catch (MongoBulkWriteException ignored) {}
-        try {db.getCollection("speech_cas").insertMany(speechCasDocs, imo);}
+        try {db.getCollection("test_speech_cas_edvin").insertMany(speechCasDocs, imo);}
         catch (MongoBulkWriteException ignored) {}
-        try {db.getCollection("speech_tokens").insertMany(speechTokenDocs, imo);}
+        try {db.getCollection("test_speech_token_edvin").insertMany(speechTokenDocs, imo);}
         catch (MongoBulkWriteException ignored) {}
 
     }
@@ -440,33 +440,6 @@ public class MongoDBHandler {
             pipeline.add(0, matchDate);
         }
     }
-
-    /**
-     * @param collection the collection to be aggregation-queried, may not be null or the empty string
-     * @param pipeline  the aggregation pipeline stages, may not contain null valued stages
-     * @return MongoIterable of BSON Documents
-     * @author DavidJordan
-     * @author Eric Lakhter
-     */
-    public Iterable<Document> aggregateIterate(String collection, Bson... pipeline) {
-        // Validating the collection name
-        if (collection == null || collection.trim().isEmpty()) {
-            throw new IllegalArgumentException("Invalid collection name");
-        }
-        // Validating the pipeline
-        if (pipeline == null || pipeline.length == 0) {
-            throw new IllegalArgumentException("Invalid pipeline of length = 0");
-        }
-        for (Bson stage : pipeline) {
-            if (stage == null) {
-                throw new IllegalArgumentException("Invalid pipeline stage whith value: null");
-            }
-        }
-
-        MongoIterable<Document> result = db.getCollection(collection).aggregate(Arrays.asList(pipeline));
-        return result;
-    }
-
 
     /**
      * Returns the text belonging to either a speech or comment ID.

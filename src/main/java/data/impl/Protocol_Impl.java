@@ -19,11 +19,11 @@ public class Protocol_Impl implements Protocol {
     private String _id;
     private LocalTime beginTime, endTime;
     private LocalDate date;
+    private long duration;
 
     private int electionPeriod, protocolNumber;
 
     private ArrayList<String> sessionLeaders, agendaItems;
-
 
     /**
      * Full {@code Protocol} constructor that takes the parameters listed below.
@@ -42,6 +42,32 @@ public class Protocol_Impl implements Protocol {
         this.date = date;
         this.beginTime =beginTime;
         this.endTime = endTime;
+        this.duration = 0;
+        this.electionPeriod = electionPeriod;
+        this.protocolNumber = protocolNumber;
+        this.sessionLeaders = sessionLeaders;
+        this.agendaItems = agendaItems;
+    }
+
+    /**
+     * Full {@code Protocol} constructor that takes the parameters listed below.
+     * @param id The Protocol's id
+     * @param date The date of the protocolled session
+     * @param beginTime The Time when the session starts
+     * @param endTime The Time when the session ends
+     * @param duration the duration of the session in minutes
+     * @param electionPeriod The election Period the Protocol is from
+     * @param protocolNumber The Number of the Protocol
+     * @param sessionLeaders The List of all Session leaders for the Protocol
+     * @param agendaItems The List of IDs of the AgendaItems featured in this Protocol
+     * @author DavidJordan
+     */
+    public Protocol_Impl(String id, LocalDate date, LocalTime beginTime, LocalTime endTime, long duration, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems){
+        this._id = id;
+        this.date = date;
+        this.beginTime =beginTime;
+        this.endTime = endTime;
+        this.duration = duration;
         this.electionPeriod = electionPeriod;
         this.protocolNumber = protocolNumber;
         this.sessionLeaders = sessionLeaders;
@@ -94,6 +120,11 @@ public class Protocol_Impl implements Protocol {
     @Override
     public LocalTime getEndTime() {
         return this.endTime;
+    }
+
+    @Override
+    public long getDuration() {
+        return this.duration;
     }
 
     @Override

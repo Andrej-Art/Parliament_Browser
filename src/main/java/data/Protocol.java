@@ -56,6 +56,13 @@ public interface Protocol {
     LocalTime getEndTime();
 
     /**
+     * Gets the duration of the session in minutes.
+     * @return duration
+     * @author Eric Lakhter
+     */
+    long getDuration();
+
+    /**
      * Gets a List of all the session leaders in this protocol.
      * @return sessionLeaders
      * @author DavidJordan
