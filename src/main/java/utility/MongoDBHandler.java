@@ -478,6 +478,43 @@ public class MongoDBHandler {
         }
     }
 
+    /**
+     * Adds potential sentiment filter to an aggregation pipeline. If no sentiment is set and no neededFields are given,
+     * the pipeline is unaltered. If neededFields are provided they are added to a project stage and added to the beginning
+     * of the pipeline. If a sentiment value is given the filter is set accordingly.
+     * @param pipeline the given aggregation pipeline
+     * @param sentiment a String which must be either:  "positive", "neutral" , "negative"  .  To set the filter for the sentiment field.
+     * @param neededField  a number of potential fields that the caller wants to set. No projection is performed if no neededFields are given.
+     * @author DavidJordan
+     */
+    public void applySentimentFilterToAggregation(List<Bson> pipeline, String sentiment, String... neededField){
+        Document projectDoc = new Document();
+        for(String field: neededField){
+            projectDoc.append(field, 1);
+        }
+        Bson project = project(projectDoc);
+
+        Bson sentimentFilter = null;
+        switch (sentiment){
+            case "negative":
+                sentimentFilter = Filters.lt("sentiment", 0);
+                break;
+            case "neutral":
+                sentimentFilter = Filters.eq("sentiment", 0);
+                break;
+            case "positive":
+                sentimentFilter = Filters.gt("sentiment", 0);
+                break;
+        }
+        if(sentimentFilter != null){
+            pipeline.add(0, match(sentimentFilter));
+        }
+
+        if(neededField.length != 0){
+            pipeline.add(project);
+        }
+    }
+
 
 
     /**
