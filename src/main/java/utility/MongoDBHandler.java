@@ -10,6 +10,7 @@ import data.*;
 import exceptions.WrongInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
@@ -649,15 +650,22 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
-    public void getPOSCount() {
+    public JSONObject getPOSCount() {
         Bson unwind = unwind("$tokens");
         Bson project = project(new Document("OnlyPOS", "$tokens.POS"));
         Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
-        Bson sort = descending("CountOfPOS");
+        Bson sort = sort(descending("CountOfPOS"));
+        JSONObject obj = new JSONObject();
+
 
         db.getCollection("test_speech_token_edvin").aggregate(Arrays.asList(unwind, project, group, sort))
                 .allowDiskUse(false)
-                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+                .forEach((Consumer<? super Document>) procBlock -> {
+                    Document doc = (Document) procBlock.get("_id");
+                    obj.put(doc.getString("_id"), procBlock.getInteger("CountOfPOS"));
+                });
+        System.out.println(obj);
+        return obj;
     }
 
     /**
