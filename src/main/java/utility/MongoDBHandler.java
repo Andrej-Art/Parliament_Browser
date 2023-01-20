@@ -439,7 +439,10 @@ public class MongoDBHandler {
         }
     }
 
+    @Unfinished("Probably, needs to be adapted to the fraction 19, fraction 20 options." +
+            " Possibly also needs to be changed to fit the needs of the visualisation in the front end.")
     /**
+     *
      * Adds potential person/fraction filters in front of a pipeline performed on either the speech or comment collection.
      * If both person and fraction filters exist, person has priority while fraction gets ignored.
      * <p> If enabled, the project stage leaves the pipeline with a collection containing the
@@ -453,8 +456,9 @@ public class MongoDBHandler {
      * @author Eric Lakhter
      * @modified DavidJordan
      */
-    private void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String personFilter, String fractionFilter, String... neededField) {
+    public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String personFilter, String fractionFilter, String... neededField) {
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
+        // Setting each of the needed fields to be included in the results
         for (String field : neededField) {
             projectDoc.append(field, 1);
         }
