@@ -4,7 +4,7 @@
 
 List<ProcessedSpeech> processedSpeeches = new ArrayList<>();
 for (Speech speech : speeches) {
-    if (mongodbHandler.checkIfDocumentExists("speech", speech.getID())) {
+    if (!mongodbHandler.checkIfDocumentExists("speech", speech.getID())) {
         processedSpeeches.add(uima.processSpeech(speech));
     }
 }
