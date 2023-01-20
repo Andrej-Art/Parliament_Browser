@@ -481,7 +481,7 @@ public class MongoDBHandler {
     /**
      * Adds potential sentiment filter to an aggregation pipeline. If no sentiment is set and no neededFields are given,
      * the pipeline is unaltered. If neededFields are provided they are added to a project stage and added to the beginning
-     * of the pipeline. If a sentiment value is given the filter is set accordingly.
+     * of the pipeline. If a sentiment value   is given the filter is set accordingly.
      * @param pipeline the given aggregation pipeline
      * @param sentiment a String which must be either:  "positive", "neutral" , "negative"  .  To set the filter for the sentiment field.
      * @param neededField  a number of potential fields that the caller wants to set. No projection is performed if no neededFields are given.
