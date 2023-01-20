@@ -10,6 +10,7 @@ import data.*;
 import exceptions.WrongInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
@@ -32,7 +33,7 @@ import static com.mongodb.client.model.Sorts.descending;
 @Unfinished("This class is unfinished")
 public class MongoDBHandler {
     private final MongoDatabase db;
-    private final InsertManyOptions imo =  new InsertManyOptions().ordered(false);
+    private final InsertManyOptions imo = new InsertManyOptions().ordered(false);
     private final Gson gson = new Gson();
 
     /**
@@ -45,10 +46,10 @@ public class MongoDBHandler {
         prop.load(new FileInputStream(MongoDBHandler.class.getClassLoader().getResource("PRG_WiSe22_Group_9_4.txt").getPath()));
         MongoClient client = MongoClients.create(
                 "mongodb://" + prop.getProperty("remote_user") +
-                ":" + prop.getProperty("remote_password") +
-                "@" + prop.getProperty("remote_host") +
-                ":" + prop.getProperty("remote_port") +
-                "/?authSource=" + prop.getProperty("remote_user"));
+                        ":" + prop.getProperty("remote_password") +
+                        "@" + prop.getProperty("remote_host") +
+                        ":" + prop.getProperty("remote_port") +
+                        "/?authSource=" + prop.getProperty("remote_user"));
         db = client.getDatabase(prop.getProperty("remote_database"));
     }
 
@@ -85,7 +86,7 @@ public class MongoDBHandler {
      * @return the found Document
      * @author DavidJordan
      */
-    public Document getDocument(String col, String id){
+    public Document getDocument(String col, String id) {
         Document document = new Document();
         try {
             Document queryDoc = new Document().append("_id", id);
@@ -103,12 +104,11 @@ public class MongoDBHandler {
      * @param col collection name
      * @author DavidJordan
      */
-    public void createCollection(String col){
-        if(!collectionExists(col)){
+    public void createCollection(String col) {
+        if (!collectionExists(col)) {
             db.createCollection(col);
             System.out.println("Collection " + col + "was created.");
-        }
-        else{
+        } else {
             System.out.println("Collection " + col + "was not created because it already exists.");
         }
     }
@@ -136,7 +136,7 @@ public class MongoDBHandler {
      * @author DavidJordan
      */
     public void insertPersons(List<Person> persons) throws WrongInputException {
-        if (persons == null || persons.isEmpty()){
+        if (persons == null || persons.isEmpty()) {
             throw new WrongInputException("Input is null or empty.");
         }
         ArrayList<Document> mongoPersons = new ArrayList<>(0);
@@ -222,7 +222,7 @@ public class MongoDBHandler {
      * @param rights  The rights that the user has when using his account
      * @author DavidJordan
      */
-    public void insertUser(String id, String password, String rights){
+    public void insertUser(String id, String password, String rights) {
         //Create the user Document
         Document userDoc = new Document()
                 .append("_id", id)
@@ -244,18 +244,24 @@ public class MongoDBHandler {
      * @param processedSpeech
      * @author DavidJordan
      */
-    public void insertSpeech(ProcessedSpeech processedSpeech){
+    public void insertSpeech(ProcessedSpeech processedSpeech) {
         //Insert single processedSpeech into speech collection
-        try {db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()));}
-        catch(MongoWriteException ignored){}
+        try {
+            db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()));
+        } catch (MongoWriteException ignored) {
+        }
 
         //Insert single document into speech_cas collection
-        try {db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()));}
-        catch(MongoWriteException ignored){}
+        try {
+            db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()));
+        } catch (MongoWriteException ignored) {
+        }
 
         //Insert single document into speech_tokens collection
-        try {db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()));}
-        catch(MongoWriteException ignored){}
+        try {
+            db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()));
+        } catch (MongoWriteException ignored) {
+        }
     }
 
     /**
@@ -526,7 +532,8 @@ public class MongoDBHandler {
      */
     public String getText(String col, String id) throws NullPointerException {
         Document result = db.getCollection(col).find(new Document("_id", id)).iterator().tryNext();
-        if (result == null) throw new NullPointerException("The Document with _id = " + id + " does not exist in this collection.");
+        if (result == null)
+            throw new NullPointerException("The Document with _id = " + id + " does not exist in this collection.");
         return result.getString("text");
     }
 
@@ -599,15 +606,40 @@ public class MongoDBHandler {
      * returns count of all Tokens
      * @author Edvin Nise
      */
-    public void getTokenCount() {
-        Bson unwind = Aggregates.unwind("$token");
-        Bson groupToken = group(new Document("Token", "$token"),
-                sum("tokenCount", 1));
-        Bson sortDesc = sort(descending("tokenCount"));
-        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, groupToken, sortDesc))
-                .allowDiskUse(false)
-                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+    public void getTokenCount(int limit) {
+        Bson unwind = unwind("$tokens");
+        Bson group = group("$tokens.lemmaValue", sum("count", 1));
+        Bson sort = sort(descending("count"));
+//        Bson rankMode = limit(limit);
+        Bson rankMode = match(gte("count", limit));
+        MongoIterable<Document> result = db.getCollection("test_speech_token_edvin")
+                .aggregate(Arrays.asList(unwind, group, sort, rankMode));
+        for (Document doc : result) {
+            System.out.println(doc.toJson());
+        }
+    }
 
+    /**
+     * returns all Named Entities with their respective count
+     * @author Edvin Nise
+     */
+    public void facetNamedEntities() {
+        Bson facet = new Document("$facet", new Document()
+                .append("PersonEntity", Arrays.asList(
+                        new Document("$unwind", "$namedEntitiesPer"),
+                        new Document("$group", new Document("_id", "$namedEntitiesPer.coveredText").append("PersonEntityCount", new Document("$sum", 1.0))),
+                        new Document("$sort", new Document("PersonEntityCount", -1))))
+                .append("LocationEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesLoc"),
+                        new Document("$group", new Document("_id", "$namedEntitiesLoc.coveredText").append("LocEntityCount", new Document("$sum", 1))),
+                        new Document("$sort", new Document("LocEntityCount", -1))))
+                .append("OrgEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesOrg"),
+                        new Document("$group", new Document("_id", "$namedEntitiesOrg.coveredText").append("OrgEntityCount", new Document("$sum", 1))),
+                        new Document("$sort", new Document("OrgEntityCount", -1))))
+
+                );
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(facet));
+        db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
     }
 
     /**
@@ -655,13 +687,22 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
-    public void getPOSCount() {
-        Bson unwind = Aggregates.unwind("$tokenWithPos");
-        Bson project = Aggregates.project(new Document("POSValue", new Document("$arrayElemAt", Arrays.asList("$tokenWithPos", 1))));
-        Bson groupPOSValue = group(new Document("POSValue", "$POSValue"), sum("POSValueCount", 1));
-        db.getCollection("test_speech").aggregate(Arrays.asList(unwind, project, groupPOSValue))
+    public JSONObject getPOSCount() {
+        Bson unwind = unwind("$tokens");
+        Bson project = project(new Document("OnlyPOS", "$tokens.POS"));
+        Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
+        Bson sort = sort(descending("CountOfPOS"));
+        JSONObject obj = new JSONObject();
+
+
+        db.getCollection("test_speech_token_edvin").aggregate(Arrays.asList(unwind, project, group, sort))
                 .allowDiskUse(false)
-                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+                .forEach((Consumer<? super Document>) procBlock -> {
+                    Document doc = (Document) procBlock.get("_id");
+                    obj.put(doc.getString("_id"), procBlock.getInteger("CountOfPOS"));
+                });
+        System.out.println(obj);
+        return obj;
     }
 
     /**
@@ -719,15 +760,22 @@ public class MongoDBHandler {
     /**
      * find all speeches that follow the search pattern
      * @author Edvin Nise
-     * @param filter
+     * @param textFilter
      */
     @Unfinished("Need to know what data we will need for the visualisation")
-    public void findSpeech(String filter) {
-        Bson match = match(new Document("$text", new Document("$search", filter)));
+    public void findSpeech(String textFilter, String dateFilterOne, String dateFilterTwo) {
+        Bson match = match(new Document("$text", new Document("$search", textFilter)));
         Bson project = project(new Document("_id", 1));
-        db.getCollection("test_speech_edvin").aggregate(Arrays.asList(match, project))
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(project));
+
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+
+        pipeline.add(0, match);
+        db.getCollection("test_speech_edvin").aggregate(pipeline)
                 .allowDiskUse(false)
-                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
     }
 
     /**
@@ -749,10 +797,12 @@ public class MongoDBHandler {
         Bson project = project(new Document("comments", 0)
                 .append("CommentatorData", 0));
 
-        db.getCollection("test_speech_edvin").aggregate(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker,
-                unwindComments, lookupCommentator, unwindCommentatorData, addFieldMergedCommentWithData, project))
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker, unwindComments
+        , lookupCommentator, unwindCommentatorData, addFieldMergedCommentWithData, project));
+
+        db.getCollection("test_speech_edvin").aggregate(pipeline)
                 .allowDiskUse(false)
-                .forEach((Block<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
+                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson()));
     }
 
     /**
@@ -781,7 +831,7 @@ public class MongoDBHandler {
      * @param field
      * @author Edvin Nise
      */
-    public void dropTextIndex(String col, String field){
+    public void dropTextIndex(String col, String field) {
         db.getCollection(col).dropIndex(field + "_text");
     }
 
