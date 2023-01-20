@@ -213,10 +213,8 @@ public class XMLProtocolParser {
                                             case "kommentar":
                                                 comment = speechChild.getTextContent();
 
-
                                                 //Remove first bracket of comment
                                                 comment = comment.replaceFirst("\\(", "");
-
                                                 //Remove last bracket of comment
                                                 String reComment = new StringBuilder(comment).reverse().toString();
                                                 reComment = reComment.replaceFirst("\\)", "");
@@ -235,7 +233,7 @@ public class XMLProtocolParser {
                                                 }
                                                  */
 
-                                                //String rauslesen aus den eckigen Klammen, um Partei zu erhalten
+                                                //String rauslesen aus den eckigen Klammen, um Partei des Kommentators zu erhalten
                                                 /*
                                                 String partyComment = commentList.get().substring();
                                                 substring(comment.indexOf("[")+1, comment.indexOf("]"));
@@ -249,22 +247,29 @@ public class XMLProtocolParser {
                                                 if (commentList.contains(comment)) {
                                                 } else commentList.add(comment);
 
+                                                // commentID soll sein die speechID + Kommentat#
+
+                                                for (int p = 0; p <= commentList.size(); p++) {
+                                                        commentID = speechID + "/" + p;
+                                                }
+                                                System.out.println(commentID);
+
+
 
                                                 break;
 
                                             default:
                                                 break;
                                         }
-
-
+                                        /*
                                         for (int p = 0; p <= speechElementList.size(); p++) {
                                             for (int c = 0; c <= commentList.size(); c++) {
                                                 commentID = speechID + "/" + p + "/" + c;
 
-
-                                                //System.out.println(commentID);
                                             }
                                         }
+
+                                         */
 
 
                                     }
@@ -273,9 +278,6 @@ public class XMLProtocolParser {
                                     addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                     addToProtocolMap(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
                                     addToCommentMap(commentID, speechID, speakerID, comment, date);
-
-
-
 
 
                                    /*
@@ -455,12 +457,17 @@ public class XMLProtocolParser {
         //System.out.println(protocolMap.size());
     }
 
-    //addToCommentMap(commentID, speechID, speakerID, comment, date);
 
     public static void addToCommentMap(String commentID, String speechID, String speakerID, String comment, LocalDate date){
         if (((!(commentID.equals(""))) && (!(commentMap.containsKey(commentID))))){
             commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, comment, date));
         }
+        /*
+        System.out.println(commentID);
+        System.out.println(speechID);
+        System.out.println(comment);
+
+         */
 
     }
 
