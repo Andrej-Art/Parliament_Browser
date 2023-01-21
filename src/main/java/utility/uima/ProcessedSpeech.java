@@ -77,18 +77,6 @@ public class ProcessedSpeech {
                 + "\n  speakerID:\"" + speakerID + "\","
                 + "\n  text:\"" + text + "\",");
 
-        // build comment data field
-        StringBuilder commentDataString = new StringBuilder("\n  commentData:[");
-        for (String[] commentDatum : commentData) {
-            commentDataString.append("\n    {_id:\"")
-                    .append(commentDatum[0])
-                    .append("\",startPos:")
-                    .append(commentDatum[1])
-                    .append("},");
-        }
-        commentDataString.append("\n  ],");
-        jsonString.append(commentDataString);
-
         jsonString.append("\n  sentiment:").append(sentiment)
                 .append(",\n  mainTopic:\"").append(mainTopic)
                 .append("\",\n  maybeTopic:\"").append(maybeTopic).append("\",");

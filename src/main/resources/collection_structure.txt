@@ -37,7 +37,7 @@ person:
 ########################################################################################################################
 
 # _id ist RedeID
-# eigene collections für volles CAS und tokens während der größe
+# eigene collections für volles CAS und tokens wegen der größe
 
 speech:
     _id                 String
