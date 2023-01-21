@@ -373,9 +373,9 @@ public class MongoDBHandler {
         //Create the  Comment Document
         Document commentDoc = new Document()
                 .append("_id", comment.getID())
-                .append("speech_id", comment.getSpeechID())
-                .append("speaker_id", comment.getSpeakerID())
-                .append("commentator_id", comment.getCommentatorID())
+                .append("speechID", comment.getSpeechID())
+                .append("speakerID", comment.getSpeakerID())
+                .append("commentatorID", comment.getCommentatorID())
                 .append("text", comment.getText())
                 .append("date", comment.getDate())
                 .append("sentiment", sentiment);
