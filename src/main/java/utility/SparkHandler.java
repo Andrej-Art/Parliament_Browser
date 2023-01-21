@@ -26,8 +26,8 @@ public class SparkHandler {
     private static String path = "C:/Users/ericl/Desktop/Uni/5_Semester/PPR/parliament_browser_9_donnerstag_4/src/main/resources/";
 
     public static void main(String[] args) throws IOException {
-        SparkHandler.init();
-        openInDefaultBrowser("http://localhost:4567/");
+        SparkHandler.init(new MongoDBHandler());
+//        openInDefaultBrowser("http://localhost:4567/");
     }
 
     /**
@@ -35,12 +35,8 @@ public class SparkHandler {
      * @see #getHome
      * @author Eric Lakhter
      */
-    public static void init() throws IOException {
-        try {
-            mongoDBHandler = new MongoDBHandler();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static void init(MongoDBHandler mdbh) throws IOException {
+        mongoDBHandler = mdbh;
         cfg.setDirectoryForTemplateLoading(new File(path));
         cfg.setDefaultEncoding("UTF-8");
         port(4567);
@@ -49,6 +45,7 @@ public class SparkHandler {
             if (!path.endsWith("/") && req.queryParams().size() == 0) res.redirect(path + "/") ;
         });
 
+        // Test is for testing
         get("/test/", getTest, new FreeMarkerEngine(cfg));
         get("/", getHome, new FreeMarkerEngine(cfg));
     }

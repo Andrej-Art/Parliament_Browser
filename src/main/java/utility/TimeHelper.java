@@ -33,7 +33,6 @@ public class TimeHelper {
         return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate();
     }
 
-
     /**
      * Converts a Java {@code Date} object to an equivalent LocalTime.
      * @param date Date object form the database
