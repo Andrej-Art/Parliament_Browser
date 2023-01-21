@@ -64,7 +64,10 @@ public class Speech_Impl implements Speech {
         this._id = document.getString("_id");
         this.speakerID = document.getString("speakerID");
         this.text = document.getString("text");
-        this.date = (LocalDate) document.get("date");
+        this.date = LocalDate.parse(document.getString("date"));
+        for (Document doc : (ArrayList<Document>) document.get("commentData")) {
+            this.commentData.add(new String[] {doc.getString("_id"), doc.getInteger("startPos").toString()});
+        }
     }
 
     @Override

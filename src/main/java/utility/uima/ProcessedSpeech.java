@@ -18,6 +18,7 @@ public class ProcessedSpeech {
     private final String fullCas;
     private final double sentiment;
     private final String mainTopic;
+    private final String maybeTopic;
     private final List<MongoToken> tokens;
     private final List<MongoSentence> sentences;
     private final List<MongoNamedEntity> namedEntities;
@@ -37,6 +38,7 @@ public class ProcessedSpeech {
             String fullCas,
             double sentiment,
             String mainTopic,
+            String maybeTopic,
             List<MongoToken> tokens,
             List<MongoSentence> sentences,
             List<MongoNamedEntity> namedEntities) {
@@ -48,6 +50,7 @@ public class ProcessedSpeech {
         this.fullCas = fullCas;
         this.sentiment = sentiment;
         this.mainTopic = mainTopic;
+        this.maybeTopic = maybeTopic;
         this.tokens = tokens;
         this.sentences = sentences;
         this.namedEntities = namedEntities;
@@ -79,7 +82,9 @@ public class ProcessedSpeech {
         commentDataString.append("\n  ],");
         jsonString.append(commentDataString);
 
-        jsonString.append("\n  sentiment:").append(sentiment).append(",\n  mainTopic:\"").append(mainTopic).append("\",");
+        jsonString.append("\n  sentiment:").append(sentiment)
+                .append(",\n  mainTopic:\"").append(mainTopic)
+                .append("\",\n  maybeTopic:\"").append(maybeTopic).append("\",");
 
         // build sentences field
         StringBuilder sentenceString = new StringBuilder("\n  sentences:[");
@@ -133,7 +138,8 @@ public class ProcessedSpeech {
         perString.append("\n  ],");
         orgString.append("\n  ],");
         locString.append("\n  ]");
-        jsonString.append(perString).append(orgString).append(locString).append("\n}");
+        jsonString.append(perString).append(orgString).append(locString)
+                .append("\n}");
         return jsonString.toString();
     }
 

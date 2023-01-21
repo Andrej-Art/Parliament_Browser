@@ -41,7 +41,7 @@ public class PollScraper {
 
     /**
      * Iterates over all polls on the german Bundestag's webpage and returns them.<br>
-     * Collecting all the poll data takes a few minutes.
+     * Warning: Connecting to ~800 webpages might take a few minutes.
      * @return A list of {@link Poll} objects.
      * @see #getOnePoll(int)
      * @author Eric Lakhter
@@ -54,10 +54,10 @@ public class PollScraper {
             try {
                 polls.add(getOnePoll(i));
             } catch (IOException e) {
-                System.err.println("There was a problem with poll ID #" + i + ": " + e.getMessage());
+                System.err.println("There was a problem getting the DOM for poll ID #" + i + ": " + e.getMessage());
                 e.printStackTrace();
-            } catch (NoPollException e) {
-                System.err.println(e.getMessage() + " noPollCounter is at " + ++noPollCounter);
+            } catch (NullPointerException e) {
+                System.err.println(e.getMessage() + "; noPollCounter is at " + ++noPollCounter);
                 // if 15 polls in a row don't exist it's a safe bet that there won't be more
                 // there is a 10 poll gap between ID 422 and 431
                 if (noPollCounter > 14) hasMorePolls = false;
@@ -81,20 +81,20 @@ public class PollScraper {
         Document pollHTML = Jsoup.connect("https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=" + id).get();
         Elements pollElements = pollHTML.getElementsByClass("bt-teaser-chart-solo");
 
-        if (pollElements.isEmpty()) throw new NoPollException("The poll with ID " + id + " doesn't exist.");
+        if (pollElements.isEmpty()) throw new NoPollException("The poll with ID " + id + " doesn't exist");
 
         // If pollElements isn't empty poll results were found
-        noPollCounter = 0;
-
         LocalDate date = TimeHelper.convertToISOdate(
                 pollHTML.getElementsByClass("bt-dachzeile").first().text(), 2);
+        noPollCounter = 0;
+
 
         /*
-            Each index represents a party's votes:
-            [0]: # of YES votes
-            [1]: # of NO votes
-            [2]: # of ABSTAINED votes
-            [3]: # of DIDN'T VOTE vote
+         * Each index represents a party's votes:
+         * [0]: # of YES votes
+         * [1]: # of NO votes
+         * [2]: # of ABSTAINED votes
+         * [3]: # of DIDN'T VOTE vote
          */
         Map<String, int[]> pollMap = new HashMap<>();
         pollMap.put("SPD",              new int[]{0, 0, 0, 0});

@@ -4,7 +4,7 @@ import data.Comment;
 import org.bson.Document;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 /**
@@ -57,7 +57,7 @@ public class Comment_Impl implements Comment {
         this.speakerID = document.getString("speakerID");
         this.commentatorID = document.getString("commentator");
         this.text = document.getString("text");
-        this.date = (LocalDate) document.get("date");
+        this.date = document.getDate("date").toInstant().atZone(ZoneOffset.of("Z")).toLocalDate();
         this.fractions = (ArrayList<String>) document.get("fractions");
         this.commentPosition = document.getInteger("commentPosition");
     }
