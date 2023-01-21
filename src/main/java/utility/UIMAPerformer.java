@@ -43,7 +43,7 @@ public class UIMAPerformer {
      * @throws UIMAException If an error occurs while building the {@code AnalysisEngine}.
      * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/}.
      */
-    public UIMAPerformer(MongoDBHandler mongoDBHandler) throws UIMAException, FileNotFoundException {
+    public UIMAPerformer() throws UIMAException, FileNotFoundException {
         analysisEngine = generateAnalysisEngine();
         ddcCategories = generateDDCCategories();
     }
@@ -61,11 +61,11 @@ public class UIMAPerformer {
         JCas jcas = getJCas(speech.getText());
         String fullCas = getFullCas(jcas);
         double sentiment = getAverageSentiment(jcas);
-        String mainTopic = getMainTopic(jcas);
+        String[] topics = getMainTopic(jcas);
         List<MongoToken> tokens = getTokens(jcas);
         List<MongoSentence> sentences = getSentences(jcas);
         List<MongoNamedEntity> namedEntities = getNamedEntities(jcas);
-        return new ProcessedSpeech(speech, fullCas, sentiment, mainTopic, tokens, sentences, namedEntities);
+        return new ProcessedSpeech(speech, fullCas, sentiment, topics[0], topics[1], tokens, sentences, namedEntities);
     }
 
     /*
@@ -129,17 +129,20 @@ public class UIMAPerformer {
     }
 
     /**
-     * Returns the DDC category with the highest score in the text.
+     * Returns the 2 DDC categories with the highest score in the text.
      * @param jcas JCas containing the text.
-     * @return DDC category name.
+     * @return The two most probable topics in an array.
      * @see #getJCas(String)
      * @author Eric Lakhter
      */
-    public String getMainTopic(JCas jcas) {
+    public String[] getMainTopic(JCas jcas) {
+        String[] topics = new String[2];
         Iterator<CategoryCoveredTagged> cct = JCasUtil.select(jcas, CategoryCoveredTagged.class).iterator();
-        return cct.hasNext() ?
-                ddcCategories[Integer.parseInt(cct.next().getValue().substring(13))]
-                : null;
+        if (cct.hasNext()) {
+            topics[0] = ddcCategories[Integer.parseInt(cct.next().getValue().substring(13))];
+            topics[1] = ddcCategories[Integer.parseInt(cct.next().getValue().substring(13))];
+        }
+        return topics;
     }
 
     /**
