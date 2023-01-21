@@ -1,5 +1,7 @@
 package data;
 
+import java.util.ArrayList;
+
 /**
  * Interface representing all Persons appearing in the Parliament Protocols and the
  * Abgeordneten Stammdaten.
@@ -21,7 +23,7 @@ public interface Person {
      * @return electionPeriods
      * @author DavidJordan
      */
-    String[] getPicture();
+    ArrayList<String> getPicture();
 
 
     /**

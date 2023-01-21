@@ -73,6 +73,7 @@ public class XMLProtocolParser {
         UIMAPerformer uima = new UIMAPerformer(mongoDBHandler);
 
         try {
+            mongoDBHandler.getPersons();
 
             //Parsing all XMLs-protocols from last to first one
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -153,6 +154,7 @@ public class XMLProtocolParser {
 
                                     String speakerID = "";
                                     String speechText = "";
+                                    Integer commentNumber = 0;
                                     //String sessionLeader= "";
                                     //List for comments (every speech get a list of comments)
                                     List<String> commentList = new ArrayList<>(0);
@@ -218,7 +220,10 @@ public class XMLProtocolParser {
 
                                             case "kommentar":
                                                 comment = speechChild.getTextContent();
-
+                                                // commentID soll sein die speechID + / + Kommentar#
+                                                commentNumber++;
+                                                commentID = speechID + "/" + commentNumber;
+                                                String commentPosition = "" + speechText.length();
                                                 //Remove first bracket of comment
                                                 comment = comment.replaceFirst("\\(", "");
                                                 //Remove last bracket of comment
@@ -231,7 +236,7 @@ public class XMLProtocolParser {
                                                 Jedes Mal, wenn eckige Klammern vorkommen, wird geprüft,
                                                 ob vor den Klammern der Name vorkommt.
 
-                                                String fullName = "Renate Künast" ;
+                                                String fullName = "Renate Künast";
 
                                                 Boolean commentatorName =(comment.indexOf(fullName) < comment.indexOf("["));
                                                 if (commentatorName = true){
@@ -254,12 +259,7 @@ public class XMLProtocolParser {
                                                 if (commentList.contains(comment)) {
                                                 } else commentList.add(comment);
 
-                                                // commentID soll sein die speechID + Kommentat#
 
-                                                for (int p = 0; p <= commentList.size(); p++) {
-                                                        commentID = speechID + "/" + p;
-                                                }
-                                                System.out.println(commentID);
 
 
 
@@ -469,6 +469,9 @@ public class XMLProtocolParser {
     }
 
     /*
+    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, Integer commentPosition,String text, LocalDate date, ArrayList<String> fractions){
+
+
     public static void addToCommentMap(String commentID, String speechID, String speakerID, String comment, LocalDate date){
         if (((!(commentID.equals(""))) && (!(commentMap.containsKey(commentID))))){
             commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, comment, date));
@@ -481,7 +484,7 @@ public class XMLProtocolParser {
          //
 
     }
-        */
+*/
 
     /**
      * Get the Speech Map
