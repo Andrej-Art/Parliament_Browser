@@ -345,7 +345,6 @@ public class MongoDBHandler {
     /**
      * Method to insert a comment and its sentiment value into the "comment" collection
      * of the database.
-     *
      * @param comment   The comment Object
      * @param sentiment The sentiment value of the comment
      * @throws WrongInputException
@@ -418,9 +417,8 @@ public class MongoDBHandler {
 
     /**
      * Adds a document to an existing collection
-     *
-     * @param document
-     * @param collection
+     * @param document The Bson Document to be added
+     * @param collection The collection name of where it is supposed to be added
      * @author DavidJordan
      */
     public void addDocument(Document document, String collection) {
@@ -465,8 +463,8 @@ public class MongoDBHandler {
     public void applyDateFiltersToAggregation(List<Bson> pipeline, String dateFilterOne, String dateFilterTwo) {
         if (!dateFilterOne.isEmpty()) {
             Bson matchDate = dateFilterTwo.isEmpty() ?
-                    match(new Document("datum", dateFilterOne)) :
-                    match(and(Arrays.asList(gte("datum", dateFilterOne), lte("datum", dateFilterTwo))));
+                    match(new Document("date", dateFilterOne)) :
+                    match(and(Arrays.asList(gte("date", dateFilterOne), lte("date", dateFilterTwo))));
             pipeline.add(0, matchDate);
         }
     }
@@ -545,6 +543,47 @@ public class MongoDBHandler {
         if(neededField.length != 0){
             pipeline.add(project);
         }
+    }
+
+    /**
+     * A Method that executes an aggregation query on a target collection, according to the given filter
+     * parameters. The pipeline is created within the method and the aggregation is run once all filters have been
+     * added. Returns the complete Bson Documents which may then be used for instantiating Java Objects.
+     * @param collection The name of the collection to aggregate
+     * @param dateFilterOne The first date-filter that is passed to the applyDateFilter...  method
+     * @param dateFilterTwo The second date-filter that is passed to the applyDateFilter... method
+     * @param personFilter The _id of the Person that is passed to the applyPersonFractionFilter... method
+     * @param fractionFilter The name of the fraction to be passed to the applyPersonFractionFilter... method
+     * @param sentimentFilter The sentiment type (positive, neutral, negative) to be passed to the applySentimentFilter... method
+     * @return MongoIterable
+     * @author DavidJordan
+     */
+    @Unfinished("Requires thorough testing still.")
+    public MongoIterable<Document> runAggregationQueryWithFilters(
+            String collection,
+            String dateFilterOne,
+            String dateFilterTwo,
+            String personFilter,
+            String fractionFilter,
+            String sentimentFilter){
+
+        //create the pipeline
+        List<Bson> pipeline = new ArrayList<>(0);
+
+        //if datefilters are present add them to the pipeline
+        if(!dateFilterOne.isEmpty()){
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        // if person or fraction filters are present, add them as well
+        if(!personFilter.isEmpty() || !fractionFilter.isEmpty()){
+            applyPersonFractionFiltersToAggregation(pipeline, personFilter, fractionFilter);
+        }
+        //if sentiment filter is provided add it
+        if (!sentimentFilter.isEmpty()){
+            applySentimentFilterToAggregation(pipeline, sentimentFilter);
+        }
+        // Return an Iterable of the queried Documents
+        return db.getCollection(collection).aggregate(pipeline);
     }
 
 
