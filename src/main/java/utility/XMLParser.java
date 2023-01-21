@@ -1,10 +1,10 @@
 package utility;
 
 
+import data.Person;
 import data.impl.AgendaItem_Impl;
 import data.impl.Person_Impl;
 import data.impl.Protocol_Impl;
-import org.apache.commons.math.linear.ArrayRealVector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -31,7 +31,7 @@ import java.util.List;
 public class XMLParser {
 
     // Here the persons are saved for the duration of the parsing
-    static ArrayList<Person_Impl> persons = new ArrayList<>(0);
+    static List<Person> persons = new ArrayList<Person>(0);
 
     // Here the protocols are saved for the duration of the parsing
     static ArrayList<Protocol_Impl> protocols = new ArrayList<>(0);
@@ -45,7 +45,7 @@ public class XMLParser {
      * @return
      * @author Julian Ocker
      */
-    public static /*Data_Kraken*/ void personParse(/*, Data_Kraken data_pack*/) {
+    public static void personParse() throws IOException {
         System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
         String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
         try {
@@ -119,13 +119,9 @@ public class XMLParser {
                                     if (nameAttributes.item(k).getNodeName().equals("HISTORIE_BIS")) {
                                         deputyPoliticEnd = nameAttributes.item(k).getTextContent();
                                     }
-
                                 }
-
                             }
-
                         }
-
                     }
                     // Here personal information get fetched.
                     if (attributes.item(i).getNodeName().equals("BIOGRAFISCHE_ANGABEN")) {
@@ -164,9 +160,7 @@ public class XMLParser {
                             if (biographicAttributes.item(j).getNodeName().equals("PARTEI_KURZ")) {
                                 party = biographicAttributes.item(j).getTextContent();
                             }
-
                         }
-
                     }
                     // Here the fractions of a person get fetched.
                     if (attributes.item(i).getNodeName().equals("WAHLPERIODEN")) {
@@ -201,7 +195,6 @@ public class XMLParser {
                                                             check = true;
 
                                                         }
-
                                                     }
 
                                                     if (InstitiutionAttributes.item(m).getNodeName().equals("INS_LANG") && check) {
@@ -214,35 +207,26 @@ public class XMLParser {
                                                         check = false;
 
                                                     }
-
                                                 }
 
                                                 WPFractionList.add(fractionList);
-
                                             }
-
                                         }
-
                                     }
-
                                 }
-
                             }
-
                         }
-
                     }
-
                 }
                 //Here the picture is fetched and the Instance of Person is created
+                if ( ! (fraction19 == null && fraction20 == null)){
                 if (!(firstName.equals(null)) || !(lastName.equals(null)) || !(id.equals(null))) {
                     String[] pictureArray = PictureScraper.producePictureUrl(firstName, lastName);
-                    Person_Impl person = new Person_Impl(id, firstName, lastName, null, title, place, fraction19, fraction20, party, pictureArray, gender, birthDate, deathDate, birthPlace);
+                    Person_Impl person = new Person_Impl(id, firstName, lastName, null, title, place, fraction19,
+                            fraction20, party, pictureArray, gender, birthDate, deathDate, birthPlace);
                     persons.add(person);
-                }
-
+                }}
             }
-
 
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
@@ -258,8 +242,9 @@ public class XMLParser {
 
         } catch (Exception e) {
             e.printStackTrace();
-
         }
+        MongoDBHandler mongoDBHandler = new MongoDBHandler();
+        mongoDBHandler.insertPersons(persons);
     }
 
 

@@ -7,6 +7,7 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import data.*;
+import data.impl.Person_Impl;
 import exceptions.WrongInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -245,6 +246,21 @@ public class MongoDBHandler {
         } catch (MongoWriteException e) {
             System.err.println("User: " + id + " could not be inserted.");
         }
+    }
+
+    /**
+     * This Method pulls all the persons from DB and returns them as a ArrayList of Person_Impl
+     * @return
+     * @author Julian Ocker
+     */
+    public ArrayList<Person_Impl> getPersons(){
+        ArrayList<Person_Impl> personsList = new ArrayList<>(0);
+
+        db.getCollection("person").find().forEach((Consumer<? super Document>) procBlock -> personsList.add(new Person_Impl(procBlock)));
+        for (int i = 0; i < personsList.size(); i++) {
+            System.out.println(personsList.get(i).getID());
+        }
+        return personsList;
     }
 
 

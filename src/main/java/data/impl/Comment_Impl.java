@@ -17,6 +17,7 @@ public class Comment_Impl implements Comment {
     // The BSON Document
     private Document commentDoc;
 
+    private Integer commentPosition;
     private String _id, speechID, speakerID, commentatorID, text;
     private LocalDate date;
 
@@ -33,7 +34,7 @@ public class Comment_Impl implements Comment {
      * @param fractions the list of fractions involved in making the comment
      * @author DavidJordan
      */
-    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, String text, LocalDate date, ArrayList<String> fractions){
+    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, Integer commentPosition,String text, LocalDate date, ArrayList<String> fractions){
         this._id = id;
         this.speechID = speechID;
         this.speakerID = speakerID;
@@ -41,6 +42,7 @@ public class Comment_Impl implements Comment {
         this.text = text;
         this.date = date;
         this.fractions = fractions;
+        this.commentPosition = commentPosition;
     }
 
     /**
@@ -57,6 +59,7 @@ public class Comment_Impl implements Comment {
         this.text = document.getString("text");
         this.date = (LocalDate) document.get("date");
         this.fractions = (ArrayList<String>) document.get("fractions");
+        this.commentPosition = document.getInteger("commentPosition");
     }
 
 

@@ -19,7 +19,7 @@ public class Person_Impl implements Person {
 
     //Class Variables
     private String _id, firstName, lastName, role, title, fraction19, fraction20, party, place, gender,  birthDate, deathDate, birthPlace;
-    private String[] picture;
+    private ArrayList picture;
 
     /**
      * Default Constructor.
@@ -41,7 +41,9 @@ public class Person_Impl implements Person {
         this.birthDate = birthDate;
         this.deathDate = deathDate;
         this.birthPlace = birthPlace;
-        this.picture = pictureArray;
+        for (int i = 0; i < pictureArray.length; i++) {
+            picture.add(pictureArray[i]);
+        }
     }
 
     /**
@@ -67,7 +69,7 @@ public class Person_Impl implements Person {
         this.birthDate = document.getString("birthDate");
         this.deathDate = document.getString("deathDate");
         this.birthPlace = document.getString("birthPlace");
-        this.picture = (String[]) document.get("picture");
+        this.picture = document.get("picture", ArrayList.class);
 
     }
 
@@ -77,7 +79,7 @@ public class Person_Impl implements Person {
     }
 
     @Override
-    public String[] getPicture() {
+    public ArrayList<String> getPicture() {
         return this.picture;
     }
 
@@ -139,4 +141,31 @@ public class Person_Impl implements Person {
     public String getBirthPlace() {
         return this.birthPlace;
     }
+
+
+    /**
+     * This Method generates a org.bson.Document containing the Data of Person.
+     * @return
+     * @author Julian Ocker
+     */
+    public Document getPersonDoc() {
+        personDoc = new Document()
+                .append("_id", _id)
+                .append("firstname",firstName)
+                .append("lastname",lastName)
+                .append("role",role)
+                .append("title",title)
+                .append("fraction19", fraction19)
+                .append("fraction20", fraction20)
+                .append("party",party)
+                .append("place", place)
+                .append("gender", gender)
+                .append("birthDate", birthDate)
+                .append("deathDate", deathDate)
+                .append("birthPlace", birthPlace)
+                .append("picture", picture);
+
+        return personDoc;
+    }
+
 }
