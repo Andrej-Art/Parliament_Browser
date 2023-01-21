@@ -10,9 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * The {@code TimeHelper} class contains methods which convert dates of the pattern {@code dd.MM.yyyy}
- * and times of the pattern {@code H:mm} to the ISO-8601 calendar system.
- *
+ * The {@code TimeHelper} class contains useful methods for date/time related conversions.
  * @author Eric Lakhter
  */
 public class TimeHelper {

@@ -75,6 +75,7 @@ comment:
     speechID            String
     speakerID           String
     commentatorID       String
+    commentPos          int
     text                String
     date                LocalDate
     pos                 int
