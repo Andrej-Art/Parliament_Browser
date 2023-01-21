@@ -40,6 +40,13 @@ public interface Comment {
     String getCommentatorID();
 
     /**
+     * Gets the position of the comment in its respective speech.
+     * @return This comment's position.
+     * @author Eric Lakhter
+     */
+    int getCommentPosition();
+
+    /**
      * Gets a list of names of the Bundestags-Fractions who made the Comment.
      * @return fractions
      * @author DavidJordan

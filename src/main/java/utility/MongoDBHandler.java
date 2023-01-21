@@ -274,19 +274,19 @@ public class MongoDBHandler {
     public void insertSpeech(ProcessedSpeech processedSpeech) {
         //Insert single processedSpeech into speech collection
         try {
-            db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()));
+            db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
         } catch (MongoWriteException ignored) {
         }
 
         //Insert single document into speech_cas collection
         try {
-            db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()));
+            db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
         } catch (MongoWriteException ignored) {
         }
 
         //Insert single document into speech_tokens collection
         try {
-            db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()));
+            db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
         } catch (MongoWriteException ignored) {
         }
     }
@@ -306,13 +306,13 @@ public class MongoDBHandler {
 
         for (ProcessedSpeech processedSpeech : processedSpeeches) {
             //parse into Bson Document and add to list
-            speechDocs.add(Document.parse(processedSpeech.toSpeechJson()));
+            speechDocs.add(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
 
             //parse into Bson Document for speech_cas and add to list
-            speechCasDocs.add(Document.parse(processedSpeech.toSpeechCasJson()));
+            speechCasDocs.add(Document.parse(processedSpeech.toSpeechCasJson()).append("date", processedSpeech.getDate()));
 
             //parse into Bson Document for speech_tokens collection and add to list
-            speechTokenDocs.add(Document.parse(processedSpeech.toSpeechTokensJson()));
+            speechTokenDocs.add(Document.parse(processedSpeech.toSpeechTokensJson()).append("date", processedSpeech.getDate()));
         }
 
         // MongoBulkWriteExceptions are caught when inserting the Lists
@@ -376,6 +376,7 @@ public class MongoDBHandler {
                 .append("speechID", comment.getSpeechID())
                 .append("speakerID", comment.getSpeakerID())
                 .append("commentatorID", comment.getCommentatorID())
+                .append("commentPos", comment.getCommentPosition())
                 .append("text", comment.getText())
                 .append("date", comment.getDate())
                 .append("sentiment", sentiment);

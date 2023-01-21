@@ -2,9 +2,11 @@ package utility;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -23,6 +25,25 @@ public class TimeHelper {
 
      // Private to restrict other classes from instantiating a TimeHelper.
     private TimeHelper(){}
+
+    /**
+     * Converts a Java {@code Date} object to an equivalent LocalDate.
+     * @param date Date object form the database
+     * @return LocalDate of this Date
+     */
+    public static LocalDate dateToLocalDate(Date date) {
+        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate();
+    }
+
+
+    /**
+     * Converts a Java {@code Date} object to an equivalent LocalTime.
+     * @param date Date object form the database
+     * @return LocalTime of this Date
+     */
+    public static LocalTime dateToLocalTime(Date date) {
+        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalTime();
+    }
 
     /**
      * Converts dates of the pattern {@code dd.MM.yyyy} to a LocalDate.

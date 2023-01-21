@@ -57,6 +57,14 @@ public class ProcessedSpeech {
     }
 
     /**
+     * Returns the date of this speech.
+     * @return LocalDate object of this speech.
+     */
+    public LocalDate getDate(){
+        return this.date;
+    }
+
+    /**
      * Converts almost all fields (excluding {@code fullCas} and {@code tokens})
      * into a String compatible with {@code org.bson.Document.parse()}.<br>
      * Intended to go into the {@code speech} collection.
@@ -67,8 +75,7 @@ public class ProcessedSpeech {
         StringBuilder jsonString = new StringBuilder(
                 "{\n  _id:\"" + _id + "\","
                 + "\n  speakerID:\"" + speakerID + "\","
-                + "\n  text:\"" + text + "\","
-                + "\n  date:\"" + date + "\",");
+                + "\n  text:\"" + text + "\",");
 
         // build comment data field
         StringBuilder commentDataString = new StringBuilder("\n  commentData:[");
@@ -154,7 +161,6 @@ public class ProcessedSpeech {
         return "{" +
                 "\n _id:\"" + _id
                 + "\",\n  speakerID:\"" + speakerID
-                + "\",\n  date:\"" + date
                 + "\",\n  fullCas:'" + fullCas + "'" +
                 "\n}";
     }
@@ -168,8 +174,7 @@ public class ProcessedSpeech {
      */
     public String toSpeechTokensJson() {
         StringBuilder jsonString = new StringBuilder("{\n  _id:\"" + _id
-                + "\",\n  speakerID:\"" + speakerID
-                + "\",\n  date:\"" + date + "\"");
+                + "\",\n  speakerID:\"" + speakerID + "\"");
 
         // build tokens field
         StringBuilder tokenString = new StringBuilder(",\n  tokens:[");

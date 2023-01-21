@@ -2,6 +2,7 @@ package data.impl;
 
 import data.Comment;
 import org.bson.Document;
+import utility.TimeHelper;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -17,7 +18,7 @@ public class Comment_Impl implements Comment {
     // The BSON Document
     private Document commentDoc;
 
-    private Integer commentPosition;
+    private int commentPosition;
     private String _id, speechID, speakerID, commentatorID, text;
     private LocalDate date;
 
@@ -29,12 +30,13 @@ public class Comment_Impl implements Comment {
      * @param speechID the ID of the Speech
      * @param speakerID the ID of the Speaker receiving the comment
      * @param commentatorID the ID of the commentator
+     * @param commentPosition the position of the comment in its speech
      * @param text the raw text of the comment
      * @param date  the LocalDate when the comment was made
      * @param fractions the list of fractions involved in making the comment
      * @author DavidJordan
      */
-    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, Integer commentPosition,String text, LocalDate date, ArrayList<String> fractions){
+    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, int commentPosition, String text, LocalDate date, ArrayList<String> fractions){
         this._id = id;
         this.speechID = speechID;
         this.speakerID = speakerID;
@@ -57,7 +59,7 @@ public class Comment_Impl implements Comment {
         this.speakerID = document.getString("speakerID");
         this.commentatorID = document.getString("commentator");
         this.text = document.getString("text");
-        this.date = document.getDate("date").toInstant().atZone(ZoneOffset.of("Z")).toLocalDate();
+        this.date = TimeHelper.dateToLocalDate(document.getDate("date"));
         this.fractions = (ArrayList<String>) document.get("fractions");
         this.commentPosition = document.getInteger("commentPosition");
     }
@@ -81,6 +83,11 @@ public class Comment_Impl implements Comment {
     @Override
     public String getCommentatorID() {
         return this.commentatorID;
+    }
+
+    @Override
+    public int getCommentPosition() {
+        return commentPosition;
     }
 
     @Override

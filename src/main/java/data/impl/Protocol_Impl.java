@@ -2,6 +2,7 @@ package data.impl;
 
 import data.Protocol;
 import org.bson.Document;
+import utility.TimeHelper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -82,9 +83,9 @@ public class Protocol_Impl implements Protocol {
     public Protocol_Impl(Document document){
         this.protocolDoc = document;
         this._id = document.getString("_id");
-        this.date = (LocalDate) document.get("date");
-        this.beginTime = (LocalTime) document.get("beginTime");
-        this.endTime = (LocalTime) document.get("endTime");
+        this.date = TimeHelper.dateToLocalDate(document.getDate("date"));
+        this.beginTime = TimeHelper.dateToLocalTime(document.getDate("beginTime"));
+        this.endTime = TimeHelper.dateToLocalTime(document.getDate("endTime"));
         this.electionPeriod = document.getInteger("electionPeriod");
         this.protocolNumber = document.getInteger("protocolNumber");
         this.sessionLeaders = (ArrayList<String>) document.get("sessionLeaders");
