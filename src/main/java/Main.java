@@ -1,5 +1,6 @@
 import com.google.gson.Gson;
 import data.impl.Person_Impl;
+import org.apache.uima.UIMAException;
 import org.bson.Document;
 import utility.MongoDBHandler;
 import utility.Scraper;
@@ -59,7 +60,11 @@ public class Main {
 
                 case "2":
                     System.out.println("Parsing the protocols");
-                    XMLProtocolParser.speechParse2();
+                    try {
+                        XMLProtocolParser.speechParse2();
+                    } catch (UIMAException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
 
 

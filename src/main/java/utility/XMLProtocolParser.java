@@ -5,6 +5,7 @@ import data.impl.Protocol_Impl;
 import data.impl.Speech_Impl;
 import data.impl.Person_Impl;
 import org.apache.uima.UIMAException;
+import jdk.jfr.internal.tool.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,12 +20,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is currently only for testing purposes. At the end there will be one class for parsing.
@@ -62,7 +66,7 @@ public class XMLProtocolParser {
          //Create connection to mongoDB
          MongoDBHandler mongoDBHandler = null;
          try {
-             mongoDBHandler = new MongoDBHandler();
+         mongoDBHandler = new MongoDBHandler();
          } catch (IOException e) {
          e.printStackTrace();
          }
@@ -73,7 +77,8 @@ public class XMLProtocolParser {
             //Parsing all XMLs-protocols from last to first one
             DocumentBuilder db = dbf.newDocumentBuilder();
             //access to our downloaded protocol-files
-            File[] files = new File("ProtokollXMLs/").listFiles();
+            String path = XMLProtocolParser.class.getClassLoader().getResource("").getPath();
+            File[] files = new File(path + "ProtokollXMLs/Protokolle/").listFiles();
 
 
 
@@ -87,7 +92,7 @@ public class XMLProtocolParser {
                     //System.out.println("\tSpeeches are collected right now...");
 
                     //Go through the protocol-sessions
-                    Document xmlDoc = db.parse("ProtokollXMLs/" + file.getName());
+                    Document xmlDoc = db.parse(path + "ProtokollXMLs/Protokolle/" + file.getName());
 
                     // orientation for the Dom-Parser: https://mkyong.com/java/how-to-read-xml-file-in-java-dom-parser/
                     //get the root element of the protocol --> (dbtplenarprotokoll)
@@ -115,7 +120,7 @@ public class XMLProtocolParser {
                             int protocolNumber = Integer.parseInt(sessionInfoElement.getAttribute("sitzung-nr"));
                             int electionPeriod = Integer.parseInt(sessionInfoElement.getAttribute("wahlperiode"));
                             String _id = (electionPeriod + "/" + protocolNumber);
-                            //System.out.println(_id);
+                            System.out.println(_id);
 
                             //using the methods from the TimeHelper class we can convert the date and time
                             String sessionDate = (sessionInfoElement.getAttribute("sitzung-datum"));
@@ -148,11 +153,12 @@ public class XMLProtocolParser {
 
                                     String speakerID = "";
                                     String speechText = "";
-                                    int sameSpeechCounter = 0;
                                     //String sessionLeader= "";
                                     //List for comments (every speech get a list of comments)
-                                    List<String> commentList = new ArrayList<>();
+                                    List<String> commentList = new ArrayList<>(0);
                                     boolean addStatus = false;
+                                    int sameSpeechCounter = 0;
+
 
 
                                     //Go through all ChildNodes of a speech
@@ -242,6 +248,7 @@ public class XMLProtocolParser {
                                                  */
 
 
+
                                                 //System.out.println(comment + comment.contains("["));
 
                                                 if (commentList.contains(comment)) {
@@ -261,11 +268,13 @@ public class XMLProtocolParser {
                                             default:
                                                 break;
                                         }
+
                                         /*
                                         for (int p = 0; p <= speechElementList.size(); p++) {
                                             for (int c = 0; c <= commentList.size(); c++) {
                                                 commentID = speechID + "/" + p + "/" + c;
 
+                                                //System.out.println(commentID);
                                             }
                                         }
 
@@ -277,7 +286,7 @@ public class XMLProtocolParser {
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                     addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                     addToProtocolMap(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
-                                    addToCommentMap(commentID, speechID, speakerID, comment, date);
+                                    //addToCommentMap(commentID, speechID, speakerID, comment, date);
 
 
                                    /*
@@ -366,6 +375,8 @@ public class XMLProtocolParser {
             ex.printStackTrace();
         }
     }
+
+
 
     /**
      * A helper method to extract all Elements of a given parent node from the XML Document which is parsed.
@@ -457,7 +468,7 @@ public class XMLProtocolParser {
         //System.out.println(protocolMap.size());
     }
 
-
+    /*
     public static void addToCommentMap(String commentID, String speechID, String speakerID, String comment, LocalDate date){
         if (((!(commentID.equals(""))) && (!(commentMap.containsKey(commentID))))){
             commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, comment, date));
@@ -467,9 +478,10 @@ public class XMLProtocolParser {
         System.out.println(speechID);
         System.out.println(comment);
 
-         */
+         //
 
     }
+        */
 
     /**
      * Get the Speech Map

@@ -6,7 +6,7 @@
 package exceptions;
 
 /**
- * pathNullException
+ * This is an example of an exception as an example for further Usage.
  *
  * @author Giuseppe Abrami
  * 

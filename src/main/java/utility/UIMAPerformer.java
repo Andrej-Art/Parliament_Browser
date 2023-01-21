@@ -43,7 +43,7 @@ public class UIMAPerformer {
      * @throws UIMAException If an error occurs while building the {@code AnalysisEngine}.
      * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/}.
      */
-    public UIMAPerformer() throws UIMAException, FileNotFoundException {
+    public UIMAPerformer(MongoDBHandler mongoDBHandler) throws UIMAException, FileNotFoundException {
         analysisEngine = generateAnalysisEngine();
         ddcCategories = generateDDCCategories();
     }
