@@ -5,14 +5,13 @@ import data.impl.Protocol_Impl;
 import data.impl.Speech_Impl;
 import data.impl.Person_Impl;
 import org.apache.uima.UIMAException;
-import jdk.jfr.internal.tool.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import utility.annotations.Testing;
-import utility.annotations.Unfinished;
+import utility.uima.ProcessedSpeech;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,15 +19,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class is currently only for testing purposes. At the end there will be one class for parsing.
@@ -55,7 +51,7 @@ public class XMLProtocolParser {
 
     public static void speechParse2() throws FileNotFoundException, UIMAException {
 
-        speechMap= new HashMap<>();
+        speechMap = new HashMap<>();
         protocolMap = new HashMap<>();
         commentMap = new HashMap<>();
 
@@ -63,17 +59,17 @@ public class XMLProtocolParser {
         //speechMap = new HashMap<>();
 
 
-         //Create connection to mongoDB
-         MongoDBHandler mongoDBHandler = null;
-         try {
-         mongoDBHandler = new MongoDBHandler();
-         } catch (IOException e) {
-         e.printStackTrace();
-         }
+        //Create connection to mongoDB
+        MongoDBHandler mongoDBHandler = null;
+        try {
+            mongoDBHandler = new MongoDBHandler();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         UIMAPerformer uima = new UIMAPerformer(mongoDBHandler);
 
         try {
-            mongoDBHandler.getPersons();
+            ArrayList<Person_Impl> persons = mongoDBHandler.getPersons();
 
             //Parsing all XMLs-protocols from last to first one
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -82,9 +78,8 @@ public class XMLProtocolParser {
             File[] files = new File(path + "ProtokollXMLs/Protokolle/").listFiles();
 
 
-
             // iterating over all xml-protocols
-            for (int i = files.length - 1; i >= 0; i--) {
+            for (int i = files.length - 1; i >=  files.length - 3; i--) {
                 File file = files[i];
                 //check if the file is a xml-file
                 if (file.isFile() && file.getName().matches(".*\\.xml")) {
@@ -107,7 +102,6 @@ public class XMLProtocolParser {
                     ArrayList<String> agendaItemIDS = new ArrayList<>();
 
                      */
-
 
 
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
@@ -139,9 +133,8 @@ public class XMLProtocolParser {
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
                                 ArrayList<String> agendaItemIDS = new ArrayList<>();
-                                if(agendaItemIDS.contains(topid))
-                                {}
-                                else agendaItemIDS.add(topid);
+                                if (agendaItemIDS.contains(topid)) {
+                                } else agendaItemIDS.add(topid);
                                 //System.out.println(topid);
 
                                 //Go through all Speeches
@@ -160,7 +153,7 @@ public class XMLProtocolParser {
                                     List<String> commentList = new ArrayList<>(0);
                                     boolean addStatus = false;
                                     int sameSpeechCounter = 0;
-
+                                    ArrayList<String[]> commentsPos = new ArrayList<>(0);
 
 
                                     //Go through all ChildNodes of a speech
@@ -172,7 +165,7 @@ public class XMLProtocolParser {
                                         switch (speechChild.getTagName()) {
                                             //If its a <name>-Tag -> So its not a speaker (set addStatus = false) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "name":
-                                                sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
+                                                sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
                                                 addStatus = false;
                                                 speakerID = "";
                                                 speechText = "";
@@ -195,7 +188,7 @@ public class XMLProtocolParser {
                                             //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
                                                 if (speechChild.getAttribute("klasse").equals("redner")) {
-                                                    sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
+                                                    sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
                                                     addStatus = true;
                                                     NodeList speakerNodeList = speechChild.getChildNodes();
                                                     for (int e = 0; e < speakerNodeList.getLength(); e++) {
@@ -223,7 +216,7 @@ public class XMLProtocolParser {
                                                 // commentID soll sein die speechID + / + Kommentar#
                                                 commentNumber++;
                                                 commentID = speechID + "/" + commentNumber;
-                                                String commentPosition = "" + speechText.length();
+                                                Integer commentPosition = speechText.length();
                                                 //Remove first bracket of comment
                                                 comment = comment.replaceFirst("\\(", "");
                                                 //Remove last bracket of comment
@@ -231,36 +224,45 @@ public class XMLProtocolParser {
                                                 reComment = reComment.replaceFirst("\\)", "");
                                                 comment = new StringBuilder(reComment).reverse().toString();
 
+                                                String[] commentIdPos = new String[2];
+                                                commentIdPos[0] = commentID;
+                                                commentIdPos[1] = commentPosition + "";
+                                                commentsPos.add(commentIdPos);
+
+                                                String commentatorID = "";
+                                                ArrayList<String> commentatorFractions = new ArrayList<>(0);
                                                 /*
                                                 hier wird eine Liste fullName benötigt/aus den Stammdaten generiert
                                                 Jedes Mal, wenn eckige Klammern vorkommen, wird geprüft,
                                                 ob vor den Klammern der Name vorkommt.
+                                                   */
 
-                                                String fullName = "Renate Künast";
-
-                                                Boolean commentatorName =(comment.indexOf(fullName) < comment.indexOf("["));
-                                                if (commentatorName = true){
-                                                    System.out.println(fullName);
+                                                for (int k = 0; k < persons.size(); k++) {
+                                                    Boolean commentatorName = (comment.indexOf(persons.get(i).getFirstName() + " " + persons.get(i).getLastName()) < comment.indexOf("["));
+                                                    if (commentatorName) {
+                                                        commentatorID = persons.get(i).getID();
+                                                        if (!(persons.get(i).getFraction19() == null)) {
+                                                            commentatorFractions.add(persons.get(i).getFraction19());
+                                                        }
+                                                        if (!(persons.get(i).getFraction20() == null)) {
+                                                            commentatorFractions.add(persons.get(i).getFraction20());
+                                                        }
+                                                    }
                                                 }
-                                                 */
 
                                                 //String rauslesen aus den eckigen Klammen, um Partei des Kommentators zu erhalten
                                                 /*
                                                 String partyComment = commentList.get().substring();
                                                 substring(comment.indexOf("[")+1, comment.indexOf("]"));
                                                 System.out.println(partyComment);
-
                                                  */
 
-
+                                                addToCommentMap(commentID, speechID, speakerID, commentatorID, commentPosition, comment, date, commentatorFractions);
 
                                                 //System.out.println(comment + comment.contains("["));
 
                                                 if (commentList.contains(comment)) {
                                                 } else commentList.add(comment);
-
-
-
 
 
                                                 break;
@@ -284,7 +286,7 @@ public class XMLProtocolParser {
                                     }
 
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
-                                    addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
+                                    addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
                                     addToProtocolMap(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
                                     //addToCommentMap(commentID, speechID, speakerID, comment, date);
 
@@ -312,15 +314,28 @@ public class XMLProtocolParser {
                                      */
 
 
-                                    //addToCommentMap(commentID, speechID, speakerID, commentID);
                                     //System.out.println(commentID);
 
                                 }
+
+
+                                for (Map.Entry<String, Comment_Impl> stringCommentEntry : commentMap.entrySet()) {
+                                    if (!mongoDBHandler.checkIfDocumentExists("comment", stringCommentEntry.getValue().getID())) {
+                                        double sentiment = uima.getAverageSentiment(uima.getJCas(stringCommentEntry.getValue().getText()));
+                                        mongoDBHandler.insertComment(
+                                                stringCommentEntry.getValue(),
+                                                sentiment
+                                        );
+                                    }
+                                }
+                                commentMap.clear();
+
+
                             }
                             //System.out.println("\tPersons werden gesammelt...");
 
                             List<Element> speakerElementList = getElementList(sessionInfoElement, "redner");
-                            for(Element speakerElement: speakerElementList) {
+                            for (Element speakerElement : speakerElementList) {
                                 String[] speakerProperties = new String[10];
                                 List<Element> nameElementList = getElementList(speakerElement, "name");
                                 for (Element name : nameElementList) {
@@ -347,7 +362,7 @@ public class XMLProtocolParser {
                                                 break;
                                             case "rolle":
                                                 List<Element> roleElementList = getChildElementList(nameChild);
-                                                for(Element role: roleElementList){
+                                                for (Element role : roleElementList) {
                                                     if (role.getTagName().equals("rolle_kurz")) {
                                                         speakerProperties[7] = role.getTextContent();
                                                     }
@@ -364,18 +379,28 @@ public class XMLProtocolParser {
                                     //fraktion, rolle
 
                                     // aus den Stammdaten muss folgendes rein: Partei, Place
-                                  // Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1]);
+                                    // Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1]);
                                 }
                             }
                         }
                     }
+
+                    List<ProcessedSpeech> processedSpeeches = new ArrayList<>();
+                    for (Map.Entry<String, Speech_Impl> stringSpeechEntry : speechMap.entrySet()) {
+                        if (!mongoDBHandler.checkIfDocumentExists("speech", stringSpeechEntry.getValue().getID())) {
+                            processedSpeeches.add(uima.processSpeech(stringSpeechEntry.getValue()));
+                        }
+                    }
+
+                    mongoDBHandler.insertSpeeches(processedSpeeches);
+                    speechMap.clear();
+
                 }
             }
         } catch (ParserConfigurationException | IOException | SAXException ex) {
             ex.printStackTrace();
         }
     }
-
 
 
     /**
@@ -426,70 +451,74 @@ public class XMLProtocolParser {
 
     /**
      * This method is for Database Control
-     * @author Andrej Artuschenko
+     *
      * @param speechID
      * @param speakerID
      * @param speechText
      * @param sameSpeechCounter
      * @param date
+     * @param commentsPos
+     * @author Andrej Artuschenko
      */
     @Testing
-
-    public static int addToSpeechMap(String speechID, String speakerID, String speechText, Boolean addStatus, MongoDBHandler mongoDBHandler, int sameSpeechCounter, LocalDate date){
-
-        if (((!(speakerID.equals(""))) && (!(speechText.equals(""))) && (!(speechMap.containsKey(speechID))) && addStatus)){
-            sameSpeechCounter = sameSpeechCounter +1;
+    public static int addToSpeechMap(String speechID, String speakerID, String speechText, Boolean addStatus, MongoDBHandler mongoDBHandler, int sameSpeechCounter, LocalDate date, ArrayList<String[]> commentsPos) {
+        String abc ="";
+        if (((!(speakerID.equals(""))) && (!(speechText.equals(""))) && (!(speechMap.containsKey(speechID))) && addStatus)) {
+            sameSpeechCounter = sameSpeechCounter + 1;
             //If speech is not in MongoDB, add it in MongoDB
-            if(!mongoDBHandler.checkIfDocumentExists("test_Speech_Andrej", speechID)){
-                speechMap.put(speechID, new Speech_Impl(speechID, speakerID, speechText, date));
-            }else{
+            if (!mongoDBHandler.checkIfDocumentExists("test_Speech_Andrej", speechID)) {
+                speechMap.put(speechID, new Speech_Impl(speechID, speakerID, speechText, date, commentsPos));
+            } else {
                 System.out.println("Speech" + (speechID + "#" + String.valueOf(sameSpeechCounter)) + " ist schon in der Datenbank");
             }
-           //System.out.println(speechID);
+            //System.out.println(speechID);
             //System.out.println(speakerID);
             //System.out.println(speechText);
             //System.out.println(date);
             //System.out.println("------------------------------------------------------------------");
-           //System.out.println(speechMap.size());
+            //System.out.println(speechMap.size());
         }
         return sameSpeechCounter;
     }
 
 
     @Testing
-
-
-
-    public static void addToProtocolMap(String _id,LocalDate date,LocalTime begin,LocalTime end,long sessionDuration,int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders,ArrayList<String> agendaItemIDS){
-        if (((!(_id.equals(""))))){
+    public static void addToProtocolMap(String _id, LocalDate date, LocalTime begin, LocalTime end, long sessionDuration, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItemIDS) {
+        if (((!(_id.equals(""))))) {
             protocolMap.put(_id, new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS));
 
         }
         //System.out.println(protocolMap.size());
     }
 
-    /*
-    public Comment_Impl(String id, String speechID, String speakerID, String commentatorID, Integer commentPosition,String text, LocalDate date, ArrayList<String> fractions){
 
-
-    public static void addToCommentMap(String commentID, String speechID, String speakerID, String comment, LocalDate date){
-        if (((!(commentID.equals(""))) && (!(commentMap.containsKey(commentID))))){
-            commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, comment, date));
+    /**
+     * This Method generates an object of Comment_Impl and adds it into a Map with its Id as its key.
+     *
+     * @param commentID
+     * @param speechID
+     * @param speakerID
+     * @param commentatorID
+     * @param commentPosition
+     * @param comment
+     * @param date
+     * @param commentatorFractions
+     * @author Andrej Artuschenko
+     * @author Julian Ocker
+     */
+    public static void addToCommentMap(String commentID, String speechID, String speakerID, String commentatorID,
+                                       Integer commentPosition, String comment, LocalDate date, ArrayList commentatorFractions) {
+        if (((!(commentID.equals(""))) && (!(commentMap.containsKey(commentID))))) {
+            commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, commentatorID, commentPosition, comment, date, commentatorFractions));
         }
-        /*
-        System.out.println(commentID);
-        System.out.println(speechID);
-        System.out.println(comment);
-
-         //
-
     }
-*/
+
 
     /**
      * Get the Speech Map
-     * @author Andrej Artuschenko
+     *
      * @return Map<String, Speech_Impl>
+     * @author Andrej Artuschenko
      */
     /*
     public static Map<String, Speech_Impl> getSpeechMap() {
@@ -498,32 +527,24 @@ public class XMLProtocolParser {
     }
 
      */
-
-
-
-    public static Map<String, Speech_Impl> getSpeechMap(){
+    public static Map<String, Speech_Impl> getSpeechMap() {
         return speechMap;
     }
 
 
-
-    public Map<String, Protocol_Impl> getProtocolMap(){
+    public Map<String, Protocol_Impl> getProtocolMap() {
         return protocolMap;
     }
 
-    /*
-    public static void addToCommentMap(String commentID, String speechID, String speakerID, String commentatorID, String commentText, LocalDate date, String fraction) {
-        new Comment_Impl(commentID, speechID, speakerID, commentatorID, commentText, date, fraction);
-    }
-
-     */
-
     /**
      * Get the Comment Map
-     * @author Andrej Artuschenko
+     *
      * @return Map<String, Speech_Impl>
+     * @author Andrej Artuschenko
      */
-    public  Map<String, Comment_Impl> getCommentMap() {return commentMap;}
+    public Map<String, Comment_Impl> getCommentMap() {
+        return commentMap;
+    }
 
 }
 

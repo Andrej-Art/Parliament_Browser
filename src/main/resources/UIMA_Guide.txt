@@ -32,7 +32,7 @@
 // for comments only the sentiment is important
 
     double sentiment = uima.getAverageSentiment(uima.getJCas(commentText));
-    mongoDBHandler.insertSpeech(
+    mongoDBHandler.insertComment(
             comment,
             sentiment
     );
