@@ -23,11 +23,12 @@ import static spark.Spark.*;
 public class SparkHandler {
     private static MongoDBHandler mongoDBHandler = null;
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
-    private static String path = "C:/Users/ericl/Desktop/Uni/5_Semester/PPR/parliament_browser_9_donnerstag_4/src/main/resources/";
+    // the added string redirects to the /resources/ directory
+    private static final String frontendPath = SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../src/main/resources/";
 
     public static void main(String[] args) throws IOException {
         SparkHandler.init(new MongoDBHandler());
-//        openInDefaultBrowser("http://localhost:4567/");
+//        openInDefaultBrowser();
     }
 
     /**
@@ -37,7 +38,7 @@ public class SparkHandler {
      */
     public static void init(MongoDBHandler mdbh) throws IOException {
         mongoDBHandler = mdbh;
-        cfg.setDirectoryForTemplateLoading(new File(path));
+        cfg.setDirectoryForTemplateLoading(new File(frontendPath));
         cfg.setDefaultEncoding("UTF-8");
         port(4567);
         before((req, res) -> {
@@ -90,6 +91,17 @@ public class SparkHandler {
 
     /**
      * Opens <a href="http://localhost:4567/">http://localhost:4567/</a> in the system's default browser.
+     * @throws IOException if an I/O error occurs during execution
+     * @author Eric Lakhter
+     */
+    public static void openInDefaultBrowser() throws IOException {
+        openInDefaultBrowser("http://localhost:4567/");
+    }
+
+    /**
+     * Opens the given URL in the system's default browser.
+     * @param url Page to open
+     * @throws IOException if an I/O error occurs during execution
      * @author Eric Lakhter
      */
     public static void openInDefaultBrowser(String url) throws IOException {
