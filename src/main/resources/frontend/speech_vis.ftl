@@ -7,33 +7,61 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-<h1>🎃</h1>
-🍪🍪🍪
-<p id="speech">
+<h1>This page is lit fam 🔥</h1>
+
+🍪☀🍪
+
 <ul>
     <#list 1..speechData?size as index>
-        <li>${index - 1}</li>
+        <li><span style="background-color: aqua">${index - 1}</span></li>
     </#list>
 </ul>
+<p id="speech">
+    <span style="background-color: aqua">Das</span> hier ist ein Text.
 </p>
 
 <div id="plot1"></div>
-<script>
+<script> // all of this works so far, except for the functions which don't have functionality yet
     <#include "js/speech_vis.js">
 
-    let speech_data = ${speechData[0]};
-    let commentatorData = [];
-    // combine all commentData into one array
-    <#list 0..speechData?size - 1 as index>
-        commentatorData.push(${speechData[index]}["commentatorData"]);
-        commentatorData[${index}]["commentsPos"] = ${speechData[0]}["commentsPos"][${index}];
-    </#list>
-    console.log(commentatorData);
+    let speechData = ${speechData[0]};
 
-    console.log(speech_data);
-    console.log("butter");
+    const sentenceData = speechData["sentences"];
+    const perData = speechData["namedEntitiesPer"];
+    const orgData = speechData["namedEntitiesOrg"];
+    const locData = speechData["namedEntitiesLoc"];
+    let commentData = [];
+    // combine all commentData into one array
+    <#list 0..speechData?size - 1 as i>
+    commentData.push(${speechData[i]}["commentatorData"]);
+    commentData[${i}]["commentPos"] = speechData["commentsPos"][${i}];
+    </#list>
+
+    // console.log(sentenceData);
+    // console.log(perData);
+    // console.log(orgData);
+    // console.log(locData);
+    // console.log(commentData);
+
     let speechTag = document.getElementById("speech");
-    // speechTag.innerText = "butter";
+    // speechTag.innerHTML = '<span style="background-color: aqua">Das hier <span style="background-color: blue">ist</span> ein Text.</span>';
+    console.log(speechData["text"]);
+    speechTag.innerHTML = applyDataToSpeech(
+        speechData["text"],
+        sentenceData,
+        perData,
+        orgData,
+        locData,
+        commentData
+    );
+    // speechTag.innerHTML = applyDataToSpeech(
+    //     speechData["text"],
+    //     sentenceData,
+    //     perData,
+    //     orgData,
+    //     locData,
+    //     commentData
+    // );
 </script>
 </body>
 

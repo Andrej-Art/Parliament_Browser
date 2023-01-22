@@ -697,7 +697,7 @@ public class MongoDBHandler {
      * returns count of all Tokens
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getTokenCount(int limit,String dateFilterOne, String dateFilterTwo) {
+    public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo) {
         Bson unwind = unwind("$tokens");
         Bson group = group("$tokens.lemmaValue", sum("count", 1));
         Bson sort = sort(descending("count"));

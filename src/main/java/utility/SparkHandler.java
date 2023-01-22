@@ -97,7 +97,7 @@ public class SparkHandler {
 
         JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
         pageContent.put("entities", entitiesObject);
-        return new ModelAndView(pageContent, "frontend/multi.ftl");
+        return new ModelAndView(pageContent, "multi.ftl");
     };
 
     /**
