@@ -1,9 +1,6 @@
 package utility;
 
-import data.impl.Comment_Impl;
-import data.impl.Protocol_Impl;
-import data.impl.Speech_Impl;
-import data.impl.Person_Impl;
+import data.impl.*;
 import org.apache.uima.UIMAException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,10 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is currently only for testing purposes. At the end there will be one class for parsing.
@@ -41,7 +35,7 @@ public class XMLProtocolParser {
     //private Map <Object, Speech_Impl>speechMap;
     //static HashMap<String, Object> speechMap = new HashMap<>();
     private static Map<String, Speech_Impl> speechMap;
-    private Map<String, Person_Impl> speakerMap;
+    private static Map<String, Person_Impl> personMap;
     private static Map<String, Comment_Impl> commentMap;
     private static Map<String, Protocol_Impl> protocolMap;
 
@@ -54,6 +48,7 @@ public class XMLProtocolParser {
         speechMap = new HashMap<>();
         protocolMap = new HashMap<>();
         commentMap = new HashMap<>();
+        personMap = new HashMap<>();
 
         //Reset Maps
         //speechMap = new HashMap<>();
@@ -95,14 +90,6 @@ public class XMLProtocolParser {
                     NodeList sessionInfoNodes = xmlDoc.getElementsByTagName("dbtplenarprotokoll");
                     //iterate threw all dbtplenarptotokoll nodes
 
-                    /*
-
-
-                    ArrayList <String> sessionLeaders = new ArrayList<>();
-                    ArrayList<String> agendaItemIDS = new ArrayList<>();
-
-                     */
-
 
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
                         Node sessionInfoNode = sessionInfoNodes.item(a);
@@ -128,13 +115,12 @@ public class XMLProtocolParser {
 
                             //Iterate through all Tagesordnungspunkte
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
-
+                            ArrayList<String> agendaItemIDS = new ArrayList<>();
+                            ArrayList protocolSessionLeaders = new ArrayList();
 
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
-                                ArrayList<String> agendaItemIDS = new ArrayList<>();
-                                if (agendaItemIDS.contains(topid)) {
-                                } else agendaItemIDS.add(topid);
+                                if (agendaItemIDS.contains(topid)) {} else agendaItemIDS.add(topid);
                                 //System.out.println(topid);
 
                                 //Go through all Speeches
@@ -179,7 +165,8 @@ public class XMLProtocolParser {
 
                                                 // Adds missing session leaders to the list
                                                 if (sessionLeaders.contains(sessionLeader)) {
-                                                } else sessionLeaders.add(sessionLeader);
+                                                } else {sessionLeaders.add(sessionLeader);
+                                                protocolSessionLeaders.add(sessionLeader);};
                                                 //System.out.println(sessionLeaders);
 
 
@@ -249,75 +236,21 @@ public class XMLProtocolParser {
                                                         }
                                                     }
                                                 }
-
-                                                //String rauslesen aus den eckigen Klammen, um Partei des Kommentators zu erhalten
-                                                /*
-                                                String partyComment = commentList.get().substring();
-                                                substring(comment.indexOf("[")+1, comment.indexOf("]"));
-                                                System.out.println(partyComment);
-                                                 */
-
                                                 addToCommentMap(commentID, speechID, speakerID, commentatorID, commentPosition, comment, date, commentatorFractions);
-
-                                                //System.out.println(comment + comment.contains("["));
 
                                                 if (commentList.contains(comment)) {
                                                 } else commentList.add(comment);
-
-
                                                 break;
 
                                             default:
                                                 break;
                                         }
-
-                                        /*
-                                        for (int p = 0; p <= speechElementList.size(); p++) {
-                                            for (int c = 0; c <= commentList.size(); c++) {
-                                                commentID = speechID + "/" + p + "/" + c;
-
-                                                //System.out.println(commentID);
-                                            }
-                                        }
-
-                                         */
-
-
                                     }
 
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                     addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
                                     addToProtocolMap(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
-                                    //addToCommentMap(commentID, speechID, speakerID, comment, date);
-
-
-                                   /*
-                                   #####################################################################################
-
-                                   speeches haben unterschiedliche Zeichenlänge und werden nicht wiederholt
-                                   System.out.println(speech2.getText().length());
-
-
-                                    */
-
-
-                                    // Comment_Impl comment = new Comment_Impl(CommentID, speechID, speakerID, commentatorID, commentText, date,
-
-
-                                    //System.out.println(protocol + " "+protocol.getSessionLeaders());
-                                    //Comment_Impl comment = new Comment_Impl(commentID, speakerID);
-                                    /*
-                                        private String _id, speechID, speakerID, commentatorID, text;
-                                            private LocalDate date;
-
-                                                private ArrayList<String> fractions;
-                                     */
-
-
-                                    //System.out.println(commentID);
-
                                 }
-
 
                                 for (Map.Entry<String, Comment_Impl> stringCommentEntry : commentMap.entrySet()) {
                                     if (!mongoDBHandler.checkIfDocumentExists("comment", stringCommentEntry.getValue().getID())) {
@@ -330,12 +263,12 @@ public class XMLProtocolParser {
                                 }
                                 commentMap.clear();
 
-
                             }
-                            //System.out.println("\tPersons werden gesammelt...");
 
                             List<Element> speakerElementList = getElementList(sessionInfoElement, "redner");
+
                             for (Element speakerElement : speakerElementList) {
+                                String speakerID = speakerElement.getAttribute("id");
                                 String[] speakerProperties = new String[10];
                                 List<Element> nameElementList = getElementList(speakerElement, "name");
                                 for (Element name : nameElementList) {
@@ -378,9 +311,37 @@ public class XMLProtocolParser {
                                     // aus den Protokollen: id, Titel, Vorname, namenszusatz, nachname, ortszusatz,
                                     //fraktion, rolle
 
-                                    // aus den Stammdaten muss folgendes rein: Partei, Place
-                                    // Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1]);
+                                    // aus den Stammdaten muss folgendes rein: Partei, Place (?)
+                                    /*
+                                    Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1], speakerProperties[2], speakerProperties[3], speakerProperties[4], speakerProperties[5], speakerProperties[6], speakerProperties[7], speakerProperties[8]);
+                                    personMap.put(person.getID(), person)
+                                     */
                                 }
+
+
+                                    if (!mongoDBHandler.checkIfDocumentExists("person", speakerID)) {
+                                        Person_Impl person = null;
+                                        if (electionPeriod == 19) {
+                                            person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
+                                                    speakerProperties[1], speakerProperties[5],speakerProperties[6],null,"Parteilos",
+                                                    PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]),null,null,
+                                                    null,speakerProperties[8]);
+                                        } else if (electionPeriod == 20){
+                                            person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
+                                                    speakerProperties[1], speakerProperties[5],speakerProperties[6],null,"Parteilos",
+                                                    PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]),null,null,
+                                                    null,speakerProperties[8]);
+                                        }
+                                        mongoDBHandler.insertPerson(person);
+                                        persons.add(person);
+                                    }
+
+                                commentMap.clear();
+                            }
+                            String protcolID = electionPeriod + "/" + protocolNumber;
+                            if (!mongoDBHandler.checkIfDocumentExists("protocol",protcolID)){
+                                Protocol_Impl protocol = new Protocol_Impl(protcolID, date,begin,end,electionPeriod,protocolNumber,protocolSessionLeaders,agendaItemIDS);
+                                mongoDBHandler.insertProtocol(protocol);
                             }
                         }
                     }
@@ -462,7 +423,6 @@ public class XMLProtocolParser {
      */
     @Testing
     public static int addToSpeechMap(String speechID, String speakerID, String speechText, Boolean addStatus, MongoDBHandler mongoDBHandler, int sameSpeechCounter, LocalDate date, ArrayList<String[]> commentsPos) {
-        String abc ="";
         if (((!(speakerID.equals(""))) && (!(speechText.equals(""))) && (!(speechMap.containsKey(speechID))) && addStatus)) {
             sameSpeechCounter = sameSpeechCounter + 1;
             //If speech is not in MongoDB, add it in MongoDB
@@ -471,16 +431,9 @@ public class XMLProtocolParser {
             } else {
                 System.out.println("Speech" + (speechID + "#" + String.valueOf(sameSpeechCounter)) + " ist schon in der Datenbank");
             }
-            //System.out.println(speechID);
-            //System.out.println(speakerID);
-            //System.out.println(speechText);
-            //System.out.println(date);
-            //System.out.println("------------------------------------------------------------------");
-            //System.out.println(speechMap.size());
         }
         return sameSpeechCounter;
     }
-
 
     @Testing
     public static void addToProtocolMap(String _id, LocalDate date, LocalTime begin, LocalTime end, long sessionDuration, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItemIDS) {
@@ -488,9 +441,7 @@ public class XMLProtocolParser {
             protocolMap.put(_id, new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS));
 
         }
-        //System.out.println(protocolMap.size());
     }
-
 
     /**
      * This Method generates an object of Comment_Impl and adds it into a Map with its Id as its key.
@@ -512,39 +463,5 @@ public class XMLProtocolParser {
             commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, commentatorID, commentPosition, comment, date, commentatorFractions));
         }
     }
-
-
-    /**
-     * Get the Speech Map
-     *
-     * @return Map<String, Speech_Impl>
-     * @author Andrej Artuschenko
-     */
-    /*
-    public static Map<String, Speech_Impl> getSpeechMap() {
-        return speechMap;
-
-    }
-
-     */
-    public static Map<String, Speech_Impl> getSpeechMap() {
-        return speechMap;
-    }
-
-
-    public Map<String, Protocol_Impl> getProtocolMap() {
-        return protocolMap;
-    }
-
-    /**
-     * Get the Comment Map
-     *
-     * @return Map<String, Speech_Impl>
-     * @author Andrej Artuschenko
-     */
-    public Map<String, Comment_Impl> getCommentMap() {
-        return commentMap;
-    }
-
 }
 

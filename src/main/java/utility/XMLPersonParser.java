@@ -28,7 +28,7 @@ import java.util.List;
  * @author Julian Ocker
  * @author DavidJordan
  */
-public class XMLParser {
+public class XMLPersonParser {
 
     // Here the persons are saved for the duration of the parsing
     static List<Person> persons = new ArrayList<Person>(0);
@@ -46,8 +46,8 @@ public class XMLParser {
      * @author Julian Ocker
      */
     public static void personParse() throws IOException {
-        System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
-        String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
+        System.out.println(XMLPersonParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath());
+        String path = XMLPersonParser.class.getClassLoader().getResource("ProtokollXMLs/MdB-Stammdaten-data/MDB_STAMMDATEN.XML").getPath();
         try {
             //gett the File and make it accessible
             File input_file = new File(path);
@@ -306,8 +306,8 @@ public class XMLParser {
         ArrayList<String> ivzAgendaItems = new ArrayList<>(0);
         ArrayList<String> ivzAgendaTitle = new ArrayList<>(0);
 
-        System.out.println(XMLParser.class.getClassLoader().getResource("ProtokollXMLs/Protokolle/").getPath());
-        String path = XMLParser.class.getClassLoader().getResource("ProtokollXMLs/Protokolle/").getPath();
+        System.out.println(XMLPersonParser.class.getClassLoader().getResource("ProtokollXMLs/Protokolle/").getPath());
+        String path = XMLPersonParser.class.getClassLoader().getResource("ProtokollXMLs/Protokolle/").getPath();
         for (int out = firstProtocol; out < lastProtocol+1; out++) {
 
             try {

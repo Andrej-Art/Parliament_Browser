@@ -58,11 +58,14 @@ public class TimeHelper {
      * @param mode Undefined modes behave like mode 1.<br>
      *             - 1 means that dates of the pattern {@code dd.MM.yyyy} get converted.<br>
      *             - 2 means that dates of the pattern {@code d. MMMM yyyy} get converted.
+     *             - 3 means that dates of the pattern {@code yyyy-MM-dd} get converted.
      * @return Respective {@code LocalDate}.
      * @author Eric Lakhter
      */
     public static LocalDate convertToISOdate(String date, int mode){
         switch (mode) {
+            case 3:
+                return LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
             case 2:
                 return LocalDate.parse(date, DATE_FORMAT_INPUT_2);
             case 1:

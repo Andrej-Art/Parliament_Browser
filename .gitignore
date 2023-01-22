@@ -7,4 +7,8 @@
 # target dir
 /target/
 
+# test.ftl and schmierzettel.js
+/src/main/resources/frontend/test.ftl
+/src/main/resources/frontend/js/schmierzettel.js
+
 abschlussprojekt.iml

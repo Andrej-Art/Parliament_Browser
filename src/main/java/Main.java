@@ -1,18 +1,11 @@
-import com.google.gson.Gson;
-import data.impl.Person_Impl;
 import org.apache.uima.UIMAException;
-import org.bson.Document;
-import utility.MongoDBHandler;
 import utility.Scraper;
 
 import java.io.IOException;
-import java.util.ArrayList;
+
 import utility.*;
-import marmot.util.Sys;
-import org.apache.catalina.util.URL;
 import utility.PictureScraper;
 
-import java.io.File;
 import java.net.MalformedURLException;
 
 import java.util.Scanner;
@@ -70,7 +63,7 @@ public class Main {
 
                 case "3":
                     System.out.println("Database will be created.");
-                    XMLParser.personParse();
+                    XMLPersonParser.personParse();
                     break;
 
                 case "4":
