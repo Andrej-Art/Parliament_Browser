@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static spark.Spark.*;
@@ -19,12 +20,12 @@ import static spark.Spark.*;
  * @author Eric Lakhter
  */
 @Testing
-@Unfinished("Just a skeleton so far")
+@Unfinished("Is missing most routes")
 public class SparkHandler {
     private static MongoDBHandler mongoDBHandler = null;
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
     // the added string redirects to the /resources/ directory
-    private static final String frontendPath = SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../src/main/resources/";
+    private static final String frontendPath = SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException {
         SparkHandler.init(new MongoDBHandler());
@@ -48,17 +49,31 @@ public class SparkHandler {
 
         // Test is for testing
         get("/test/", getTest, new FreeMarkerEngine(cfg));
+
+        /*
+         * request.queryParams() is a set of query parameters, needs question mark
+         * example path:
+         * /reden/?id=4&hu=7
+         * =>
+         * request.queryParams(): [id, hu]     (type: Set<String>)
+         * request.queryParams("id"): "4"      (important: potential trailing slash is seen as part of param)
+         * request.queryParams("rrr"): null    (no exceptions)
+         *
+         * ?fraktion=CDU/CSU                   works without issues, even with the slash
+         * ?fraktion=BÜNDNIS 90/DIE GRÜNEN     works without issues, spaces get percent-encoded: " " -> "%20"
+         * CDU/CSU is equivalent to CDU%2FCSU  %2F is the percent-encoded slash
+         */
         get("/", getHome, new FreeMarkerEngine(cfg));
+        get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
     }
 
     /*
-        GET routes
+     * GET routes
      */
 
 
     /**
      * Test page.
-     *
      * @author Eric Lakhter
      */
     @Testing
@@ -73,12 +88,11 @@ public class SparkHandler {
         pageContent.put("obj", obj);
         pageContent.put("objList", objList);
 
-        return new ModelAndView(pageContent, "frontend/test.ftl");
+        return new ModelAndView(pageContent, "test.ftl");
     };
 
     /**
      * Homepage.
-     *
      * @author Eric Lakhter
      */
     private static final TemplateViewRoute getHome = (Request request, Response response) -> {
@@ -86,7 +100,24 @@ public class SparkHandler {
 
         pageContent.put("title", "Homepage");
 
-        return new ModelAndView(pageContent, "frontend/home.ftl");
+        return new ModelAndView(pageContent, "home.ftl");
+    };
+
+    /**
+     * Speech visualisation page.
+     * @author Eric Lakhter
+     */
+    private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+        String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
+
+        List<JSONObject> speechData = mongoDBHandler.allSpeechData("ID19100100");
+
+        pageContent.put("title", "Rede-Visualisierung");
+        pageContent.put("speechData", speechData);
+
+        return new ModelAndView(pageContent, "speech_vis.ftl");
     };
 
     /**
@@ -117,10 +148,4 @@ public class SparkHandler {
             rt.exec("xdg-open " + url);
         }
     }
-
-//    @Override
-//    public void destroy() {
-//        SparkApplication.super.destroy();
-//    }
-
 }

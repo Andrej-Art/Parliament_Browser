@@ -407,8 +407,7 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoBulkWriteException ignored) {
-        }
+        } catch (MongoBulkWriteException ignored) {}
     }
 
     /**

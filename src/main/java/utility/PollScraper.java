@@ -22,15 +22,15 @@ import java.util.*;
  */
 public class PollScraper {
     /*
-        Current last poll is https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=830
-        The page's source has elements which directly correspond to the poll results.
-        Polls (seemingly) start at ID 1: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=1
-        The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
-        and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
-        Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i = 1 upward we won't
-        ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
-        Some IDs seem to be missing, e.g. 470. The noPollCounter variable controls whether missing polls are
-        consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
+     * Current last poll is https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=830
+     * The page's source has elements which directly correspond to the poll results.
+     * Polls (seemingly) start at ID 1: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=1
+     * The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
+     * and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
+     * Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i = 1 upward we won't
+     * ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
+     * Some IDs seem to be missing, e.g. 470. The noPollCounter variable controls whether missing polls are
+     * consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
      */
 
     // Private to restrict other classes from instantiating a PollScraper.
@@ -44,25 +44,36 @@ public class PollScraper {
      * @author Eric Lakhter
      */
     public static List<Poll> getAllPolls() {
+        return getAllPolls(1, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Iterates over polls on the german Bundestag's webpage and returns them,
+     * starting at ID = {@code start} and ending at ID = {@code end}.
+     * @return A list of {@link Poll} objects.
+     * @see #getOnePoll(int)
+     * @author Eric Lakhter
+     */
+    public static List<Poll> getAllPolls(int start, int end) {
         List<Poll> polls = new ArrayList<>();
         int noPollCounter = 0;
 
         // if 15 polls in a row don't exist it's a safe bet that there won't be more
         // there is a 10 poll gap between ID 422 and 431
-        for (int i = 1; noPollCounter < 16; i++) {
+        for (int i = start; (noPollCounter < 15 && i < end); i++) {
             try {
                 polls.add(getOnePoll(i));
                 // if no exception is thrown the poll counter gets reset
                 noPollCounter = 0;
             } catch (IOException e) {
                 noPollCounter++;
-                System.err.println("There was a problem getting the DOM for poll ID #" + i + ": " + e.getMessage());
+                System.err.println("There was a problem getting the DOM for poll ID #" + i + ": " + e.getMessage()
+                        + "; noPollCounter is at " + noPollCounter);
                 e.printStackTrace();
             } catch (NullPointerException e) {
                 noPollCounter++;
                 System.err.println(e.getMessage() + "; noPollCounter is at " + noPollCounter);
             }
-
         }
 
         return polls;
@@ -122,6 +133,7 @@ public class PollScraper {
                 pollMap.get("FDP"),
                 pollMap.get("AfD"),
                 pollMap.get("DIE LINKE."),
-                pollMap.get("fraktionslose"));
+                pollMap.get("fraktionslose")
+        );
     }
 }
