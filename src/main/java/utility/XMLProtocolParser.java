@@ -115,11 +115,11 @@ public class XMLProtocolParser {
 
                             //Iterate through all Tagesordnungspunkte
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
-
+                            ArrayList<String> agendaItemIDS = new ArrayList<>();
+                            ArrayList protocolSessionLeaders = new ArrayList();
 
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
-                                ArrayList<String> agendaItemIDS = new ArrayList<>();
                                 if (agendaItemIDS.contains(topid)) {} else agendaItemIDS.add(topid);
                                 //System.out.println(topid);
 
@@ -165,7 +165,8 @@ public class XMLProtocolParser {
 
                                                 // Adds missing session leaders to the list
                                                 if (sessionLeaders.contains(sessionLeader)) {
-                                                } else sessionLeaders.add(sessionLeader);
+                                                } else {sessionLeaders.add(sessionLeader);
+                                                protocolSessionLeaders.add(sessionLeader);};
                                                 //System.out.println(sessionLeaders);
 
 
@@ -336,6 +337,11 @@ public class XMLProtocolParser {
                                     }
 
                                 commentMap.clear();
+                            }
+                            String protcolID = electionPeriod + "/" + protocolNumber;
+                            if (!mongoDBHandler.checkIfDocumentExists("protocol",protcolID)){
+                                Protocol_Impl protocol = new Protocol_Impl(protcolID, date,begin,end,electionPeriod,protocolNumber,protocolSessionLeaders,agendaItemIDS);
+                                mongoDBHandler.insertProtocol(protocol);
                             }
                         }
                     }
