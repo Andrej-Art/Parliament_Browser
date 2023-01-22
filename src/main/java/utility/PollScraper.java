@@ -40,28 +40,29 @@ public class PollScraper {
      * Iterates over all polls on the german Bundestag's webpage and returns them.<br>
      * Warning: Connecting to ~800 webpages might take a few minutes.
      * @return A list of {@link Poll} objects.
-     * @see #getOnePoll(int, int)
+     * @see #getOnePoll(int)
      * @author Eric Lakhter
      */
     public static List<Poll> getAllPolls() {
         List<Poll> polls = new ArrayList<>();
         int noPollCounter = 0;
 
-        boolean hasMorePolls = true;
-        for (int i = 1; hasMorePolls; i++) {
+        // if 15 polls in a row don't exist it's a safe bet that there won't be more
+        // there is a 10 poll gap between ID 422 and 431
+        for (int i = 1; noPollCounter < 16; i++) {
             try {
-                polls.add(getOnePoll(i, noPollCounter));
+                polls.add(getOnePoll(i));
                 // if no exception is thrown the poll counter gets reset
                 noPollCounter = 0;
             } catch (IOException e) {
+                noPollCounter++;
                 System.err.println("There was a problem getting the DOM for poll ID #" + i + ": " + e.getMessage());
                 e.printStackTrace();
             } catch (NullPointerException e) {
-                System.err.println(e.getMessage() + "; noPollCounter is at " + ++noPollCounter);
-                // if 15 polls in a row don't exist it's a safe bet that there won't be more
-                // there is a 10 poll gap between ID 422 and 431
-                if (noPollCounter > 14) hasMorePolls = false;
+                noPollCounter++;
+                System.err.println(e.getMessage() + "; noPollCounter is at " + noPollCounter);
             }
+
         }
 
         return polls;
@@ -74,7 +75,7 @@ public class PollScraper {
      * @throws NoPollException If the poll with the given ID cannot be found.
      * @author Eric Lakhter
      */
-    public static Poll getOnePoll(int id, int noPollCounter) throws NoPollException, IOException {
+    public static Poll getOnePoll(int id) throws NoPollException, IOException {
 
         if (id < 1) throw new NoPollException("There are no polls with an ID < 1");
 
