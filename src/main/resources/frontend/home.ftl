@@ -8,6 +8,8 @@
 
 <body>
 <a href="test/">test</a>
+
+<a href="multi/">multi</a>
 </body>
 
 </html>

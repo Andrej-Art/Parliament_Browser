@@ -18,3 +18,5 @@ let loc_data_set = son["locEntity"];
 console.log(per_data_set);
 console.log(org_data_set);
 console.log(loc_data_set);
+
+

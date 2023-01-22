@@ -747,7 +747,7 @@ public class MongoDBHandler {
         }
 
         JSONObject obj = new JSONObject();
-        db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
+        db.getCollection("speech").aggregate(pipeline).allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
                     ArrayList<Document> perList = (ArrayList<Document>) procBlock.get("PersonEntity");
                     ArrayList<JSONObject> perData = new ArrayList<>();

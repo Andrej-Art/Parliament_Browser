@@ -10,16 +10,23 @@
 <h1>🎃</h1>
 
 <div id="plot1"></div>
+
+
+
 <script>
     let data = [];
-    <#list objList as obj>
-        data.push(${obj});
+    <#list objList as obj2>
+        data.push(${obj2});
     </#list>
 
-    // window.alert(data)
-<#--    <#include "js/schmierzettel.js">-->
+
+
+    window.alert(data)
+   <#include "js/schmierzettel.js">
     <#include "js/balkentest.js">
-    // window.alert(per_data_set);
+
+
+    window.alert(per_data_set);
 </script>
 </body>
 

@@ -49,6 +49,7 @@ public class SparkHandler {
         // Test is for testing
         get("/test/", getTest, new FreeMarkerEngine(cfg));
         get("/", getHome, new FreeMarkerEngine(cfg));
+        get("/multi/", getMulti, new FreeMarkerEngine(cfg));
     }
 
     /*
@@ -74,6 +75,14 @@ public class SparkHandler {
         pageContent.put("objList", objList);
 
         return new ModelAndView(pageContent, "frontend/test.ftl");
+    };
+    @Testing
+    private static final TemplateViewRoute getMulti = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+        JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
+        pageContent.put("entities", entitiesObject);
+        return new ModelAndView(pageContent, "frontend/multi.ftl");
     };
 
     /**
