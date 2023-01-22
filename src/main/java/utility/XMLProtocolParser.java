@@ -1,9 +1,6 @@
 package utility;
 
-import data.impl.Comment_Impl;
-import data.impl.Protocol_Impl;
-import data.impl.Speech_Impl;
-import data.impl.Person_Impl;
+import data.impl.*;
 import org.apache.uima.UIMAException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,10 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is currently only for testing purposes. At the end there will be one class for parsing.
@@ -95,6 +89,8 @@ public class XMLProtocolParser {
                     //get the root element of the protocol --> (dbtplenarprotokoll)
                     NodeList sessionInfoNodes = xmlDoc.getElementsByTagName("dbtplenarprotokoll");
                     //iterate threw all dbtplenarptotokoll nodes
+
+
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
                         Node sessionInfoNode = sessionInfoNodes.item(a);
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -124,8 +120,7 @@ public class XMLProtocolParser {
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
                                 ArrayList<String> agendaItemIDS = new ArrayList<>();
-                                if (agendaItemIDS.contains(topid)) {
-                                } else agendaItemIDS.add(topid);
+                                if (agendaItemIDS.contains(topid)) {} else agendaItemIDS.add(topid);
                                 //System.out.println(topid);
 
                                 //Go through all Speeches
@@ -266,10 +261,13 @@ public class XMLProtocolParser {
                                     }
                                 }
                                 commentMap.clear();
+
                             }
 
                             List<Element> speakerElementList = getElementList(sessionInfoElement, "redner");
+
                             for (Element speakerElement : speakerElementList) {
+                                String speakerID = speakerElement.getAttribute("id");
                                 String[] speakerProperties = new String[10];
                                 List<Element> nameElementList = getElementList(speakerElement, "name");
                                 for (Element name : nameElementList) {
@@ -318,6 +316,26 @@ public class XMLProtocolParser {
                                     personMap.put(person.getID(), person)
                                      */
                                 }
+
+
+                                    if (!mongoDBHandler.checkIfDocumentExists("person", speakerID)) {
+                                        Person_Impl person = null;
+                                        if (electionPeriod == 19) {
+                                            person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
+                                                    speakerProperties[1], speakerProperties[5],speakerProperties[6],null,"Parteilos",
+                                                    PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]),null,null,
+                                                    null,speakerProperties[8]);
+                                        } else if (electionPeriod == 20){
+                                            person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
+                                                    speakerProperties[1], speakerProperties[5],speakerProperties[6],null,"Parteilos",
+                                                    PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]),null,null,
+                                                    null,speakerProperties[8]);
+                                        }
+                                        mongoDBHandler.insertPerson(person);
+                                        persons.add(person);
+                                    }
+
+                                commentMap.clear();
                             }
                         }
                     }
@@ -328,6 +346,7 @@ public class XMLProtocolParser {
                             processedSpeeches.add(uima.processSpeech(stringSpeechEntry.getValue()));
                         }
                     }
+
                     mongoDBHandler.insertSpeeches(processedSpeeches);
                     speechMap.clear();
 
@@ -337,6 +356,7 @@ public class XMLProtocolParser {
             ex.printStackTrace();
         }
     }
+
 
     /**
      * A helper method to extract all Elements of a given parent node from the XML Document which is parsed.
@@ -382,6 +402,7 @@ public class XMLProtocolParser {
         }
         return elementList;
     }
+
 
     /**
      * This method is for Database Control
