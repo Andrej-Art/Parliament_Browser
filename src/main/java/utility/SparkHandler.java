@@ -110,11 +110,10 @@ public class SparkHandler {
     private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
+//        String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
+        String speechID = "ID19100100";
 
-        List<JSONObject> speechData = mongoDBHandler.allSpeechData("ID19100100");
-
-        pageContent.put("title", "Rede-Visualisierung");
+        List<JSONObject> speechData = mongoDBHandler.allSpeechData(speechID);
         pageContent.put("speechData", speechData);
 
         return new ModelAndView(pageContent, "speech_vis.ftl");
