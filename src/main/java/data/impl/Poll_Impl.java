@@ -6,7 +6,7 @@ import exceptions.WrongInputException;
 import java.time.LocalDate;
 
 /**
- * The {@code Poll} class contains the results of a poll for each fraction.
+ * The {@code Poll} class contains the id, the date and each fraction's poll results.
  *
  * @author Eric Lakhter
  */

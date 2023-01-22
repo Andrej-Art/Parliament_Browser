@@ -943,12 +943,12 @@ public class MongoDBHandler {
     }
 
     /**
-     * returns named or unnamed vote results
+     * returns named or unnamed poll results
      *
      * @author Edvin Nise
      */
     @Unfinished("Dont know where we save this data")
-    public void getVoteResults() {
+    public void getPollResults() {
 
     }
 

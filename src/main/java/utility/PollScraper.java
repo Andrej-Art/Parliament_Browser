@@ -33,9 +33,6 @@ public class PollScraper {
         consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
      */
 
-    // Counts how many polls in a row don't exist.
-    private static int noPollCounter = 0;
-
     // Private to restrict other classes from instantiating a PollScraper.
     private PollScraper() {}
 
@@ -43,16 +40,19 @@ public class PollScraper {
      * Iterates over all polls on the german Bundestag's webpage and returns them.<br>
      * Warning: Connecting to ~800 webpages might take a few minutes.
      * @return A list of {@link Poll} objects.
-     * @see #getOnePoll(int)
+     * @see #getOnePoll(int, int)
      * @author Eric Lakhter
      */
     public static List<Poll> getAllPolls() {
         List<Poll> polls = new ArrayList<>();
+        int noPollCounter = 0;
 
         boolean hasMorePolls = true;
         for (int i = 1; hasMorePolls; i++) {
             try {
-                polls.add(getOnePoll(i));
+                polls.add(getOnePoll(i, noPollCounter));
+                // if no exception is thrown the poll counter gets reset
+                noPollCounter = 0;
             } catch (IOException e) {
                 System.err.println("There was a problem getting the DOM for poll ID #" + i + ": " + e.getMessage());
                 e.printStackTrace();
@@ -74,7 +74,7 @@ public class PollScraper {
      * @throws NoPollException If the poll with the given ID cannot be found.
      * @author Eric Lakhter
      */
-    public static Poll getOnePoll(int id) throws NoPollException, IOException {
+    public static Poll getOnePoll(int id, int noPollCounter) throws NoPollException, IOException {
 
         if (id < 1) throw new NoPollException("There are no polls with an ID < 1");
 
@@ -86,8 +86,6 @@ public class PollScraper {
         // If pollElements isn't empty poll results were found
         LocalDate date = TimeHelper.convertToISOdate(
                 pollHTML.getElementsByClass("bt-dachzeile").first().text(), 2);
-        noPollCounter = 0;
-
 
         /*
          * Each index represents a party's votes:
@@ -114,7 +112,8 @@ public class PollScraper {
             pollMap.get(currentFraction)[3] = Integer.parseInt(results[3]);
         }
 
-        return new Poll_Impl(id,
+        return new Poll_Impl(
+                id,
                 date,
                 pollMap.get("SPD"),
                 pollMap.get("CDU/CSU"),
