@@ -66,7 +66,7 @@ public class XMLProtocolParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        UIMAPerformer uima = new UIMAPerformer(mongoDBHandler);
+        UIMAPerformer uima = new UIMAPerformer();
 
         try {
             ArrayList<Person_Impl> persons = mongoDBHandler.getPersons();
