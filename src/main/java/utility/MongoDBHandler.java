@@ -356,9 +356,7 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("agendaItem").insertMany(mongoAgendaItems);
-        } catch (MongoWriteException e) {
-            System.err.println("Insert of agendaItems failed.");
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
     }
 
 

@@ -14,7 +14,6 @@ import java.util.List;
 public class ProcessedSpeech {
     private final String _id, speakerID, text;
     private final LocalDate date;
-    private final List<String[]> commentData;
     private final String fullCas;
     private final double sentiment;
     private final String mainTopic;
@@ -46,7 +45,6 @@ public class ProcessedSpeech {
         this.speakerID = speech.getSpeakerID();
         this.text = speech.getText();
         this.date = speech.getDate();
-        this.commentData = speech.getCommentData();
         this.fullCas = fullCas;
         this.sentiment = sentiment;
         this.mainTopic = mainTopic;
