@@ -4,9 +4,12 @@
     <title>Multiple Linechart Test</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src = "https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 </head>
 
 <body>
+
+<h1>Multiline Chart for Named Entities</h1>
 
 <div id="multiline"></div>
 
@@ -16,74 +19,27 @@
 
 <script>
 
-    const entitiesSon = JSON.parse('${entities}');
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+<#include "js/multilinetest.js">
 
+    $(document).ready(function(){
+        const originalData = {
+            "2000-01-01": {per: 4, org: 7, loc: 2},
+            "2000-01-02": {per: 3, org: 4, loc: 5},
+            "2000-01-03": {per: 2, org: 9, loc: 1},
+            "2000-01-05": {per: 3, org: 7, loc: 2},
+            "2000-01-06": {per: 4, org: 12, loc: 17},
+            "2000-01-07": {per: 7, org: 4, loc: 23},
+            "2000-01-08": {per: 3, org: 5, loc: 11},
+            "2000-01-09": {per: 5, org: 6, loc: 23},
+            "2000-01-12": {per: 12, org: 6, loc: 12},
+            "2000-01-13": {per: 2, org: 9, loc: 13},
+            "2000-01-14": {per: 3, org: 2, loc: 5},
+            "2000-01-15": {per: 4, org: 4, loc: 7},
+        }
+        MultiLineEntities(originalData, '#multiline');
 
-    // The data sets that I cant seem to get this fing js to find from the ftl
-    let per_data_set = entitiesSon["PersonEntities"];
-    let org_data_set = entitiesSon["LocationEntities"];
-    let loc_data_set = entitiesSon["OrgEntities"];
-
-    console.log(per_data_set);
-    console.log(org_data_set);
-    console.log(loc_data_set);
-
-
-    // set up the scales for the x and y axes
-    var x = d3.scaleLinear()
-        .range([0, width]);
-
-    var y = d3.scaleLinear()
-        .range([height, 0]);
-
-    var color = d3.scaleOrdinal(d3.schemeCategory10);
-
-    // This is where the trouble happens
-    var line = d3.line()
-        .x(function(d) { return x(d._id); })// !!!
-        .y(function(d) { return y(d.PersonEntityCount); });// !!!!!!
-
-    // create the svg element in the selected div element
-    var svg = d3.select("#multiline").append('svg')
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // bind the three  datasets to the svg element
-    var dataset = [per_data_set];
-
-
-    dataset.forEach(function(data,i){
-        svg.append("path")
-            .datum(data)
-            .attr("class", "line")
-            .attr("fill", "none")
-            .attr("stroke", color(i))
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
-    });
-
-    // set the domain for the x and y scales
-    x.domain([d3.min(dataset, function(c) { return d3.min(c, function(d) { return d.key; }); }),
-        d3.max(dataset, function(c) { return d3.max(c, function(d) { return d.key; }); })]);
-
-    y.domain([d3.min(dataset, function(c) { return d3.min(c, function(d) { return d.value; }); }),
-        d3.max(dataset, function(c) { return d3.max(c, function(d) { return d.value; }); })]);
-
-    // add the x and y axis
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
-
-    svg.append("g")
-        .call(d3.axisLeft(y));
-
-
+    })
 </script>
 
 </html>
