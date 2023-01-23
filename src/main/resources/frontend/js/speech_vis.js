@@ -1,4 +1,7 @@
 // Contains the applyDataToSpeech() function.
+//
+// It basically splits the complete text string into singular symbols (e.g. "butter" becomes ["b", "u", "t", "t", "e", "r"])
+// and then advances step by step, inserting data where it needs to.
 
 /**
  * Inserts an icon at the end of each sentence which shows a sentence's sentiment.<br>
@@ -40,11 +43,11 @@ function applyDataToSpeech(
         if (sentenceIndex < sentenceData.length && i === sentenceData[sentenceIndex]["endPos"]) {
             let sentiment = sentenceData[sentenceIndex]["sentiment"];
             if (sentiment > 0) {
-                finalSpeech += '🤔<span style="color: blue">' + sentiment + '</span>';
+                finalSpeech += '<span style="color: blue">(' + sentiment + ')</span>';
             } else if (sentiment === 0) {
-                finalSpeech += '🤔<span style="color: orange">' + sentiment + '</span>';
+                finalSpeech += '<span style="color: orange">(' + sentiment + ')</span>';
             } else {
-                finalSpeech += '🤔<span style="color: red">' + sentiment + '</span>';
+                finalSpeech += '<span style="color: red">(' + sentiment + ')</span>';
             }
             sentenceIndex++;
         }
@@ -78,7 +81,7 @@ function applyDataToSpeech(
         // insert comments at their respective position
         if (commentIndex < commentData.length && i === commentData[commentIndex]["commentPos"]) {
             finalSpeech +=
-                ('<br><span style="color: darkslategray">'
+                ('<br><span style="color: darkgreen">'
                 + commentData[commentIndex]["full_name"]
                 + '[' + commentData[commentIndex]["party"] + ']: '
                 +  commentData[commentIndex]["text"] + '</span><br>');

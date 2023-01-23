@@ -7,25 +7,22 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-<h1>This page is lit fam 🔥</h1>
+<h1 id="speechHeader"></h1>
 
-🍪☀🍪
-
-<ul>
-    <#list 1..speechData?size as index>
-        <li><span style="background-color: aqua">${index - 1}</span></li>
-    </#list>
-</ul>
-<p id="speech">
-    <span style="background-color: aqua">Das</span> hier ist ein Text.
-</p>
+<ul id="speechData"></ul>
+<p id="speech"></p>
 
 <div id="plot1"></div>
-<script> // all of this works so far, except for the functions which don't have functionality yet
+<script>
     <#include "js/speech_vis.js">
 
     let speechData = ${speechData[0]};
-
+    let speakerData = speechData["speaker"];
+    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + speakerData["full_name"];
+    document.getElementById("speechData").innerHTML =
+        '<li>Redner: ' + speakerData["full_name"] + '</li>' +
+        '<li>Partei: ' + speakerData["party"] + '</li>' +
+        '<li>Datum:' + speechData["date"] + '</li>';
     const sentenceData = speechData["sentences"];
     const perData = speechData["namedEntitiesPer"];
     const orgData = speechData["namedEntitiesOrg"];
@@ -37,16 +34,7 @@
     commentData[${i}]["commentPos"] = speechData["commentsPos"][${i}];
     </#list>
 
-    // console.log(sentenceData);
-    // console.log(perData);
-    // console.log(orgData);
-    // console.log(locData);
-    // console.log(commentData);
-
-    let speechTag = document.getElementById("speech");
-    // speechTag.innerHTML = '<span style="background-color: aqua">Das hier <span style="background-color: blue">ist</span> ein Text.</span>';
-    console.log(speechData["text"]);
-    speechTag.innerHTML = applyDataToSpeech(
+    document.getElementById("speech").innerHTML = applyDataToSpeech(
         speechData["text"],
         sentenceData,
         perData,
@@ -54,14 +42,6 @@
         locData,
         commentData
     );
-    // speechTag.innerHTML = applyDataToSpeech(
-    //     speechData["text"],
-    //     sentenceData,
-    //     perData,
-    //     orgData,
-    //     locData,
-    //     commentData
-    // );
 </script>
 </body>
 
