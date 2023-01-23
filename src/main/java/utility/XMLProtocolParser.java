@@ -211,12 +211,12 @@ public class XMLProtocolParser {
                                                 for (int k = 0; k < persons.size(); k++) {
                                                     Boolean commentatorName = (comment.indexOf(persons.get(i).getFirstName() + " " + persons.get(i).getLastName()) < comment.indexOf("["));
                                                     if (commentatorName) {
-                                                        commentatorID = persons.get(i).getID();
-                                                        if (!(persons.get(i).getFraction19() == null)) {
-                                                            commentatorFractions.add(persons.get(i).getFraction19());
+                                                        commentatorID = persons.get(k).getID();
+                                                        if (!(persons.get(k).getFraction19() == null)) {
+                                                            commentatorFractions.add(persons.get(k).getFraction19());
                                                         }
-                                                        if (!(persons.get(i).getFraction20() == null)) {
-                                                            commentatorFractions.add(persons.get(i).getFraction20());
+                                                        if (!(persons.get(k).getFraction20() == null)) {
+                                                            commentatorFractions.add(persons.get(k).getFraction20());
                                                         }
                                                     }
                                                 }
