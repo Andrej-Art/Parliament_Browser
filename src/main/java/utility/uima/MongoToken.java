@@ -10,12 +10,14 @@ public class MongoToken {
     private final int endPos;
     private final String lemmaValue;
     private final String pos;
+    private final String coarsePos;
 
-    public MongoToken(int startPos, int endPos, String lemmaValue, String pos) {
+    public MongoToken(int startPos, int endPos, String lemmaValue, String pos, String coarsePos) {
         this.startPos = startPos;
         this.endPos = endPos;
         this.lemmaValue = lemmaValue;
         this.pos = pos;
+        this.coarsePos = coarsePos;
     }
 
     public int getStartPos() {
@@ -32,5 +34,9 @@ public class MongoToken {
 
     public String getPOS() {
         return pos;
+    }
+
+    public String getCoarsePOS() {
+        return coarsePos;
     }
 }

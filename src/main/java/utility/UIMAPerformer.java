@@ -122,7 +122,7 @@ public class UIMAPerformer {
         List<MongoToken> mongoTokens = new ArrayList<>(0);
         for (Token token : JCasUtil.select(jcas, Token.class)) {
             mongoTokens.add(new MongoToken(
-                    token.getBegin(), token.getEnd(), token.getLemmaValue(), token.getPos().getCoarseValue()
+                    token.getBegin(), token.getEnd(), token.getLemmaValue(), token.getPosValue(), token.getPos().getCoarseValue()
             ));
         }
         return mongoTokens;
