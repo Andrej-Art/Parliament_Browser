@@ -22,7 +22,8 @@
     document.getElementById("speechData").innerHTML =
         '<li>Redner: ' + speakerData["full_name"] + '</li>' +
         '<li>Partei: ' + speakerData["party"] + '</li>' +
-        '<li>Datum:' + speechData["date"] + '</li>';
+        '<li>Datum: ' + speechData["date"] + '</li>' +
+        '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
     const sentenceData = speechData["sentences"];
     const perData = speechData["namedEntitiesPer"];
     const orgData = speechData["namedEntitiesOrg"];
