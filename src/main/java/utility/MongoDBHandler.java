@@ -191,7 +191,8 @@ public class MongoDBHandler {
                 .append("endTime", protocol.getEndTime())
                 .append("date", protocol.getDate())
                 .append("duration", protocol.getDuration())
-                .append("electionPeriod", protocol.getProtocolNumber())
+                .append("electionPeriod", protocol.getElectionPeriod())
+                .append("protocolNumber", protocol.getProtocolNumber())
                 .append("sessionLeaders", protocol.getSessionLeaders())
                 .append("agendaItems", protocol.getAgendaItemIDs());
 
