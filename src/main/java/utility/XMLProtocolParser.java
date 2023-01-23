@@ -7,7 +7,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import utility.annotations.*;
+import utility.annotations.Testing;
+import utility.annotations.Unfinished;
 import utility.uima.ProcessedSpeech;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -103,7 +104,8 @@ public class XMLProtocolParser {
 
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
-                                if (agendaItemIDS.contains(topid)) {} else agendaItemIDS.add(topid);
+                                if (agendaItemIDS.contains(topid)) {
+                                } else agendaItemIDS.add(topid);
                                 //System.out.println(topid);
 
                                 //Go through all Speeches
@@ -122,6 +124,7 @@ public class XMLProtocolParser {
                                     List<String> commentList = new ArrayList<>(0);
                                     boolean addStatus = false;
                                     int sameSpeechCounter = 0;
+                                    ArrayList<String[]> commentsPos = new ArrayList<>(0);
 
 
                                     //Go through all ChildNodes of a speech
@@ -191,6 +194,11 @@ public class XMLProtocolParser {
                                                 String reComment = new StringBuilder(comment).reverse().toString();
                                                 reComment = reComment.replaceFirst("\\)", "");
                                                 comment = new StringBuilder(reComment).reverse().toString();
+
+                                                String[] commentIdPos = new String[2];
+                                                commentIdPos[0] = commentID;
+                                                commentIdPos[1] = commentPosition + "";
+                                                commentsPos.add(commentIdPos);
 
                                                 String commentatorID = "";
                                                 ArrayList<String> commentatorFractions = new ArrayList<>(0);
@@ -294,29 +302,33 @@ public class XMLProtocolParser {
                                 }
 
 
-                                    if (!mongoDBHandler.checkIfDocumentExists("person", speakerID)) {
-                                        Person_Impl person = null;
-                                        if (electionPeriod == 19) {
-                                            person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
-                                                    speakerProperties[1], speakerProperties[5],speakerProperties[6],null,"Parteilos",
-                                                    PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]),null,null,
-                                                    null,speakerProperties[8]);
-                                        } else if (electionPeriod == 20){
-                                            person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
-                                                    speakerProperties[1], speakerProperties[5],speakerProperties[6],null,"Parteilos",
-                                                    PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]),null,null,
-                                                    null,speakerProperties[8]);
-                                        }
-                                        mongoDBHandler.insertPerson(person);
-                                        persons.add(person);
+                                if (!mongoDBHandler.checkIfDocumentExists("person", speakerID)) {
+                                    Person_Impl person = null;
+                                    if (electionPeriod == 19) {
+                                        person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
+                                                speakerProperties[1], speakerProperties[5], speakerProperties[6], null, "Parteilos",
+                                                PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]), null, null,
+                                                null, speakerProperties[8]);
+                                    } else if (electionPeriod == 20) {
+                                        person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
+                                                speakerProperties[1], speakerProperties[5], speakerProperties[6], null, "Parteilos",
+                                                PictureScraper.producePictureUrl(speakerProperties[2], speakerProperties[4]), null, null,
+                                                null, speakerProperties[8]);
                                     }
+                                    mongoDBHandler.insertPerson(person);
+                                    persons.add(person);
+                                }
 
                                 commentMap.clear();
                             }
+                            ArrayList<String> agendaItemFullIDS = new ArrayList<>(0);
                             String protcolID = electionPeriod + "/" + protocolNumber;
+                            for (int k = 0; k < agendaItemIDS.size(); k++) {
+                                agendaItemFullIDS.add(protcolID + "/" + agendaItemIDS.get(k));
+                            }
                             if (!mongoDBHandler.checkIfDocumentExists("protocol", protcolID)) {
                                 Protocol_Impl protocol = new Protocol_Impl(protcolID, date, begin, end, sessionDuration,
-                                        electionPeriod, protocolNumber, protocolSessionLeaders, agendaItemIDS);
+                                        electionPeriod, protocolNumber, protocolSessionLeaders, agendaItemFullIDS);
                                 mongoDBHandler.insertProtocol(protocol);
                             }
                         }
