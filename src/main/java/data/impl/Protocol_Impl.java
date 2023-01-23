@@ -7,6 +7,7 @@ import utility.TimeHelper;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Class that implements the Protocol Interface. Provides Constructors for parameter-based instantiation of the variables.
@@ -24,31 +25,8 @@ public class Protocol_Impl implements Protocol {
 
     private int electionPeriod, protocolNumber;
 
-    private ArrayList<String> sessionLeaders, agendaItems;
-
-    /**
-     * Full {@code Protocol} constructor that takes the parameters listed below.
-     * @param id The Protocol's id
-     * @param date The date of the protocolled session
-     * @param beginTime The Time when the session starts
-     * @param endTime The Time when the session ends
-     * @param electionPeriod The election Period the Protocol is from
-     * @param protocolNumber The Number of the Protocol
-     * @param sessionLeaders The List of all Session leaders for the Protocol
-     * @param agendaItems The List of IDs of the AgendaItems featured in this Protocol
-     * @author DavidJordan
-     */
-    public Protocol_Impl(String id, LocalDate date, LocalTime beginTime, LocalTime endTime, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems){
-        this._id = id;
-        this.date = date;
-        this.beginTime = beginTime;
-        this.endTime = endTime;
-        this.duration = 0;
-        this.electionPeriod = electionPeriod;
-        this.protocolNumber = protocolNumber;
-        this.sessionLeaders = sessionLeaders;
-        this.agendaItems = agendaItems;
-    }
+    private Set<String> sessionLeaders;
+    private ArrayList<String> agendaItems;
 
     /**
      * Full {@code Protocol} constructor that takes the parameters listed below.
@@ -63,7 +41,7 @@ public class Protocol_Impl implements Protocol {
      * @param agendaItems The List of IDs of the AgendaItems featured in this Protocol
      * @author DavidJordan
      */
-    public Protocol_Impl(String id, LocalDate date, LocalTime beginTime, LocalTime endTime, long duration, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItems){
+    public Protocol_Impl(String id, LocalDate date, LocalTime beginTime, LocalTime endTime, long duration, int electionPeriod, int protocolNumber, Set<String> sessionLeaders, ArrayList<String> agendaItems){
         this._id = id;
         this.date = date;
         this.beginTime =beginTime;
@@ -88,7 +66,7 @@ public class Protocol_Impl implements Protocol {
         this.endTime = TimeHelper.dateToLocalTime(document.getDate("endTime"));
         this.electionPeriod = document.getInteger("electionPeriod");
         this.protocolNumber = document.getInteger("protocolNumber");
-        this.sessionLeaders = (ArrayList<String>) document.get("sessionLeaders");
+        this.sessionLeaders.addAll((ArrayList<String>) document.get("sessionLeaders"));
         this.agendaItems = (ArrayList<String>) document.get("agendaItems");
     }
 
@@ -129,7 +107,7 @@ public class Protocol_Impl implements Protocol {
     }
 
     @Override
-    public ArrayList<String> getSessionLeaders() {
+    public Set<String> getSessionLeaders() {
         return this.sessionLeaders;
     }
 

@@ -3,6 +3,7 @@ package data;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Interface that represents a Parliament Protocol. Provides getter methods
@@ -67,7 +68,7 @@ public interface Protocol {
      * @return sessionLeaders
      * @author DavidJordan
      */
-    ArrayList<String> getSessionLeaders();
+    Set<String> getSessionLeaders();
 
     /**
      * Gets a list of all IDs of the Agenda Items contained in this Protocol.

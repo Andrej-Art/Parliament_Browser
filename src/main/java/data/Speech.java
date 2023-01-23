@@ -38,12 +38,4 @@ public interface Speech {
      * @author DavidJordan
      */
     LocalDate getDate();
-
-    /**
-     * Gets the comment data for this speech.<br>
-     * Each entry is a length 2 array which has the comment ID at index 0 and text position at index 1.
-     * @return Comment data array.
-     * @author Eric Lakhter
-     */
-    List<String[]> getCommentData();
 }

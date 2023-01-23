@@ -54,7 +54,7 @@ public class Main {
                 case "2":
                     System.out.println("Parsing the protocols");
                     try {
-                        XMLProtocolParser.speechParse2();
+                        XMLProtocolParser.speechParse();
                     } catch (UIMAException e) {
                         throw new RuntimeException(e);
                     }

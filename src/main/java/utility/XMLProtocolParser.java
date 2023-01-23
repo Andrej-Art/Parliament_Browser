@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import utility.annotations.Testing;
+import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -25,35 +25,22 @@ import java.util.*;
  * I don't want to get in Julians way with the Stammdaten-Parser.
  *
  * @author Andrej
- * @Testing
- * @Unfinished
  */
-
+@Unfinished("Some reason")
 public class XMLProtocolParser {
 
-
-    //private Map <Object, Speech_Impl>speechMap;
-    //static HashMap<String, Object> speechMap = new HashMap<>();
     private static Map<String, Speech_Impl> speechMap;
-    private static Map<String, Person_Impl> personMap;
     private static Map<String, Comment_Impl> commentMap;
-    private static Map<String, Protocol_Impl> protocolMap;
-
 
     //Create New Instance of DocumentBuilderFactory
-    static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    private static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
-    public static void speechParse2() throws FileNotFoundException, UIMAException {
+    public static void speechParse() throws FileNotFoundException, UIMAException {
 
         speechMap = new HashMap<>();
-        protocolMap = new HashMap<>();
         commentMap = new HashMap<>();
-        personMap = new HashMap<>();
 
         //Reset Maps
-        //speechMap = new HashMap<>();
-
-
         //Create connection to mongoDB
         MongoDBHandler mongoDBHandler = null;
         try {
@@ -74,23 +61,19 @@ public class XMLProtocolParser {
 
 
             // iterating over all xml-protocols
-            for (int i = files.length - 1; i >= 0; i--) {
+            for (int i = 0; i < files.length; i++) {
                 File file = files[i];
                 //check if the file is a xml-file
                 if (file.isFile() && file.getName().matches(".*\\.xml")) {
-                    //Show Progress in console (we won't need later)
-                    //System.out.println(" The file " + file.getName() + " is being edited...");
-                    //System.out.println("\tSpeeches are collected right now...");
 
                     //Go through the protocol-sessions
                     Document xmlDoc = db.parse(path + "ProtokollXMLs/Protokolle/" + file.getName());
 
                     // orientation for the Dom-Parser: https://mkyong.com/java/how-to-read-xml-file-in-java-dom-parser/
-                    //get the root element of the protocol --> (dbtplenarprotokoll)
+                    // get the root element of the protocol --> (dbtplenarprotokoll)
                     NodeList sessionInfoNodes = xmlDoc.getElementsByTagName("dbtplenarprotokoll");
-                    //iterate threw all dbtplenarptotokoll nodes
 
-
+                    //iterate through all dbtplenarptotokoll nodes
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
                         Node sessionInfoNode = sessionInfoNodes.item(a);
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -116,7 +99,7 @@ public class XMLProtocolParser {
                             //Iterate through all Tagesordnungspunkte
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
                             ArrayList<String> agendaItemIDS = new ArrayList<>();
-                            ArrayList protocolSessionLeaders = new ArrayList();
+                            Set<String> protocolSessionLeaders = new HashSet<>();
 
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
@@ -139,7 +122,6 @@ public class XMLProtocolParser {
                                     List<String> commentList = new ArrayList<>(0);
                                     boolean addStatus = false;
                                     int sameSpeechCounter = 0;
-                                    ArrayList<String[]> commentsPos = new ArrayList<>(0);
 
 
                                     //Go through all ChildNodes of a speech
@@ -151,7 +133,7 @@ public class XMLProtocolParser {
                                         switch (speechChild.getTagName()) {
                                             //If its a <name>-Tag -> So its not a speaker (set addStatus = false) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "name":
-                                                sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
+                                                sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                                 addStatus = false;
                                                 speakerID = "";
                                                 speechText = "";
@@ -166,8 +148,7 @@ public class XMLProtocolParser {
                                                 // Adds missing session leaders to the list
                                                 if (sessionLeaders.contains(sessionLeader)) {
                                                 } else {sessionLeaders.add(sessionLeader);
-                                                protocolSessionLeaders.add(sessionLeader);};
-                                                //System.out.println(sessionLeaders);
+                                                protocolSessionLeaders.add(sessionLeader);}
 
 
                                                 break;
@@ -175,7 +156,7 @@ public class XMLProtocolParser {
                                             //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
                                                 if (speechChild.getAttribute("klasse").equals("redner")) {
-                                                    sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
+                                                    sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                                     addStatus = true;
                                                     NodeList speakerNodeList = speechChild.getChildNodes();
                                                     for (int e = 0; e < speakerNodeList.getLength(); e++) {
@@ -211,11 +192,6 @@ public class XMLProtocolParser {
                                                 reComment = reComment.replaceFirst("\\)", "");
                                                 comment = new StringBuilder(reComment).reverse().toString();
 
-                                                String[] commentIdPos = new String[2];
-                                                commentIdPos[0] = commentID;
-                                                commentIdPos[1] = commentPosition + "";
-                                                commentsPos.add(commentIdPos);
-
                                                 String commentatorID = "";
                                                 ArrayList<String> commentatorFractions = new ArrayList<>(0);
                                                 /*
@@ -248,8 +224,7 @@ public class XMLProtocolParser {
                                     }
 
                                     //At the end of a xml speech: The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
-                                    addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate), commentsPos);
-                                    addToProtocolMap(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS);
+                                    addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                 }
 
                                 for (Map.Entry<String, Comment_Impl> stringCommentEntry : commentMap.entrySet()) {
@@ -339,8 +314,9 @@ public class XMLProtocolParser {
                                 commentMap.clear();
                             }
                             String protcolID = electionPeriod + "/" + protocolNumber;
-                            if (!mongoDBHandler.checkIfDocumentExists("protocol",protcolID)){
-                                Protocol_Impl protocol = new Protocol_Impl(protcolID, date,begin,end,electionPeriod,protocolNumber,protocolSessionLeaders,agendaItemIDS);
+                            if (!mongoDBHandler.checkIfDocumentExists("protocol", protcolID)) {
+                                Protocol_Impl protocol = new Protocol_Impl(protcolID, date, begin, end, sessionDuration,
+                                        electionPeriod, protocolNumber, protocolSessionLeaders, agendaItemIDS);
                                 mongoDBHandler.insertProtocol(protocol);
                             }
                         }
@@ -418,29 +394,20 @@ public class XMLProtocolParser {
      * @param speechText
      * @param sameSpeechCounter
      * @param date
-     * @param commentsPos
      * @author Andrej Artuschenko
      */
     @Testing
-    public static int addToSpeechMap(String speechID, String speakerID, String speechText, Boolean addStatus, MongoDBHandler mongoDBHandler, int sameSpeechCounter, LocalDate date, ArrayList<String[]> commentsPos) {
+    public static int addToSpeechMap(String speechID, String speakerID, String speechText, Boolean addStatus, MongoDBHandler mongoDBHandler, int sameSpeechCounter, LocalDate date) {
         if (((!(speakerID.equals(""))) && (!(speechText.equals(""))) && (!(speechMap.containsKey(speechID))) && addStatus)) {
             sameSpeechCounter = sameSpeechCounter + 1;
             //If speech is not in MongoDB, add it in MongoDB
             if (!mongoDBHandler.checkIfDocumentExists("test_Speech_Andrej", speechID)) {
-                speechMap.put(speechID, new Speech_Impl(speechID, speakerID, speechText, date, commentsPos));
+                speechMap.put(speechID, new Speech_Impl(speechID, speakerID, speechText, date));
             } else {
                 System.out.println("Speech" + (speechID + "#" + String.valueOf(sameSpeechCounter)) + " ist schon in der Datenbank");
             }
         }
         return sameSpeechCounter;
-    }
-
-    @Testing
-    public static void addToProtocolMap(String _id, LocalDate date, LocalTime begin, LocalTime end, long sessionDuration, int electionPeriod, int protocolNumber, ArrayList<String> sessionLeaders, ArrayList<String> agendaItemIDS) {
-        if (((!(_id.equals(""))))) {
-            protocolMap.put(_id, new Protocol_Impl(_id, date, begin, end, sessionDuration, electionPeriod, protocolNumber, sessionLeaders, agendaItemIDS));
-
-        }
     }
 
     /**
