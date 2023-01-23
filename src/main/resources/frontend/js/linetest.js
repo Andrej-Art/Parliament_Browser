@@ -1,5 +1,5 @@
 /**
- * Function that generates a line chart for the Token coarsePOS values. Takes data of the type:
+ * Function that generat es a line chart for the Token coarsePOS values. Takes data of the type:
  * <p>
  *   tokenData = [{"verb": 123}, {"adj": 173}, {"noun": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
  * <p>
