@@ -14,6 +14,9 @@
 <div id="multiline"></div>
 
 
+<div id ="tokenline"></div>
+
+
 
 </body>
 
@@ -21,6 +24,7 @@
 
 
 <#include "js/multilinetest.js">
+<#include "js/linetest.js">
 
     $(document).ready(function(){
         const originalData = {
@@ -39,6 +43,10 @@
         }
         MultiLineEntities(originalData, '#multiline');
 
+
+
+        const tokenData = [{"verb": 123}, {"adj": 173}, {"noun": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
+        createLineChart(tokenData, "#tokenline");
     })
 </script>
 

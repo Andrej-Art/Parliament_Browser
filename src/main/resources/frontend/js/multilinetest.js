@@ -1,5 +1,10 @@
-
-
+/**
+ * Function to generate a Multi_Line_Chart for the Named Entities
+ * @param data the query data
+ * @param target the target html element
+ * @constructor
+ * @author DavidJordan
+ */
 function MultiLineEntities(data, target){
 
  const originalData = data;
@@ -112,4 +117,8 @@ function MultiLineEntities(data, target){
         .text(function(d) { return d; });
 
 }
+
+const tokenData = [{"verb": 123}, {"adj": 173}, {"nn": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
+
+
 
