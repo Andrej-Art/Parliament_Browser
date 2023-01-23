@@ -18,12 +18,6 @@
 
     let speechData = ${speechData[0]};
     let speakerData = speechData["speaker"];
-    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + speakerData["full_name"];
-    document.getElementById("speechData").innerHTML =
-        '<li>Redner: ' + speakerData["full_name"] + '</li>' +
-        '<li>Partei: ' + speakerData["party"] + '</li>' +
-        '<li>Datum: ' + speechData["date"] + '</li>' +
-        '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
     const sentenceData = speechData["sentences"];
     const perData = speechData["namedEntitiesPer"];
     const orgData = speechData["namedEntitiesOrg"];
@@ -35,6 +29,12 @@
     commentData[${i}]["commentPos"] = speechData["commentsPos"][${i}];
     </#list>
 
+    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + speakerData["full_name"];
+    document.getElementById("speechData").innerHTML =
+        '<li>Redner: ' + speakerData["full_name"] + '</li>' +
+        '<li>Partei: ' + speakerData["party"] + '</li>' +
+        '<li>Datum: ' + speechData["date"] + '</li>' +
+        '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
     document.getElementById("speech").innerHTML = applyDataToSpeech(
         speechData["text"],
         sentenceData,

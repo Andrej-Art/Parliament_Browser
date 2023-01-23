@@ -194,7 +194,14 @@ public class MongoDBHandler {
         if (protocol == null) {
             throw new WrongInputException("Protocol is null. Input failed.");
         }
-        Document protocolDoc = Document.parse(gson.toJson(protocol));
+        Document protocolDoc = new Document("_id", protocol.getID())
+                .append("beginTime", protocol.getBeginTime())
+                .append("endTime", protocol.getEndTime())
+                .append("date", protocol.getDate())
+                .append("duration", protocol.getDuration())
+                .append("electionPeriod", protocol.getProtocolNumber())
+                .append("sessionLeaders", protocol.getSessionLeaders())
+                .append("agendaItems", protocol.getAgendaItemIDs());
 
         try {
             db.getCollection("protocol").insertOne(protocolDoc);
@@ -246,7 +253,7 @@ public class MongoDBHandler {
         // Insert it into the DB
         try {
             db.getCollection("user").insertOne(userDoc);
-        } catch (MongoWriteException e) {
+        } catch (MongoWriteException | IllegalArgumentException e) {
             System.err.println("User: " + id + " could not be inserted.");
         }
     }
@@ -259,11 +266,7 @@ public class MongoDBHandler {
      */
     public ArrayList<Person_Impl> getPersons() {
         ArrayList<Person_Impl> personsList = new ArrayList<>(0);
-
         db.getCollection("person").find().forEach((Consumer<? super Document>) procBlock -> personsList.add(new Person_Impl(procBlock)));
-        for (int i = 0; i < personsList.size(); i++) {
-            System.out.println(personsList.get(i).getID());
-        }
         return personsList;
     }
 
@@ -279,20 +282,17 @@ public class MongoDBHandler {
         //Insert single processedSpeech into speech collection
         try {
             db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
 
         //Insert single document into speech_cas collection
         try {
             db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
 
         //Insert single document into speech_tokens collection
         try {
             db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
     }
 
     /**
@@ -322,15 +322,15 @@ public class MongoDBHandler {
         // MongoBulkWriteExceptions are caught when inserting the Lists
         try {
             db.getCollection("speech").insertMany(speechDocs, imo);
-        } catch (MongoBulkWriteException ignored) {
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
         }
         try {
             db.getCollection("speech_cas").insertMany(speechCasDocs, imo);
-        } catch (MongoBulkWriteException ignored) {
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
         }
         try {
             db.getCollection("speech_token").insertMany(speechTokenDocs, imo);
-        } catch (MongoBulkWriteException ignored) {
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
         }
 
     }
@@ -389,7 +389,7 @@ public class MongoDBHandler {
 
         try {
             db.getCollection("comment").insertOne(commentDoc);
-        } catch (MongoWriteException e) {
+        } catch (MongoWriteException | IllegalArgumentException e) {
             System.err.println("Insert of comment with id: " + comment.getID() + "could not be performed.");
         }
     }
@@ -407,7 +407,7 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoBulkWriteException ignored) {}
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
     }
 
     /**
