@@ -1,9 +1,6 @@
 package utility;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
-import com.mongodb.Block;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
@@ -17,7 +14,6 @@ import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
-import javax.json.Json;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -152,16 +148,12 @@ public class MongoDBHandler {
         }
         ArrayList<Document> mongoPersons = new ArrayList<>(0);
         for (Person person : persons) {
-            if (person == null) {
-                throw new IllegalArgumentException("protocol is null.");
-            }
+            if (person == null) continue;
             mongoPersons.add(Document.parse(gson.toJson(person)));
         }
         try {
             db.getCollection("person").insertMany(mongoPersons);
-        } catch (MongoWriteException e) {
-            System.err.println("Insert of person failed.");
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
     }
 
     /**
@@ -349,10 +341,11 @@ public class MongoDBHandler {
         }
         ArrayList<Document> mongoAgendaItems = new ArrayList<>(0);
         for (AgendaItem agendaItem : agendaItems) {
-            if (agendaItem == null) {
-                throw new IllegalArgumentException("An agendaItem object is null.");
-            }
-            mongoAgendaItems.add(Document.parse(gson.toJson(agendaItem)));
+            if (agendaItem == null) continue;
+            mongoAgendaItems.add(new Document("_id", agendaItem.getDate())
+                    .append("date", agendaItem.getDate())
+                    .append("subject", agendaItem.getSubject())
+                    .append("speechIDs", agendaItem.getSpeechIDs()));
         }
         try {
             db.getCollection("agendaItem").insertMany(mongoAgendaItems);
