@@ -22,15 +22,17 @@
  */
 function applyDataToSpeech(
     text = "Das hier ist ein Text.",
-    sentenceData = [{endPos : 10, sentiment : 0.0}],
+    sentenceData = [{endPos : 22, sentiment : 0.0}],
     perData = [{startPos: 2, endPos: 3}],
     orgData = [{startPos: 4, endPos: 5}],
     locData = [{startPos: 6, endPos: 7}],
     commentData = [{
-        full_name: "Bob Baumeister", text: "(Heiterkeit)", commentPos: 10, party: "SPD", sentiment: 0.1, commentator_id: "0001"
+        full_name: "Bob Baumeister", text: "(Heiterkeit)", commentPos: 22, party: "SPD", sentiment: 0.1, commentator_id: "0001"
     }]
 ) {
     let speechArray = text.split('');
+    // artificially increase text array length by one so the final sentence doesn't get cut off
+    speechArray.push('');
     let sentenceIndex = 0;
     let perIndex = 0;
     let orgIndex = 0;
