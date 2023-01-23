@@ -86,7 +86,6 @@ public class XMLProtocolParser {
                             int protocolNumber = Integer.parseInt(sessionInfoElement.getAttribute("sitzung-nr"));
                             int electionPeriod = Integer.parseInt(sessionInfoElement.getAttribute("wahlperiode"));
                             String _id = (electionPeriod + "/" + protocolNumber);
-                            System.out.println(_id);
 
                             //using the methods from the TimeHelper class we can convert the date and time
                             String sessionDate = (sessionInfoElement.getAttribute("sitzung-datum"));
@@ -106,7 +105,6 @@ public class XMLProtocolParser {
                                 String topid = aiElement.getAttribute("top-id");
                                 if (agendaItemIDS.contains(topid)) {
                                 } else agendaItemIDS.add(topid);
-                                //System.out.println(topid);
 
                                 //Go through all Speeches
                                 List<Element> speechElementList = getElementList(aiElement, "rede");
@@ -124,8 +122,6 @@ public class XMLProtocolParser {
                                     List<String> commentList = new ArrayList<>(0);
                                     boolean addStatus = false;
                                     int sameSpeechCounter = 0;
-                                    ArrayList<String[]> commentsPos = new ArrayList<>(0);
-
 
                                     //Go through all ChildNodes of a speech
                                     List<Element> speechChildNodeList = getChildElementList(speech);
@@ -158,6 +154,9 @@ public class XMLProtocolParser {
 
                                             //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
+                                                // "Drucksache X" is not part of the speech
+                                                if (speechChild.getAttribute("klasse").equals("T_Drs")) continue;
+
                                                 if (speechChild.getAttribute("klasse").equals("redner")) {
                                                     sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                                     addStatus = true;
@@ -195,11 +194,6 @@ public class XMLProtocolParser {
                                                 reComment = reComment.replaceFirst("\\)", "");
                                                 comment = new StringBuilder(reComment).reverse().toString();
 
-                                                String[] commentIdPos = new String[2];
-                                                commentIdPos[0] = commentID;
-                                                commentIdPos[1] = commentPosition + "";
-                                                commentsPos.add(commentIdPos);
-
                                                 String commentatorID = "";
                                                 ArrayList<String> commentatorFractions = new ArrayList<>(0);
                                                 /*
@@ -208,15 +202,15 @@ public class XMLProtocolParser {
                                                 ob vor den Klammern der Name vorkommt.
                                                    */
 
-                                                for (int k = 0; k < persons.size(); k++) {
-                                                    Boolean commentatorName = (comment.indexOf(persons.get(i).getFirstName() + " " + persons.get(i).getLastName()) < comment.indexOf("["));
-                                                    if (commentatorName) {
-                                                        commentatorID = persons.get(k).getID();
-                                                        if (!(persons.get(k).getFraction19() == null)) {
-                                                            commentatorFractions.add(persons.get(k).getFraction19());
+                                                for (Person_Impl person : persons) {
+                                                    String fullName = person.getFirstName() + " " + person.getLastName();
+                                                    if (comment.indexOf(fullName) < comment.indexOf("[") && comment.contains(fullName)) {
+                                                        commentatorID = person.getID();
+                                                        if (person.getFraction19() != null) {
+                                                            commentatorFractions.add(person.getFraction19());
                                                         }
-                                                        if (!(persons.get(k).getFraction20() == null)) {
-                                                            commentatorFractions.add(persons.get(k).getFraction20());
+                                                        if (person.getFraction20() != null) {
+                                                            commentatorFractions.add(person.getFraction20());
                                                         }
                                                     }
                                                 }

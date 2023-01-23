@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
+import javax.json.Json;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -153,7 +154,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("person").insertMany(mongoPersons);
-        } catch (MongoWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoWriteException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -275,17 +277,20 @@ public class MongoDBHandler {
         //Insert single processedSpeech into speech collection
         try {
             db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoWriteException | IllegalArgumentException ignored) {
+        }
 
         //Insert single document into speech_cas collection
         try {
             db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoWriteException | IllegalArgumentException ignored) {
+        }
 
         //Insert single document into speech_tokens collection
         try {
             db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoWriteException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -350,7 +355,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("agendaItem").insertMany(mongoAgendaItems);
-        } catch (MongoWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoWriteException | IllegalArgumentException ignored) {
+        }
     }
 
 
@@ -399,7 +405,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -484,16 +491,16 @@ public class MongoDBHandler {
     }
 
     /**
-     *
      * Adds potential person/fraction filters in front of a pipeline performed on either the speech or comment collection.
      * If both person and fraction filters exist, person has priority while fraction gets ignored.
      * <p> If enabled, the project stage leaves the pipeline with a collection containing the
      * {@code _id, speechID, speakerID, neededFieldOne, neededFieldTwo} and if filtering for fractions a
      * {@code persondata} field matching the {@code speakerID} form the person collection.
-     * @param pipeline The pipeline to be modified.
+     *
+     * @param pipeline       The pipeline to be modified.
      * @param fractionFilter the fraction to be filtered for.
-     * @param neededField Potential field names to be added to the projection. No projection will be performed if
-     *                    no needed fields are given.
+     * @param neededField    Potential field names to be added to the projection. No projection will be performed if
+     *                       no needed fields are given.
      * @author Eric Lakhter
      * @modified DavidJordan
      */
@@ -511,7 +518,7 @@ public class MongoDBHandler {
 //        if (!personFilter.isEmpty()) {
 //            pipeline.add(0, match(new Document("speakerID", personFilter)));
 //        }
-         if (!fractionFilter.isEmpty()) {
+        if (!fractionFilter.isEmpty()) {
             pipeline.add(0, match(new Document("persondata.fraction", fractionFilter)));
             pipeline.add(0, unwind("$persondata"));
             pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
@@ -660,7 +667,7 @@ public class MongoDBHandler {
      *
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne,String dateFilterTwo) {
+    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo) {
         Bson groupSpeaker = group(new Document("speakerID", "$speakerID"),
                 sum("SpeechesCount", 1));
         Bson sortDesc = sort(descending("SpeechesCount"));
@@ -686,6 +693,7 @@ public class MongoDBHandler {
 
     /**
      * returns count of all Tokens
+     *
      * @author Edvin Nise
      */
     public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo) {
@@ -715,19 +723,20 @@ public class MongoDBHandler {
 
     /**
      * returns all Named Entities with their respective count
+     *
      * @author Edvin Nise
      */
-    public JSONObject facetNamedEntities(String dateFilterOne, String dateFilterTwo) {
+    public JSONObject facetNamedEntities(String dateFilterOne, String dateFilterTwo) { //String dateFilterOne, String dateFilterTwo
         Bson facet = new Document("$facet", new Document()
                 .append("PersonEntity", Arrays.asList(
                         new Document("$unwind", "$namedEntitiesPer"),
-                        new Document("$group", new Document("_id", "$namedEntitiesPer.coveredText").append("PersonEntityCount", new Document("$sum", 1))),
+                        new Document("$group", new Document("_id", "$date").append("PersonEntityCount", new Document("$sum", 1))),
                         new Document("$sort", new Document("PersonEntityCount", -1))))
                 .append("LocationEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesLoc"),
-                        new Document("$group", new Document("_id", "$namedEntitiesLoc.coveredText").append("LocEntityCount", new Document("$sum", 1))),
+                        new Document("$group", new Document("_id", "$date").append("LocEntityCount", new Document("$sum", 1))),
                         new Document("$sort", new Document("LocEntityCount", -1))))
                 .append("OrgEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesOrg"),
-                        new Document("$group", new Document("_id", "$namedEntitiesOrg.coveredText").append("OrgEntityCount", new Document("$sum", 1))),
+                        new Document("$group", new Document("_id", "$date").append("OrgEntityCount", new Document("$sum", 1))),
                         new Document("$sort", new Document("OrgEntityCount", -1))))
 
         );
@@ -737,49 +746,123 @@ public class MongoDBHandler {
         }
 
         JSONObject obj = new JSONObject();
-        db.getCollection("speech").aggregate(pipeline).allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> {
-                    ArrayList<Document> perList = (ArrayList<Document>) procBlock.get("PersonEntity");
-                    ArrayList<JSONObject> perData = new ArrayList<>();
-                    for (Document doc : perList) {
-                        perData.add(new JSONObject(doc.toJson()));
-                    }
-                    obj.put("PersonEntities", perData);
-                    ArrayList<Document> locList = (ArrayList<Document>) procBlock.get("LocationEntity");
-                    ArrayList<JSONObject> locData = new ArrayList<>();
-                    for (Document doc : locList) {
-                        locData.add(new JSONObject(doc.toJson()));
-                    }
-                    obj.put("LocationEntities", locData);
-                    ArrayList<Document> orgList = (ArrayList<Document>) procBlock.get("OrgEntity");
-                    ArrayList<JSONObject> orgData = new ArrayList<>();
-                    for (Document doc : orgList) {
-                        orgData.add(new JSONObject(doc.toJson()));
-                    }
-                    obj.put("OrgEntities", orgData);
+        db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock ->
+                        {
+                            ArrayList<Document> perList = (ArrayList<Document>) procBlock.get("PersonEntity");
+                            ArrayList<Integer> perData = new ArrayList<>();
+                            for (Document doc : perList) {
+                                perData.add((doc.getInteger("PersonEntityCount")));
+                            }
+                            obj.put("PersonEntities", perData);
+//                    ArrayList<Document> locList = (ArrayList<Document>) procBlock.get("LocationEntity");
+//                    ArrayList<JSONObject> locData = new ArrayList<>();
+//                    for (Document doc : locList) {
+//                        locData.add(new JSONObject(doc.toJson()));
+//                    }
+//                    obj.put("LocationEntities", locData);
+//                    ArrayList<Document> orgList = (ArrayList<Document>) procBlock.get("OrgEntity");
+//                    ArrayList<JSONObject> orgData = new ArrayList<>();
+//                    for (Document doc : orgList) {
+//                        orgData.add(new JSONObject(doc.toJson()));
+//                    }
+//                    obj.put("OrgEntities", orgData);
 
+                        }
+                );
+        System.out.println(obj);
+        return obj;
+    }
+
+    public void facetNamedEntitiestest(String dateFilterOne, String dateFilterTwo) { //String dateFilterOne, String dateFilterTwo
+        Bson facet = new Document("$facet", new Document()
+                .append("PersonEntity", Arrays.asList(
+                        new Document("$unwind", "$namedEntitiesPer"),
+                        new Document("$group", new Document("_id", "$date").append("PersonEntityCount", new Document("$sum", 1))),
+                        new Document("$sort", new Document("PersonEntityCount", -1))))
+                .append("LocationEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesLoc"),
+                        new Document("$group", new Document("_id", "$date").append("LocEntityCount", new Document("$sum", 1))),
+                        new Document("$sort", new Document("LocEntityCount", -1))))
+                .append("OrgEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesOrg"),
+                        new Document("$group", new Document("_id", "$date").append("OrgEntityCount", new Document("$sum", 1))),
+                        new Document("$sort", new Document("OrgEntityCount", -1))))
+
+        );
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(facet));
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+
+//        JSONObject obj = new JSONObject();
+        db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson())
+//                        {
+//                            ArrayList<Document> perList = (ArrayList<Document>) procBlock.get("PersonEntity");
+//                            ArrayList<Integer> perData = new ArrayList<>();
+//                            for (Document doc : perList) {
+//                                perData.add((doc.getInteger("PersonEntityCount")));
+//                            }
+//                            obj.put("PersonEntities", perData);
+////                    ArrayList<Document> locList = (ArrayList<Document>) procBlock.get("LocationEntity");
+////                    ArrayList<JSONObject> locData = new ArrayList<>();
+////                    for (Document doc : locList) {
+////                        locData.add(new JSONObject(doc.toJson()));
+////                    }
+////                    obj.put("LocationEntities", locData);
+////                    ArrayList<Document> orgList = (ArrayList<Document>) procBlock.get("OrgEntity");
+////                    ArrayList<JSONObject> orgData = new ArrayList<>();
+////                    for (Document doc : orgList) {
+////                        orgData.add(new JSONObject(doc.toJson()));
+////                    }
+////                    obj.put("OrgEntities", orgData);
+//
+//                        }
+                );
+//        System.out.println(obj);
+//        return obj;
+    }
+
+    public JSONObject testPipeline() {
+        Bson group = group(new Document("_id", "$date"),
+                sum("namedEntityPerson", new Document("$size", "$namedEntitiesPer")),
+                sum("namedEntityLocation", new Document("$size", "$namedEntitiesLoc")),
+                sum("namedEntityOrg", new Document("$size", "$namedEntitiesOrg")));
+        Bson sort = sort(descending("namedEntityPerson"));
+
+        JSONObject obj = new JSONObject();
+
+        db.getCollection("test_speech_edvin").aggregate(Arrays.asList(group, sort)).allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock -> {
+                    Document doc = (Document) procBlock.get("_id");
+                    JSONObject objEnt = new JSONObject();
+                    objEnt.put("personEntity", procBlock.getInteger("namedEntityPerson"));
+                    objEnt.put("locationEntity", procBlock.getInteger("namedEntityLocation"));
+                    objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
+                    obj.put((String) doc.get("_id"), objEnt);
                 });
+        System.out.println(obj);
         return obj;
     }
 
     /**
      * returns the count for all Parts of Speech
+     *
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
-    public JSONObject getPOSCount(String dateFilterOne,String dateFilterTwo) {
+    public JSONObject getPOSCount() {//String dateFilterOne,String dateFilterTwo
         Bson unwind = unwind("$tokens");
-        Bson project = project(new Document("OnlyPOS", "$tokens.POS"));
+        Bson project = project(new Document("OnlyPOS", "$tokens.coarsePOS"));
         Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
         Bson sort = sort(descending("CountOfPOS"));
         JSONObject obj = new JSONObject();
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, project, group, sort));
 
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
+//        if (!dateFilterOne.isEmpty()) {
+//            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+//        }
 
-        db.getCollection("test_speech_token_edvin").aggregate(pipeline)
+        db.getCollection("speech_token").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
                     Document doc = (Document) procBlock.get("_id");
@@ -885,37 +968,36 @@ public class MongoDBHandler {
      */
     public ArrayList<JSONObject> allSpeechData(String redeID) {
         Bson match = match(new Document("_id", new Document("$eq", redeID)));
-        Bson lookupSpeaker = lookup("test_person", "speakerID", "_id", "Speaker");
-        Bson lookupComments = lookup("test_comment", "_id", "speech_id", "comments");
+        Bson lookupSpeaker = lookup("person", "speakerID", "_id", "Speaker");
+        Bson lookupComments = lookup("comment", "_id", "speechID", "comments");
         Bson unwindSpeaker = unwind("$Speaker");
         Bson unwindComments = unwind("$comments");
-        Bson lookupCommentator = lookup("test_person", "comments.commentator_id", "_id", "CommentatorData");
-        Bson unwindCommentatorData = unwind("$CommentatorData");
-        Bson addFieldMergedCommentWithData = new Document("$addFields",
-                new Document("CommentatorWithComments",
-                        new Document("$mergeObjects", Arrays.asList("$comments", "$CommentatorData"))));
+        Bson lookupCommentator = lookup("person", "comments.commentatorID", "_id", "CommentatorData");
+        Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
+                .append("preserveNullAndEmptyArrays", true));
         Bson project = project(new Document("comments", 0)
                 .append("CommentatorData", 0));
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker, unwindComments
-                , lookupCommentator, unwindCommentatorData, addFieldMergedCommentWithData, project));
+                , lookupCommentator, unwindCommentatorData, project));
 
         ArrayList<JSONObject> jsonList = new ArrayList<>();
 
-        db.getCollection("test_speech_edvin").aggregate(pipeline)
+        db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> {
+                .forEach((Consumer<? super Document>) procBlock ->
+                {
                     JSONObject obj = new JSONObject();
                     obj.put("speechID", procBlock.getString("_id"));
                     obj.put("speakerID", procBlock.getString("speakerID"));
                     obj.put("text", procBlock.getString("text"));
 //                    obj.put("commentData", procBlock.get("commentData"));
-                    ArrayList<Document> docList = (ArrayList<Document>) procBlock.get("commentData");
-                    ArrayList<Integer> comPos = new ArrayList<>();
-                    for (Document doc : docList) {
-                        comPos.add(doc.getInteger("startPos"));
-                    }
-                    obj.put("commentsPos", comPos);
+//                    ArrayList<Document> docList = (ArrayList<Document>) procBlock.get("commentData");
+//                    ArrayList<Integer> comPos = new ArrayList<>();
+//                    for (Document doc : docList) {
+//                        comPos.add(doc.getInteger("startPos"));
+//                    }
+//                    obj.put("commentsPos", comPos);
                     obj.put("speechSentiment", procBlock.getDouble("sentiment"));
                     obj.put("sentences", procBlock.get("sentences"));
                     obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
@@ -923,12 +1005,11 @@ public class MongoDBHandler {
                     obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
                     obj.put("date", procBlock.get("date"));
                     obj.put("speaker", procBlock.get("Speaker"));
-                    obj.put("commentatorData", procBlock.get("CommentatorWithComments"));
+                    obj.put("comment", procBlock.get("comments"));
+                    obj.put("CommentatorData", procBlock.get("CommentatorData"));
                     jsonList.add(obj);
                 });
-        for (JSONObject jsonObject : jsonList) {
-            System.out.println(jsonObject);
-        }
+        System.out.println(jsonList);
         return jsonList;
     }
 

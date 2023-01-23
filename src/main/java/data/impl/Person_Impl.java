@@ -70,7 +70,6 @@ public class Person_Impl implements Person {
         this.deathDate = document.getString("deathDate");
         this.birthPlace = document.getString("birthPlace");
         this.picture = document.get("picture", ArrayList.class);
-
     }
 
     @Override
