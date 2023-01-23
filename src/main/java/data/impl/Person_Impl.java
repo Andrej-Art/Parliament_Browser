@@ -57,7 +57,7 @@ public class Person_Impl implements Person {
     public Person_Impl(Document document){
         this.personDoc = document;
         this._id = document.getString("_id");
-        this.firstName = document.getString("firstname");
+        this.firstName = document.getString("firstName");
         this.lastName = document.getString("lastName");
         this.role = document.getString("role");
         this.title = document.getString("title");
