@@ -483,8 +483,6 @@ public class MongoDBHandler {
         }
     }
 
-    @Unfinished("Probably, needs to be adapted to the fraction 19, fraction 20 options." +
-            " Possibly also needs to be changed to fit the needs of the visualisation in the front end.")
     /**
      *
      * Adds potential person/fraction filters in front of a pipeline performed on either the speech or comment collection.
@@ -493,13 +491,14 @@ public class MongoDBHandler {
      * {@code _id, speechID, speakerID, neededFieldOne, neededFieldTwo} and if filtering for fractions a
      * {@code persondata} field matching the {@code speakerID} form the person collection.
      * @param pipeline The pipeline to be modified.
-     * @param personFilter The person ID to be filtered for.
      * @param fractionFilter the fraction to be filtered for.
      * @param neededField Potential field names to be added to the projection. No projection will be performed if
      *                    no needed fields are given.
      * @author Eric Lakhter
      * @modified DavidJordan
      */
+    @Unfinished("Probably, needs to be adapted to the fraction 19, fraction 20 options." +
+            " Possibly also needs to be changed to fit the needs of the visualisation in the front end.")
     public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
         // Setting each of the needed fields to be included in the results
@@ -965,5 +964,4 @@ public class MongoDBHandler {
     public void dropTextIndex(String col, String field) {
         db.getCollection(col).dropIndex(field + "_text");
     }
-
 }

@@ -173,6 +173,10 @@ public class ProcessedSpeech {
                     .append(token.getLemmaValue())
                     .append("\",POS:\"")
                     .append(token.getPOS())
+                    .append("\",coarsePOS:\"")
+                    .append(token.getCoarsePOS())
+                    .append("\",morphValue:\"")
+                    .append(token.getMorphValue())
                     .append("\"},");
         }
         tokenString.append("\n  ],");
