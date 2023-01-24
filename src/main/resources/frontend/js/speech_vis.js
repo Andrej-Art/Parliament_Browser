@@ -9,7 +9,7 @@
  * <ul>
  *     <li><tt>PER</tt> is red</li>
  *     <li><tt>ORG</tt> is blue</li>
- *     <li><tt>LOC</tt> is yellow</li>
+ *     <li><tt>LOC</tt> is green</li>
  * </ul>
  * Inserts comments at their respective positions in the text.
  * @param text          Speech text.
@@ -73,7 +73,7 @@ function applyDataToSpeech(
         }
         if (locIndex < locData.length) {
             if (i === locData[locIndex]["startPos"]) {
-                finalSpeech += '<span style="background-color: yellow">';
+                finalSpeech += '<span style="background-color: green">';
             } else if (i === locData[locIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 locIndex++;
@@ -82,12 +82,19 @@ function applyDataToSpeech(
 
         // insert comments at their respective position
         if (commentIndex < commentData.length && i === commentData[commentIndex]["commentPos"]) {
-            finalSpeech +=
-                ('<br><span style="color: darkgreen">'
-                + commentData[commentIndex]["full_name"]
-                + '[' + commentData[commentIndex]["party"] + ']: '
-                +  commentData[commentIndex]["text"] + '</span><br>');
-            commentIndex++;
+            let commentDatum = commentData[commentIndex];
+            if (commentDatum.hasOwnProperty("full_name")) {
+                let fullText = commentDatum["text"];
+                if (fullText.contains(" - ")) {
+                    let leftText = fullText.split(" - ", 1);
+                    finalSpeech += ('<br><span style="color: darkgreen">' + leftText + '</span><br>');
+                }
+                let rightText = fullText.split("[")[1];
+                finalSpeech += ('<br><span style="color: darkgreen">' + commentDatum["full_name"] + '[' + rightText + '</span><br>');
+            } else {
+                finalSpeech += ('<br><span style="color: darkgreen">' + commentDatum["text"] + '</span><br>');
+                commentIndex++;
+            }
         }
 
         // Build up the result String after each step

@@ -7,6 +7,11 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
+[
+<#list speechData as speech>
+    ${speech}<#sep>, <br>
+</#list>
+]
 <h1 id="speechHeader"></h1>
 
 <ul id="speechData"></ul>
@@ -25,8 +30,8 @@
     let commentData = [];
     // combine all commentData into one array
     <#list 0..speechData?size - 1 as i>
-    commentData.push(${speechData[i]}["commentatorData"]);
-    commentData[${i}]["commentPos"] = speechData["commentsPos"][${i}];
+    commentData.push(${speechData[i]}["comment"]);
+    commentData[${i}]["commentPos"] = speechData["comment"][${i}];
     </#list>
 
     document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + speakerData["full_name"];
