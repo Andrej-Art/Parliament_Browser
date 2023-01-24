@@ -696,7 +696,7 @@ public class MongoDBHandler {
      *
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo) {
+    public ArrayList<JSONObject> getTokenCount(int limit) { // , String dateFilterOne, String dateFilterTwo
         Bson unwind = unwind("$tokens");
         Bson group = group("$tokens.lemmaValue", sum("count", 1));
         Bson sort = sort(descending("count"));
@@ -704,17 +704,16 @@ public class MongoDBHandler {
 //        Bson rankMode = match(gte("count", limit));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, group, sort, rankMode));
 
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
+//        if (!dateFilterOne.isEmpty()) {
+//            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+//        }
 
         MongoIterable<Document> result = db.getCollection("test_speech_token_edvin")
                 .aggregate(pipeline);
         ArrayList<JSONObject> objList = new ArrayList<>();
         for (Document doc : result) {
             JSONObject obj = new JSONObject();
-            obj.put("Token", doc.getString("_id"));
-            obj.put("count", doc.getInteger("count"));
+            obj.put(doc.getString("_id"), doc.getInteger("count"));
             objList.add(obj);
         }
         System.out.println(objList);
