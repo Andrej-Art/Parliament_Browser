@@ -943,11 +943,9 @@ public class MongoDBHandler {
         Bson lookupCommentator = lookup("person", "comments.commentatorID", "_id", "CommentatorData");
         Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
                 .append("preserveNullAndEmptyArrays", true));
-        Bson project = project(new Document("comments", 0)
-                .append("CommentatorData", 0));
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker, unwindComments
-                , lookupCommentator, unwindCommentatorData, project));
+                , lookupCommentator, unwindCommentatorData));
 
         ArrayList<JSONObject> jsonList = new ArrayList<>();
 
