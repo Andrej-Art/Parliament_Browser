@@ -67,13 +67,13 @@
         </div>
 
         <div class="calenderfield">
-            <form action="/action_page.php">
-                <label for="von">von:</label>
-                <input type="date" id="von" name="von">
-                <label for="bis">bis:</label>
-                <input type="date" id="bis" name="bis">
-                <input type="submit">
-            </form>
+            <label for="von">von:</label>
+            <input type="date" id="von" name="von">
+            <label for="bis">bis:</label>
+            <input type="date" id="bis" name="bis">
+            <input name="form" type="submit" value="Anzeigen"/>
+
+
         </div>
     </div>
 </div>
