@@ -40,7 +40,8 @@
             "2000-01-13": {per: 2, org: 9, loc: 13},
             "2000-01-14": {per: 3, org: 2, loc: 5},
             "2000-01-15": {per: 4, org: 4, loc: 7},
-        }
+        };
+
         MultiLineEntities(originalData, '#multiline');
 
 

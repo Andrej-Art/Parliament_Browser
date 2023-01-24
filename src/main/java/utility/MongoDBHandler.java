@@ -770,7 +770,7 @@ public class MongoDBHandler {
 
                         }
                 );
-        System.out.println(obj);
+   //     System.out.println(obj);
         return obj;
     }
 

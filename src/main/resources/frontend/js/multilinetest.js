@@ -118,7 +118,6 @@ function MultiLineEntities(data, target){
 
 }
 
-const tokenData = [{"verb": 123}, {"adj": 173}, {"nn": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
 
 
 
