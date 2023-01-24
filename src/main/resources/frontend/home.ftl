@@ -9,7 +9,7 @@
 
 <body>
 
-<a href="multi/">multi</a>
+<a href="/multi/">multi</a>
 
 <a href="reden/">reden</a>
 

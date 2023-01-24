@@ -9,12 +9,17 @@
 
 <body>
 
-<h1>Multiline Chart for Named Entities</h1>
+<h2>Multiline Chart for Named Entities</h2>
 
 <div id="multiline"></div>
 
+<h2>Linechart for Tokens</h2>
 
-<div id ="tokenline"></div>
+<div id ="line"></div>
+
+<h2>Barchart for POS</h2>
+
+<div id ="posBar"></div>
 
 
 
@@ -25,29 +30,39 @@
 
 <#include "js/multilinetest.js">
 <#include "js/linetest.js">
+enitityData = ${entities};
+
+
+
+let posdata = [];
+<#list pos as posObject>
+posdata.push(${posObject});
+</#list>
+console.log(posdata);
+
+<#--let entityData = [];-->
+<#--<#list entities as entObject>-->
+<#--    entityData.push(${entObject});-->
+<#--</#list>-->
+<#--console.log(entityData);-->
+
+let entityData = ${entities};
+
+console.log(entityData);
+
+let tokenData = [];
+<#list token as tokenObject>
+    tokenData.push(${tokenObject});
+</#list>
+console.log(tokenData);
 
     $(document).ready(function(){
-        const originalData = {
-            "2000-01-01": {per: 4, org: 7, loc: 2},
-            "2000-01-02": {per: 3, org: 4, loc: 5},
-            "2000-01-03": {per: 2, org: 9, loc: 1},
-            "2000-01-05": {per: 3, org: 7, loc: 2},
-            "2000-01-06": {per: 4, org: 12, loc: 17},
-            "2000-01-07": {per: 7, org: 4, loc: 23},
-            "2000-01-08": {per: 3, org: 5, loc: 11},
-            "2000-01-09": {per: 5, org: 6, loc: 23},
-            "2000-01-12": {per: 12, org: 6, loc: 12},
-            "2000-01-13": {per: 2, org: 9, loc: 13},
-            "2000-01-14": {per: 3, org: 2, loc: 5},
-            "2000-01-15": {per: 4, org: 4, loc: 7},
-        };
-
-        MultiLineEntities(originalData, '#multiline');
+       MultiLineEntities(entityData, '#multiline');
+       createLineChart(tokenData, '#line');
+        createBarChart(posdata, '#posBar');
 
 
 
-        const tokenData = [{"verb": 123}, {"adj": 173},{"nuns": 153}, {"noun": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
-        createLineChart(tokenData, "#tokenline");
     })
 </script>
 

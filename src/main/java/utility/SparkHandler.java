@@ -65,7 +65,7 @@ public class SparkHandler {
          */
         get("/", getHome, new FreeMarkerEngine(cfg));
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
-        get("/multiline/", getMulti, new FreeMarkerEngine(cfg));
+        get("/multi/", getMulti, new FreeMarkerEngine(cfg));
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
     }
 
@@ -98,6 +98,15 @@ public class SparkHandler {
 
        // JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
        // pageContent.put("entities", entitiesObject);
+
+        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount();
+        pageContent.put("pos", posAndCounts);
+
+        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30);
+        pageContent.put("token", tokenAndCounts);
+
+        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","");
+        pageContent.put("entities", datesAndNamedEntities);
         return new ModelAndView(pageContent, "multi.ftl");
     };
 
@@ -105,8 +114,8 @@ public class SparkHandler {
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
-        pageContent.put("entities", entitiesObject);
+      //  JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
+     //   pageContent.put("entities", entitiesObject);
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
