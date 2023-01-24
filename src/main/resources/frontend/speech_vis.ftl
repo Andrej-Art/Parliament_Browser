@@ -3,20 +3,21 @@
 <head>
     <meta name="author" content="Eric Lakhter">
     <title>Rede-Visualisierung</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<#--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-[
-<#list speechData as speech>
-    ${speech}<#sep>, <br>
-</#list>
-]
 <h1 id="speechHeader"></h1>
 
 <ul id="speechData"></ul>
 <p id="speech"></p>
 
+<#-- checking out field names -->
+[
+<#list speechData as speech>
+    ${speech}<#sep>, <br>
+</#list>
+]
 <div id="plot1"></div>
 <script>
     <#include "js/speech_vis.js">
@@ -33,10 +34,10 @@
     commentData.push(${speechData[i]}["comment"]);
     commentData[${i}]["commentPos"] = speechData["comment"][${i}];
     </#list>
-
-    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + speakerData["full_name"];
+    let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
+    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speechData").innerHTML =
-        '<li>Redner: ' + speakerData["full_name"] + '</li>' +
+        '<li>Redner: ' + fullName + '</li>' +
         '<li>Partei: ' + speakerData["party"] + '</li>' +
         '<li>Datum: ' + speechData["date"] + '</li>' +
         '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';

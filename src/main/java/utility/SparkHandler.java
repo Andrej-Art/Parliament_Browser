@@ -135,6 +135,8 @@ public class SparkHandler {
      * Speech visualisation page.
      * @author Eric Lakhter
      */
+    @Testing
+    @Unfinished("Need to reimplement comments properly, need to put sentence sentiment in an icon")
     private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Date;
@@ -15,10 +16,10 @@ import java.util.Locale;
  */
 public class TimeHelper {
     // Used in protocols
-    private static final DateTimeFormatter DATE_FORMAT_INPUT_1 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
+    private static final DateTimeFormatter DATE_FORMAT_1 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
     // Used on the german Bundestag's website
-    private static final DateTimeFormatter DATE_FORMAT_INPUT_2 = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMANY);
-    private static final DateTimeFormatter CLOCK_FORMAT_INPUT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
+    private static final DateTimeFormatter DATE_FORMAT_2 = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMANY);
+    private static final DateTimeFormatter CLOCK_FORMAT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
 
 
      // Private to restrict other classes from instantiating a TimeHelper.
@@ -43,6 +44,16 @@ public class TimeHelper {
     }
 
     /**
+     * Converts Date objects to a String of format {@code dd.MM.yyyy}.
+     * @param date Date object form the database
+     * @return String with the date, e.g. 24.07.2017
+     */
+    public static String mongoDateToGermanDate(Date date) {
+        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.GERMANY)
+                + ", " +date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_1);
+    }
+
+    /**
      * Converts dates of the pattern {@code dd.MM.yyyy} to a LocalDate.
      * @param date Date String.
      * @return Respective {@code LocalDate}.
@@ -57,7 +68,7 @@ public class TimeHelper {
      * @param date Date String.
      * @param mode Undefined modes behave like mode 1.<br>
      *             - 1 means that dates of the pattern {@code dd.MM.yyyy} get converted.<br>
-     *             - 2 means that dates of the pattern {@code d. MMMM yyyy} get converted.
+     *             - 2 means that dates of the pattern {@code d. MMMM yyyy} get converted.<br>
      *             - 3 means that dates of the pattern {@code yyyy-MM-dd} get converted.
      * @return Respective {@code LocalDate}.
      * @author Eric Lakhter
@@ -67,10 +78,10 @@ public class TimeHelper {
             case 3:
                 return LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
             case 2:
-                return LocalDate.parse(date, DATE_FORMAT_INPUT_2);
+                return LocalDate.parse(date, DATE_FORMAT_2);
             case 1:
             default:
-                return LocalDate.parse(date, DATE_FORMAT_INPUT_1);
+                return LocalDate.parse(date, DATE_FORMAT_1);
         }
     }
 
@@ -81,7 +92,7 @@ public class TimeHelper {
      * @author Eric Lakhter
      */
     public static LocalTime convertToISOtime(String time){
-        return LocalTime.parse(time.replace(".", ":").replace(" Uhr", ""), CLOCK_FORMAT_INPUT);
+        return LocalTime.parse(time.replace(".", ":").replace(" Uhr", ""), CLOCK_FORMAT);
     }
 
     /**
