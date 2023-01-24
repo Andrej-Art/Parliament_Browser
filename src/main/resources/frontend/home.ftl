@@ -12,6 +12,9 @@
 <a href="multi/">multi</a>
 
 <a href="reden/">reden</a>
+
+<a href="dashboard/">dashboard</a>
+
 </body>
 
 </html>

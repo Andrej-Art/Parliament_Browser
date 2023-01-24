@@ -1,0 +1,27 @@
+swagger: "3.0"
+
+info:
+  description: "Gruppe 9_donnerstag_4 API for PPR"
+  version: "v.0.0.1"
+  title: "9_donnerstag_4 API for PPR"
+
+host: "localhost: 4567"
+
+tags:
+- name: "Persons"
+  description:
+
+- name: "Speeches"
+  description:
+
+- name: "Comment"
+  description:
+
+- name: "Protocol"
+  description:
+
+- name: "AgendaItem"
+  description:
+
+schemes:
+
