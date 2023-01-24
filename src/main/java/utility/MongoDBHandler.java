@@ -780,6 +780,62 @@ public class MongoDBHandler {
         return objList;
     }
 
+    public JSONObject getSentimentData () {
+        Bson facet = new Document("$facet", new Document()
+                .append("speechSentimentPipeline", Arrays.asList(
+                        new Document("$group", new Document("_id", null)
+                                .append("count", new Document("$sum",1))
+                                .append("pos", new Document("$sum", new Document("$cond",
+                                        Arrays.asList(new Document("$gt", Arrays.asList("$sentiment", 0)), 1, 0))))
+                                .append("neg", new Document("$sum", new Document("$cond",
+                                        Arrays.asList(new Document("$lt", Arrays.asList("$sentiment", 0)), 1, 0))))
+                                .append("neu", new Document("$sum", new Document("$cond",
+                                        Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0))))
+                )))
+                .append("commentSentimentPipeline", Arrays.asList(
+                        new Document("$lookup", new Document("from", "comment")
+                                .append("localField", "_id")
+                                .append("foreignField", "speechID")
+                                .append("as", "comments")),
+                        new Document("$unwind", "$comments"),
+                        new Document("$group", new Document("_id", null)
+                                .append("count", new Document("$sum",1))
+                                .append("pos", new Document("$sum", new Document("$cond",
+                                        Arrays.asList(new Document("$gt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
+                                .append("neg", new Document("$sum", new Document("$cond",
+                                        Arrays.asList(new Document("$lt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
+                                .append("neu", new Document("$sum", new Document("$cond",
+                                        Arrays.asList(new Document("$eq", Arrays.asList("$comments.sentiment", 0)), 1, 0)))))
+                ))
+        );
+        Bson unwindSpeech = unwind("$speechSentimentPipeline");
+        Bson unwindComments = unwind("$commentSentimentPipeline");
+        Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
+                Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
+                .append("posCount", new Document("$add",
+                        Arrays.asList("$speechSentimentPipeline.pos", "$commentSentimentPipeline.pos")))
+                .append("negCount", new Document("$add",
+                        Arrays.asList("$speechSentimentPipeline.neg", "$commentSentimentPipeline.neg")))
+                .append("neuCount", new Document("$add",
+                        Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
+
+        Bson project = project(new Document("posPercent", new Document("$divide", Arrays.asList("$posCount", "$allCount")))
+                .append("negPercent", new Document("$divide", Arrays.asList("$negCount", "$allCount")))
+                .append("neuPercent", new Document("$divide", Arrays.asList("$neuCount", "$allCount"))));
+
+
+
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(facet, unwindSpeech, unwindComments, addFields, project));
+        JSONObject obj = new JSONObject();
+        db.getCollection("speech").aggregate(pipeline).forEach((Consumer<? super Document>) procBlock -> {
+            obj.put("positive", procBlock.getDouble("posPercent")*100);
+            obj.put("negative", procBlock.getDouble("negPercent")*100);
+            obj.put("neutral", procBlock.getDouble("neuPercent")*100);
+        });
+        System.out.println(obj);
+        return obj;
+    }
+
     /**
      * returns who commented on which speaker
      *
