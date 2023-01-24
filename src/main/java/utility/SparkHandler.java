@@ -104,9 +104,6 @@ public class SparkHandler {
     @Testing
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
-
-        JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
-        pageContent.put("entities", entitiesObject);
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
