@@ -11,6 +11,7 @@
     <link rel="stylesheet" href=
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+
     <style>
         <#include "css/dashboard.css">
     </style>
@@ -82,27 +83,38 @@
     <h1>Große Überschrift</h1>
     <h2>Überschrift etwas kleiner</h2>
 
+    <div class="wrapper">
+        <div>
+            <h3>Tokens as Line Chart</h3>
+            <canvas id="myChart" width="500" height="300"></canvas>
+        </div>
 
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
-    <p>Blub Blub Blub</p>
+        <div>
+            <h3>POS als vertikaler Bar Chart</h3>
+            <canvas id="myChart1" width="500" height="300"></canvas>
+        </div>
+
+        <div>
+            <h3>Sentiment als Radar Chart</h3>
+            <canvas id="myChart2" width="500" height="300"></canvas>
+        </div>
+
+        <div>
+            <h3>Named Entities als Multiple Line Chart</h3>
+            <canvas id="myChart3" width="500" height="300"></canvas>
+        </div>
+
+
+        <div>
+            <h3>Redner als Bar Chart</h3>
+            <canvas id="myChart5" width="500" height="300"></canvas>
+        </div>
+
+        <div>
+            <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
+            <canvas id="myChart6" width="500" height="300"></canvas>
+        </div>
+    </div>
 
 </div>
 </body>

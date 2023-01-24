@@ -108,4 +108,11 @@ body {
     cursor: pointer;
 }
 
+.wrapper {
+    display: grid;
+    grid-template-columns: 800px 800px;
+    column-gap: 50px;
+    row-gap: 50px;
+}
+
 
