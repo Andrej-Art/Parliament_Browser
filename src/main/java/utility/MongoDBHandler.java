@@ -667,18 +667,18 @@ public class MongoDBHandler {
      *
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo) {
+    public ArrayList<JSONObject> getSpeechesBySpeakerCount() {//String dateFilterOne, String dateFilterTwo
         Bson groupSpeaker = group(new Document("speakerID", "$speakerID"),
                 sum("SpeechesCount", 1));
         Bson sortDesc = sort(descending("SpeechesCount"));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(groupSpeaker, sortDesc));
 
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
+//        if (!dateFilterOne.isEmpty()) {
+//            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+//        }
 
         ArrayList<JSONObject> objList = new ArrayList<>();
-        db.getCollection("test_speech_edvin").aggregate(pipeline)
+        db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
                     Document doc = (Document) procBlock.get("_id");
@@ -774,53 +774,6 @@ public class MongoDBHandler {
         return obj;
     }
 
-    public void facetNamedEntitiestest(String dateFilterOne, String dateFilterTwo) { //String dateFilterOne, String dateFilterTwo
-        Bson facet = new Document("$facet", new Document()
-                .append("PersonEntity", Arrays.asList(
-                        new Document("$unwind", "$namedEntitiesPer"),
-                        new Document("$group", new Document("_id", "$date").append("PersonEntityCount", new Document("$sum", 1))),
-                        new Document("$sort", new Document("PersonEntityCount", -1))))
-                .append("LocationEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesLoc"),
-                        new Document("$group", new Document("_id", "$date").append("LocEntityCount", new Document("$sum", 1))),
-                        new Document("$sort", new Document("LocEntityCount", -1))))
-                .append("OrgEntity", Arrays.asList(new Document("$unwind", "$namedEntitiesOrg"),
-                        new Document("$group", new Document("_id", "$date").append("OrgEntityCount", new Document("$sum", 1))),
-                        new Document("$sort", new Document("OrgEntityCount", -1))))
-
-        );
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(facet));
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
-
-//        JSONObject obj = new JSONObject();
-        db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson())
-//                        {
-//                            ArrayList<Document> perList = (ArrayList<Document>) procBlock.get("PersonEntity");
-//                            ArrayList<Integer> perData = new ArrayList<>();
-//                            for (Document doc : perList) {
-//                                perData.add((doc.getInteger("PersonEntityCount")));
-//                            }
-//                            obj.put("PersonEntities", perData);
-////                    ArrayList<Document> locList = (ArrayList<Document>) procBlock.get("LocationEntity");
-////                    ArrayList<JSONObject> locData = new ArrayList<>();
-////                    for (Document doc : locList) {
-////                        locData.add(new JSONObject(doc.toJson()));
-////                    }
-////                    obj.put("LocationEntities", locData);
-////                    ArrayList<Document> orgList = (ArrayList<Document>) procBlock.get("OrgEntity");
-////                    ArrayList<JSONObject> orgData = new ArrayList<>();
-////                    for (Document doc : orgList) {
-////                        orgData.add(new JSONObject(doc.toJson()));
-////                    }
-////                    obj.put("OrgEntities", orgData);
-//
-//                        }
-                );
-//        System.out.println(obj);
-//        return obj;
-    }
 
     public JSONObject testPipeline() {
         Bson group = group(new Document("_id", "$date"),
@@ -846,16 +799,15 @@ public class MongoDBHandler {
 
     /**
      * returns the count for all Parts of Speech
-     *
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
-    public JSONObject getPOSCount() {//String dateFilterOne,String dateFilterTwo
+    public ArrayList<JSONObject> getPOSCount() {//String dateFilterOne,String dateFilterTwo
         Bson unwind = unwind("$tokens");
         Bson project = project(new Document("OnlyPOS", "$tokens.coarsePOS"));
         Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
         Bson sort = sort(descending("CountOfPOS"));
-        JSONObject obj = new JSONObject();
+        ArrayList<JSONObject> objList = new ArrayList<>();
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, project, group, sort));
 
 //        if (!dateFilterOne.isEmpty()) {
@@ -865,35 +817,36 @@ public class MongoDBHandler {
         db.getCollection("speech_token").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
+                    JSONObject obj = new JSONObject();
                     Document doc = (Document) procBlock.get("_id");
                     obj.put(doc.getString("_id"), procBlock.getInteger("CountOfPOS"));
+                    objList.add(obj);
                 });
-        System.out.println(obj);
-        return obj;
+        System.out.println(objList);
+        return objList;
     }
 
     /**
      * returns who commented on which speaker
-     *
      * @author Edvin Nise
      */
     @Unfinished("waiting for correct structure of collection")
-    public ArrayList<Object> commentatorToSpeaker(String sent) {
+    public ArrayList<Object> commentatorToSpeaker() {
         ArrayList<Object> commentatorToSpeakerData = new ArrayList<>();
 
-        Bson lookupCommentator = lookup("test_person", "commentator_id", "_id", "CommentatorPerson");
-        Bson lookupSpeaker = lookup("test_person", "speaker_id", "_id", "SpeakerPerson");
+        Bson lookupCommentator = lookup("person", "commentatorID", "_id", "CommentatorPerson");
+        Bson lookupSpeaker = lookup("person", "speakerID", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
-        Bson project = project(new Document("CommentatorName", "$CommentatorPerson.full_name")
-                .append("SpeakerName", "$SpeakerPerson.full_name")
+        Bson project = project(new Document("CommentatorName", new Document("$concat", Arrays.asList("$CommentatorPerson.firstName", " ", "$CommentatorPerson.lastName")))
+                .append("SpeakerName", new Document("$concat", Arrays.asList("$SpeakerPerson.firstName", " ", "$SpeakerPerson.lastName")))
                 .append("sentiment", 1));
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker, project));
-        if (!sent.isEmpty()) {
-            applySentimentFilterToAggregation(pipeline, sent);
-        }
-        db.getCollection("test_comment").aggregate(pipeline)
+//        if (!sent.isEmpty()) {
+//            applySentimentFilterToAggregation(pipeline, sent);
+//        }
+        db.getCollection("comment").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
                     JSONObject obj = new JSONObject();
@@ -907,35 +860,37 @@ public class MongoDBHandler {
     }
 
     /**
-     * returns Hashmap with Speaker and List of Topics
-     *
+     * returns speaker with corresponding topics
      * @author Edvin Nise
      */
     @Unfinished("Waiting for structure of collection")
     public JSONObject matchSpeakerToDDC() {
         JSONObject speakerWithDDCJSON = new JSONObject();
 
-        Bson lookup = lookup("test_person", "speakerID", "_id", "Speaker");
-        Bson unwind = unwind("$Speaker");
-        Bson project = project(new Document("Abgeordneter", "$Speaker.full_name")
-                .append("mainTopic", 1));
-        Bson group = new Document("$group", new Document()
-                .append("_id", "$Abgeordneter")
-                .append("DDCKategorien", new Document("$push", "$mainTopic")));
+        Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
+        Bson unwind = unwind("$speakerData");
+        Bson project = project(new Document("Abgeordneter", new Document("$concat", Arrays.asList("$speakerData.firstName"," ", "$speakerData.lastName")))
+                .append("mainTopic", 1)
+                .append("maybeTopic", 1));
+        Bson group = new Document("$group", new Document("_id", "$Abgeordneter")
+                .append("DDCKategorien", new Document("$push", "$mainTopic"))
+                .append("maybeKategorien", new Document("$push", "$maybeTopic")));
+        Bson projectTest = project(new Document("allDDC", new Document("$concatArrays", Arrays.asList("$DDCKategorien", "$maybeKategorien"))));
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group,projectTest));
 
-        db.getCollection("test_speech_edvin").aggregate(pipeline)
+        db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> speakerWithDDCJSON.put(procBlock.getString("_id"), ((ArrayList<String>) procBlock.get("DDCKategorien"))));
+                .forEach((Consumer<? super Document>) procBlock -> speakerWithDDCJSON.put(procBlock.getString("_id"), ((ArrayList<String>) procBlock.get("allDDC"))));
         System.out.println(speakerWithDDCJSON);
         return speakerWithDDCJSON;
     }
 
     /**
-     * find all speeches that follow the search pattern
-     *
+     * find all speeches that follow the search pattern*
      * @param textFilter
+     * @param dateFilterOne
+     * @param dateFilterTwo
      * @author Edvin Nise
      */
     @Unfinished("Need to know what data we will need for the visualisation")
@@ -962,7 +917,6 @@ public class MongoDBHandler {
 
     /**
      * returns all required Data for visualisation of a speech
-     *
      * @param redeID
      * @author Edvin Nise
      */
@@ -991,13 +945,6 @@ public class MongoDBHandler {
                     obj.put("speechID", procBlock.getString("_id"));
                     obj.put("speakerID", procBlock.getString("speakerID"));
                     obj.put("text", procBlock.getString("text"));
-//                    obj.put("commentData", procBlock.get("commentData"));
-//                    ArrayList<Document> docList = (ArrayList<Document>) procBlock.get("commentData");
-//                    ArrayList<Integer> comPos = new ArrayList<>();
-//                    for (Document doc : docList) {
-//                        comPos.add(doc.getInteger("startPos"));
-//                    }
-//                    obj.put("commentsPos", comPos);
                     obj.put("speechSentiment", procBlock.getDouble("sentiment"));
                     obj.put("sentences", procBlock.get("sentences"));
                     obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
