@@ -46,7 +46,7 @@
 
 
 
-        const tokenData = [{"verb": 123}, {"adj": 173}, {"noun": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
+        const tokenData = [{"verb": 123}, {"adj": 173},{"nuns": 153}, {"noun": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
         createLineChart(tokenData, "#tokenline");
     })
 </script>

@@ -2,7 +2,6 @@
  * Function to generate a Multi_Line_Chart for the Named Entities
  * @param data the query data
  * @param target the target html element
- * @constructor
  * @author DavidJordan
  */
 function MultiLineEntities(data, target){

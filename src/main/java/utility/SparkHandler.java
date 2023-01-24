@@ -95,8 +95,8 @@ public class SparkHandler {
     private static final TemplateViewRoute getMulti = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
-        pageContent.put("entities", entitiesObject);
+       // JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
+       // pageContent.put("entities", entitiesObject);
         return new ModelAndView(pageContent, "multi.ftl");
     };
 
@@ -119,7 +119,7 @@ public class SparkHandler {
     private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-//        String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
+//       String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
         String speechID = "ID19100100";
 
         List<JSONObject> speechData = mongoDBHandler.allSpeechData(speechID);

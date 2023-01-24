@@ -6,7 +6,6 @@
  * @param data
  * @param target
  */
-@Unfinished("Still testing")
 function createLineChart(data, target) {
     // setting the margins of the chart
     var margin = {top: 20, right: 20, bottom: 30, left: 50},
