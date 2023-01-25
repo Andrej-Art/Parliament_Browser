@@ -50,9 +50,12 @@ public class PictureScraper {
         https://bilddatenbank.bundestag.de/search/picture-result?query=marco+buschmann&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
         */
         // Connection to website
+        //Thread Sleep for 250ms so that we dont get kicked off the bundestag server
+
         try {
+            Thread.sleep(250);
             Document doc = Jsoup.connect(urlWebsite).get();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         //Check if the Bilddatenbank-Site has results

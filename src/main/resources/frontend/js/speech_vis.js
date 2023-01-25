@@ -13,19 +13,19 @@
  * </ul>
  * Inserts comments at their respective positions in the text.
  * @param text          Speech text.
- * @param sentenceData  Dataset from which to find the sentiment and sentence ends.
  * @param perData       Dataset from which to find the PER named entities and their positions.
  * @param orgData       Dataset from which to find the ORG entities and their positions.
  * @param locData       Dataset from which to find the LOC entities and their positions.
+ * @param sentenceData  Dataset from which to find the sentiment and sentence ends.
  * @param commentData   Dataset from which to find the comments and their positions.
  * @author Eric Lakhter
  */
 function applyDataToSpeech(
     text = "Das hier ist ein Text.",
-    sentenceData = [{endPos : 22, sentiment : 0.0}],
     perData = [{startPos: 2, endPos: 3}],
     orgData = [{startPos: 4, endPos: 5}],
     locData = [{startPos: 6, endPos: 7}],
+    sentenceData = [{endPos : 22, sentiment : 0.0}],
     commentData = [{
         full_name: "Bob Baumeister", text: "(Heiterkeit)", commentPos: 22, party: "SPD", sentiment: 0.1, commentator_id: "0001"
     }]
@@ -41,23 +41,10 @@ function applyDataToSpeech(
     let finalSpeech = "";
     for (let i = 0; i < speechArray.length; i++) {
 
-        // insert icon at end of sentence
-        if (sentenceIndex < sentenceData.length && i === sentenceData[sentenceIndex]["endPos"]) {
-            let sentiment = sentenceData[sentenceIndex]["sentiment"];
-            if (sentiment > 0) {
-                finalSpeech += '<span style="color: blue">(' + sentiment + ')</span>';
-            } else if (sentiment === 0) {
-                finalSpeech += '<span style="color: orange">(' + sentiment + ')</span>';
-            } else {
-                finalSpeech += '<span style="color: red">(' + sentiment + ')</span>';
-            }
-            sentenceIndex++;
-        }
-
         // mark named entities: PER, ORG, LOC data sets
         if (perIndex < perData.length) {
             if (i === perData[perIndex]["startPos"]) {
-                finalSpeech += '<span style="background-color: tomato">';
+                finalSpeech += '<span style="background-color: coral">';
             } else if (i === perData[perIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 perIndex++;
@@ -73,28 +60,41 @@ function applyDataToSpeech(
         }
         if (locIndex < locData.length) {
             if (i === locData[locIndex]["startPos"]) {
-                finalSpeech += '<span style="background-color: limegreen">';
+                finalSpeech += '<span style="background-color: lime">';
             } else if (i === locData[locIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 locIndex++;
             }
         }
 
+        // insert icon at end of sentence
+        if (sentenceIndex < sentenceData.length && i === sentenceData[sentenceIndex]["endPos"]) {
+            let sentiment = sentenceData[sentenceIndex]["sentiment"];
+            if (sentiment > 0) {
+                finalSpeech += '<span style="color: blue">(' + sentiment + ')</span>';
+            } else if (sentiment === 0) {
+                finalSpeech += '<span style="color: orange">(' + sentiment + ')</span>';
+            } else {
+                finalSpeech += '<span style="color: red">(' + sentiment + ')</span>';
+            }
+            sentenceIndex++;
+        }
+
         // insert comments at their respective position
+
         if (commentIndex < commentData.length && i === commentData[commentIndex]["commentPos"]) {
             let commentDatum = commentData[commentIndex];
-            // if (commentDatum.hasOwnProperty("full_name")) {
-            //     let fullText = commentDatum["text"];
-            //     if (fullText.contains(" - ")) {
-            //         let leftText = fullText.split(" - ", 1);
-            //         finalSpeech += ('<br><span style="color: darkgreen">' + leftText + '</span><br>');
-            //     }
-            //     let rightText = fullText.split("[")[1];
-            //     finalSpeech += ('<br><span style="color: darkgreen">' + commentDatum["full_name"] + '[' + rightText + '</span><br>');
-            // } else {
-                finalSpeech += ('<br><span style="color: darkgreen">' + commentDatum["text"] + '</span><br>');
-                commentIndex++;
-            // }
+            let fullText = commentDatum["text"];
+
+            if (commentDatum.hasOwnProperty("CommentatorData") && fullText.indexOf("–") > 0) {
+                let leftText = fullText.split("–", 1);
+                finalSpeech += ('<br><span style="color: darkgreen">' + leftText + '</span>');
+                let rightText = fullText.split("[")[1];
+                finalSpeech += ('<br><span style="color: darkgreen">' + commentDatum["CommentatorData"]["fullName"] + ' [' + rightText + '</span><br>');
+            } else {
+                finalSpeech += ('<br><span style="color: darkgreen">' + fullText + '</span><br>');
+            }
+            commentIndex++;
         }
 
         // Build up the result String after each step

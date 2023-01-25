@@ -37,42 +37,37 @@ public class PollScraper {
     private PollScraper() {}
 
     /**
-     * Iterates over all polls on the german Bundestag's webpage and returns them.<br>
-     * Warning: Connecting to ~800 webpages might take a few minutes.
-     * @return A list of {@link Poll} objects.
-     * @see #getOnePoll(int)
-     * @author Eric Lakhter
-     */
-    public static List<Poll> getAllPolls() {
-        return getAllPolls(1, Integer.MAX_VALUE);
-    }
-
-    /**
      * Iterates over polls on the german Bundestag's webpage and returns them,
      * starting at ID = {@code start} and ending at ID = {@code end}.
      * @return A list of {@link Poll} objects.
      * @see #getOnePoll(int)
      * @author Eric Lakhter
      */
-    public static List<Poll> getAllPolls(int start, int end) {
+    public static List<Poll> getAllPolls(MongoDBHandler mongoDBHandler) {
         List<Poll> polls = new ArrayList<>();
         int noPollCounter = 0;
 
         // if 15 polls in a row don't exist it's a safe bet that there won't be more
         // there is a 10 poll gap between ID 422 and 431
-        for (int i = start; (noPollCounter < 15 && i < end); i++) {
+        for (int id = 1; noPollCounter < 15; id++) {
             try {
-                polls.add(getOnePoll(i));
+                if (mongoDBHandler != null && mongoDBHandler.checkIfDocumentExists("poll", Integer.toString(id))) {
+                    noPollCounter = 0;
+                    continue;
+                }
+                Thread.sleep(250);
+                polls.add(getOnePoll(id));
                 // if no exception is thrown the poll counter gets reset
                 noPollCounter = 0;
             } catch (IOException e) {
                 noPollCounter++;
-                System.err.println("There was a problem getting the DOM for poll ID #" + i + ": " + e.getMessage()
+                System.err.println("There was a problem getting the DOM for poll ID #" + id + ": " + e.getMessage()
                         + "; noPollCounter is at " + noPollCounter);
                 e.printStackTrace();
             } catch (NullPointerException e) {
                 noPollCounter++;
                 System.err.println(e.getMessage() + "; noPollCounter is at " + noPollCounter);
+            } catch (InterruptedException ignored) {
             }
         }
 

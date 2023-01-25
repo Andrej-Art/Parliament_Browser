@@ -55,6 +55,13 @@ public interface Person {
     String getLastName();
 
     /**
+     * Gets the full name of the Person.
+     * @return fullName
+     * @author DavidJordan
+     */
+    String getFullName();
+
+    /**
      * Gets the Bundestags Fraction of the Person in the Election Period 20.
      * @return fraction
      * @author Julian Ocker
