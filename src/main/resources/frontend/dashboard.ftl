@@ -18,6 +18,7 @@
 </head>
 
 
+
 <div class="container">
 
     <div class="navbar">
@@ -113,10 +114,27 @@
         <div>
             <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
             <canvas id="myChart6" width="500" height="300"></canvas>
+            <div id="line_chart"></div>
+
         </div>
+
+        <div class="card mt-3">
+            <div id="svg"></div>
+        </div>
+
+        <h3 class="text-center mt-3 text-light">This is a line Chart</h3>
+        <div class="card mt-3" style="display: flex; align-items: center">
+            <div id="svg"></div>
+        </div>
+
+
     </div>
 
 </div>
+
+<script>
+    <#include "js/linetest.js">
+</script>
 </body>
 </html>
 
