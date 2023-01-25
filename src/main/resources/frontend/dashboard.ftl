@@ -6,17 +6,18 @@
     <meta name="author" content="Andrej Artuschenko">
     <title> Dashboard </title>
     <#-- Include d3.js for graphs -->
-    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
     <#-- Include ajax -->
     <link rel="stylesheet" href=
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <#-- Include jquery for better javascript usage -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
 
     <style>
         <#include "css/dashboard.css">
     </style>
 </head>
-
 
 
 <div class="container">
@@ -86,9 +87,10 @@
 
     <div class="wrapper">
         <div>
-            <h3>Tokens as Line Chart</h3>
-            <canvas id="myChart" width="500" height="300"></canvas>
+            <h3>POS als vertikaler Bar Chart</h3>
+            <div id="multiline"> </div>
         </div>
+
 
         <div>
             <h3>POS als vertikaler Bar Chart</h3>
@@ -102,39 +104,36 @@
 
         <div>
             <h3>Named Entities als Multiple Line Chart</h3>
-            <canvas id="myChart3" width="500" height="300"></canvas>
+            <canvas id="body" width="500" height="300"></canvas>
         </div>
 
 
         <div>
             <h3>Redner als Bar Chart</h3>
-            <canvas id="myChart5" width="500" height="300"></canvas>
+            <div id="my_dataviz"></div>
+            <p>
+                <label># Redner:</label>
+                <input type="number" min="0" max="100" step="30" value="20" id="nBin">
+            </p>
         </div>
 
         <div>
             <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
             <canvas id="myChart6" width="500" height="300"></canvas>
             <div id="line_chart"></div>
-
         </div>
-
-        <div class="card mt-3">
-            <div id="svg"></div>
-        </div>
-
-        <h3 class="text-center mt-3 text-light">This is a line Chart</h3>
-        <div class="card mt-3" style="display: flex; align-items: center">
-            <div id="svg"></div>
-        </div>
-
 
     </div>
 
 </div>
 
+</body>
+
 <script>
+    <#include "js/barchartSpeaker.js">
+    <#include "js/multilinetest.js">
+    <#include "js/balkentest.js">
     <#include "js/linetest.js">
 </script>
-</body>
 </html>
 
