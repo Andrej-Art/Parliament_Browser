@@ -4,6 +4,9 @@ import data.Person;
 import org.bson.Document;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * !!Unfinished!!
@@ -18,8 +21,8 @@ public class Person_Impl implements Person {
     private Document personDoc;
 
     //Class Variables
-    private String _id, firstName, lastName, role, title, fraction19, fraction20, party, place, gender,  birthDate, deathDate, birthPlace;
-    private ArrayList picture;
+    private String _id, firstName, lastName, fullName, role, title, fraction19, fraction20, party, place, gender,  birthDate, deathDate, birthPlace;
+    private ArrayList<String> picture;
 
     /**
      * Default Constructor.
@@ -31,6 +34,7 @@ public class Person_Impl implements Person {
         this._id = id;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.fullName = firstName + " " + lastName;
         this.role = role;
         this.title = title;
         this.fraction19 = fraction19;
@@ -41,9 +45,8 @@ public class Person_Impl implements Person {
         this.birthDate = birthDate;
         this.deathDate = deathDate;
         this.birthPlace = birthPlace;
-        for (int i = 0; i < pictureArray.length; i++) {
-            picture.add(pictureArray[i]);
-        }
+        this.picture = new ArrayList<>();
+        Collections.addAll(picture, pictureArray);
     }
 
     /**
@@ -69,7 +72,7 @@ public class Person_Impl implements Person {
         this.birthDate = document.getString("birthDate");
         this.deathDate = document.getString("deathDate");
         this.birthPlace = document.getString("birthPlace");
-        this.picture = document.get("picture", ArrayList.class);
+        this.picture = (ArrayList<String>) document.get("picture");
     }
 
     @Override
@@ -100,6 +103,11 @@ public class Person_Impl implements Person {
     @Override
     public String getLastName() {
         return this.lastName;
+    }
+
+    @Override
+    public String getFullName() {
+        return this.fullName;
     }
 
     @Override
