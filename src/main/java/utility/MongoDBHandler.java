@@ -1,7 +1,6 @@
 package utility;
 
 import com.google.gson.Gson;
-import com.mongodb.Block;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
-import javax.json.Json;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -469,6 +467,23 @@ public class MongoDBHandler {
         }
     }
 
+    /**
+     * Verifies whether a person in the DB has real picture data or a null array.<br>
+     * If the array is null, tries to update its contents with actual data.
+     * @author Eric Lakhter
+     */
+    public void checkPersonPictureData() {
+        for (Document doc : db.getCollection("person").find()) {
+            if (((ArrayList<String>) doc.get("picture")).get(0) == null) {
+                String id = doc.getString("_id");
+                String firstName = doc.getString("firstName");
+                String lastName = doc.getString("lastName");
+                String[] pictureData = PictureScraper.producePictureUrl(firstName, lastName);
+                List<String> picture = new ArrayList<>(Arrays.asList(pictureData));
+                db.getCollection("person").updateOne(new Document("_id", id), new Document("$set", new Document("picture", picture)));
+            }
+        }
+    }
 
     /**
      * Adds potential date filters in front of an aggregation pipeline.
