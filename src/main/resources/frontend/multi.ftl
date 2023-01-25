@@ -21,6 +21,9 @@
 
 <div id ="posBar"></div>
 
+<h2>Test ajax multiline</h2>
+
+<div id="testajax"></div>
 
 
 </body>
@@ -28,7 +31,7 @@
 <script>
 
 
-<#include "js/multilinetest.js">
+<#include "js/chart_functions.js">
 <#include "js/linetest.js">
 enitityData = ${entities};
 
@@ -56,10 +59,17 @@ let tokenData = [];
 </#list>
 console.log(tokenData);
 
+
+BASIC_URL = ${url};
+
     $(document).ready(function(){
        MultiLineEntities(entityData, '#multiline');
        createLineChart(tokenData, '#line');
         createBarChart(posdata, '#posBar');
+
+        loadMultiLineEnities('#testajax');
+
+
 
 
 

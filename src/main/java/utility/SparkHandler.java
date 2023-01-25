@@ -74,6 +74,8 @@ public class SparkHandler {
      */
 
 
+
+
     /**
      * Test page.
      * @author Eric Lakhter
@@ -107,6 +109,9 @@ public class SparkHandler {
 
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","");
         pageContent.put("entities", datesAndNamedEntities);
+
+        pageContent.put("url", request.raw().getRequestURL());
+
         return new ModelAndView(pageContent, "multi.ftl");
     };
 
