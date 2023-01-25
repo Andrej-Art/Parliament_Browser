@@ -19,6 +19,7 @@ public class TimeHelper {
     private static final DateTimeFormatter DATE_FORMAT_1 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
     // Used on the german Bundestag's website
     private static final DateTimeFormatter DATE_FORMAT_2 = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMANY);
+    private static final DateTimeFormatter DATE_FORMAT_3 = DateTimeFormatter.ofPattern("EE, dd.MM.yyyy", Locale.GERMANY);
     private static final DateTimeFormatter CLOCK_FORMAT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
 
 
@@ -44,13 +45,12 @@ public class TimeHelper {
     }
 
     /**
-     * Converts Date objects to a String of format {@code dd.MM.yyyy}.
+     * Converts Date objects to a String of format {@code EE, dd.MM.yyyy}.
      * @param date Date object form the database
-     * @return String with the date, e.g. 24.07.2017
+     * @return String with the day of week and date, e.g. "Di, 24.07.2017"
      */
     public static String mongoDateToGermanDate(Date date) {
-        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.GERMANY)
-                + ", " +date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_1);
+        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_3);
     }
 
     /**

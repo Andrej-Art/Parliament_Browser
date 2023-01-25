@@ -13,11 +13,9 @@
 <p id="speech"></p>
 
 <#-- checking out field names -->
-[
-<#list speechData as speech>
-    ${speech}<#sep>, <br>
-</#list>
-]
+
+    ${speechData[0]}
+
 <div id="plot1"></div>
 <script>
     <#include "js/speech_vis.js">
