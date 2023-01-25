@@ -402,12 +402,11 @@ public class MongoDBHandler {
     public void insertPolls(List<Poll> polls) {
         List<Document> pollDocs = new ArrayList<>();
         for (Poll poll : polls) {
-            pollDocs.add(Document.parse(poll.toJson()));
+            pollDocs.add(Document.parse(poll.toJson()).append("date", poll.getDate()));
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
     }
 
     /**

@@ -55,8 +55,13 @@ public class Poll_Impl implements Poll {
     }
 
     @Override
+    public LocalDate getDate() {
+        return date;
+    }
+
+    @Override
     public String toJson(){
-        return "{\n  _id:" + _id + ",date:\"" + date + "\"," +
+        return "{\n  _id:\"" + _id + "\",date:\"" + date + "\"," +
                 "\n  SPDYes:" + spd[0] + ",SPDNo:" + spd[1] + ",SPDAbstained:" + spd[2] + ",SPDNoVotes:"  + spd[3] + "," +
                 "\n  CxUYes:" + cxu[0] + ",CxUNo:" + cxu[1] + ",CxUAbstained:" + cxu[2] + ",CxUNoVotes:"  + cxu[3] + "," +
                 "\n  B90Yes:" + b90[0] + ",B90No:" + b90[1] + ",B90Abstained:" + b90[2] + ",B90NoVotes:"  + b90[3] + "," +

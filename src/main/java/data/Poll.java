@@ -2,6 +2,8 @@ package data;
 
 import data.impl.Poll_Impl;
 
+import java.time.LocalDate;
+
 /**
  * The {@code Poll} interface.
  *
@@ -10,7 +12,14 @@ import data.impl.Poll_Impl;
  */
 public interface Poll {
     /**
-     * Converts all fields into a JSON String compatible with {@code org.bson.Document.parse()},
+     *
+     * @return LocalDate of the poll.
+     * @author Eric Lakhter
+     */
+    LocalDate getDate();
+
+    /**
+     * Converts all fields (except {@code date}) into a JSON String compatible with {@code org.bson.Document.parse()},
      * formatted to fit the {@code poll} collection.
      *
      * @return JSON String with all poll results.
