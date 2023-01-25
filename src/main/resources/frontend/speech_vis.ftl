@@ -11,6 +11,7 @@
 
 <ul id="speechData"></ul>
 <p id="speech"></p>
+<p id="test"></p>
 
 <#-- checking out field names -->
 
@@ -27,11 +28,15 @@
     const orgData = speechData["namedEntitiesOrg"];
     const locData = speechData["namedEntitiesLoc"];
     let commentData = [];
-    // combine all commentData into one array
+    // combine all commentData into one array and then sort it
     <#list 0..speechData?size - 1 as i>
     commentData.push(${speechData[i]}["comment"]);
-    commentData[${i}]["commentPos"] = speechData["comment"][${i}];
+     if (${speechData[i]}["CommentatorData"] !== undefined) {
+         commentData[${i}]["CommentatorData"] = ${speechData[i]}["CommentatorData"];
+     }
     </#list>
+    commentData.sort((a, b) => {return a["commentPos"] - b["commentPos"]});
+
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speechData").innerHTML =
@@ -41,10 +46,10 @@
         '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
     document.getElementById("speech").innerHTML = applyDataToSpeech(
         speechData["text"],
-        sentenceData,
         perData,
         orgData,
         locData,
+        sentenceData,
         commentData
     );
 </script>

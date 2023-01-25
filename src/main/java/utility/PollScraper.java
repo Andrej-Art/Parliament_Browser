@@ -55,7 +55,7 @@ public class PollScraper {
                     noPollCounter = 0;
                     continue;
                 }
-
+                Thread.sleep(250);
                 polls.add(getOnePoll(id));
                 // if no exception is thrown the poll counter gets reset
                 noPollCounter = 0;
@@ -67,6 +67,7 @@ public class PollScraper {
             } catch (NullPointerException e) {
                 noPollCounter++;
                 System.err.println(e.getMessage() + "; noPollCounter is at " + noPollCounter);
+            } catch (InterruptedException ignored) {
             }
         }
 
