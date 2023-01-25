@@ -3,7 +3,7 @@
 
 
 <head>
-    <meta name="author" content="Andrej Artuschenko">
+    <meta name="author" content="Andrej Artuschenko, DavidJordan">
     <title> Dashboard </title>
     <#-- Include d3.js for graphs -->
     <script src="https://d3js.org/d3.v4.js"></script>
@@ -88,12 +88,12 @@
     <div class="wrapper">
         <div>
             <h3>POS als vertikaler Bar Chart</h3>
-            <div id="multiline"> </div>
+            <div id="pos"> </div>
         </div>
 
 
         <div>
-            <h3>POS als vertikaler Bar Chart</h3>
+            <h3>Token als Line Chart</h3>
             <canvas id="myChart1" width="500" height="300"></canvas>
         </div>
 
@@ -104,7 +104,7 @@
 
         <div>
             <h3>Named Entities als Multiple Line Chart</h3>
-            <canvas id="body" width="500" height="300"></canvas>
+            <canvas id="bodyentity" width="500" height="300"></canvas>
         </div>
 
 
@@ -130,13 +130,28 @@
 </body>
 
 <script>
+
     <#include "js/barchartSpeaker.js">
-    <#include "js/multilinetest.js">
+    <#include "js/chart_functions.js">
     <#include "js/balkentest.js">
-    <#include "js/linetest.js">
 
+    let posdata = [];
+    <#list pos as posObject>
+    posdata.push(${posObject});
+    </#list>
 
+    let entityData = ${entities};
 
+    let tokenData = [];
+    <#list token as tokenObject>
+    tokenData.push(${tokenObject});
+    </#list>
+
+    $(document).ready(function(){
+        MultiLineEntities(entityData, '#bodyentity');
+        createLineChart(tokenData, '#myChart1');
+        createBarChart(posdata, '#pos');
+    })
 
 </script>
 </html>

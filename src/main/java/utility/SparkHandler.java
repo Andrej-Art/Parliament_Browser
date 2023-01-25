@@ -110,14 +110,21 @@ public class SparkHandler {
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","");
         pageContent.put("entities", datesAndNamedEntities);
 
-        pageContent.put("url", request.raw().getRequestURL());
-
         return new ModelAndView(pageContent, "multi.ftl");
     };
 
     @Testing
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
+
+        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount();
+        pageContent.put("pos", posAndCounts);
+
+        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30);
+        pageContent.put("token", tokenAndCounts);
+
+        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","");
+        pageContent.put("entities", datesAndNamedEntities);
 
       //  JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
      //   pageContent.put("entities", entitiesObject);

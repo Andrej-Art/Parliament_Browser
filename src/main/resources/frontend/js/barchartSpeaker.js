@@ -4,6 +4,7 @@ $(document).ready(function () {
     drawBarChart();
 
 
+
     // Template for any AJAX request. Just change the route below.
     $.ajax({
         url: "http://localhost:4567/dashboard/",
