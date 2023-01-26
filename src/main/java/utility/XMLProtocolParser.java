@@ -134,8 +134,6 @@ public class XMLProtocolParser {
                                             case "name":
                                                 sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
                                                 addStatus = false;
-                                                speakerID = "";
-                                                speechText = "";
                                                 commentList.clear();
 
                                                 // @Testing //Get sessionLeader
@@ -291,8 +289,8 @@ public class XMLProtocolParser {
                                     // aus den Stammdaten muss folgendes rein: Partei, Place (?)
                                     /*
                                     Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1], speakerProperties[2], speakerProperties[3], speakerProperties[4], speakerProperties[5], speakerProperties[6], speakerProperties[7], speakerProperties[8]);
-                                    personMap.put(person.getID(), person)
-                                     */
+                                    personMap.put(person.getID(), person);
+                                    */
                                 }
 
 

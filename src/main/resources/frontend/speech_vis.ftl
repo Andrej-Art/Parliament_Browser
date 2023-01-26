@@ -35,7 +35,7 @@
          commentData[${i}]["CommentatorData"] = ${speechData[i]}["CommentatorData"];
      }
     </#list>
-    commentData.sort((a, b) => {return a["commentPos"] - b["commentPos"]});
+    commentData.sort((a, b) => {return parseInt(a["_id"].split("/")[1]) - parseInt(b["_id"].split("/")[1])});
 
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;

@@ -82,6 +82,12 @@ function applyDataToSpeech(
 
         // insert comments at their respective position
 
+        if (commentData[commentIndex]["commentPos"] <= i) {
+            console.log(i);
+            console.log(commentData[commentIndex]["commentPos"]);
+            // need to check whether <= i or <i is right
+            // adding i (or i - 1 ?) to current commentPos should fix the issue
+        }
         if (commentIndex < commentData.length && i === commentData[commentIndex]["commentPos"]) {
             let commentDatum = commentData[commentIndex];
             let fullText = commentDatum["text"];
