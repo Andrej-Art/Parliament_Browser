@@ -1,6 +1,7 @@
 package utility;
 
 import com.google.gson.Gson;
+import com.mongodb.Block;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
@@ -14,8 +15,11 @@ import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
+import javax.json.Json;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -23,6 +27,7 @@ import static com.mongodb.client.model.Accumulators.*;
 import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.descending;
+import static utility.TimeHelper.dateToLocalDate;
 
 /**
  * When instanced, the {@code MongoDBHandler} connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
@@ -404,7 +409,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -470,6 +476,7 @@ public class MongoDBHandler {
     /**
      * Verifies whether a person in the DB has real picture data or a null array.<br>
      * If the array is null, tries to update its contents with actual data.
+     *
      * @author Eric Lakhter
      */
     public void checkPersonPictureData() {
@@ -495,15 +502,20 @@ public class MongoDBHandler {
      *                      <p>If {@code (dateFilterTwo < dateFilterOne)} then the query result will be empty.
      * @author Eric Lakhter
      * @modified DavidJordan
+     * @modified Edvin Nise
      */
-    public void applyDateFiltersToAggregation(List<Bson> pipeline, String dateFilterOne, String dateFilterTwo) {
+    public void
+    applyDateFiltersToAggregation(List<Bson> pipeline, String dateFilterOne, String dateFilterTwo) {
         if (!dateFilterOne.isEmpty()) {
+            LocalDate dateOne = TimeHelper.convertToISOdate(dateFilterOne, 3);
+            LocalDate dateTwo = TimeHelper.convertToISOdate(dateFilterTwo, 3);
             Bson matchDate = dateFilterTwo.isEmpty() ?
                     match(new Document("date", dateFilterOne)) :
-                    match(and(Arrays.asList(gte("date", dateFilterOne), lte("date", dateFilterTwo))));
+                    match(and(Arrays.asList(gte("date", dateOne), lte("date", dateTwo))));
             pipeline.add(0, matchDate);
         }
     }
+
 
     /**
      * Adds potential person/fraction filters in front of a pipeline performed on either the speech or comment collection.
@@ -521,7 +533,7 @@ public class MongoDBHandler {
      */
     @Unfinished("Probably, needs to be adapted to the fraction 19, fraction 20 options." +
             " Possibly also needs to be changed to fit the needs of the visualisation in the front end.")
-    public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
+    public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String personFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
         // Setting each of the needed fields to be included in the results
         for (String field : neededField) {
@@ -530,11 +542,13 @@ public class MongoDBHandler {
 
         Bson project = project(projectDoc);
 
-//        if (!personFilter.isEmpty()) {
-//            pipeline.add(0, match(new Document("speakerID", personFilter)));
-//        }
+        if (!personFilter.isEmpty()) {
+            pipeline.add(0, match(new Document("personDaten.fullName", personFilter)));
+            pipeline.add(0, unwind("$personDaten"));
+            pipeline.add(0, lookup("person", "speakerID", "_id", "personDaten"));
+        }
         if (!fractionFilter.isEmpty()) {
-            pipeline.add(0, match(new Document("persondata.fraction", fractionFilter)));
+            pipeline.add(0, match(new Document("persondata.party", fractionFilter)));
             pipeline.add(0, unwind("$persondata"));
             pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
         }
@@ -680,17 +694,26 @@ public class MongoDBHandler {
     /**
      * returns all Speakers with their speeches count.
      *
+     * @param dateFilterOne
+     * @param dateFilterTwo
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getSpeechesBySpeakerCount() {//String dateFilterOne, String dateFilterTwo
+    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
         Bson group = new Document("$group", new Document("_id", "$speakerID").append("speechesCount", new Document("$sum", 1)));
         Bson lookup = lookup("person", "_id", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(group, lookup, unwind));
 
-//        if (!dateFilterOne.isEmpty()) {
-//            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-//        }
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
 
         ArrayList<JSONObject> objList = new ArrayList<>();
         db.getCollection("speech").aggregate(pipeline)
@@ -711,9 +734,10 @@ public class MongoDBHandler {
     /**
      * returns count of all Tokens
      *
+     * @param limit
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getTokenCount(int limit) { // , String dateFilterOne, String dateFilterTwo
+    public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
         Bson unwind = unwind("$tokens");
         Bson group = group("$tokens.lemmaValue", sum("count", 1));
         Bson sort = sort(descending("count"));
@@ -721,9 +745,15 @@ public class MongoDBHandler {
 //        Bson rankMode = match(gte("count", limit));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, group, sort, rankMode));
 
-//        if (!dateFilterOne.isEmpty()) {
-//            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-//        }
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
 
         MongoIterable<Document> result = db.getCollection("test_speech_token_edvin")
                 .aggregate(pipeline);
@@ -742,7 +772,7 @@ public class MongoDBHandler {
      *
      * @author Edvin Nise
      */
-    public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo) { //String dateFilterOne, String dateFilterTwo
+    public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
         Bson group = group(new Document("_id", "$date"),
                 sum("namedEntityPerson", new Document("$size", "$namedEntitiesPer")),
                 sum("namedEntityLocation", new Document("$size", "$namedEntitiesLoc")),
@@ -750,6 +780,16 @@ public class MongoDBHandler {
         Bson sort = sort(descending("namedEntityPerson"));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(group, sort));
         JSONObject obj = new JSONObject();
+
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
 
         db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
@@ -770,7 +810,8 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
-    public ArrayList<JSONObject> getPOSCount() {//String dateFilterOne,String dateFilterTwo
+    public ArrayList<JSONObject> getPOSCount(String dateFilterOne, String dateFilterTwo,
+                                             String fractionFilter, String personFilter) {
         Bson unwind = unwind("$tokens");
         Bson project = project(new Document("OnlyPOS", "$tokens.coarsePOS"));
         Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
@@ -778,9 +819,15 @@ public class MongoDBHandler {
         ArrayList<JSONObject> objList = new ArrayList<>();
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, project, group, sort));
 
-//        if (!dateFilterOne.isEmpty()) {
-//            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-//        }
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
 
         db.getCollection("speech_token").aggregate(pipeline)
                 .allowDiskUse(false)
@@ -794,18 +841,20 @@ public class MongoDBHandler {
         return objList;
     }
 
-    public JSONObject getSentimentData () {
+    public JSONObject getSentimentData(String dateFilterOne, String dateFilterTwo,
+                                       String fractionFilter, String personFilter) {
+        //Create two pipelines to get the total amount of positive, negative and neutral sentiments for both speeches and comments
         Bson facet = new Document("$facet", new Document()
                 .append("speechSentimentPipeline", Arrays.asList(
                         new Document("$group", new Document("_id", null)
-                                .append("count", new Document("$sum",1))
+                                .append("count", new Document("$sum", 1))
                                 .append("pos", new Document("$sum", new Document("$cond",
                                         Arrays.asList(new Document("$gt", Arrays.asList("$sentiment", 0)), 1, 0))))
                                 .append("neg", new Document("$sum", new Document("$cond",
                                         Arrays.asList(new Document("$lt", Arrays.asList("$sentiment", 0)), 1, 0))))
                                 .append("neu", new Document("$sum", new Document("$cond",
                                         Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0))))
-                )))
+                        )))
                 .append("commentSentimentPipeline", Arrays.asList(
                         new Document("$lookup", new Document("from", "comment")
                                 .append("localField", "_id")
@@ -813,7 +862,7 @@ public class MongoDBHandler {
                                 .append("as", "comments")),
                         new Document("$unwind", "$comments"),
                         new Document("$group", new Document("_id", null)
-                                .append("count", new Document("$sum",1))
+                                .append("count", new Document("$sum", 1))
                                 .append("pos", new Document("$sum", new Document("$cond",
                                         Arrays.asList(new Document("$gt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
                                 .append("neg", new Document("$sum", new Document("$cond",
@@ -824,6 +873,8 @@ public class MongoDBHandler {
         );
         Bson unwindSpeech = unwind("$speechSentimentPipeline");
         Bson unwindComments = unwind("$commentSentimentPipeline");
+
+        //adds Fields for the summed amount of all sentiment counts
         Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
                 Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
                 .append("posCount", new Document("$add",
@@ -833,18 +884,27 @@ public class MongoDBHandler {
                 .append("neuCount", new Document("$add",
                         Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
 
+        //calculates the percentage of positive, negative and neutral sentiments over all comments and speeches
         Bson project = project(new Document("posPercent", new Document("$divide", Arrays.asList("$posCount", "$allCount")))
                 .append("negPercent", new Document("$divide", Arrays.asList("$negCount", "$allCount")))
                 .append("neuPercent", new Document("$divide", Arrays.asList("$neuCount", "$allCount"))));
 
 
-
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(facet, unwindSpeech, unwindComments, addFields, project));
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
         JSONObject obj = new JSONObject();
         db.getCollection("speech").aggregate(pipeline).forEach((Consumer<? super Document>) procBlock -> {
-            obj.put("positive", procBlock.getDouble("posPercent")*100);
-            obj.put("negative", procBlock.getDouble("negPercent")*100);
-            obj.put("neutral", procBlock.getDouble("neuPercent")*100);
+            obj.put("positive", procBlock.getDouble("posPercent") * 100);
+            obj.put("negative", procBlock.getDouble("negPercent") * 100);
+            obj.put("neutral", procBlock.getDouble("neuPercent") * 100);
         });
         System.out.println(obj);
         return obj;
@@ -863,7 +923,8 @@ public class MongoDBHandler {
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
-        Bson project = project(new Document("CommentatorName", new Document("$concat", Arrays.asList("$CommentatorPerson.firstName", " ", "$CommentatorPerson.lastName")))
+        Bson project = project(new Document("CommentatorName", new Document("$concat",
+                Arrays.asList("$CommentatorPerson.firstName", " ", "$CommentatorPerson.lastName")))
                 .append("SpeakerName", new Document("$concat", Arrays.asList("$SpeakerPerson.firstName", " ", "$SpeakerPerson.lastName")))
                 .append("sentiment", 1));
 
@@ -907,7 +968,8 @@ public class MongoDBHandler {
 
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> speakerWithDDCJSON.put(procBlock.getString("_id"), ((ArrayList<String>) procBlock.get("allDDC"))));
+                .forEach((Consumer<? super Document>) procBlock -> speakerWithDDCJSON.put(procBlock.getString("_id"),
+                        ((ArrayList<String>) procBlock.get("allDDC"))));
         System.out.println(speakerWithDDCJSON);
         return speakerWithDDCJSON;
     }
@@ -921,7 +983,8 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("Need to know what data we will need for the visualisation")
-    public ArrayList<JSONObject> findSpeech(String textFilter, String dateFilterOne, String dateFilterTwo) {
+    public ArrayList<JSONObject> findSpeech(String textFilter, String dateFilterOne, String dateFilterTwo,
+                                            String fractionFilter, String personFilter) {
         Bson match = match(new Document("$text", new Document("$search", textFilter)));
         Bson project = project(new Document("_id", 1));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(project));
@@ -929,16 +992,26 @@ public class MongoDBHandler {
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
 
         pipeline.add(0, match);
         ArrayList<JSONObject> objList = new ArrayList<>();
-        db.getCollection("test_speech_edvin").aggregate(pipeline)
+        db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
                     JSONObject obj = new JSONObject();
                     obj.put("speechID", procBlock.getString("_id"));
                     objList.add(obj);
                 });
+        System.out.println(objList);
         return objList;
     }
 
@@ -976,7 +1049,7 @@ public class MongoDBHandler {
                     obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
                     obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
                     obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
-                    obj.put("date", procBlock.get("date"));
+                    obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
                     obj.put("speaker", procBlock.get("Speaker"));
                     obj.put("comment", procBlock.get("comments"));
                     obj.put("CommentatorData", procBlock.get("CommentatorData"));
@@ -987,18 +1060,127 @@ public class MongoDBHandler {
     }
 
     /**
-     * returns named or unnamed poll results
-     *
+     * returns all poll results from all named fractions
      * @author Edvin Nise
      */
     @Unfinished("Dont know where we save this data")
-    public void getPollResults() {
+    public ArrayList<JSONObject> getPollResults() {
 
+        //calculates total votes for each party and also for each type of vote
+        Bson addFieldsVotesData = new Document("$addFields", new Document()
+                .append("totalVotesSPD", new Document("$add", Arrays.asList("$SPDYes", "$SPDNo", "$SPDAbstained", "$SPDNoVotes")))
+                .append("totalVotesAfD", new Document("$add", Arrays.asList("$AfDYes", "$AfDNo", "$AfDAbstained", "$AfDNoVotes")))
+                .append("totalVotesCxU", new Document("$add", Arrays.asList("$CxUYes", "$CxUNo", "$CxUAbstained", "$CxUNoVotes")))
+                .append("totalVotesB90", new Document("$add", Arrays.asList("$B90Yes", "$B90No", "$B90Abstained", "$B90NoVotes")))
+                .append("totalVotesFDP", new Document("$add", Arrays.asList("$FDPYes", "$FDPNo", "$FDPAbstained", "$FDPNoVotes")))
+                .append("totalVotesLINKE", new Document("$add", Arrays.asList("$LINKEYes", "$LINKENo", "$LINKEAbstained", "$LINKENoVotes")))
+                .append("totalVotesindependent", new Document("$add", Arrays.asList("$independentYes",
+                        "$independentNo", "$independentAbstained", "$independentNoVotes")))
+                .append("totalVotesYes", new Document("$add", Arrays.asList("$SPDYes", "$AfDYes", "$CxUYes", "$B90Yes",
+                        "$FDPYes", "$LINKEYes", "$independentYes")))
+                .append("totalVotesNo", new Document("$add", Arrays.asList("$SPDNo", "$AfDNo", "$CxUNo", "$B90No",
+                        "$FDPNo", "$LINKENo", "$independentNo")))
+                .append("totalVotesAbstained", new Document("$add", Arrays.asList("$SPDAbstained", "$AfDAbstained",
+                        "$CxUAbstained", "$B90Abstained", "$FDPAbstained", "$LINKEAbstained", "$independentAbstained")))
+                .append("totalVotesNoVotes", new Document("$add", Arrays.asList("$SPDNoVotes", "$AfDNoVotes",
+                        "$CxUNoVotes", "$B90NoVotes", "$FDPNoVotes", "$LINKENoVotes", "$independentNoVotes"))));
+
+        //cannot use newly created field for another field addition so i had to add a pipeline stage
+        Bson addFieldsTotalVotes = new Document("$addFields", new Document()
+                .append("totalVotes", new Document("$add", Arrays.asList("$totalVotesYes", "$totalVotesNo",
+                        "$totalVotesAbstained", "$totalVotesNoVotes"))));
+
+
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(addFieldsVotesData, addFieldsTotalVotes));
+        ArrayList<JSONObject> objList = new ArrayList<>();
+        db.getCollection("poll").aggregate(pipeline).allowDiskUse(false).forEach((Consumer<? super Document>) procBlock -> {
+            JSONObject obj = new JSONObject();
+            obj.put("totalVotes", procBlock.getInteger("totalVotes"));
+            obj.put("pollID", procBlock.getString("_id"));
+            obj.put("totalVotesYes", procBlock.getInteger("totalVotesYes"));
+            obj.put("totalVotesNo", procBlock.getInteger("totalVotesNo"));
+            obj.put("totalVotesAbstained", procBlock.getInteger("totalVotesAbstained"));
+            obj.put("totalVotesNoVotes", procBlock.getInteger("totalVotesNoVotes"));
+
+            if (!procBlock.getInteger("totalVotesSPD").equals(0)) {
+                JSONObject objSPD = new JSONObject();
+                objSPD.put("totalVotesSPD", procBlock.getInteger("totalVotesSPD"));
+                objSPD.put("SPDYes", procBlock.getInteger("SPDYes"));
+                objSPD.put("SPDNo", procBlock.getInteger("SPDNo"));
+                objSPD.put("SPDAbstained", procBlock.getInteger("SPDAbstained"));
+                objSPD.put("SPDNoVotes", procBlock.getInteger("SPDNoVotes"));
+                obj.put("SPDresults", objSPD);
+            }
+
+            if (!procBlock.getInteger("totalVotesAfD").equals(0)) {
+                JSONObject objAfD = new JSONObject();
+                objAfD.put("totalVotesAfD", procBlock.getInteger("totalVotesAfD"));
+                objAfD.put("AfDYes", procBlock.getInteger("AfDYes"));
+                objAfD.put("AfdNo", procBlock.getInteger("AfdNo"));
+                objAfD.put("AfDAbstained", procBlock.getInteger("AfDAbstained"));
+                objAfD.put("AfDNoVotes", procBlock.getInteger("AfDNoVotes"));
+                obj.put("AfDresults", objAfD);
+            }
+
+            if (!procBlock.getInteger("totalVotesCxU").equals(0)) {
+                JSONObject objCxU = new JSONObject();
+                objCxU.put("totalVotesCxU", procBlock.getInteger("totalVotesCxU"));
+                objCxU.put("CxUYes", procBlock.getInteger("CxUYes"));
+                objCxU.put("CxUNo", procBlock.getInteger("CxUNo"));
+                objCxU.put("CxUAbstained", procBlock.getInteger("CxUAbstained"));
+                objCxU.put("CxUNoVotes", procBlock.getInteger("CxUNoVotes"));
+                obj.put("CxUresults", objCxU);
+            }
+
+            if (!procBlock.getInteger("totalVotesB90").equals(0)) {
+                JSONObject objB90 = new JSONObject();
+                objB90.put("totalVotesB90", procBlock.getInteger("totalVotesB90"));
+                objB90.put("B90Yes", procBlock.getInteger("B90Yes"));
+                objB90.put("B90No", procBlock.getInteger("B90No"));
+                objB90.put("B90Abstained", procBlock.getInteger("B90Abstained"));
+                objB90.put("B90NoVotes", procBlock.getInteger("B90NoVotes"));
+                obj.put("B90results", objB90);
+            }
+
+            if (!procBlock.getInteger("totalVotesFDP").equals(0)) {
+                JSONObject objFDP = new JSONObject();
+                objFDP.put("totalVotesFDP", procBlock.getInteger("totalVotesFDP"));
+                objFDP.put("FDPYes", procBlock.getInteger("FDPYes"));
+                objFDP.put("FDPNo", procBlock.getInteger("FDPNo"));
+                objFDP.put("FDPAbstained", procBlock.getInteger("FDPAbstained"));
+                objFDP.put("FDPNoVotes", procBlock.getInteger("FDPNoVotes"));
+                obj.put("FDPresults", objFDP);
+            }
+
+            if (!procBlock.getInteger("totalVotesLINKE").equals(0)) {
+                JSONObject objLINKE = new JSONObject();
+                objLINKE.put("totalVotesLINKE", procBlock.getInteger("totalVotesLINKE"));
+                objLINKE.put("LINKEYes", procBlock.getInteger("LINKEYes"));
+                objLINKE.put("LINKENo", procBlock.getInteger("LINKENo"));
+                objLINKE.put("LINKEAbstained", procBlock.getInteger("LINKEAbstained"));
+                objLINKE.put("LINKENoVotes", procBlock.getInteger("LINKENoVotes"));
+                obj.put("LINKEresults", objLINKE);
+            }
+
+            if (!procBlock.getInteger("totalVotesindependent").equals(0)) {
+                JSONObject objindependent = new JSONObject();
+                objindependent.put("totalVotesindependent", procBlock.getInteger("totalVotesindependent"));
+                objindependent.put("independentYes", procBlock.getInteger("independentYes"));
+                objindependent.put("independentNo", procBlock.getInteger("independentNo"));
+                objindependent.put("independentAbstained", procBlock.getInteger("independentAbstained"));
+                objindependent.put("independentNoVotes", procBlock.getInteger("independentNoVotes"));
+                obj.put("independentresults", objindependent);
+            }
+
+
+            objList.add(obj);
+        });
+        System.out.println(objList);
+        return objList;
     }
 
     /**
      * create a text index for a collection by indexing a specific field
-     *
      * @param col
      * @param field
      * @author Edvin Nise
