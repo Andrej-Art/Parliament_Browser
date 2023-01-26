@@ -3,15 +3,20 @@
  * @param data the query data
  * @param target the   target html element
  * @author DavidJordan
+ * // Sources: https://observablehq.com/@d3/multi-line-chart
+ * // Sources: https://d3-graph-gallery.com/graph/line_several_group.html
+ * // This function, like the other d3.js chart-functions I contributed to, was pieced together from
+ * // various foreign code examples. My own original contribution was solely! in adapting the code
+ * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
  */
 function MultiLineEntities(data, target){
 
  const originalData = data;
 
-    // Setting the margins
-    const margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    // Setting the margins to the same dimensions as all other charts
+    var margin = {top: 10, right: 30, bottom: 30, left: 40},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
     // Parsing the date
     const parseDate = d3.timeParse("%Y-%m-%d");
@@ -27,22 +32,24 @@ function MultiLineEntities(data, target){
         .domain(["personEntity", "orgEntity", "locationEntity"])
         .range(["red", "blue", "green"]);
 
-
     // Setting the axis descriptions
     const xAxis = d3.axisBottom(x)
         .tickFormat(d3.timeFormat("%Y-%m-%d"));
     const yAxis = d3.axisLeft(y);
 
+    // Mapping the values to the line
     const line = d3.line()
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.value); });
 
+    // Creating the svg object
     const svg = d3.select(target).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    // Selecting the right fields from the returned JSON object to match the right values
     const processedData = Object.entries(originalData).map(d => {
         return {
             date: parseDate(d[0]),
@@ -52,8 +59,8 @@ function MultiLineEntities(data, target){
         }
     });
 
+    // setting the color values
     color.domain(Object.keys(processedData[0]).filter(function(key) { return key !== "date"; }));
-
     const types = color.domain().map(function(name) {
         return {
             name: name,
@@ -63,18 +70,20 @@ function MultiLineEntities(data, target){
         };
     });
 
+    // Setting the x domain to the date and the y domain to the respective values
     x.domain(d3.extent(processedData, function(d) { return d.date; }));
-
     y.domain([
         d3.min(types, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
         d3.max(types, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
     ]);
 
+    // Building the svg element , setting x-axis
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
+    // Building the svg element , setting y-axis
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis)
@@ -85,7 +94,7 @@ function MultiLineEntities(data, target){
         .style("text-anchor", "end")
         .text("Values");
 
-
+    // Matching each of the three different types to the accordingly colored line
     types.forEach(function(type) {
         svg.append("path")
             .attr("class", "line")
@@ -95,7 +104,7 @@ function MultiLineEntities(data, target){
             .style("stroke-width", 2);
     });
 
-
+    // Adding a legend to the chart
     const legend = svg.selectAll(".legend")
         .data(color.domain().slice().reverse())
         .enter().append("g")
@@ -118,30 +127,39 @@ function MultiLineEntities(data, target){
 }
 
 
-
-
+/**
+ *  A function to create a Bar chart
+ * @param data The data to be mapped to the chart
+ * @param target the target html element
+ * @author DavidJordan
+ * // Sources: https://observablehq.com/@d3/bar-chart?collection=@d3/charts
+ * // Sources: https://d3-graph-gallery.com/barplot.html
+ * // This function like the other d3.js chart-functions I contributed to was pieced together from
+ * // various foreign code examples. My own original contribution was solely! in adapting the code
+ * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
+ */
 function createBarChart(data, target) {
-    // set the dimensions and margins of the graph
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    // Setting the margins to the same dimensions as all other charts
+    const margin = {top: 10, right: 30, bottom: 30, left: 40},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-    // set the x and y scales
-    var x = d3.scaleBand()
+    // setting the x and y scales
+    const x = d3.scaleBand()
         .range([0, width])
         .padding(0.1);
-    var y = d3.scaleLinear()
+    const y = d3.scaleLinear()
         .range([height, 0]);
 
-
-    var svg = d3.select(target).append("svg")
+    // selecting the target html element to insert into and matching it to the margins
+    const svg = d3.select(target).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
-    // format the data
+    // extracting the data and setting the key and value
     data.forEach(function(d) {
         for (var key in d) {
             d.key = key;
@@ -149,11 +167,11 @@ function createBarChart(data, target) {
         }
     });
 
-    // Scale the range of the data in the domains
+    // Adjusting the scaling of the axes to fit the dataset scope
     x.domain(data.map(function(d) { return d.key; }));
     y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
-    // append the rectangles for the bar chart
+    // appending  the rectangles for the bar chart
     svg.selectAll(".bar")
         .data(data)
         .enter().append("rect")
@@ -161,7 +179,23 @@ function createBarChart(data, target) {
         .attr("x", function(d) { return x(d.key); })
         .attr("width", x.bandwidth())
         .attr("y", function(d) { return y(d.value); })
-        .attr("height", function(d) { return height - y(d.value); });
+        .attr("height", function(d) { return height - y(d.value); })
+        // Adding a tooltip functionality to the chart, changing th opacity
+        // when the mouse hovers over
+        .on("mouseover", function(d) {
+        d3.select(this)
+            .style("opacity", 0.5);
+        svg.append("text")
+            .attr("id", "tooltip")
+            .attr("x", x(d.key) + x.bandwidth() / 2)
+            .attr("y", y(d.value) - 5)
+            .text(d.value);
+    })
+        .on("mouseout", function(d) {
+            d3.select(this)
+                .style("opacity", 1);
+            d3.select("#tooltip").remove();
+        });
 
     // add the x Axis
     svg.append("g")
@@ -175,28 +209,31 @@ function createBarChart(data, target) {
 
 
 /**
- * Function that generat es a line chart for the Token coarsePOS values. Takes data of the type:
- * <p>
- *   tokenData = [{"verb": 123}, {"adj": 173}, {"noun": 53}, {"punct": 143}, {"adv": 93}, {"con": 155}, {"nn": 187}];
- * <p>
- * @param data
- * @param target
+ * Function to create a Linechart and insert it into the target html element.
+ * @param data the data delivered from the query
+ * @param target the target html element
+ * @author DavidJordan
+ * // Sources: https://observablehq.com/@d3/line-chart?collection=@d3/charts
+ * // Sources: https://d3-graph-gallery.com/graph/line_basic.html
+ * // This function like the other d3.js chart-functions I contributed to was pieced together from
+ * // various foreign code examples. My own original contribution was solely in adapting the code
+ * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
  */
 function createLineChart(data, target) {
-    // setting the margins of the chart
-    var margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    // Setting the margins to the same dimensions as all other charts
+    const margin = {top: 10, right: 30, bottom: 30, left: 40},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
     // scaling the x and y axis
-    var x = d3.scaleBand()
+    const x = d3.scaleBand()
         .range([0, width])
         .padding(0.1);
-    var y = d3.scaleLinear()
+    const y = d3.scaleLinear()
         .range([height, 0]);
 
     // Selecting the target html element to insert the svg element
-    var svg = d3.select(target).append("svg")
+    const svg = d3.select(target).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -224,8 +261,6 @@ function createLineChart(data, target) {
         .attr("d", d3.line()
             .x(function(d) { return x(d.label) + x.bandwidth()/2; })
             .y(function(d) { return y(d.value); }));
-
-
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));

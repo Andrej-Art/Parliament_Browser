@@ -126,8 +126,6 @@ public class SparkHandler {
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","");
         pageContent.put("entities", datesAndNamedEntities);
 
-      //  JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
-     //   pageContent.put("entities", entitiesObject);
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 

@@ -62,7 +62,6 @@ console.log(tokenData);
        MultiLineEntities(entityData, '#multiline');
        createLineChart(tokenData, '#line');
         createBarChart(posdata, '#posBar');
-
     })
 </script>
 
