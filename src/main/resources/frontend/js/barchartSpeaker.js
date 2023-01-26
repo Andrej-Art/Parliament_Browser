@@ -1,7 +1,11 @@
 // Execute this when the document has been loaded
 $(document).ready(function () {
     console.log("Im up and running!");
+
     drawBarChart();
+    MultiLineEntities(entityData, '#entitiesMulti');
+    createLineChart(tokenData, '#tokenLine');
+    createBarChart(posdata, '#pos');
 
 
 

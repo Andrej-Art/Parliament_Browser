@@ -94,7 +94,7 @@
 
         <div>
             <h3>Token als Line Chart</h3>
-            <canvas id="myChart1" width="500" height="300"></canvas>
+            <div id="tokenLine"></div>
         </div>
 
         <div>
@@ -104,7 +104,8 @@
 
         <div>
             <h3>Named Entities als Multiple Line Chart</h3>
-            <canvas id="bodyentity" width="500" height="300"></canvas>
+
+            <div id="entitiesMulti"></div>
         </div>
 
 
@@ -131,9 +132,6 @@
 
 <script>
 
-    <#include "js/barchartSpeaker.js">
-    <#include "js/chart_functions.js">
-    <#include "js/balkentest.js">
 
     let posdata = [];
     <#list pos as posObject>
@@ -147,11 +145,11 @@
     tokenData.push(${tokenObject});
     </#list>
 
-    $(document).ready(function(){
-        MultiLineEntities(entityData, '#bodyentity');
-        createLineChart(tokenData, '#myChart1');
-        createBarChart(posdata, '#pos');
-    })
+    <#include "js/barchartSpeaker.js">
+    <#include "js/chart_functions.js">
+    <#include "js/balkentest.js">
+
+
 
 </script>
 </html>

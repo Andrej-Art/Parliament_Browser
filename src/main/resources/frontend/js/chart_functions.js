@@ -221,19 +221,19 @@ function createBarChart(data, target) {
  */
 function createLineChart(data, target) {
     // Setting the margins to the same dimensions as all other charts
-    const margin = {top: 10, right: 30, bottom: 30, left: 40},
+    var margin = {top: 10, right: 30, bottom: 30, left: 40},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
     // scaling the x and y axis
-    const x = d3.scaleBand()
+    var x = d3.scaleBand()
         .range([0, width])
         .padding(0.1);
-    const y = d3.scaleLinear()
+    var y = d3.scaleLinear()
         .range([height, 0]);
 
     // Selecting the target html element to insert the svg element
-    const svg = d3.select(target).append("svg")
+    var svg = d3.select(target).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -260,7 +260,21 @@ function createLineChart(data, target) {
         .style("stroke-width", "2px")
         .attr("d", d3.line()
             .x(function(d) { return x(d.label) + x.bandwidth()/2; })
-            .y(function(d) { return y(d.value); }));
+            .y(function(d) { return y(d.value); }))
+        .on("mouseover", function(d) {
+            d3.select(this)
+                .style("opacity", 0.5);
+            svg.append("text")
+                .attr("id", "tooltip")
+                .attr("x", x(d.key) + x.bandwidth() / 2)
+                .attr("y", y(d.value) - 5)
+                .text(d.value);
+        })
+        .on("mouseout", function(d) {
+            d3.select(this)
+                .style("opacity", 1);
+            d3.select("#tooltip").remove();
+        });
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
