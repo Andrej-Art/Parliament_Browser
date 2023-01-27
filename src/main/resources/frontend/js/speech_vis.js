@@ -32,10 +32,10 @@ function applyDataToSpeech(
     let speechArray = text.split('');
     // artificially increase text array length by one so the final sentence doesn't get cut off
     speechArray.push('');
-    let sentenceIndex = 0;
     let perIndex = 0;
     let orgIndex = 0;
     let locIndex = 0;
+    let sentenceIndex = 0;
     let commentIndex = 0;
     let finalSpeech = "";
     for (let i = 0; i < speechArray.length; i++) {
@@ -68,14 +68,7 @@ function applyDataToSpeech(
 
         // insert icon at end of sentence
         if (sentenceIndex < sentenceData.length && i === sentenceData[sentenceIndex]["endPos"]) {
-            let sentiment = sentenceData[sentenceIndex]["sentiment"];
-            if (sentiment > 0) {
-                finalSpeech += '<span style="color: blue">(' + sentiment + ')</span>';
-            } else if (sentiment === 0) {
-                finalSpeech += '<span style="color: orange">(' + sentiment + ')</span>';
-            } else {
-                finalSpeech += '<span style="color: red">(' + sentiment + ')</span>';
-            }
+            finalSpeech += generateSentimentBlob(sentenceData[sentenceIndex]["sentiment"])
             sentenceIndex++;
         }
 
@@ -92,11 +85,20 @@ function applyDataToSpeech(
 }
 
 /**
- *
- * @param sentiment
+ * Inserts a blob which displays a sentiment value on mouse hover.
+ * @param sentiment the value to be displayed.
+ * @return String to be inserted in the speech's inner HTML.
  */
 function generateSentimentBlob(sentiment = 0.0) {
-    return '<div onmouseover=" ' + sentiment + '" class="sentiment">OOO</div>'
+    let returnSentiment = '';
+    if (sentiment > 0) {
+        returnSentiment += '<g class="sentiment">❔<span style="color: blue" class="hoverText">' + sentiment + '</g></span>';
+    } else if (sentiment === 0) {
+        returnSentiment += '<g class="sentiment">❔<span style="color: orange" class="hoverText">' + sentiment + '</g></span>';
+    } else {
+        returnSentiment += '<g class="sentiment">❔<span style="color: red" class="hoverText">' + sentiment + '</g></span>';
+    }
+    return returnSentiment;
 }
 
 /**
@@ -105,7 +107,7 @@ function generateSentimentBlob(sentiment = 0.0) {
  * @return Formatted String which is to be inserted in the displayed speech.
  */
 function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) {
-    let returnText = "";
+    let returnText = '';
     let fullText = commentDatum["text"];
     // if the comment has more than one part it gets split into multiple lines
     // example: "Beifall bei der AfD – Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
@@ -118,7 +120,7 @@ function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) 
             if (commentDatum.hasOwnProperty("CommentatorData")
                 && textParts[i].includes(commentDatum["CommentatorData"]["fullName"])) {
                 returnText += ('<br>' +
-                    '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" style="width:60px;height:50px;">' +
+                    '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" style="width:60px;height:50px;"> ' +
                     '<span style="color: darkgreen">' + textParts[i] + '</span>');
             } else {
                 returnText += ('<br><span style="color: darkgreen">' + textParts[i] + '</span>');
@@ -129,7 +131,7 @@ function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) 
         if (commentDatum.hasOwnProperty("CommentatorData")
             && fullText.includes(commentDatum["CommentatorData"]["fullName"])) {
             returnText += ('<br>' +
-                '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" style="width:60px;height:50px;">' +
+                '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" style="width:60px;height:50px;"> ' +
                 '<span style="color: darkgreen">' + fullText + '</span><br>');
         } else {
             returnText += ('<br><span style="color: darkgreen">' + fullText + '</span><br>');
