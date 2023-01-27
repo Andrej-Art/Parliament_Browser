@@ -66,7 +66,17 @@ public class SparkHandler {
         get("/", getHome, new FreeMarkerEngine(cfg));
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
+       // get("/multi/chartdata/", getDataUpdate, new FreeMarkerEngine(cfg));
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
+
+
+//        Testing out things
+//        post("/chartdata", (request, response) -> {
+//            String datefilterOne = request.queryParams("datefilterOne");
+//            String datefilterTwo = request.queryParams("datefilterTwo");
+//           JSONObject newData =  mongoDBHandler.getNamedEntityCount(datefilterOne, datefilterTwo, "", "");
+//           return newData;
+//        });
     }
 
     /*
@@ -107,8 +117,14 @@ public class SparkHandler {
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","", "","");
         pageContent.put("entities", datesAndNamedEntities);
 
+
+
         return new ModelAndView(pageContent, "multi.ftl");
     };
+
+//    private static final TemplateViewRoute getDataUpdate = (Request request, Response response) -> {
+//        //.....
+//    }
 
     @Testing
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
