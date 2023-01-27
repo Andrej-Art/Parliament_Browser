@@ -5,8 +5,13 @@
     <title>Rede-Visualisierung</title>
 <#--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .sentiment:hover {
+            background-color: blue;
+        } </style>
 </head>
 <body>
+
 <h1 id="speechHeader"></h1>
 
 <ul id="speechData"></ul>
@@ -15,7 +20,7 @@
 
 <#-- checking out field names -->
 
-    ${speechData[0]}
+<#--    ${speechData[0]}-->
 
 <div id="plot1"></div>
 <script>
@@ -36,7 +41,6 @@
      }
     </#list>
     commentData.sort((a, b) => {return parseInt(a["_id"].split("/")[1]) - parseInt(b["_id"].split("/")[1])});
-
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speechData").innerHTML =
@@ -53,6 +57,6 @@
         commentData
     );
 </script>
-</body>
 
+</body>
 </html>
