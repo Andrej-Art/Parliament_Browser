@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
 
-
 <head>
     <meta name="author" content="Andrej Artuschenko, DavidJordan">
     <title> Dashboard </title>
     <#-- Include d3.js for graphs -->
-    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+
     <#-- Include ajax -->
     <link rel="stylesheet" href=
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -19,6 +20,7 @@
     </style>
 </head>
 
+<body>
 
 <div class="container">
 
@@ -88,7 +90,7 @@
     <div class="wrapper">
         <div>
             <h3>POS als vertikaler Bar Chart</h3>
-            <div id="pos"> </div>
+            <div id="pos"></div>
         </div>
 
 
@@ -99,7 +101,7 @@
 
         <div>
             <h3>Sentiment als Radar Chart</h3>
-            <canvas id="myChart2" width="500" height="300"></canvas>
+            <div id="spider"></div>
         </div>
 
         <div>
@@ -145,12 +147,13 @@
     tokenData.push(${tokenObject});
     </#list>
 
+
     <#include "js/barchartSpeaker.js">
     <#include "js/chart_functions.js">
     <#include "js/balkentest.js">
 
 
-
 </script>
+
 </html>
 
