@@ -73,9 +73,6 @@ public class SparkHandler {
      * GET routes
      */
 
-
-
-
     /**
      * Test page.
      * @author Eric Lakhter

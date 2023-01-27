@@ -33,7 +33,7 @@ function MultiLineEntities(data, target){
         .range(["red", "blue", "green"]);
 
     // Setting the axis descriptions
-    const xAxis = d3.axisBottom(x)
+    var xAxis = d3.axisBottom(x)
         .tickFormat(d3.timeFormat("%Y-%m-%d"));
     const yAxis = d3.axisLeft(y);
 
@@ -77,11 +77,18 @@ function MultiLineEntities(data, target){
         d3.max(types, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
     ]);
 
-    // Building the svg element , setting x-axis
+    // Building the svg element , setting x-axis rotation so that the date values are legible
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-20)");
+
+
 
     // Building the svg element , setting y-axis
     svg.append("g")
@@ -94,15 +101,33 @@ function MultiLineEntities(data, target){
         .style("text-anchor", "end")
         .text("Values");
 
+
     // Matching each of the three different types to the accordingly colored line
     types.forEach(function(type) {
+        // Creating the lines and setting the corresponding color to each
         svg.append("path")
             .attr("class", "line")
             .attr("d", line(type.values))
             .style("fill", "none")
             .style("stroke", color(type.name))
             .style("stroke-width", 2);
+
+        // Creating a circle to denote each datapoint
+        svg.selectAll("dot")
+            .data(processedData)
+            .enter().append("circle")
+            .attr("r", 5)
+            .attr("cx", function(d) { return x(d.date); })
+            .attr("cy", function(d) { return y(d[type.name]); })
+            .style("fill", color(type.name));
+
+        // I also wanted to add a tooltip with a hover effect, but it did not work
+        // regardless of what I tried. So no hover effect for this chart
     });
+
+
+
+
 
     // Adding a legend to the chart
     const legend = svg.selectAll(".legend")
@@ -199,12 +224,21 @@ function createBarChart(data, target) {
 
     // add the x Axis
     svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+        .attr("transform", "translate(0," + height + ")");
+       // .call(d3.axisBottom(x));
 
     // add the y Axis
     svg.append("g")
         .call(d3.axisLeft(y));
+
+    var xAxis = svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-35)");
 }
 
 
@@ -216,7 +250,7 @@ function createBarChart(data, target) {
  * // Sources: https://observablehq.com/@d3/line-chart?collection=@d3/charts
  * // Sources: https://d3-graph-gallery.com/graph/line_basic.html
  * // This function like the other d3.js chart-functions I contributed to was pieced together from
- * // various foreign code examples. My own original contribution was solely in adapting the code
+ * // various foreign code examples. My own original contribution was only in adapting the code
  * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
  */
 function createLineChart(data, target) {
@@ -260,28 +294,74 @@ function createLineChart(data, target) {
         .style("stroke-width", "2px")
         .attr("d", d3.line()
             .x(function(d) { return x(d.label) + x.bandwidth()/2; })
-            .y(function(d) { return y(d.value); }))
+            .y(function(d) { return y(d.value); }));
+        // .on("mouseover", function(d) {
+        //     d3.select(this)
+        //         .style("opacity", 0.5);
+        //     svg.append("text")
+        //         .attr("id", "tooltip")
+        //         .attr("x", x(d.key) + x.bandwidth() / 2)
+        //         .attr("y", y(d.value) - 5)
+        //         .text(d.value);
+        // })
+        // .on("mouseout", function(d) {
+        //     d3.select(this)
+        //         .style("opacity", 1);
+        //     d3.select("#tooltip").remove();
+        // });
+
+    // More
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")");
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    //creating a tooltip feature  that displays the label and value pair when hovering over a blue circle
+    var tooltip = svg.append("text")
+        .attr("id", "tooltip")
+        .style("display", "none");
+
+    // Adding the blue circle feature to the svg denoting each datapoint
+    svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) { return x(d.label) + x.bandwidth()/2; })
+        .attr("cy", function(d) { return y(d.value); })
+        .attr("r", 5)
+        .style("fill", "steelblue")
+        .attr("title", function(d) { return d.label;})
+        // Creating the hover effect for the circles causing a change in opacity when mouse hovers over it
         .on("mouseover", function(d) {
             d3.select(this)
                 .style("opacity", 0.5);
-            svg.append("text")
-                .attr("id", "tooltip")
-                .attr("x", x(d.key) + x.bandwidth() / 2)
-                .attr("y", y(d.value) - 5)
-                .text(d.value);
+            tooltip
+                .style("right", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + "px")
+                .style("display", "block")
+                .text(d.label + ": " + d.value);
         })
+        // the corresponding change when the mouse leaves the circle
         .on("mouseout", function(d) {
             d3.select(this)
                 .style("opacity", 1);
-            d3.select("#tooltip").remove();
+            tooltip
+                .style("display", "none");
         });
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
 
-    svg.append("g")
-        .call(d3.axisLeft(y));
+    // Making sure to rotate the labels on the x-axis for better readabillity
+    var xAxis = svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-55)");
+
 }
+
+
 
 
 

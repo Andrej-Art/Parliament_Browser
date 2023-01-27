@@ -800,7 +800,7 @@ public class MongoDBHandler {
                     objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
                     obj.put((String) doc.get("_id"), objEnt);
                 });
-        System.out.println(obj);
+       // System.out.println(obj);
         return obj;
     }
 
