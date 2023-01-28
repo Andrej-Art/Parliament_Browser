@@ -1,6 +1,7 @@
 package utility;
 
 import freemarker.template.Configuration;
+import net.arnx.jsonic.JSON;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -65,9 +66,14 @@ public class SparkHandler {
          * CDU/CSU is equivalent to CDU%2FCSU  %2F is the percent-encoded slash
          */
         get("/", getHome, new FreeMarkerEngine(cfg));
+
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
+
+
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
-       // get("/multi/chartdata/", getDataUpdate, new FreeMarkerEngine(cfg));
+        put("/chartdata/", getChartUpdatesAjax);  // Currently not working. In the muli.ftl by pressing the button on the calendar field it is supposed to go here
+                                                        // Tells me the /chartdata is not mapped in Spark for accept
+
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
         get("/reden/ajax/", getSpeechVisAjax);
 
@@ -183,6 +189,32 @@ public class SparkHandler {
         String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
 
         return mongoDBHandler.allSpeechData(speechID);
+    };
+
+
+    @Unfinished("Not working currently. Attempted to test this in  the multi.ftl")
+    private final static Route getChartUpdatesAjax = (Request request, Response response) ->{
+        // The Datefilters that are gotten through the calendar fields
+        String dateFilterOne = request.queryParams("#von") != null ? request.queryParams("#von") : "";
+        String dateFilterTwo = request.queryParams("#bis") != null ? request.queryParams("#bis") : "";
+        // The Redner person gotten through the search field
+        String personFilter = request.queryParams("search") != null ? request.queryParams("search") : "";
+        /*
+        Add the party and fraction filters here that are input through the dropdown menus. Not sure how to do that yet
+         */
+        Map<String, Object> newDBData = new HashMap<>();
+        List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, dateFilterOne, dateFilterTwo, "", personFilter);
+        newDBData.put("token", tokenData);
+
+        List<JSONObject> posData = mongoDBHandler.getPOSCount(dateFilterOne, dateFilterTwo, "", personFilter);
+        newDBData.put("pos", posData);
+
+        JSONObject entityData = mongoDBHandler.getNamedEntityCount(dateFilterOne, dateFilterTwo, "", personFilter);
+        newDBData.put("entities", entityData);
+
+        // The Updates for the other charts could be added here
+
+        return newDBData;
     };
 
     /*
