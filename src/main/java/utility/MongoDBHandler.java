@@ -1021,7 +1021,7 @@ public class MongoDBHandler {
      * @param redeID
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> allSpeechData(String redeID) {
+    public JSONObject allSpeechData(String redeID) {
         Bson match = match(new Document("_id", new Document("$eq", redeID)));
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "speaker");
         Bson lookupComments = lookup("comment", "_id", "speechID", "comments");
@@ -1032,17 +1032,18 @@ public class MongoDBHandler {
         Bson lookupCommentator = lookup("person", "comments.commentatorID", "_id", "CommentatorData");
         Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
                 .append("preserveNullAndEmptyArrays", true));
+        Bson limit = limit(1);
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker
-                ,unwindComments,lookupCommentator,unwindCommentatorData));
+                ,lookupCommentator,unwindCommentatorData, limit));
 
-        ArrayList<JSONObject> jsonList = new ArrayList<>();
+        JSONObject obj = new JSONObject();
 
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock ->
                 {
-                    JSONObject obj = new JSONObject();
+
                     obj.put("speechID", procBlock.getString("_id"));
                     obj.put("speakerID", procBlock.getString("speakerID"));
                     obj.put("text", procBlock.getString("text"));
@@ -1055,10 +1056,10 @@ public class MongoDBHandler {
                     obj.put("speaker", procBlock.get("speaker"));
                     obj.put("comment", procBlock.get("comments"));
                     obj.put("CommentatorData", procBlock.get("CommentatorData"));
-                    jsonList.add(obj);
+
                 });
-        System.out.println(jsonList);
-        return jsonList;
+        System.out.println(obj);
+        return obj;
     }
 
     /**
