@@ -375,8 +375,10 @@ function updateCharts(e) {
 
     // Make an AJAX call to the backend
     const ajaxChartData = new XMLHttpRequest();
-    ajaxChartData.open("GET", "/chartdata?start=$startDate&end=$endDate") // There is something wrong with this URL
+    ajaxChartData.open("GET", "/chartdata/?start=" + startDate + "&end=" + endDate) // There is something wrong with this URL
+    ajaxChartData.responseType = "json";
     ajaxChartData.onload = function() {
+
         // if successful
         if (ajaxChartData.status === 200) {
 

@@ -71,7 +71,7 @@ public class SparkHandler {
 
 
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
-        put("/chartdata/", getChartUpdatesAjax);  // Currently not working. In the muli.ftl by pressing the button on the calendar field it is supposed to go here
+        get("/chartdata/", getChartUpdatesAjax);  // Currently not working. In the muli.ftl by pressing the button on the calendar field it is supposed to go here
                                                         // Tells me the /chartdata is not mapped in Spark for accept
 
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
@@ -202,7 +202,7 @@ public class SparkHandler {
         /*
         Add the party and fraction filters here that are input through the dropdown menus. Not sure how to do that yet
          */
-        Map<String, Object> newDBData = new HashMap<>();
+        JSONObject newDBData = new JSONObject();
         List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, dateFilterOne, dateFilterTwo, "", personFilter);
         newDBData.put("token", tokenData);
 
