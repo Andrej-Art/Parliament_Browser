@@ -118,7 +118,7 @@
 
         <div>
             <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
-            <div id=""></div>
+            <div id="pie"></div>
         </div>
 
     </div>
@@ -147,6 +147,7 @@
     <#include "js/chart_functions.js">
     <#include "js/balkentest.js">
     <#include  "js/barSpeaker.js">
+    <#include "js/pollPie.js">
 
 
 </script>

@@ -10,6 +10,7 @@ $(document).ready(function () {
     createLineChart(tokenData, '#tokenLine');
     createBarChart(posdata, '#pos');
     drawSpiderChart("#spider");
+    drawDoughnutChart();
 
     speakerbarchart();
 
