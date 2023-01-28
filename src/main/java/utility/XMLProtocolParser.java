@@ -153,7 +153,7 @@ public class XMLProtocolParser {
                                             //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
                                                 // "Drucksache X" is not part of the speech
-                                                if (speechChild.getAttribute("klasse").equals("T_Drs")) continue;
+                                                if (speechChild.getAttribute("klasse").equals("T_Drs")||speechChild.getAttribute("klasse").equals("T_Beratung")) break;
 
                                                 if (speechChild.getAttribute("klasse").equals("redner")) {
                                                     sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
