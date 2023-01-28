@@ -11,6 +11,8 @@ $(document).ready(function () {
     createBarChart(posdata, '#pos');
     drawSpiderChart("#spider");
 
+    speakerbarchart();
+
 
 
     // Template for any AJAX request. Just change the route below.
@@ -30,6 +32,8 @@ $(document).ready(function () {
     });
 })
 
+
+// This is our Radarchart for the sentiment analysis.
 function drawSpiderChart(target) {
 
     let data2 = [];

@@ -114,16 +114,11 @@
         <div>
             <h3>Redner als Bar Chart</h3>
             <div id="my_dataviz"></div>
-            <p>
-                <label># Redner:</label>
-                <input type="number" min="0" max="100" step="30" value="20" id="nBin">
-            </p>
         </div>
 
         <div>
             <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
-            <canvas id="myChart6" width="500" height="300"></canvas>
-            <div id="line_chart"></div>
+            <div id=""></div>
         </div>
 
     </div>
@@ -148,9 +143,10 @@
     </#list>
 
 
-    <#include "js/barchartSpeaker.js">
+    <#include "js/spiderSentiment.js">
     <#include "js/chart_functions.js">
     <#include "js/balkentest.js">
+    <#include  "js/barSpeaker.js">
 
 
 </script>
