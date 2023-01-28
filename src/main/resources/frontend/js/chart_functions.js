@@ -362,7 +362,7 @@ function createLineChart(data, target) {
 }
 
 /**
- * Attempt at a function that makes an ajax call to the backend to update the data for the charts
+ * Attempt at a function that ma kes an ajax call to the backend to update the data for the charts
  * @param e
  */
 function updateCharts() {
