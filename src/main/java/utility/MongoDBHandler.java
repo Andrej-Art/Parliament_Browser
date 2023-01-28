@@ -769,7 +769,6 @@ public class MongoDBHandler {
 
     /**
      * returns all Named Entities with their respective count
-     *
      * @author Edvin Nise
      */
     public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
@@ -791,15 +790,17 @@ public class MongoDBHandler {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
         }
 
-        db.getCollection("test_speech_edvin").aggregate(pipeline).allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> {
+        db.getCollection("speech").aggregate(pipeline).allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock ->
+                {
                     Document doc = (Document) procBlock.get("_id");
                     JSONObject objEnt = new JSONObject();
                     objEnt.put("personEntity", procBlock.getInteger("namedEntityPerson"));
                     objEnt.put("locationEntity", procBlock.getInteger("namedEntityLocation"));
                     objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
-                    obj.put((String) doc.get("_id"), objEnt);
-                });
+                    obj.put("" + (dateToLocalDate((Date) doc.get("_id"))), objEnt);
+                }
+                );
         System.out.println(obj);
         return obj;
     }
@@ -1023,16 +1024,18 @@ public class MongoDBHandler {
      */
     public ArrayList<JSONObject> allSpeechData(String redeID) {
         Bson match = match(new Document("_id", new Document("$eq", redeID)));
-        Bson lookupSpeaker = lookup("person", "speakerID", "_id", "Speaker");
+        Bson lookupSpeaker = lookup("person", "speakerID", "_id", "speaker");
         Bson lookupComments = lookup("comment", "_id", "speechID", "comments");
-        Bson unwindSpeaker = unwind("$Speaker");
-        Bson unwindComments = unwind("$comments");
+        Bson unwindSpeaker = new Document("$unwind", new Document("path", "$speaker")
+                .append("preserveNullAndEmptyArrays", true));
+        Bson unwindComments = new Document("$unwind", new Document("path", "$comments")
+                .append("preserveNullAndEmptyArrays", true));
         Bson lookupCommentator = lookup("person", "comments.commentatorID", "_id", "CommentatorData");
         Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
                 .append("preserveNullAndEmptyArrays", true));
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker, unwindComments
-                , lookupCommentator, unwindCommentatorData));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker
+                ,unwindComments,lookupCommentator,unwindCommentatorData));
 
         ArrayList<JSONObject> jsonList = new ArrayList<>();
 
@@ -1050,7 +1053,7 @@ public class MongoDBHandler {
                     obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
                     obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
                     obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
-                    obj.put("speaker", procBlock.get("Speaker"));
+                    obj.put("speaker", procBlock.get("speaker"));
                     obj.put("comment", procBlock.get("comments"));
                     obj.put("CommentatorData", procBlock.get("CommentatorData"));
                     jsonList.add(obj);
