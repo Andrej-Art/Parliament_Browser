@@ -1,15 +1,11 @@
-// Contains the applyDataToSpeech() function.
+// applyDataToSpeech() basically splits the complete text string into singular symbols
+// (e.g. "butter" becomes ["b", "u", "t", "t", "e", "r"]) and then advances step by step, adding char by char to one
+// big final string while inserting html tags whenever necessary.
 //
-// It basically splits the complete text string into singular symbols (e.g. "butter" becomes ["b", "u", "t", "t", "e", "r"])
-// and then advances step by step, inserting data where it needs to.
 
 /**
- * Changes a words background colour in accordance to their Named Entity Category.
- * <ul>
- *     <li><tt>PER</tt> is red</li>
- *     <li><tt>ORG</tt> is blue</li>
- *     <li><tt>LOC</tt> is green</li>
- * </ul>
+ * Changes a word's background colour in accordance to their named entity type:
+ * <tt>PER</tt> is red, <tt>ORG</tt> is blue, <tt>LOC</tt> is green.<br>
  * Inserts an icon at the end of each sentence which shows a sentence's sentiment.<br>
  * Inserts comments at their respective positions in the text.
  * @param text          Speech text.
@@ -26,7 +22,7 @@ function applyDataToSpeech(
     perData = [{startPos: 2, endPos: 3}],
     orgData = [{startPos: 4, endPos: 5}],
     locData = [{startPos: 6, endPos: 7}],
-    sentenceData = [{endPos : 22, sentiment : 0.0}],
+    sentenceData = [{sentiment : 0.0, endPos : 22}],
     commentData = [{text: "Heiterkeit", commentPos: 22}]
 ) {
     let speechArray = text.split('');
@@ -43,7 +39,7 @@ function applyDataToSpeech(
         // mark named entities: PER, ORG, LOC data sets
         if (perIndex < perData.length) {
             if (i === perData[perIndex]["startPos"]) {
-                finalSpeech += '<span style="background-color: coral">';
+                finalSpeech += '<span class="perEntity">';
             } else if (i === perData[perIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 perIndex++;
@@ -51,7 +47,7 @@ function applyDataToSpeech(
         }
         if (orgIndex < orgData.length) {
             if (i === orgData[orgIndex]["startPos"]) {
-                finalSpeech += '<span style="background-color: aqua">';
+                finalSpeech += '<span class="orgEntity">';
             } else if (i === orgData[orgIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 orgIndex++;
@@ -59,7 +55,7 @@ function applyDataToSpeech(
         }
         if (locIndex < locData.length) {
             if (i === locData[locIndex]["startPos"]) {
-                finalSpeech += '<span style="background-color: lime">';
+                finalSpeech += '<span class="locEntity">';
             } else if (i === locData[locIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 locIndex++;
@@ -68,7 +64,7 @@ function applyDataToSpeech(
 
         // insert icon at end of sentence
         if (sentenceIndex < sentenceData.length && i === sentenceData[sentenceIndex]["endPos"]) {
-            finalSpeech += generateSentimentBlob(sentenceData[sentenceIndex]["sentiment"])
+            finalSpeech += formatSentimentBlob(sentenceData[sentenceIndex]["sentiment"])
             sentenceIndex++;
         }
 
@@ -85,18 +81,19 @@ function applyDataToSpeech(
 }
 
 /**
- * Inserts a blob which displays a sentiment value on mouse hover.
+ * Inserts an icon which displays a sentiment value on mouse hover.
  * @param sentiment the value to be displayed.
  * @return String to be inserted in the speech's inner HTML.
+ * @author Eric Lakhter
  */
-function generateSentimentBlob(sentiment = 0.0) {
-    let returnSentiment = '';
+function formatSentimentBlob(sentiment = 0.0) {
+    let returnSentiment;
     if (sentiment > 0) {
-        returnSentiment += '<g class="sentiment">❔<span style="color: blue" class="hoverText">' + sentiment + '</g></span>';
+        returnSentiment = '<span class="sentiment">❔' + '<div class="hoverText posSentiment">' + sentiment + '</div></span>';
     } else if (sentiment === 0) {
-        returnSentiment += '<g class="sentiment">❔<span style="color: orange" class="hoverText">' + sentiment + '</g></span>';
+        returnSentiment = '<span class="sentiment">❔' + '<div class="hoverText neuSentiment">' + sentiment + '</div></span>';
     } else {
-        returnSentiment += '<g class="sentiment">❔<span style="color: red" class="hoverText">' + sentiment + '</g></span>';
+        returnSentiment = '<span class="sentiment">❔' + '<div class="hoverText negSentiment">' + sentiment + '</div></span>';
     }
     return returnSentiment;
 }
@@ -105,37 +102,26 @@ function generateSentimentBlob(sentiment = 0.0) {
  * Formats given comment data and returns a String.
  * @param commentDatum Comment data to format.
  * @return Formatted String which is to be inserted in the displayed speech.
+ * @author Eric Lakhter
  */
 function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) {
     let returnText = '';
     let fullText = commentDatum["text"];
-    // if the comment has more than one part it gets split into multiple lines
+    // If the comment has more than one part it gets split into multiple lines
     // example: "Beifall bei der AfD – Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
     // =>
     // "Beifall bei der AfD"
-    // "Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
-    if (fullText.includes("–")) {
-        let textParts = fullText.split("–");
-        for (let i in textParts) {
-            if (commentDatum.hasOwnProperty("CommentatorData")
-                && textParts[i].includes(commentDatum["CommentatorData"]["fullName"])) {
-                returnText += ('<br>' +
-                    '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" style="width:60px;height:50px;"> ' +
-                    '<span style="color: darkgreen">' + textParts[i] + '</span>');
-            } else {
-                returnText += ('<br><span style="color: darkgreen">' + textParts[i] + '</span>');
-            }
-        }
-        returnText += '<br>';
-    } else {
-        if (commentDatum.hasOwnProperty("CommentatorData")
-            && fullText.includes(commentDatum["CommentatorData"]["fullName"])) {
-            returnText += ('<br>' +
-                '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" style="width:60px;height:50px;"> ' +
-                '<span style="color: darkgreen">' + fullText + '</span><br>');
+    // "*image* Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
+    let splitText = fullText.split("–");
+    for (let textPart of splitText) {
+        if (commentDatum.hasOwnProperty("CommentatorData") && textPart.includes(commentDatum["CommentatorData"]["fullName"])) {
+            returnText += ('<p>' +
+                '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" class="speakerPic"> ' +
+                '<span class="comment">' + textPart + '</span>');
         } else {
-            returnText += ('<br><span style="color: darkgreen">' + fullText + '</span><br>');
+            returnText += ('<p><span class="comment">' + textPart + '</span>');
         }
     }
+    returnText += '</p>';
     return returnText;
 }

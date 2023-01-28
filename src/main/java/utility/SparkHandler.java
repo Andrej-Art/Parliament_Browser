@@ -1,6 +1,7 @@
 package utility;
 
 import freemarker.template.Configuration;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -42,6 +43,7 @@ public class SparkHandler {
         cfg.setDirectoryForTemplateLoading(new File(frontendPath));
         cfg.setDefaultEncoding("UTF-8");
         port(4567);
+        // If there aren't any query params redirect the user to a path with trailing slash
         before((req, res) -> {
             String path = req.pathInfo();
             if (!path.endsWith("/") && req.queryParams().size() == 0) res.redirect(path + "/") ;
@@ -68,6 +70,7 @@ public class SparkHandler {
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
        // get("/multi/chartdata/", getDataUpdate, new FreeMarkerEngine(cfg));
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
+        get("/ajax/reden/", getSpeechVisAjax);
 
 
 //        Testing out things
@@ -83,10 +86,7 @@ public class SparkHandler {
      * GET routes
      */
 
-    /**
-     * Test page.
-     * @author Eric Lakhter
-     */
+    /** Test page. */
     @Testing
     private static final TemplateViewRoute getTest = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -101,6 +101,17 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "test.ftl");
     };
+
+    /** Homepage. */
+    private static final TemplateViewRoute getHome = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+        pageContent.put("title", "Homepage");
+
+        return new ModelAndView(pageContent, "home.ftl");
+    };
+
+    /** ADD SHORT DESCRIPTION */
     @Testing
     private static final TemplateViewRoute getMulti = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -126,6 +137,7 @@ public class SparkHandler {
 //        //.....
 //    }
 
+    /** ADD SHORT DESCRIPTION */
     @Testing
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -142,35 +154,42 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
-    /**
-     * Homepage.
-     * @author Eric Lakhter
-     */
-    private static final TemplateViewRoute getHome = (Request request, Response response) -> {
-        Map<String, Object> pageContent = new HashMap<>();
-
-        pageContent.put("title", "Homepage");
-
-        return new ModelAndView(pageContent, "home.ftl");
-    };
-
-    /**
-     * Speech visualisation page.
-     * @author Eric Lakhter
-     */
-    @Testing
-    @Unfinished("Need to reimplement comments properly, need to put sentence sentiment in an icon")
+    /** Speech visualisation page. */
+    @Unfinished("Needs a better speech selection menu")
     private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-       String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
-//        String speechID = "ID19100100";
+        List<String> speechIDs = new ArrayList<>(0);
+        mongoDBHandler
+                .getDB()
+                .getCollection("speech")
+                .find()
+                .iterator()
+                .forEachRemaining(d -> speechIDs.add(d.getString("_id")));
 
-        List<JSONObject> speechData = mongoDBHandler.allSpeechData(speechID);
-        pageContent.put("speechData", speechData);
+        speechIDs.sort((a, b) -> {
+            Integer num1 = Integer.parseInt(a.substring(2));
+            Integer num2 = Integer.parseInt(b.substring(2));
+            return num1.compareTo(num2);
+        });
 
-        return new ModelAndView(pageContent, "speech_vis.ftl");
+        pageContent.put("speechIDs", speechIDs);
+
+        return new ModelAndView(pageContent, "speechVis.ftl");
     };
+
+    /** Returns a JSON list containing all data for a specific speech. */
+    private final static Route getSpeechVisAjax = (Request request, Response response) -> {
+
+        String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
+        System.out.println(speechID);
+
+        return new JSONArray(mongoDBHandler.allSpeechData(speechID));
+    };
+
+    /*
+     * MISC:
+     */
 
     /**
      * Opens <a href="http://localhost:4567/">http://localhost:4567/</a> in the system's default browser.
