@@ -1,7 +1,6 @@
 package utility;
 
 import freemarker.template.Configuration;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -70,7 +69,7 @@ public class SparkHandler {
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
        // get("/multi/chartdata/", getDataUpdate, new FreeMarkerEngine(cfg));
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
-        get("/ajax/reden/", getSpeechVisAjax);
+        get("/reden/ajax/", getSpeechVisAjax);
 
 
 //        Testing out things
@@ -182,9 +181,8 @@ public class SparkHandler {
     private final static Route getSpeechVisAjax = (Request request, Response response) -> {
 
         String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
-        System.out.println(speechID);
 
-        return new JSONArray(mongoDBHandler.allSpeechData(speechID));
+        return mongoDBHandler.allSpeechData(speechID);
     };
 
     /*

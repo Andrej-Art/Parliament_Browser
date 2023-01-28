@@ -1,5 +1,5 @@
 // applyDataToSpeech() basically splits the complete text string into singular symbols
-// (e.g. "butter" becomes ["b", "u", "t", "t", "e", "r"]) and then advances step by step, adding char by char to one
+// (e.g. "butter" becomes ["b", "u", "t", "t", "e", "r"]) and then advances char by char, adding them to one
 // big final string while inserting html tags whenever necessary.
 //
 
@@ -35,7 +35,6 @@ function applyDataToSpeech(
     let commentIndex = 0;
     let finalSpeech = "";
     for (let i = 0; i < speechArray.length; i++) {
-
         // mark named entities: PER, ORG, LOC data sets
         if (perIndex < perData.length) {
             if (i === perData[perIndex]["startPos"]) {
