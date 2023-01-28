@@ -2,9 +2,9 @@ package data.impl;
 
 import data.AgendaItem;
 import org.bson.Document;
+import utility.TimeHelper;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -16,7 +16,6 @@ public class AgendaItem_Impl implements AgendaItem {
 
     private Document AgendaItemDoc;
     private String _id, subject;
-
     private LocalDate date;
     private ArrayList<String> speechIDs;
 
@@ -31,7 +30,7 @@ public class AgendaItem_Impl implements AgendaItem {
     public AgendaItem_Impl(String id, LocalDate date, String subject, ArrayList<String> speechIDs){
         this._id = id;
         this.date = date;
-        this.subject = subject; //Unclear if we get this from the xml protocol or the UIMA analysis, we assume here that we parse it from the xml file
+        this.subject = subject;
         this.speechIDs = speechIDs;
     }
 
@@ -43,12 +42,10 @@ public class AgendaItem_Impl implements AgendaItem {
     public AgendaItem_Impl(Document document){
         this.AgendaItemDoc = document;
         this._id = document.getString("_id");
-        this.date = (LocalDate) document.get("date");
+        this.date = TimeHelper.dateToLocalDate(document.getDate("date"));
         this.subject = document.getString("subject");
         this.speechIDs = (ArrayList<String>) document.get("speechIDs");
     }
-
-
 
     @Override
     public String getID() {
@@ -61,12 +58,12 @@ public class AgendaItem_Impl implements AgendaItem {
     }
 
     @Override
-    public ArrayList<String> getSpeechIDs() {
-        return this.speechIDs;
+    public String getSubject() {
+        return this.subject;
     }
 
     @Override
-    public String getSubject() {
-        return this.subject;
+    public ArrayList<String> getSpeechIDs() {
+        return this.speechIDs;
     }
 }

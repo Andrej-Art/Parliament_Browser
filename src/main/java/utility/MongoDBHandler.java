@@ -158,8 +158,7 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("person").insertMany(mongoPersons);
-        } catch (MongoWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
     }
 
     /**
@@ -281,20 +280,17 @@ public class MongoDBHandler {
         //Insert single processedSpeech into speech collection
         try {
             db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
 
         //Insert single document into speech_cas collection
         try {
             db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
 
         //Insert single document into speech_tokens collection
         try {
             db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
     }
 
     /**
@@ -324,16 +320,13 @@ public class MongoDBHandler {
         // MongoBulkWriteExceptions are caught when inserting the Lists
         try {
             db.getCollection("speech").insertMany(speechDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
         try {
             db.getCollection("speech_cas").insertMany(speechCasDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
         try {
             db.getCollection("speech_token").insertMany(speechTokenDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
 
     }
 
@@ -359,8 +352,7 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("agendaItem").insertMany(mongoAgendaItems);
-        } catch (MongoWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoWriteException | IllegalArgumentException ignored) {}
     }
 
 
@@ -409,8 +401,7 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {
-        }
+        } catch (MongoBulkWriteException | IllegalArgumentException ignored) {}
     }
 
     /**
