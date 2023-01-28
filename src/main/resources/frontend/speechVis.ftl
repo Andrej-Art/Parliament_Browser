@@ -68,6 +68,7 @@ function setPageWaiting() {
  * @author Eric Lakhter
  */
 function setPageSpeechVis(speechData = {}) {
+    console.log(speechData);
     let speakerData = speechData["speaker"];
     let perData = speechData["namedEntitiesPer"];
     let orgData = speechData["namedEntitiesOrg"];
