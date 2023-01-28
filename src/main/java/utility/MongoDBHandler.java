@@ -352,7 +352,7 @@ public class MongoDBHandler {
         ArrayList<Document> mongoAgendaItems = new ArrayList<>(0);
         for (AgendaItem agendaItem : agendaItems) {
             if (agendaItem == null) continue;
-            mongoAgendaItems.add(new Document("_id", agendaItem.getDate())
+            mongoAgendaItems.add(new Document("_id", agendaItem.getID())
                     .append("date", agendaItem.getDate())
                     .append("subject", agendaItem.getSubject())
                     .append("speechIDs", agendaItem.getSpeechIDs()));

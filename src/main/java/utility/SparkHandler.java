@@ -167,9 +167,9 @@ public class SparkHandler {
                 .forEachRemaining(d -> speechIDs.add(d.getString("_id")));
 
         speechIDs.sort((a, b) -> {
-            Integer num1 = Integer.parseInt(a.substring(2));
-            Integer num2 = Integer.parseInt(b.substring(2));
-            return num1.compareTo(num2);
+            Integer speechID1 = Integer.parseInt(a.substring(2));
+            Integer speechID2 = Integer.parseInt(b.substring(2));
+            return speechID1.compareTo(speechID2);
         });
 
         pageContent.put("speechIDs", speechIDs);
@@ -206,7 +206,6 @@ public class SparkHandler {
      */
     public static void openInDefaultBrowser(String url) throws IOException {
         String os = System.getProperty("os.name").toLowerCase();
-//        System.out.println(os);
         Runtime rt = Runtime.getRuntime();
 
         if (os.contains("win")) {
