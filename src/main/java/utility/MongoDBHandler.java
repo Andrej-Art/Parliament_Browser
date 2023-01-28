@@ -746,7 +746,7 @@ public class MongoDBHandler {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
         }
 
-        MongoIterable<Document> result = db.getCollection("test_speech_token_edvin")
+        MongoIterable<Document> result = db.getCollection("speech_token")
                 .aggregate(pipeline);
         ArrayList<JSONObject> objList = new ArrayList<>();
         for (Document doc : result) {
@@ -760,6 +760,7 @@ public class MongoDBHandler {
 
     /**
      * returns all Named Entities with their respective count
+     *
      * @author Edvin Nise
      */
     public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
@@ -791,7 +792,7 @@ public class MongoDBHandler {
                     objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
                     obj.put("" + (dateToLocalDate((Date) doc.get("_id"))), objEnt);
                 });
-       // System.out.println(obj);
+        // System.out.println(obj);
         return obj;
     }
 
@@ -965,6 +966,38 @@ public class MongoDBHandler {
         return speakerWithDDCJSON;
     }
 
+    @Testing
+    public JSONObject matchSpeakerToDDCTest() {
+
+        Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
+        Bson unwind = unwind("$speakerData");
+        Bson project = project(new Document("Abgeordneter", "$speakerData.fullName")
+                .append("mainTopic", 1)
+                .append("maybeTopic", 1));
+        Bson group = new Document("$group", new Document("_id", "$Abgeordneter")
+                .append("DDCKategorien", new Document("$push", "$mainTopic"))
+                .append("maybeKategorien", new Document("$push", "$maybeTopic")));
+        Bson projectTest = project(new Document("allDDC", new Document("$concatArrays", Arrays.asList("$DDCKategorien", "$maybeKategorien"))));
+
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group, projectTest));
+        JSONObject obj = new JSONObject();
+        ArrayList<JSONObject> objNodes = new ArrayList<>();
+        db.getCollection("speech").aggregate(pipeline)
+                .allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson())
+//                        {
+//                            JSONObject objNode = new JSONObject();
+//                            objNode.put("name", procBlock.getString("_id"));
+//                            objNode.put("group", 1);
+//                            objNode.put("color", 1);
+//                            objNodes.add(objNode);
+//                            obj.put("nodes", objNodes);
+//                        }
+                );
+        System.out.println(obj);
+        return obj;
+    }
+
     /**
      * find all speeches that follow the search pattern*
      *
@@ -1015,18 +1048,17 @@ public class MongoDBHandler {
     public JSONObject allSpeechData(String redeID) {
         Bson match = match(new Document("_id", new Document("$eq", redeID)));
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "speaker");
+        //creates an array field with all the comments that match the speechID
         Bson lookupComments = lookup("comment", "_id", "speechID", "comments");
         Bson unwindSpeaker = new Document("$unwind", new Document("path", "$speaker")
-                .append("preserveNullAndEmptyArrays", true));
-        Bson unwindComments = new Document("$unwind", new Document("path", "$comments")
                 .append("preserveNullAndEmptyArrays", true));
         Bson lookupCommentator = lookup("person", "comments.commentatorID", "_id", "CommentatorData");
         Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
                 .append("preserveNullAndEmptyArrays", true));
-        Bson limit = limit(1);
+
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker
-                ,lookupCommentator,unwindCommentatorData, limit));
+                , lookupCommentator, unwindCommentatorData));
 
         JSONObject obj = new JSONObject();
 
@@ -1055,6 +1087,7 @@ public class MongoDBHandler {
 
     /**
      * returns all poll results from all named fractions
+     *
      * @author Edvin Nise
      */
     @Unfinished("Dont know where we save this data")
@@ -1175,6 +1208,7 @@ public class MongoDBHandler {
 
     /**
      * create a text index for a collection by indexing a specific field
+     *
      * @param col
      * @param field
      * @author Edvin Nise
