@@ -365,8 +365,7 @@ function createLineChart(data, target) {
  * Attempt at a function that makes an ajax call to the backend to update the data for the charts
  * @param e
  */
-function updateCharts(e) {
-    e.preventDefault();
+function updateCharts() {
     const startDate = document.querySelector("#von").value;
     const endDate = document.querySelector("#bis").value;
     //add the other updated parameters here: party, person, fraction I do not know how to get them from the
