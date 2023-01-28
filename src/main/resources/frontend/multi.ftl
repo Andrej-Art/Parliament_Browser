@@ -9,6 +9,16 @@
 
 <body>
 
+<form action="/chartdata" method="post">
+    <div class="calenderfield">
+        <label for="von">von:</label>
+        <input type="date" id="von" name="datefilterOne">
+        <label for="bis">bis:</label>
+        <input type="date" id="bis" name="datefilterTwo">
+        <input type="submit" value="Anzeigen"/>
+    </div>
+</form>
+
 <h2>Multiline Chart for Named Entities</h2>
 
 <div id="multiline"></div>

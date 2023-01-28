@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
 
-
 <head>
     <meta name="author" content="Andrej Artuschenko, DavidJordan">
     <title> Dashboard </title>
     <#-- Include d3.js for graphs -->
-    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+
     <#-- Include ajax -->
     <link rel="stylesheet" href=
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -19,6 +20,7 @@
     </style>
 </head>
 
+<body>
 
 <div class="container">
 
@@ -88,39 +90,35 @@
     <div class="wrapper">
         <div>
             <h3>POS als vertikaler Bar Chart</h3>
-            <div id="pos"> </div>
+            <div id="pos"></div>
         </div>
 
 
         <div>
             <h3>Token als Line Chart</h3>
-            <canvas id="myChart1" width="500" height="300"></canvas>
+            <div id="tokenLine"></div>
         </div>
 
         <div>
             <h3>Sentiment als Radar Chart</h3>
-            <canvas id="myChart2" width="500" height="300"></canvas>
+            <div id="spider"></div>
         </div>
 
         <div>
             <h3>Named Entities als Multiple Line Chart</h3>
-            <canvas id="bodyentity" width="500" height="300"></canvas>
+
+            <div id="entitiesMulti"></div>
         </div>
 
 
         <div>
             <h3>Redner als Bar Chart</h3>
             <div id="my_dataviz"></div>
-            <p>
-                <label># Redner:</label>
-                <input type="number" min="0" max="100" step="30" value="20" id="nBin">
-            </p>
         </div>
 
         <div>
             <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
-            <canvas id="myChart6" width="500" height="300"></canvas>
-            <div id="line_chart"></div>
+            <div id="pie"></div>
         </div>
 
     </div>
@@ -131,9 +129,6 @@
 
 <script>
 
-    <#include "js/barchartSpeaker.js">
-    <#include "js/chart_functions.js">
-    <#include "js/balkentest.js">
 
     let posdata = [];
     <#list pos as posObject>
@@ -147,12 +142,15 @@
     tokenData.push(${tokenObject});
     </#list>
 
-    $(document).ready(function(){
-        MultiLineEntities(entityData, '#bodyentity');
-        createLineChart(tokenData, '#myChart1');
-        createBarChart(posdata, '#pos');
-    })
+
+    <#include "js/spiderSentiment.js">
+    <#include "js/chart_functions.js">
+    <#include "js/balkentest.js">
+    <#include  "js/barSpeaker.js">
+    <#include "js/pollPie.js">
+
 
 </script>
+
 </html>
 

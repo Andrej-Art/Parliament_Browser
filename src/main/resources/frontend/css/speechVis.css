@@ -1,0 +1,60 @@
+/* Style for pictures */
+.speakerPic {
+    width:60px;
+    height:50px;
+}
+/* Style for Named Entities */
+.perEntity {
+    background-color: coral;
+}
+.orgEntity {
+    background-color: aqua;
+}
+.locEntity {
+    background-color: lime;
+}
+
+/* Style for comments */
+.comment {
+    color: darkgreen;
+}
+
+/* Style for sentiment info blob */
+.posSentiment {
+    color: cornflowerblue;
+}
+.neuSentiment {
+    color: yellow;
+}
+.negSentiment {
+    color: indianred;
+}
+.sentiment {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+.sentiment .hoverText {
+    visibility: hidden;
+    position: absolute;
+    bottom: 110%;
+    text-align: center;
+    background-color: black;
+    width: 60px;
+    padding: 5px 5px;
+    border-radius: 5px;
+    margin-left: -27.5px;
+}
+.sentiment:hover .hoverText {
+    visibility: visible;
+}
+.sentiment .hoverText::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}

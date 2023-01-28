@@ -799,9 +799,8 @@ public class MongoDBHandler {
                     objEnt.put("locationEntity", procBlock.getInteger("namedEntityLocation"));
                     objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
                     obj.put("" + (dateToLocalDate((Date) doc.get("_id"))), objEnt);
-                }
-                );
-        System.out.println(obj);
+                });
+       // System.out.println(obj);
         return obj;
     }
 
