@@ -119,7 +119,7 @@ public class XMLProtocolParser {
                                 for (Element speech : speechElementList) {
 
                                     String speechID = speech.getAttribute("id");
-
+                                    if(!speechIDs.contains(speechID)){speechIDs.add(speechID);}
                                     String speakerID = "";
                                     String speechText = "";
                                     Integer commentNumber = 0;
@@ -379,7 +379,7 @@ public class XMLProtocolParser {
                 NodeList dataOfContentElements = contentTableElementList.item(i).getChildNodes();
                 for (int k = 0; k < dataOfContentElements.getLength(); k++) {
                     if (dataOfContentElements.item(k).getNodeName().equals("ivz-block-titel")) {
-                        aiID = dataOfContentElements.item(k).getTextContent();
+                        aiID = dataOfContentElements.item(k).getTextContent().replace(":", "");
                     }
                     if (dataOfContentElements.item(k).getNodeName().equals("ivz-eintrag")) {
                         NodeList contentOfContentElements = dataOfContentElements.item(k).getChildNodes();
