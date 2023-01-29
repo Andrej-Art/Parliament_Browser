@@ -1056,7 +1056,7 @@ public class MongoDBHandler {
 
         //creates new fields which seperate comments with commentatorID from comments without commentatorID
         Bson addFieldsSplit = new Document("$addFields", new Document()
-                .append("commentsWithCommentator", new Document("$filter",
+                .append("commentsHaveCommentator", new Document("$filter",
                         new Document("input", "$comments")
                                 .append("as", "comment")
                                 .append("cond", new Document("$and", Arrays.asList(new Document("$ne",
@@ -1070,7 +1070,7 @@ public class MongoDBHandler {
         //adds the commentatorData to the commentsWithCommentator field
         Bson addCommentatorToComment = new Document("$addFields", new Document()
                 .append("commentAndCommentator", new Document()
-                        .append("$map", new Document("input", "$commentsWithCommentator")
+                        .append("$map", new Document("input", "$commentsHaveCommentator")
                                 .append("in", new Document("$mergeObjects", Arrays.asList(new Document()
                                         .append("$arrayElemAt", Arrays.asList(new Document()
                                                 .append("$filter", new Document("input", "$commentatorData")
@@ -1095,15 +1095,15 @@ public class MongoDBHandler {
                 {
                     obj.put("speechID", procBlock.getString("_id"));
                     obj.put("speakerID", procBlock.getString("speakerID"));
-                    obj.put("text", procBlock.getString("text"));
+//                    obj.put("text", procBlock.getString("text"));
                     obj.put("speechSentiment", procBlock.getDouble("sentiment"));
-                    obj.put("sentences", procBlock.get("sentences"));
-                    obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
-                    obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
-                    obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
+//                    obj.put("sentences", procBlock.get("sentences"));
+//                    obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
+//                    obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
+//                    obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
                     obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
                     obj.put("speaker", procBlock.get("speaker"));
-                    obj.put("comments", procBlock.get("allComments"));
+                    obj.put("comments", procBlock.get("commentsWithCommentator"));
                 }
                 );
         System.out.println(obj);
