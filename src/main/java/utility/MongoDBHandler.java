@@ -1,12 +1,12 @@
 package utility;
 
 import com.google.gson.Gson;
-import com.mongodb.Block;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import data.*;
+import data.impl.AgendaItem_Impl;
 import data.impl.Person_Impl;
 import exceptions.WrongInputException;
 import org.bson.Document;
@@ -15,11 +15,9 @@ import org.json.JSONObject;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
-import javax.json.Json;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -338,7 +336,7 @@ public class MongoDBHandler {
      * @throws WrongInputException
      * @author DavidJordan
      */
-    public void insertAgendaItems(List<AgendaItem> agendaItems) throws WrongInputException {
+    public void insertAgendaItems(List<AgendaItem_Impl> agendaItems) throws WrongInputException {
         if (agendaItems == null || agendaItems.isEmpty()) {
             throw new WrongInputException("Input is null or empty");
         }

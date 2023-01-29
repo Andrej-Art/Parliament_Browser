@@ -5,6 +5,7 @@ import org.bson.Document;
 import utility.TimeHelper;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -46,6 +47,29 @@ public class AgendaItem_Impl implements AgendaItem {
         this.subject = document.getString("subject");
         this.speechIDs = (ArrayList<String>) document.get("speechIDs");
     }
+
+    /**
+     * Full {@code AgendaItem} constructor which fills the class variables from parameters provided.
+     * @param id  The AgendaItem's unique  id made up of the concatenation of  ProtocolId + "/" + AgendaItemID
+     * @param subject The subject-matter of the Item
+     * @author DavidJordan
+     */
+    public AgendaItem_Impl(String id, String subject) {
+        this._id = id;
+        this.subject = subject;
+    }
+
+    /**
+     * This implements the addition of Data after parsing the data of the table oof contents
+     * @param date
+     * @param speechIDs
+     * @author Julian Ocker
+     */
+    public void setDateAndIDs(LocalDate date, ArrayList<String> speechIDs){
+        this.date = date;
+        this.speechIDs = speechIDs;
+    }
+
 
     @Override
     public String getID() {

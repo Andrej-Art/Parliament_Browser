@@ -77,10 +77,15 @@ public class XMLProtocolParser {
                     //iterate through all dbtplenarptotokoll nodes
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
                         Node sessionInfoNode = sessionInfoNodes.item(a);
+
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
                             Element sessionInfoElement = (Element) sessionInfoNode;
-
                             //String _id = file.getName().replaceAll("-data\\.xml", " ");
+
+                            NodeList contentTableElementList = getElementList(sessionInfoElement, "inhaltsverzeichnis").get(0).getChildNodes();
+
+                            Map<String, AgendaItem_Impl> incompleteAiMap = new HashMap<>(0);
+                            incompleteAiMap = getAiElements(contentTableElementList);
 
                             //here we get all relevant information about the protocol
                             int protocolNumber = Integer.parseInt(sessionInfoElement.getAttribute("sitzung-nr"));
@@ -100,6 +105,7 @@ public class XMLProtocolParser {
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
                             ArrayList<String> agendaItemIDS = new ArrayList<>();
                             Set<String> protocolSessionLeaders = new HashSet<>();
+                            List<AgendaItem_Impl> completeAis= new ArrayList<>(0);
 
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
@@ -108,7 +114,7 @@ public class XMLProtocolParser {
 
                                 //Go through all Speeches
                                 List<Element> speechElementList = getElementList(aiElement, "rede");
-
+                                ArrayList<String> speechIDs = new ArrayList<>(0);
 
                                 for (Element speech : speechElementList) {
 
@@ -144,8 +150,10 @@ public class XMLProtocolParser {
 
                                                 // Adds missing session leaders to the list
                                                 if (sessionLeaders.contains(sessionLeader)) {
-                                                } else {sessionLeaders.add(sessionLeader);
-                                                protocolSessionLeaders.add(sessionLeader);}
+                                                } else {
+                                                    sessionLeaders.add(sessionLeader);
+                                                    protocolSessionLeaders.add(sessionLeader);
+                                                }
 
 
                                                 break;
@@ -153,7 +161,8 @@ public class XMLProtocolParser {
                                             //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
                                                 // "Drucksache X" is not part of the speech
-                                                if (speechChild.getAttribute("klasse").equals("T_Drs")||speechChild.getAttribute("klasse").equals("T_Beratung")) break;
+                                                if (speechChild.getAttribute("klasse").equals("T_Drs") || speechChild.getAttribute("klasse").equals("T_Beratung"))
+                                                    break;
 
                                                 if (speechChild.getAttribute("klasse").equals("redner")) {
                                                     sameSpeechCounter = addToSpeechMap(speechID, speakerID, speechText, addStatus, mongoDBHandler, sameSpeechCounter, TimeHelper.convertToISOdate(sessionDate));
@@ -238,7 +247,17 @@ public class XMLProtocolParser {
                                 }
                                 commentMap.clear();
 
+                                String trueAiID = electionPeriod + "/" + protocolNumber + "/" + topid;
+
+                                if (incompleteAiMap.containsKey(topid)){
+                                    incompleteAiMap.get(topid).setDateAndIDs(date,speechIDs);
+                                    completeAis.add(new AgendaItem_Impl(trueAiID,date,incompleteAiMap.get(topid).getSubject(),speechIDs));
+                                } else {
+                                    completeAis.add(new AgendaItem_Impl(trueAiID,date,topid,speechIDs));
+                                }
                             }
+
+                            mongoDBHandler.insertAgendaItems(completeAis);
 
                             List<Element> speakerElementList = getElementList(sessionInfoElement, "redner");
 
@@ -341,6 +360,53 @@ public class XMLProtocolParser {
         } catch (ParserConfigurationException | IOException | SAXException ex) {
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * @param contentTableElementList
+     * @return
+     *
+     * @author Julian Ocker
+     */
+    private static Map<String, AgendaItem_Impl> getAiElements(NodeList contentTableElementList) {
+        Map<String, AgendaItem_Impl> incompleteAiMap = null;
+        for (int i = 0; i < contentTableElementList.getLength(); i++) {
+
+            if (contentTableElementList.item(i).getNodeName().equals("ivz-block")) {
+                String aiID = "";
+                String aiSubject = "";
+                NodeList dataOfContentElements = contentTableElementList.item(i).getChildNodes();
+                for (int k = 0; k < dataOfContentElements.getLength(); k++) {
+                    if (dataOfContentElements.item(k).getNodeName().equals("ivz-block-titel")) {
+                        aiID = dataOfContentElements.item(k).getTextContent();
+                    }
+                    if (dataOfContentElements.item(k).getNodeName().equals("ivz-eintrag")) {
+                        NodeList contentOfContentElements = dataOfContentElements.item(k).getChildNodes();
+
+                        for (int l = 0; l < contentOfContentElements.getLength(); l++) {
+                            if (contentOfContentElements.item(l).getNodeName().equals("ivz-eintrag-inhalt")) {
+                                String contentOfContentElement = contentOfContentElements.item(l).getTextContent();
+                                if (contentOfContentElements.getLength() >= l + 1) {
+                                    if (contentOfContentElements.item(l + 1).getNodeName().equals("xref")) {
+                                        contentOfContentElement = "";
+                                    }
+                                }
+
+                                aiSubject = aiSubject + contentOfContentElement;
+
+                            }
+                        }
+                        aiSubject = aiSubject + dataOfContentElements.item(k).getTextContent();
+
+                    }
+                }
+                AgendaItem_Impl ai = new AgendaItem_Impl(aiID, aiSubject);
+                incompleteAiMap.put(aiID, ai);
+            }
+            contentTableElementList.item(i);
+        }
+
+        return incompleteAiMap;
     }
 
 
