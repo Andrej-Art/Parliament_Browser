@@ -1048,6 +1048,7 @@ public class MongoDBHandler {
     public JSONObject allSpeechData(String redeID) {
         Bson match = match(new Document("_id", new Document("$eq", redeID)));
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "speaker");
+
         //creates an array field with all the comments that match the speechID
         Bson lookupComments = lookup("comment", "_id", "speechID", "comments");
         Bson unwindSpeaker = new Document("$unwind", new Document("path", "$speaker")
@@ -1056,9 +1057,38 @@ public class MongoDBHandler {
         Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
                 .append("preserveNullAndEmptyArrays", true));
 
+        //creates new fields which seperate comments with commentatorID from comments without commentatorID
+        Bson addFieldsSplit = new Document("$addFields", new Document()
+                .append("commentsWithCommentator", new Document("$filter",
+                        new Document("input", "$comments")
+                                .append("as", "comment")
+                                .append("cond", new Document("$and", Arrays.asList(new Document("$ne",
+                                        Arrays.asList("$$comment.commentatorID", "")))))))
+                .append("commentsWithoutCommentator", new Document("$filter",
+                        new Document("input", "$comments")
+                                .append("as", "comment")
+                                .append("cond", new Document("$and", Arrays.asList(new Document("$eq",
+                                        Arrays.asList("$$comment.commentatorID", ""))))))));
+
+        //adds the commentatorData to the commentsWithCommentator field
+        Bson addCommentatorToComment = new Document("$addFields", new Document()
+                .append("commentAndCommentator", new Document()
+                        .append("$map", new Document("input", "$commentsWithCommentator")
+                                .append("in", new Document("$mergeObjects", Arrays.asList(new Document()
+                                        .append("$arrayElemAt", Arrays.asList(new Document()
+                                                .append("$filter", new Document("input", "$commentatorData")
+                                                        .append("as", "cD")
+                                                        .append("cond", new Document("$eq", Arrays.asList(
+                                                                "$$this.commentatorID", "$$cD._id"
+                                                        )))), 0)), "$$this"))))));
+        //merges arrays of comments with and without commentator
+        Bson mergeComments = new Document("$addFields", new Document()
+                .append("allComments", new Document("$concatArrays",
+                        Arrays.asList("$commentsWithoutCommentator", "$commentAndCommentator"))));
+
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker
-                , lookupCommentator, unwindCommentatorData));
+                , lookupCommentator, unwindCommentatorData, addFieldsSplit, addCommentatorToComment, mergeComments));
 
         JSONObject obj = new JSONObject();
 
@@ -1066,7 +1096,6 @@ public class MongoDBHandler {
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock ->
                 {
-
                     obj.put("speechID", procBlock.getString("_id"));
                     obj.put("speakerID", procBlock.getString("speakerID"));
                     obj.put("text", procBlock.getString("text"));
@@ -1077,10 +1106,9 @@ public class MongoDBHandler {
                     obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
                     obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
                     obj.put("speaker", procBlock.get("speaker"));
-                    obj.put("comment", procBlock.get("comments"));
-                    obj.put("CommentatorData", procBlock.get("CommentatorData"));
-
-                });
+                    obj.put("comments", procBlock.get("allComments"));
+                }
+                );
         System.out.println(obj);
         return obj;
     }
