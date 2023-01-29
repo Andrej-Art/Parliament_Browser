@@ -366,15 +366,21 @@ function createLineChart(data, target) {
  * @param e
  */
 function updateCharts() {
-    const startDate = document.querySelector("#von").value;
-    const endDate = document.querySelector("#bis").value;
+    // The date filters from the calendar fields
+    const startDate = document.querySelector("#von");
+    const endDate = document.querySelector("#bis");
+
+    // The person filter from the search field selecting the personFilter
+    const person = document.querySelector("#personFilter");
+
+
     //add the other updated parameters here: party, person, fraction I do not know how to get them from the
     // document at this point yet
     //const party = document.querySelector()
 
     // Make an AJAX call to the backend
     const ajaxChartData = new XMLHttpRequest();
-    ajaxChartData.open("GET", "/chartdata/?start=" + startDate + "&end=" + endDate) // There is something wrong with this URL
+    ajaxChartData.open("GET", "dashboard/data?von=" + startDate + "&bis=" + endDate + "&personFilter=" + person);
     ajaxChartData.responseType = "json";
     ajaxChartData.onload = function() {
 
@@ -384,6 +390,12 @@ function updateCharts() {
             MultiLineEntities(entityData, '#multiline');
             createLineChart(tokenData, '#line');
             createBarChart(posdata, '#posBar');
+            MultiLineEntities(entityData, '#entitiesMulti');
+            createLineChart(tokenData, '#tokenLine');
+            createBarChart(posdata, '#pos');
+            drawSpiderChart("#spider");
+            drawDoughnutChart();
+            speakerbarchart();
 
         } else {
             console.log("Error: " + ajaxChartData.status);

@@ -6,12 +6,12 @@ $(document).ready(function () {
     console.log("Im up and running!");
 
 
+    updateCharts();
     MultiLineEntities(entityData, '#entitiesMulti');
     createLineChart(tokenData, '#tokenLine');
     createBarChart(posdata, '#pos');
     drawSpiderChart("#spider");
     drawDoughnutChart();
-
     speakerbarchart();
 
 

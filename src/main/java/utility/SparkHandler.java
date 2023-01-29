@@ -71,20 +71,12 @@ public class SparkHandler {
 
 
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
-        get("/chartdata/", getChartUpdatesAjax);  // Currently not working. In the muli.ftl by pressing the button on the calendar field it is supposed to go here
-                                                        // Tells me the /chartdata is not mapped in Spark for accept
+        get("/dashboard/data/", getChartUpdatesAjax);  // It is not clear how to combine the datefilters and person fraction party filters into one submit
 
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
         get("/reden/ajax/", getSpeechVisAjax);
 
 
-//        Testing out things
-//        post("/chartdata", (request, response) -> {
-//            String datefilterOne = request.queryParams("datefilterOne");
-//            String datefilterTwo = request.queryParams("datefilterTwo");
-//           JSONObject newData =  mongoDBHandler.getNamedEntityCount(datefilterOne, datefilterTwo, "", "");
-//           return newData;
-//        });
     }
 
     /*
@@ -195,10 +187,10 @@ public class SparkHandler {
     @Unfinished("Not working currently. Attempted to test this in  the multi.ftl")
     private final static Route getChartUpdatesAjax = (Request request, Response response) ->{
         // The Datefilters that are gotten through the calendar fields
-        String dateFilterOne = request.queryParams("#von") != null ? request.queryParams("#von") : "";
-        String dateFilterTwo = request.queryParams("#bis") != null ? request.queryParams("#bis") : "";
+        String dateFilterOne = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String dateFilterTwo = request.queryParams("bis") != null ? request.queryParams("bis") : "";
         // The Redner person gotten through the search field
-        String personFilter = request.queryParams("search") != null ? request.queryParams("search") : "";
+        String personFilter = request.queryParams("personFilter") != null ? request.queryParams("personFilter") : "";
         /*
         Add the party and fraction filters here that are input through the dropdown menus. Not sure how to do that yet
          */

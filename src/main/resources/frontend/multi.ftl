@@ -12,9 +12,9 @@
 <form onsubmit="updateCharts()">
     <div class="calenderfield">
         <label for="von">von:</label>
-        <input type="date" id="von" name="datefilterOne">
+        <input type="date" id="von" name="datefil1">
         <label for="bis">bis:</label>
-        <input type="date" id="bis" name="datefilterTwo">
+        <input type="date" id="bis" name="datefil2">
         <input type="submit" value="Anzeigen"/>
     </div>
 </form>

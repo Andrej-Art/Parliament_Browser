@@ -27,11 +27,11 @@
     <div class="navbar">
 
         <div class="search">
-
-            <form action="#">
+            <form  onclick="updateCharts()">
                 <input type="text"
                        placeholder=" Suche nach Rednern "
-                       name="search">
+                       id="personFilter"
+                       name="personFilter">
                 <button>
                     <i class="fa fa-search"
                        style="font-size: 18px;">
@@ -71,15 +71,15 @@
             </div>
         </div>
 
-        <div class="calenderfield">
-            <label for="von">von:</label>
-            <input type="date" id="von" name="von">
-            <label for="bis">bis:</label>
-            <input type="date" id="bis" name="bis">
-            <input name="form" type="submit" value="Anzeigen"/>
-
-
-        </div>
+        <form onsubmit="updateCharts()">
+            <div class="calenderfield">
+                <label for="von">von:</label>
+                <input type="date" id="von" name="von">
+                <label for="bis">bis:</label>
+                <input type="date" id="bis" name="bis">
+                <input type="submit" value="Anzeigen"/>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -145,7 +145,8 @@
 
 
 
-    <#include "js/spiderSentiment.js">
+
+    <#include "js/spiderSentiment.js"> // bisher wird in dieser .js die ajax funktion aufgerufen. Liegt es eventuell daran?
     <#include "js/chart_functions.js">
     <#include "js/balkentest.js">
     <#include  "js/barSpeaker.js">
