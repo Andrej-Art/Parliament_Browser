@@ -363,6 +363,7 @@ public class XMLProtocolParser {
     }
 
     /**
+     * Method to get the Subject of the agenda items out of the table of contents.
      * @param contentTableElementList
      * @return
      *
