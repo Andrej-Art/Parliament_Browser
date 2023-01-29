@@ -11,9 +11,11 @@
 </head>
 <body>
 <h1>Auswahl</h1>
+<div>
 <#list 0..speechIDs?size - 1 as i>
     <button type="button" onclick="getSpeechData('${speechIDs[i]}')">Rede ${speechIDs[i]}</button> <#if ((i + 1) % 2) == 0 ><br></#if>
 </#list>
+</div>
 
 <h1 id="speechHeader"></h1>
 
@@ -64,22 +66,22 @@ function setPageWaiting() {
 
 /**
  * Displays all the relevant speech information on the page.
- * @param speechData JSON containing all speech data.
+ * @param speechData JSON containing all of a speech's data.
  * @author Eric Lakhter
  */
 function setPageSpeechVis(speechData = {}) {
-    console.log(speechData);
     let speakerData = speechData["speaker"];
     let perData = speechData["namedEntitiesPer"];
     let orgData = speechData["namedEntitiesOrg"];
     let locData = speechData["namedEntitiesLoc"];
     let sentenceData = speechData["sentences"];
-    let commentData = speechData["comment"];
+    let commentData = speechData["comments"];
     commentData.sort((a, b) => {return parseInt(a["_id"].split("/")[1]) - parseInt(b["_id"].split("/")[1])});
+    console.log(commentData);
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speechData").innerHTML =
-        '<li>Redner: ' + fullName + ' <img alt="Profilbild" src="' + speakerData["picture"][0] + '" style="width:60px;height:50px;"></li>' +
+        '<li>Redner: ' + fullName + ' <img alt="Profilbild" src="' + speakerData["picture"][0] + '" class="speakerPic"></li>' +
         '<li>Partei: ' + speakerData["party"] + '</li>' +
         '<li>Datum: ' + speechData["date"] + '</li>' +
         '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
