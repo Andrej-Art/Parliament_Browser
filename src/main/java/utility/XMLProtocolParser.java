@@ -84,7 +84,7 @@ public class XMLProtocolParser {
 
                             NodeList contentTableElementList = getElementList(sessionInfoElement, "inhaltsverzeichnis").get(0).getChildNodes();
 
-                            Map<String, AgendaItem_Impl> incompleteAiMap = new HashMap<>(0);
+                            Map<String, String> incompleteAiMap = new HashMap<>(0);
                             incompleteAiMap = getAiElements(contentTableElementList);
 
                             //here we get all relevant information about the protocol
@@ -250,10 +250,8 @@ public class XMLProtocolParser {
                                 String trueAiID = electionPeriod + "/" + protocolNumber + "/" + topid;
 
                                 if (incompleteAiMap.containsKey(topid)){
-                                    incompleteAiMap.get(topid).setDateAndIDs(date,speechIDs);
-                                    completeAis.add(new AgendaItem_Impl(trueAiID,date,incompleteAiMap.get(topid).getSubject(),speechIDs));
-                                    System.out.println(incompleteAiMap.get(topid).getSubject());
-                                    System.out.println(speechIDs);
+                                    completeAis.add(new AgendaItem_Impl(trueAiID,date,incompleteAiMap.get(topid),speechIDs));
+
                                 } else {
                                     completeAis.add(new AgendaItem_Impl(trueAiID,date,topid,speechIDs));
                                 }
@@ -366,13 +364,13 @@ public class XMLProtocolParser {
 
     /**
      * Method to get the Subject of the agenda items out of the table of contents.
+     *
      * @param contentTableElementList
      * @return
-     *
      * @author Julian Ocker
      */
-    private static Map<String, AgendaItem_Impl> getAiElements(NodeList contentTableElementList) {
-        Map<String, AgendaItem_Impl> incompleteAiMap = new HashMap<>(0);
+    private static Map<String, String> getAiElements(NodeList contentTableElementList) {
+        Map<String, String> incompleteAiMap = new HashMap<>(0);
         for (int i = 0; i < contentTableElementList.getLength(); i++) {
 
             if (contentTableElementList.item(i).getNodeName().equals("ivz-block")) {
@@ -405,8 +403,7 @@ public class XMLProtocolParser {
                         }
                     }
                 }
-                AgendaItem_Impl ai = new AgendaItem_Impl(aiID, aiSubject);
-                incompleteAiMap.put(aiID, ai);
+                incompleteAiMap.put(aiID, aiSubject);
             }
             contentTableElementList.item(i);
         }
