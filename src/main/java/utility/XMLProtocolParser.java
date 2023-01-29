@@ -158,7 +158,7 @@ public class XMLProtocolParser {
 
                                                 break;
 
-                                            //If its a <p klasse="redner">-Tag -> So its a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
+                                            //If its a <p klasse="redner">-Tag -> So it is a speaker (set addStatus = true) --> The whole text up to this will be added if the tag before was a <p klasse="redner">-Tag (addStatus == true)
                                             case "p":
                                                 // "Drucksache X" is not part of the speech
                                                 if (speechChild.getAttribute("klasse").equals("T_Drs") || speechChild.getAttribute("klasse").equals("T_Beratung"))
@@ -205,7 +205,7 @@ public class XMLProtocolParser {
                                                 ArrayList<String> commentatorFractions = new ArrayList<>(0);
                                                 /*
                                                 hier wird eine Liste fullName benötigt/aus den Stammdaten generiert
-                                                Jedes Mal, wenn eckige Klammern vorkommen, wird geprüft,
+                                                jedes Mal, wenn eckige Klammern vorkommen, wird geprüft,
                                                 ob vor den Klammern der Name vorkommt.
                                                    */
 
@@ -252,6 +252,8 @@ public class XMLProtocolParser {
                                 if (incompleteAiMap.containsKey(topid)){
                                     incompleteAiMap.get(topid).setDateAndIDs(date,speechIDs);
                                     completeAis.add(new AgendaItem_Impl(trueAiID,date,incompleteAiMap.get(topid).getSubject(),speechIDs));
+                                    System.out.println(incompleteAiMap.get(topid).getSubject());
+                                    System.out.println(speechIDs);
                                 } else {
                                     completeAis.add(new AgendaItem_Impl(trueAiID,date,topid,speechIDs));
                                 }
@@ -333,12 +335,12 @@ public class XMLProtocolParser {
                                 commentMap.clear();
                             }
                             ArrayList<String> agendaItemFullIDS = new ArrayList<>(0);
-                            String protcolID = electionPeriod + "/" + protocolNumber;
+                            String protocolID = electionPeriod + "/" + protocolNumber;
                             for (int k = 0; k < agendaItemIDS.size(); k++) {
-                                agendaItemFullIDS.add(protcolID + "/" + agendaItemIDS.get(k));
+                                agendaItemFullIDS.add(protocolID + "/" + agendaItemIDS.get(k));
                             }
-                            if (!mongoDBHandler.checkIfDocumentExists("protocol", protcolID)) {
-                                Protocol_Impl protocol = new Protocol_Impl(protcolID, date, begin, end, sessionDuration,
+                            if (!mongoDBHandler.checkIfDocumentExists("protocol", protocolID)) {
+                                Protocol_Impl protocol = new Protocol_Impl(protocolID, date, begin, end, sessionDuration,
                                         electionPeriod, protocolNumber, protocolSessionLeaders, agendaItemFullIDS);
                                 mongoDBHandler.insertProtocol(protocol);
                             }
@@ -370,7 +372,7 @@ public class XMLProtocolParser {
      * @author Julian Ocker
      */
     private static Map<String, AgendaItem_Impl> getAiElements(NodeList contentTableElementList) {
-        Map<String, AgendaItem_Impl> incompleteAiMap = null;
+        Map<String, AgendaItem_Impl> incompleteAiMap = new HashMap<>(0);
         for (int i = 0; i < contentTableElementList.getLength(); i++) {
 
             if (contentTableElementList.item(i).getNodeName().equals("ivz-block")) {
@@ -482,7 +484,7 @@ public class XMLProtocolParser {
     }
 
     /**
-     * This Method generates an object of Comment_Impl and adds it into a Map with its Id as its key.
+     * This Method generates an object of Comment_Impl and adds it into a Map with its ID as its key.
      *
      * @param commentID
      * @param speechID
