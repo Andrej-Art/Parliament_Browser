@@ -1103,7 +1103,7 @@ public class MongoDBHandler {
                     obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
                     obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
                     obj.put("speaker", procBlock.get("speaker"));
-                    obj.put("comments", procBlock.get("commentsWithCommentator"));
+                    obj.put("comments", procBlock.get("allComments"));
                 }
                 );
         System.out.println(obj);
