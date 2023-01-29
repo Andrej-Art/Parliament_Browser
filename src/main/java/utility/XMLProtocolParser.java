@@ -379,28 +379,30 @@ public class XMLProtocolParser {
                 String aiID = "";
                 String aiSubject = "";
                 NodeList dataOfContentElements = contentTableElementList.item(i).getChildNodes();
+                Boolean first = true;
                 for (int k = 0; k < dataOfContentElements.getLength(); k++) {
                     if (dataOfContentElements.item(k).getNodeName().equals("ivz-block-titel")) {
                         aiID = dataOfContentElements.item(k).getTextContent().replace(":", "");
                     }
                     if (dataOfContentElements.item(k).getNodeName().equals("ivz-eintrag")) {
                         NodeList contentOfContentElements = dataOfContentElements.item(k).getChildNodes();
+                        Boolean check = true;
+                        String contentOfContentElement = "";
 
                         for (int l = 0; l < contentOfContentElements.getLength(); l++) {
                             if (contentOfContentElements.item(l).getNodeName().equals("ivz-eintrag-inhalt")) {
-                                String contentOfContentElement = contentOfContentElements.item(l).getTextContent();
-                                if (contentOfContentElements.getLength() >= l + 1) {
-                                    if (contentOfContentElements.item(l + 1).getNodeName().equals("xref")) {
-                                        contentOfContentElement = "";
-                                    }
-                                }
-
+                                contentOfContentElement = contentOfContentElements.item(l).getTextContent();
+                            }
+                            if (contentOfContentElements.item(l).getNodeName().equals("xref")) {check = false;}
+                        }
+                        if (check) {
+                            if(first){
                                 aiSubject = aiSubject + contentOfContentElement;
-
+                                first = false;
+                            }else{
+                                aiSubject = aiSubject +"\n" + contentOfContentElement;
                             }
                         }
-                        aiSubject = aiSubject + dataOfContentElements.item(k).getTextContent();
-
                     }
                 }
                 AgendaItem_Impl ai = new AgendaItem_Impl(aiID, aiSubject);
