@@ -361,6 +361,39 @@ function createLineChart(data, target) {
 
 }
 
+/**
+ * Attempt at a function that  makes an ajax  call to the backend to update the data for the charts
+ * @param e
+ */
+function updateCharts() {
+    const startDate = document.querySelector("#von").value;
+    const endDate = document.querySelector("#bis").value;
+    //add the other updated parameters here: party, person, fraction I do not know how to get them from the
+    // document at this point yet
+    //const party = document.querySelector()
+
+    // Make an AJAX call to the backend
+    const ajaxChartData = new XMLHttpRequest();
+    ajaxChartData.open("GET", "/chartdata/?start=" + startDate + "&end=" + endDate) // There is something wrong with this URL
+    ajaxChartData.responseType = "json";
+    ajaxChartData.onload = function() {
+
+        // if successful
+        if (ajaxChartData.status === 200) {
+
+            MultiLineEntities(entityData, '#multiline');
+            createLineChart(tokenData, '#line');
+            createBarChart(posdata, '#posBar');
+
+        } else {
+            console.log("Error: " + ajaxChartData.status);
+        }
+    };
+    ajaxChartData.send();
+}
+
+
+
 
 
 

@@ -83,6 +83,7 @@
     </div>
 </div>
 
+
 <div class="main">
     <h1>Große Überschrift</h1>
     <h2>Überschrift etwas kleiner</h2>
@@ -141,6 +142,7 @@
     <#list token as tokenObject>
     tokenData.push(${tokenObject});
     </#list>
+
 
 
     <#include "js/spiderSentiment.js">
