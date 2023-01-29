@@ -1095,12 +1095,12 @@ public class MongoDBHandler {
                 {
                     obj.put("speechID", procBlock.getString("_id"));
                     obj.put("speakerID", procBlock.getString("speakerID"));
-//                    obj.put("text", procBlock.getString("text"));
+                    obj.put("text", procBlock.getString("text"));
                     obj.put("speechSentiment", procBlock.getDouble("sentiment"));
-//                    obj.put("sentences", procBlock.get("sentences"));
-//                    obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
-//                    obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
-//                    obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
+                    obj.put("sentences", procBlock.get("sentences"));
+                    obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
+                    obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
+                    obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
                     obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
                     obj.put("speaker", procBlock.get("speaker"));
                     obj.put("comments", procBlock.get("commentsWithCommentator"));
