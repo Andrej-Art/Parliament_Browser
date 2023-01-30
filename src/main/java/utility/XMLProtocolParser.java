@@ -105,7 +105,7 @@ public class XMLProtocolParser {
                             List<Element> aiElementList = getElementList(sessionInfoElement, "tagesordnungspunkt");
                             ArrayList<String> agendaItemIDS = new ArrayList<>();
                             Set<String> protocolSessionLeaders = new HashSet<>();
-                            List<AgendaItem_Impl> completeAis= new ArrayList<>(0);
+                            List<AgendaItem_Impl> completeAis = new ArrayList<>(0);
 
                             for (Element aiElement : aiElementList) {
                                 String topid = aiElement.getAttribute("top-id");
@@ -201,7 +201,7 @@ public class XMLProtocolParser {
                                                 reComment = reComment.replaceFirst("\\)", "");
                                                 comment = new StringBuilder(reComment).reverse().toString();
 
-                                                String commentatorID = "";
+                                                String commentatorID = "N/A";
                                                 ArrayList<String> commentatorFractions = new ArrayList<>(0);
                                                 /*
                                                 hier wird eine Liste fullName benötigt/aus den Stammdaten generiert
@@ -251,9 +251,8 @@ public class XMLProtocolParser {
 
                                 if (incompleteAiMap.containsKey(topid)){
                                     completeAis.add(new AgendaItem_Impl(trueAiID,date,incompleteAiMap.get(topid),speechIDs));
-
                                 } else {
-                                    completeAis.add(new AgendaItem_Impl(trueAiID,date,topid,speechIDs));
+                                    completeAis.add(new AgendaItem_Impl(trueAiID, date, topid, speechIDs));
                                 }
                             }
 
@@ -313,7 +312,7 @@ public class XMLProtocolParser {
                                 }
 
 
-                                if (!mongoDBHandler.checkIfDocumentExists("person", speakerID)) {
+                                if (!mongoDBHandler.checkIfDocumentExists("person", speakerID) && !speakerID.isEmpty()) {
                                     Person_Impl person = null;
                                     if (electionPeriod == 19) {
                                         person = new Person_Impl(speakerID, speakerProperties[2], speakerProperties[4], speakerProperties[7],
@@ -329,7 +328,6 @@ public class XMLProtocolParser {
                                     mongoDBHandler.insertPerson(person);
                                     persons.add(person);
                                 }
-
                                 commentMap.clear();
                             }
                             ArrayList<String> agendaItemFullIDS = new ArrayList<>(0);
@@ -367,6 +365,7 @@ public class XMLProtocolParser {
      *
      * @param contentTableElementList
      * @return
+     *
      * @author Julian Ocker
      */
     private static Map<String, String> getAiElements(NodeList contentTableElementList) {
@@ -397,8 +396,8 @@ public class XMLProtocolParser {
                             if(first){
                                 aiSubject = aiSubject + contentOfContentElement;
                                 first = false;
-                            }else{
-                                aiSubject = aiSubject +"\n" + contentOfContentElement;
+                            } else {
+                                aiSubject = aiSubject + "\n" + contentOfContentElement;
                             }
                         }
                     }
