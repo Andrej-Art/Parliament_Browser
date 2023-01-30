@@ -1038,74 +1038,56 @@ public class MongoDBHandler {
 
     /**
      * returns all required Data for visualisation of a speech
-     *
      * @param redeID
      * @author Edvin Nise
      */
     public JSONObject allSpeechData(String redeID) {
-        Bson match = match(new Document("_id", new Document("$eq", redeID)));
+        //first pipeline to get all speech data without comments
+        Bson matchSpeech = match(new Document("_id", new Document("$eq", redeID)));
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "speaker");
-
-        //creates an array field with all the comments that match the speechID
-        Bson lookupComments = lookup("comment", "_id", "speechID", "comments");
         Bson unwindSpeaker = new Document("$unwind", new Document("path", "$speaker")
                 .append("preserveNullAndEmptyArrays", true));
-        Bson lookupCommentator = lookup("person", "comments.commentatorID", "_id", "CommentatorData");
-        Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$CommentatorData")
+        List<Bson> pipelineSpeech = new ArrayList<>(Arrays.asList(matchSpeech, lookupSpeaker, unwindSpeaker));
+
+        //second pipeline to get the comments from a speech with their commentator
+        Bson matchSpeechID = match(new Document("speechID", new Document("$eq", redeID)));
+        Bson lookupCommentator = lookup("person", "commentatorID", "_id", "commentatorData");
+        Bson unwindCommentatorData = new Document("$unwind", new Document("path", "$commentatorData")
                 .append("preserveNullAndEmptyArrays", true));
-
-        //creates new fields which seperate comments with commentatorID from comments without commentatorID
-        Bson addFieldsSplit = new Document("$addFields", new Document()
-                .append("commentsHaveCommentator", new Document("$filter",
-                        new Document("input", "$comments")
-                                .append("as", "comment")
-                                .append("cond", new Document("$and", Arrays.asList(new Document("$ne",
-                                        Arrays.asList("$$comment.commentatorID", "")))))))
-                .append("commentsWithoutCommentator", new Document("$filter",
-                        new Document("input", "$comments")
-                                .append("as", "comment")
-                                .append("cond", new Document("$and", Arrays.asList(new Document("$eq",
-                                        Arrays.asList("$$comment.commentatorID", ""))))))));
-
-        //adds the commentatorData to the commentsWithCommentator field
-        Bson addCommentatorToComment = new Document("$addFields", new Document()
-                .append("commentAndCommentator", new Document()
-                        .append("$map", new Document("input", "$commentsHaveCommentator")
-                                .append("in", new Document("$mergeObjects", Arrays.asList(new Document()
-                                        .append("$arrayElemAt", Arrays.asList(new Document()
-                                                .append("$filter", new Document("input", "$commentatorData")
-                                                        .append("as", "cD")
-                                                        .append("cond", new Document("$eq", Arrays.asList(
-                                                                "$$this.commentatorID", "$$cD._id"
-                                                        )))), 0)), "$$this"))))));
-        //merges arrays of comments with and without commentator
-        Bson mergeComments = new Document("$addFields", new Document()
-                .append("allComments", new Document("$concatArrays",
-                        Arrays.asList("$commentsWithoutCommentator", "$commentAndCommentator"))));
-
-
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupSpeaker, lookupComments, unwindSpeaker
-                , lookupCommentator, unwindCommentatorData, addFieldsSplit, addCommentatorToComment, mergeComments));
+        List<Bson> pipelineComments = new ArrayList<>(Arrays.asList(matchSpeechID, lookupCommentator, unwindCommentatorData));
 
         JSONObject obj = new JSONObject();
+        ArrayList<JSONObject> comments = new ArrayList<>();
 
-        db.getCollection("speech").aggregate(pipeline)
-                .allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock ->
-                {
-                    obj.put("speechID", procBlock.getString("_id"));
-                    obj.put("speakerID", procBlock.getString("speakerID"));
-                    obj.put("text", procBlock.getString("text"));
-                    obj.put("speechSentiment", procBlock.getDouble("sentiment"));
-                    obj.put("sentences", procBlock.get("sentences"));
-                    obj.put("namedEntitiesPer", procBlock.get("namedEntitiesPer"));
-                    obj.put("namedEntitiesLoc", procBlock.get("namedEntitiesLoc"));
-                    obj.put("namedEntitiesOrg", procBlock.get("namedEntitiesOrg"));
-                    obj.put("date", TimeHelper.mongoDateToGermanDate(procBlock.getDate("date")));
-                    obj.put("speaker", procBlock.get("speaker"));
-                    obj.put("comments", procBlock.get("allComments"));
-                }
-                );
+        MongoIterable<Document> resultSpeech = db.getCollection("speech").aggregate(pipelineSpeech)
+                .allowDiskUse(false);
+        for (Document docSpeech : resultSpeech) {
+
+            obj.put("speechID", docSpeech.getString("_id"));
+            obj.put("speakerID", docSpeech.getString("speakerID"));
+            obj.put("text", docSpeech.getString("text"));
+            obj.put("speechSentiment", docSpeech.getDouble("sentiment"));
+            obj.put("sentences", docSpeech.get("sentences"));
+            obj.put("namedEntitiesPer", docSpeech.get("namedEntitiesPer"));
+            obj.put("namedEntitiesLoc", docSpeech.get("namedEntitiesLoc"));
+            obj.put("namedEntitiesOrg", docSpeech.get("namedEntitiesOrg"));
+            obj.put("date", TimeHelper.mongoDateToGermanDate(docSpeech.getDate("date")));
+            obj.put("speaker", docSpeech.get("speaker"));
+        }
+        MongoIterable<Document> resultComments = db.getCollection("comment").aggregate(pipelineComments)
+                .allowDiskUse(false);
+        for (Document docComment : resultComments){
+
+            JSONObject objComment = new JSONObject();
+            objComment.put("id", docComment.getString("_id"));
+            objComment.put("speakerID", docComment.getString("speakerID"));
+            objComment.put("commentPos", docComment.getInteger("commentPos"));
+            objComment.put("commentText", docComment.getString("text"));
+            objComment.put("sentiment", docComment.getDouble("sentiment"));
+            objComment.put("commentator", docComment.get("commentatorData"));
+            comments.add(objComment);
+        }
+        obj.put("commentData", comments);
         System.out.println(obj);
         return obj;
     }
