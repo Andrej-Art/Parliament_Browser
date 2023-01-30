@@ -2,38 +2,24 @@
 /**
  * @author Andrej Artuschenko
  */
-$(document).ready(function () {
-    console.log("Im up and running!");
 
 
-    updateCharts();
-    MultiLineEntities(entityData, '#entitiesMulti');
-    createLineChart(tokenData, '#tokenLine');
-    createBarChart(posdata, '#pos');
-    drawSpiderChart("#spider");
-    drawDoughnutChart();
-    speakerbarchart();
-
-
-
-
-    // Template for any AJAX request. Just change the route below.
-    $.ajax({
-        url: "http://localhost:4567/dashboard/",
-        type: 'GET',
-        success: function (data, status) {
-            if (status) {
-                console.log("Dieser Aufruf war erfolgreich");
-            }
-
-
-        },
-        error: function (ex) {
-            alert("Sorry user, this request didnt work.");
-        }
-    });
-})
-
+// // Template for any AJAX request. Just change the route below.
+// $.ajax({
+//     url: "http://localhost:4567/dashboard/",
+//     type: 'GET',
+//     success: function (data, status) {
+//         if (status) {
+//             console.log("Dieser Aufruf war erfolgreich");
+//         }
+//
+//
+//     },
+//     error: function (ex) {
+//         alert("Sorry user, this request didnt work.");
+//     }
+// });
+// })
 
 // This is our Radarchart for the sentiment analysis.
 function drawSpiderChart(target) {

@@ -71,10 +71,33 @@ public class SparkHandler {
 
 
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
-        get("/dashboard/data/", getChartUpdatesAjax);  // It is not clear how to combine the datefilters and person fraction party filters into one submit
+        //get("/dashboard/data/", getChartUpdatesAjax);  // It is not clear how to combine the datefilters and person fraction party filters into one submit
 
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
         get("/reden/ajax/", getSpeechVisAjax);
+
+
+        //trying something else
+        get("/update-charts/", (request, response) -> {
+            String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+            String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
+            String person = request.queryParams("personInput") != null ? request.queryParams("personInput") : "";
+
+            JSONObject newDBData = new JSONObject();
+            List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, von, bis, "", person);
+            newDBData.put("token", tokenData);
+
+            List<JSONObject> posData = mongoDBHandler.getPOSCount(von, bis, "", person);
+            newDBData.put("pos", posData);
+
+            JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, "", person);
+            newDBData.put("entities", entityData);
+
+            // The Updates for the other charts could be added here
+            response.type("application/json");
+            return newDBData;
+
+        });
 
 
     }
@@ -205,7 +228,7 @@ public class SparkHandler {
         newDBData.put("entities", entityData);
 
         // The Updates for the other charts could be added here
-
+        response.type("application/json");
         return newDBData;
     };
 

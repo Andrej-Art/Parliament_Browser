@@ -27,17 +27,16 @@
     <div class="navbar">
 
         <div class="search">
-            <form  onclick="updateCharts()">
-                <input type="text"
-                       placeholder=" Suche nach Rednern "
-                       id="personFilter"
-                       name="personFilter">
-                <button>
-                    <i class="fa fa-search"
-                       style="font-size: 18px;">
-                    </i>
-                </button>
-            </form>
+
+            <input type="text"
+                   placeholder=" Suche nach Rednern "
+                   id="personInput">
+            <button type="button" id="personButt">
+                <i class="fa fa-search"
+                   style="font-size: 18px;">
+                </i>
+            </button>
+
         </div>
 
 
@@ -71,15 +70,15 @@
             </div>
         </div>
 
-        <form onsubmit="updateCharts()">
-            <div class="calenderfield">
-                <label for="von">von:</label>
-                <input type="date" id="von" name="von">
-                <label for="bis">bis:</label>
-                <input type="date" id="bis" name="bis">
-                <input type="submit" value="Anzeigen"/>
-            </div>
-        </form>
+
+        <div class="calenderfield">
+            <label for="von">von:</label>
+            <input type="date" id="von" name="von">
+            <label for="bis">bis:</label>
+            <input type="date" id="bis" name="bis">
+            <input type="submit"  value="Anzeigen" id="submitBtn"/>
+        </div>
+
     </div>
 </div>
 
@@ -88,7 +87,7 @@
     <h1>Große Überschrift</h1>
     <h2>Überschrift etwas kleiner</h2>
 
-    <div class="wrapper">
+    <div class="wrapper" id="chartContainer">
         <div>
             <h3>POS als vertikaler Bar Chart</h3>
             <div id="pos"></div>
@@ -130,19 +129,16 @@
 
 <script>
 
+    $(document).ready(function () {
+        console.log("Im up and running!");
+        updateCharts();
+    });
 
-    let posdata = [];
-    <#list pos as posObject>
-    posdata.push(${posObject});
-    </#list>
+    // Event Listener for the calendar field to trigger the updateCharts function
+    document.getElementById("submitBtn").addEventListener("click", updateCharts);
 
-    let entityData = ${entities};
-
-    let tokenData = [];
-    <#list token as tokenObject>
-    tokenData.push(${tokenObject});
-    </#list>
-
+    //Event Listener for the Redner search field to trigger when the search button is clicked
+    document.getElementById("personButt").addEventListener("click", updateCharts);
 
 
 

@@ -367,34 +367,39 @@ function createLineChart(data, target) {
  */
 function updateCharts() {
     // The date filters from the calendar fields
-    const startDate = document.querySelector("#von");
-    const endDate = document.querySelector("#bis");
+    const startDate = document.getElementById("von").value;
+    const endDate = document.getElementById("bis").value;
 
     // The person filter from the search field selecting the personFilter
-    const person = document.querySelector("#personFilter");
+    const person = document.getElementById("personInput").value;
 
 
     //add the other updated parameters here: party, person, fraction I do not know how to get them from the
     // document at this point yet
-    //const party = document.querySelector()
 
     // Make an AJAX call to the backend
-    const ajaxChartData = new XMLHttpRequest();
-    ajaxChartData.open("GET", "dashboard/data?von=" + startDate + "&bis=" + endDate + "&personFilter=" + person);
+    var ajaxChartData = new XMLHttpRequest();
+    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person, true);
     ajaxChartData.responseType = "json";
-    ajaxChartData.onload = function() {
-
+    ajaxChartData.onreadystatechange = function() {
         // if successful
-        if (ajaxChartData.status === 200) {
+        if (ajaxChartData.readyState === XMLHttpRequest.DONE && ajaxChartData.status === 200) {
+
+            // Clears all the old charts out of the div elements
+            var chartDivIdArray = ["pos", "tokenLine", "spider", "entitiesMulti", "my_dataviz", "pie"];
+            for(var i=0; i< chartDivIdArray.length; i++) {
+                let chart1Container = document.getElementById(chartDivIdArray[i]);
+                while (chart1Container.firstChild) {
+                    chart1Container.removeChild(chart1Container.firstChild);
+                }
+            }
+
 
             let data = ajaxChartData.response
             let entityData = data["entities"];
             let posdata = data["pos"];
             let tokenData = data["token"];
-
-            MultiLineEntities(entityData, '#multiline');
-            createLineChart(tokenData, '#line');
-            createBarChart(posdata, '#posBar');
+            // Create and insert new charts
             MultiLineEntities(entityData, '#entitiesMulti');
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
