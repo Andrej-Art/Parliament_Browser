@@ -387,6 +387,11 @@ function updateCharts() {
         // if successful
         if (ajaxChartData.status === 200) {
 
+            let data = ajaxChartData.response
+            let entityData = data["entities"];
+            let posdata = data["pos"];
+            let tokenData = data["token"];
+
             MultiLineEntities(entityData, '#multiline');
             createLineChart(tokenData, '#line');
             createBarChart(posdata, '#posBar');
