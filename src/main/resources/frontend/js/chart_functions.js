@@ -362,8 +362,8 @@ function createLineChart(data, target) {
 }
 
 /**
- * Attempt at a function that  makes an ajax  call to the backend to update the data for the charts
- * @param e
+ * Function to update the charts with data filtered by the user entry on the website.
+ * @author DavidJordan
  */
 function updateCharts() {
     // The date filters from the calendar fields
