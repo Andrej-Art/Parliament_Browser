@@ -10,91 +10,37 @@
     </style>
 </head>
 <body>
-<h1>Auswahl</h1>
-<div> <#-- for now limit this at 160 speeches max for testing convenience-->
-<#list 0..speechIDs?size - 1 as i>
-    <#if i == 160><#break></#if><button type="button" onclick="getSpeechData('${speechIDs[i]}')">Rede ${speechIDs[i]}</button> <#if ((i + 1) % 8) == 0 ><br></#if>
-</#list>
+<div class="speech-vis-sidebar">
+    <h1 style="padding: 0 20px">Auswahl</h1>
+    <div class="speech-vis-sidebar-button-container">
+        <button type="button" onclick="setProtocolButtons()" class="speech-vis-sidebar-buttons">Protokolle anzeigen</button>
+    </div>
+    <div class="speech-vis-sidebar-button-container">
+        <ul id="button-list" style="margin-left: -10px; margin-top: -10px"></ul>
+    </div>
 </div>
+<div class="speech-vis-display">
 
-<h1 id="speechHeader"></h1>
+    <h1 id="speechHeader"></h1>
 
-<ul id="speechData"></ul>
-<div style="text-align: justify"><p id="speech"></p></div>
+    <ul id="speechData"></ul>
 
+    <div style="text-align: justify">
+        <p id="speech"></p>
+    </div>
+
+</div>
 <script>
-/**
- * Accesses speech data on button press and changes the displayed text/information on the web page.
- * @param id The speech ID to <tt>GET</tt> data for.
- * @author Eric Lakhter
- */
-function getSpeechData(id = "ID") {
-    setPageWaiting();
-    let req = new XMLHttpRequest();
-    req.open("GET", "/reden/ajax/?speechID=" + id);
-    req.responseType = "json";
-    req.onload = function () {
-        try {
-            setPageSpeechVis(req.response);
-        } catch (e) {
-            console.error(e);
-            setPageDefault();
-        }
-    }
-    req.send();
-}
+    let protocolAgendaData = ${protocolAgendaData};
+    let protocols = protocolAgendaData["protocols"];
+    let protocolKeys = Object.keys(protocols);
+    protocolKeys.sort((a, b) => {return parseInt(a.replace("/", "")) - parseInt(b.replace("/", ""))});
+    let agendaItems = protocolAgendaData["agendaItems"];
+    setProtocolButtons();
 
-/**
- * Sets the page to its default configuration.
- * @author Eric Lakhter
- */
-function setPageDefault() {
-    document.getElementById("speechHeader").innerHTML = '';
-    document.getElementById("speechData").innerHTML = '';
-    document.getElementById("speech").innerHTML = '';
-}
+    <#include "js/speechVisMenu.js">
 
-/**
- * Shows that the query is being processed.
- * @author Eric Lakhter
- */
-function setPageWaiting() {
-    document.getElementById("speechHeader").innerHTML = '';
-    document.getElementById("speechData").innerHTML = '';
-    document.getElementById("speech").innerHTML = 'Auf Antwort von DB warten';
-}
-
-/**
- * Displays all the relevant speech information on the page.
- * @param speechData JSON containing all of a speech's data.
- * @author Eric Lakhter
- */
-function setPageSpeechVis(speechData = {}) {
-    let speakerData = speechData["speaker"];
-    let perData = speechData["namedEntitiesPer"];
-    let orgData = speechData["namedEntitiesOrg"];
-    let locData = speechData["namedEntitiesLoc"];
-    let sentenceData = speechData["sentences"];
-    let commentData = speechData["commentData"];
-    commentData.sort((a, b) => {return parseInt(a["id"].split("/")[1]) - parseInt(b["id"].split("/")[1])});
-    let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
-    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
-    document.getElementById("speechData").innerHTML =
-        '<li>Redner: ' + fullName + ' <img alt="Profilbild" src="' + speakerData["picture"][0] + '" class="speakerPic"></li>' +
-        '<li>Partei: ' + speakerData["party"] + '</li>' +
-        '<li>Datum: ' + speechData["date"] + '</li>' +
-        '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
-    document.getElementById("speech").innerHTML = applyDataToSpeech(
-        speechData["text"],
-        perData,
-        orgData,
-        locData,
-        sentenceData,
-        commentData
-    );
-}
-
-<#include "js/speechVis.js">
+    <#include "js/speechVis.js">
 
 </script>
 

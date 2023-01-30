@@ -1,7 +1,6 @@
 package utility;
 
 import freemarker.template.Configuration;
-import net.arnx.jsonic.JSON;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -179,21 +178,9 @@ public class SparkHandler {
     private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        List<String> speechIDs = new ArrayList<>(0);
-        mongoDBHandler
-                .getDB()
-                .getCollection("speech")
-                .find()
-                .iterator()
-                .forEachRemaining(d -> speechIDs.add(d.getString("_id")));
+        JSONObject protocolAgendaData = mongoDBHandler.getProtocalAgendaData();
 
-        speechIDs.sort((a, b) -> {
-            Integer speechID1 = Integer.parseInt(a.substring(2));
-            Integer speechID2 = Integer.parseInt(b.substring(2));
-            return speechID1.compareTo(speechID2);
-        });
-
-        pageContent.put("speechIDs", speechIDs);
+        pageContent.put("protocolAgendaData", protocolAgendaData);
 
         return new ModelAndView(pageContent, "speechVis.ftl");
     };

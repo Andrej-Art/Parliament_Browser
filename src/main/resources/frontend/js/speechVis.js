@@ -1,3 +1,5 @@
+// Contains the functions for speech visualisation.
+//
 // applyDataToSpeech() basically splits the complete text string into singular symbols
 // (e.g. "butter" becomes ["b", "u", "t", "t", "e", "r"]) and then advances char by char, adding them to one
 // big final string while inserting html tags whenever necessary.
@@ -38,7 +40,7 @@ function applyDataToSpeech(
         // mark named entities: PER, ORG, LOC data sets
         if (perIndex < perData.length) {
             if (i === perData[perIndex]["startPos"]) {
-                finalSpeech += '<span class="perEntity">';
+                finalSpeech += '<span class="entity-per">';
             } else if (i === perData[perIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 perIndex++;
@@ -46,7 +48,7 @@ function applyDataToSpeech(
         }
         if (orgIndex < orgData.length) {
             if (i === orgData[orgIndex]["startPos"]) {
-                finalSpeech += '<span class="orgEntity">';
+                finalSpeech += '<span class="entity-org">';
             } else if (i === orgData[orgIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 orgIndex++;
@@ -54,7 +56,7 @@ function applyDataToSpeech(
         }
         if (locIndex < locData.length) {
             if (i === locData[locIndex]["startPos"]) {
-                finalSpeech += '<span class="locEntity">';
+                finalSpeech += '<span class="entity-loc">';
             } else if (i === locData[locIndex]["endPos"]) {
                 finalSpeech += '</span>';
                 locIndex++;
@@ -88,11 +90,11 @@ function applyDataToSpeech(
 function formatSentimentBlob(sentiment = 0.0) {
     let returnSentiment;
     if (sentiment > 0) {
-        returnSentiment = '<span class="sentiment">❔' + '<div class="hoverText posSentiment">' + sentiment + '</div></span>';
+        returnSentiment = '<span class="sentiment">❔' + '<div class="hover-text sentiment-pos">' + sentiment + '</div></span>';
     } else if (sentiment === 0) {
-        returnSentiment = '<span class="sentiment">❔' + '<div class="hoverText neuSentiment">' + sentiment + '</div></span>';
+        returnSentiment = '<span class="sentiment">❔' + '<div class="hover-text sentiment-neu">' + sentiment + '</div></span>';
     } else {
-        returnSentiment = '<span class="sentiment">❔' + '<div class="hoverText negSentiment">' + sentiment + '</div></span>';
+        returnSentiment = '<span class="sentiment">❔' + '<div class="hover-text sentiment-neg">' + sentiment + '</div></span>';
     }
     return returnSentiment;
 }
@@ -115,7 +117,7 @@ function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) 
     for (let textPart of splitText) {
         if (commentDatum.hasOwnProperty("commentator") && textPart.includes(commentDatum["commentator"]["fullName"])) {
             returnText += ('<p>' +
-                '<img alt="Profilbild" src="' + commentDatum["commentator"]["picture"][0] + '" class="speakerPic"> ' +
+                '<img alt="Profilbild" src="' + commentDatum["commentator"]["picture"][0] + '" class="speaker-pic"> ' +
                 '<span class="comment">' + textPart + '</span>');
         } else {
             returnText += ('<p><span class="comment">' + textPart + '</span>');

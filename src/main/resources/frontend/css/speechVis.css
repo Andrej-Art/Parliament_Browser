@@ -1,17 +1,46 @@
+/* Style for speech visualisation sidebar*/
+.speech-vis-sidebar {
+    background-color: #bbb;
+    border-color: #333333;
+    border-style: solid;
+    border-width: thin;
+    height: 100%;
+    width: 20%;
+    left: 0;
+    top: 0;
+    float: left;
+}
+
+.speech-vis-sidebar-button-container {
+    padding: 20px;
+}
+
+.speech-vis-sidebar-buttons {
+    align-content: space-around;
+}
+
+/* Style for speech visualisation text field*/
+.speech-vis-display {
+    margin-left: 20%;
+    padding: 0 20px;
+}
+
 /* Style for pictures */
-.speakerPic {
-    width:60px;
+.speaker-pic {
     height:40px;
+    width:60px;
 }
 
 /* Style for Named Entities */
-.perEntity {
+.entity-per {
     background-color: coral;
 }
-.orgEntity {
+
+.entity-org {
     background-color: aqua;
 }
-.locEntity {
+
+.entity-loc {
     background-color: lime;
 }
 
@@ -21,21 +50,25 @@
 }
 
 /* Style for sentiment info blob */
-.posSentiment {
+.sentiment-pos {
     color: cornflowerblue;
 }
-.neuSentiment {
+
+.sentiment-neu {
     color: yellow;
 }
-.negSentiment {
+
+.sentiment-neg {
     color: indianred;
 }
+
 .sentiment {
     position: relative;
     display: inline-block;
     border-bottom: 1px dotted black;
 }
-.sentiment .hoverText {
+
+.sentiment .hover-text {
     visibility: hidden;
     position: absolute;
     bottom: 110%;
@@ -46,16 +79,18 @@
     border-radius: 5px;
     margin-left: -27.5px;
 }
-.sentiment:hover .hoverText {
+
+.sentiment:hover .hover-text {
     visibility: visible;
 }
-.sentiment .hoverText::after {
+
+.sentiment .hover-text::after {
     content: "";
     position: absolute;
-    top: 100%;
     left: 50%;
+    top: 100%;
     margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
     border-color: black transparent transparent transparent;
+    border-style: solid;
+    border-width: 5px;
 }
