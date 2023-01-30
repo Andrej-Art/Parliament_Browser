@@ -13,14 +13,14 @@
 <h1>Auswahl</h1>
 <div> <#-- for now limit this at 160 speeches max for testing convenience-->
 <#list 0..speechIDs?size - 1 as i>
-    <button type="button" onclick="getSpeechData('${speechIDs[i]}')">Rede ${speechIDs[i]}</button> <#if ((i + 1) % 8) == 0 ><br></#if><#if i == 160><#break></#if>
+    <#if i == 160><#break></#if><button type="button" onclick="getSpeechData('${speechIDs[i]}')">Rede ${speechIDs[i]}</button> <#if ((i + 1) % 8) == 0 ><br></#if>
 </#list>
 </div>
 
 <h1 id="speechHeader"></h1>
 
 <ul id="speechData"></ul>
-<p id="speech"></p>
+<div style="text-align: justify"><p id="speech"></p></div>
 
 <script>
 /**
@@ -75,9 +75,8 @@ function setPageSpeechVis(speechData = {}) {
     let orgData = speechData["namedEntitiesOrg"];
     let locData = speechData["namedEntitiesLoc"];
     let sentenceData = speechData["sentences"];
-    let commentData = speechData["comments"];
-    commentData.sort((a, b) => {return parseInt(a["_id"].split("/")[1]) - parseInt(b["_id"].split("/")[1])});
-    console.log(commentData);
+    let commentData = speechData["commentData"];
+    commentData.sort((a, b) => {return parseInt(a["id"].split("/")[1]) - parseInt(b["id"].split("/")[1])});
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speechData").innerHTML =

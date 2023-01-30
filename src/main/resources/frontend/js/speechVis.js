@@ -105,7 +105,7 @@ function formatSentimentBlob(sentiment = 0.0) {
  */
 function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) {
     let returnText = '';
-    let fullText = commentDatum["text"];
+    let fullText = commentDatum["commentText"];
     // If the comment has more than one part it gets split into multiple lines
     // example: "Beifall bei der AfD – Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
     // =>
@@ -113,9 +113,9 @@ function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) 
     // "*image* Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
     let splitText = fullText.split("–");
     for (let textPart of splitText) {
-        if (commentDatum.hasOwnProperty("CommentatorData") && textPart.includes(commentDatum["CommentatorData"]["fullName"])) {
+        if (commentDatum.hasOwnProperty("commentator") && textPart.includes(commentDatum["commentator"]["fullName"])) {
             returnText += ('<p>' +
-                '<img alt="Profilbild" src="' + commentDatum["CommentatorData"]["picture"][0] + '" class="speakerPic"> ' +
+                '<img alt="Profilbild" src="' + commentDatum["commentator"]["picture"][0] + '" class="speakerPic"> ' +
                 '<span class="comment">' + textPart + '</span>');
         } else {
             returnText += ('<p><span class="comment">' + textPart + '</span>');
