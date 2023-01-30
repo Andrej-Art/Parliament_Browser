@@ -13,7 +13,7 @@
 <h1>Auswahl</h1>
 <div> <#-- for now limit this at 160 speeches max for testing convenience-->
 <#list 0..speechIDs?size - 1 as i>
-    <button type="button" onclick="getSpeechData('${speechIDs[i]}')">Rede ${speechIDs[i]}</button> <#if ((i + 1) % 8) == 0 ><br></#if><#if i == 160><#break></#if>
+    <#if i == 160><#break></#if><button type="button" onclick="getSpeechData('${speechIDs[i]}')">Rede ${speechIDs[i]}</button> <#if ((i + 1) % 8) == 0 ><br></#if>
 </#list>
 </div>
 
