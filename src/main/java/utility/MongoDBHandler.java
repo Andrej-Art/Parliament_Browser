@@ -1214,6 +1214,33 @@ public class MongoDBHandler {
     }
 
     /**
+     * returns JSON Object for traversing through agendaitems to find speeches bound to them
+     * @author Edvin Nise
+     */
+    public JSONObject getProtocalAgendaData (){
+        JSONObject pageContent = new JSONObject();
+
+        JSONObject protocols = new JSONObject();
+        JSONObject agendaItems = new JSONObject();
+        db.getCollection("protocol").find()
+                .forEach((Consumer<? super Document>) procBlock -> protocols.put(procBlock.getString("_id"),
+                        (ArrayList<String>) procBlock.get("agendaItems")));
+        db.getCollection("agendaItem").find()
+                .forEach((Consumer<? super Document>) procBlock -> {
+                    JSONObject agendaItem = new JSONObject();
+                    agendaItem.put("speechIDs",
+                            (ArrayList<String>) procBlock.get("speechIDs"));
+                    agendaItem.put("subject", procBlock.get("subject"));
+                    agendaItems.put(procBlock.getString("_id"), agendaItem);
+                });
+
+        pageContent.put("protocols", protocols);
+        pageContent.put("agendaItems", agendaItems);
+        System.out.println(pageContent);
+        return pageContent;
+    }
+
+    /**
      * create a text index for a collection by indexing a specific field
      *
      * @param col
