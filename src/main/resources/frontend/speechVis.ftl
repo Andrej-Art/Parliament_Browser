@@ -21,12 +21,12 @@
 </div>
 <div class="speech-vis-display">
 
-    <h1 id="speechHeader"></h1>
+    <h1 id="speech-title"></h1>
 
-    <ul id="speechData"></ul>
+    <ul id="speech-header"></ul>
 
     <div style="text-align: justify">
-        <p id="speech"></p>
+        <p id="speech-text"></p>
     </div>
 
 </div>

@@ -21,8 +21,10 @@ function setProtocolButtons() {
 function setAgendaButtons(protocolID = "1/1") {
     let finalHTML = '';
     for (let agendaID of protocols[protocolID]) {
+        console.log(agendaItems[agendaID]["subject"]);
         finalHTML += '<li><button type="button" onclick="setSpeechButtons(\''
-            + agendaID + '\')" class="speech-vis-sidebar-buttons">' + agendaID.split("/")[2] + '</button>';
+            + agendaID + '\')" class="speech-vis-sidebar-buttons">' + agendaID.split("/")[2] + '</button><br>' +
+            '' + agendaItems[agendaID]["subject"].replaceAll('\n', '<br>');
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -43,43 +45,38 @@ function setSpeechButtons(agendaID = "1/1/ID") {
 
 /**
  * Accesses speech data on button press and changes the displayed speech on the web page.
- * @param id The speech ID to <tt>GET</tt> data for.
+ * @param speechID The speech ID to <tt>GET</tt> data for.
  * @author Eric Lakhter
  */
-function getSpeechData(id = "ID") {
-    setPageWaiting();
+function getSpeechData(speechID = "ID") {
+    setPageStatus("Auf Antwort von DB warten");
     let req = new XMLHttpRequest();
-    req.open("GET", "/reden/ajax/?speechID=" + id);
+    req.open("GET", "/reden/ajax/?speechID=" + speechID);
     req.responseType = "json";
     req.onload = function () {
         try {
-            setPageSpeechVis(req.response);
+            // happens if speechID doesn't correspond to an existing speech
+            if (req.response["speaker"] === undefined) {
+                setPageStatus("Die Rede mit dieser ID ist leer.");
+            } else {
+                setPageSpeechVis(req.response);
+            }
         } catch (e) {
             console.error(e);
-            setPageDefault();
+            setPageStatus("Ein Fehler ist aufgetreten.");
         }
     }
     req.send();
 }
 
 /**
- * Shows that the query is being processed.
- * @author Eric Lakhter
- */
-function setPageWaiting() {
-    document.getElementById("speechHeader").innerHTML = '';
-    document.getElementById("speechData").innerHTML = '';
-    document.getElementById("speech").innerHTML = 'Auf Antwort von DB warten';
-}
-
-/**
  * Sets the page to its default configuration.
  * @author Eric Lakhter
  */
-function setPageDefault() {
-    document.getElementById("speechHeader").innerHTML = '';
-    document.getElementById("speechData").innerHTML = '';
-    document.getElementById("speech").innerHTML = '';
+function setPageStatus(textMessage = "") {
+    document.getElementById("speech-title").innerHTML = '';
+    document.getElementById("speech-header").innerHTML = '';
+    document.getElementById("speech-text").innerText = textMessage;
 }
 
 /**
@@ -96,13 +93,13 @@ function setPageSpeechVis(speechData = {}) {
     let commentData = speechData["commentData"];
     commentData.sort((a, b) => {return parseInt(a["id"].split("/")[1]) - parseInt(b["id"].split("/")[1])});
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
-    document.getElementById("speechHeader").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
-    document.getElementById("speechData").innerHTML =
+    document.getElementById("speech-title").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
+    document.getElementById("speech-header").innerHTML =
         '<li>Redner: ' + fullName + ' <img alt="Profilbild" src="' + speakerData["picture"][0] + '" class="speaker-pic"></li>' +
         '<li>Partei: ' + speakerData["party"] + '</li>' +
         '<li>Datum: ' + speechData["date"] + '</li>' +
         '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
-    document.getElementById("speech").innerHTML = applyDataToSpeech(
+    document.getElementById("speech-text").innerHTML = applyDataToSpeech(
         speechData["text"],
         perData,
         orgData,
