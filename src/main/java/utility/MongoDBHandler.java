@@ -997,43 +997,25 @@ public class MongoDBHandler {
 
     /**
      * find all speeches that follow the search pattern*
-     *
      * @param textFilter
-     * @param dateFilterOne
-     * @param dateFilterTwo
      * @author Edvin Nise
      */
     @Unfinished("Need to know what data we will need for the visualisation")
-    public ArrayList<JSONObject> findSpeech(String textFilter, String dateFilterOne, String dateFilterTwo,
-                                            String fractionFilter, String personFilter) {
+    public JSONObject findSpeech(String textFilter) {
         Bson match = match(new Document("$text", new Document("$search", textFilter)));
-        Bson project = project(new Document("_id", 1));
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(project));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match));
 
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
-        if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
-        }
-        if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
-        }
+        JSONObject obj = new JSONObject();
+        ArrayList<String> speechIDs = new ArrayList<>();
 
-        pipeline.add(0, match);
-        ArrayList<JSONObject> objList = new ArrayList<>();
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
-                    JSONObject obj = new JSONObject();
-                    obj.put("speechID", procBlock.getString("_id"));
-                    objList.add(obj);
+                   speechIDs.add(procBlock.getString("_id"));
                 });
-        System.out.println(objList);
-        return objList;
+        obj.put("speechIDs", speechIDs);
+        System.out.println(obj);
+        return obj;
     }
 
     /**
@@ -1222,9 +1204,11 @@ public class MongoDBHandler {
 
         JSONObject protocols = new JSONObject();
         JSONObject agendaItems = new JSONObject();
+        //Finds all protocols and their agenda items
         db.getCollection("protocol").find()
                 .forEach((Consumer<? super Document>) procBlock -> protocols.put(procBlock.getString("_id"),
                         (ArrayList<String>) procBlock.get("agendaItems")));
+        //Finds all agendaitems, their subject and the related speeches
         db.getCollection("agendaItem").find()
                 .forEach((Consumer<? super Document>) procBlock -> {
                     JSONObject agendaItem = new JSONObject();
