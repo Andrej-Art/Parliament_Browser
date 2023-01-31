@@ -68,13 +68,11 @@ public class SparkHandler {
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
 
-
         get("/multi/", getMulti, new FreeMarkerEngine(cfg));
         //get("/dashboard/data/", getChartUpdatesAjax);  // It is not clear how to combine the datefilters and person fraction party filters into one submit
 
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
         get("/reden/ajax/", getSpeechVisAjax);
-
 
         //trying something else
         get("/update-charts/", (request, response) -> {
@@ -97,8 +95,6 @@ public class SparkHandler {
             return newDBData;
 
         });
-
-
     }
 
     /*
@@ -174,7 +170,6 @@ public class SparkHandler {
     };
 
     /** Speech visualisation page. */
-    @Unfinished("Needs a better speech selection menu")
     private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 

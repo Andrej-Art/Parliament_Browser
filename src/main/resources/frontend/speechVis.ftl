@@ -9,32 +9,41 @@
         <#include "css/speechVis.css">
     </style>
 </head>
-<body>
+<body style="margin: 0">
 <div class="speech-vis-sidebar">
     <h1 style="padding: 0 20px">Auswahl</h1>
     <div class="speech-vis-sidebar-button-container">
-        <button type="button" onclick="setProtocolButtons()" class="speech-vis-sidebar-buttons">Protokolle anzeigen</button>
+        <button type="button" onclick="setProtocolButtons()" class="speech-vis-sidebar-button">Protokolle anzeigen</button>
     </div>
     <div class="speech-vis-sidebar-button-container">
         <ul id="button-list" style="margin-left: -10px; margin-top: -10px"></ul>
     </div>
 </div>
-<div class="speech-vis-display">
-
-    <h1 id="speech-title"></h1>
-
-    <ul id="speech-header"></ul>
-
-    <div style="text-align: justify">
-        <p id="speech-text"></p>
+<div class="speech-vis-text">
+    <div class="speech-vis-text-legend">
+        <p>Legende Named Entites: Person Organisation Ort</p>
     </div>
+    <div class="speech-vis-text-field">
+        <h1 id="speech-title"></h1>
 
+        <ul id="speech-header"></ul>
+
+        <div style="text-align: justify">
+            <p id="speech-text"></p>
+        </div>
+    </div>
 </div>
 <script>
     let protocolAgendaData = ${protocolAgendaData};
     let protocols = protocolAgendaData["protocols"];
     let protocolKeys = Object.keys(protocols);
-    protocolKeys.sort((a, b) => {return parseInt(a.replace("/", "")) - parseInt(b.replace("/", ""))});
+    protocolKeys.sort((a, b) => {
+        if (parseInt(a.replace("/", "")) - parseInt(b.replace("/", "")) !== 0) {
+            return parseInt(a.replace("/", "")) - parseInt(b.replace("/", ""));
+        } else {
+            return parseInt(a.split("/")[0]) - parseInt(b.split("/")[0]);
+        }
+    });
     let agendaItems = protocolAgendaData["agendaItems"];
     setProtocolButtons();
 
