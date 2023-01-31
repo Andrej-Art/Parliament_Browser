@@ -1,7 +1,7 @@
 // Contains functions which change the displayed options on the site.
 
 /**
- * Replaces the "button-list" &lt;ul> with all protocols.
+ * Replaces the "button-list" list with all protocols.
  * @author Eric Lakhter
  */
 function setProtocolButtons() {
@@ -14,7 +14,7 @@ function setProtocolButtons() {
 }
 
 /**
- * Replaces the "button-list" &lt;ul> with all agenda points of that protocol.
+ * Replaces the "button-list" list with all agenda points of that protocol.
  * @param protocolID protocol ID by which to find the agenda points.
  * @author Eric Lakhter
  */
@@ -29,7 +29,7 @@ function setAgendaButtons(protocolID = "1/1") {
 }
 
 /**
- * Replaces the "button-list" &lt;ul> with all speeches held during the given agenda point
+ * Replaces the "button-list" list with all speeches held during the given agenda point
  * @param agendaID agenda point ID by which to find the speeches.
  * @author Eric Lakhter
  */

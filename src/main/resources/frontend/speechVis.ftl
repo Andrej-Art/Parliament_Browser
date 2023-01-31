@@ -26,7 +26,11 @@
 </div>
 <div class="speech-vis-text">
     <div class="speech-vis-text-legend">
-        <p>Legende Named Entites: Person Organisation Ort</p>
+        <p>Legende Named Entities:
+            <span style="word-spacing: 5em">
+                &nbsp;<span class="entity-per">Person</span> <span class="entity-org">Organisation</span> <span class="entity-loc">Ort</span>
+            </span>
+        </p>
     </div>
     <div class="speech-vis-text-field">
         <h1 id="speech-title"></h1>
