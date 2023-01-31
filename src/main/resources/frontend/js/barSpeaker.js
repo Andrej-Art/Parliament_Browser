@@ -3,22 +3,20 @@
  * @author Andrej Artuschenko
  */
 
-function speakerbarchart() {
+function speakerbarchart(target) {
 
     const margin = {top: 30, right: 30, bottom: 70, left: 60},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
-    const svg = d3.select("#my_dataviz")
+    const svg = d3.select(target)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-// Parse the Data
     d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv").then(function (data3) {
 
         // sort data
@@ -79,3 +77,26 @@ function speakerbarchart() {
 
 
 }
+
+function speechAjax(speakerID){
+    return $.ajax({
+        // hier muss ein von bis datum in den Link
+        url:encodeURI(globalUrl + "" + speakerID + "" ),
+        method: 'GET',
+        dataType: 'json',
+        success: function (data){
+            if(data.message == "SUCCESS") {
+                return data;
+            }else{
+                document.getElementById("my_dataviz").innerHTML = data.message;
+            }
+        },
+        error: function (){
+            document.getElementById("my_dataviz").innerHTML="Laden fehlgeschlagen";
+        }
+
+    })
+}
+
+
+

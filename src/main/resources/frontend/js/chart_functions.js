@@ -404,8 +404,8 @@ function updateCharts() {
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
             drawSpiderChart("#spider");
-            drawDoughnutChart();
-            speakerbarchart();
+            drawDoughnutChart('#pie');
+            speakerbarchart("#my_dataviz");
 
         } else {
             console.log("Error: " + ajaxChartData.status);

@@ -1,4 +1,4 @@
-function drawDoughnutChart() {
+function drawDoughnutChart(target) {
     // set the dimensions and margins of the graph
     const width = 450,
         height = 450,
@@ -8,7 +8,7 @@ function drawDoughnutChart() {
     const radius = Math.min(width, height) / 2 - margin
 
 // append the svg object to the div called 'my_dataviz'
-    const svg = d3.select("#pie")
+    const svg = d3.select(target)
         .append("svg")
         .attr("width", width)
         .attr("height", height)
