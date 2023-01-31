@@ -8,7 +8,7 @@ function setProtocolButtons() {
     let finalHTML = '';
     for (let protocolID of protocolKeys) {
         finalHTML += '<li><button type="button" onclick="setAgendaButtons(\''
-            + protocolID + '\')" class="speech-vis-sidebar-buttons"> Protokoll ' + protocolID + '</button>';
+            + protocolID + '\')" class="speech-vis-sidebar-button"> Protokoll ' + protocolID + '</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -21,10 +21,9 @@ function setProtocolButtons() {
 function setAgendaButtons(protocolID = "1/1") {
     let finalHTML = '';
     for (let agendaID of protocols[protocolID]) {
-        console.log(agendaItems[agendaID]["subject"]);
         finalHTML += '<li><button type="button" onclick="setSpeechButtons(\''
-            + agendaID + '\')" class="speech-vis-sidebar-buttons">' + agendaID.split("/")[2] + '</button><br>' +
-            '' + agendaItems[agendaID]["subject"].replaceAll('\n', '<br>');
+            + agendaID + '\')" class="speech-vis-sidebar-button agenda-button">' + agendaID.split("/")[2]+ '</button><br>'
+            + agendaItems[agendaID]["subject"].replaceAll('\n', '<br>');
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -38,7 +37,7 @@ function setSpeechButtons(agendaID = "1/1/ID") {
     let finalHTML = '';
     for (let speechID of agendaItems[agendaID]["speechIDs"]) {
         finalHTML += '<li><button type="button" onclick="getSpeechData(\''
-            + speechID + '\')" class="speech-vis-sidebar-buttons">' + speechID + '</button>';
+            + speechID + '\')" class="speech-vis-sidebar-button">' + speechID + '</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
