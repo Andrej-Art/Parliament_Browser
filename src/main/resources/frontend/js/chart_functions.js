@@ -11,46 +11,50 @@
  */
 function MultiLineEntities(data, target){
 
- const originalData = data;
+    let sortedData = {};
+    Object.keys(data).sort().forEach(function(key) {
+        sortedData[key] = data[key];
+    });
+ let originalData = sortedData;
 
     // Setting the margins to the same dimensions as all other charts
-    var margin = {top: 10, right: 30, bottom: 30, left: 40},
+    let margin = {top: 10, right: 30, bottom: 30, left: 40},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
     // Parsing the date
-    const parseDate = d3.timeParse("%Y-%m-%d");
+    let parseDate = d3.timeParse("%Y-%m-%d");
 
     // Scaling the  x and y axis
-    const x = d3.scaleTime()
+    let x = d3.scaleTime()
         .range([0, width]);
-    const y = d3.scaleLinear()
+    let y = d3.scaleLinear()
         .range([height, 0]);
 
     // Setting the colors of the respective fields
-    const color = d3.scaleOrdinal()
+    let color = d3.scaleOrdinal()
         .domain(["personEntity", "orgEntity", "locationEntity"])
         .range(["red", "blue", "green"]);
 
     // Setting the axis descriptions
-    var xAxis = d3.axisBottom(x)
+    let xAxis = d3.axisBottom(x)
         .tickFormat(d3.timeFormat("%Y-%m-%d"));
-    const yAxis = d3.axisLeft(y);
+    let yAxis = d3.axisLeft(y);
 
     // Mapping the values to the line
-    const line = d3.line()
+    let line = d3.line()
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.value); });
 
     // Creating the svg object
-    const svg = d3.select(target).append("svg")
+    let svg = d3.select(target).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Selecting the right fields from the returned JSON object to match the right values
-    const processedData = Object.entries(originalData).map(d => {
+    let processedData = Object.entries(originalData).map(d => {
         return {
             date: parseDate(d[0]),
             personEntity: d[1].personEntity,
@@ -61,7 +65,7 @@ function MultiLineEntities(data, target){
 
     // setting the color values
     color.domain(Object.keys(processedData[0]).filter(function(key) { return key !== "date"; }));
-    const types = color.domain().map(function(name) {
+    let types = color.domain().map(function(name) {
         return {
             name: name,
             values: processedData.map(function(d) {
@@ -70,12 +74,14 @@ function MultiLineEntities(data, target){
         };
     });
 
+
     // Setting the x domain to the date and the y domain to the respective values
     x.domain(d3.extent(processedData, function(d) { return d.date; }));
     y.domain([
         d3.min(types, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
         d3.max(types, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
     ]);
+
 
     // Building the svg element , setting x-axis rotation so that the date values are legible
     svg.append("g")
@@ -130,7 +136,7 @@ function MultiLineEntities(data, target){
 
 
     // Adding a legend to the chart
-    const legend = svg.selectAll(".legend")
+    let legend = svg.selectAll(".legend")
         .data(color.domain().slice().reverse())
         .enter().append("g")
         .attr("class", "legend")
