@@ -14,7 +14,7 @@
     <h1 style="padding: 0 20px">Auswahl</h1>
     <div class="speech-vis-sidebar-button-container speech-vis-text-search">
         <label for="text-search"></label>
-        <input id="text-search" type="text" placeholder="Textsuche nach Protokollen">
+        <input id="text-search" type="text" placeholder="Textsuche in Protokollen">
         <button type="submit" onclick="findSpeechIDs()" >Suche</button>
     </div>
     <div class="speech-vis-sidebar-button-container">
