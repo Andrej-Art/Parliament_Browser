@@ -13,9 +13,10 @@
 <div class="speech-vis-sidebar">
     <h1 style="padding: 0 20px">Auswahl</h1>
     <div class="speech-vis-sidebar-button-container speech-vis-text-search">
-        <label for="text-search"></label>
-        <input id="text-search" type="text" placeholder="Textsuche in Protokollen">
-        <button type="submit" onclick="findSpeechIDs()">Suche</button>
+        <form onsubmit="findSpeechIDs(); return false;">
+            <label>Volltextsuche in Protokollen<br><input id="text-search" type="text" placeholder="Hier eingeben"></label>
+            <button type="submit">Suche</button>
+        </form>
     </div>
     <div class="speech-vis-sidebar-button-container">
         <button type="button" onclick="setProtocolButtons()" class="speech-vis-sidebar-button">Protokolle anzeigen</button>
@@ -43,27 +44,25 @@
     </p>
 </div>
 <script>
-    document.getElementById("text-search").addEventListener("keydown", (event) => {
-        if (event.key === "enter") findSpeechIDs();
-    });
-    let protocolAgendaData = ${protocolAgendaData};
-    let protocols = protocolAgendaData["protocols"];
-    let protocolKeys = Object.keys(protocols);
-    protocolKeys.sort((a, b) => {
-        let keyA = a.split("/");
-        let keyB = b.split("/");
-        if (keyA[0] === keyB[0]) {
-            return parseInt(keyA[1]) - parseInt(keyB[1]);
-        } else {
-            return parseInt(keyA[0]) - parseInt(keyB[0]);
-        }
-    });
-    let agendaItems = protocolAgendaData["agendaItems"];
-    setProtocolButtons();
 
-    <#include "js/speechVisMenu.js">
+let protocolAgendaData = ${protocolAgendaData};
+let protocols = protocolAgendaData["protocols"];
+let protocolKeys = Object.keys(protocols);
+protocolKeys.sort((a, b) => {
+    let keyA = a.split("/");
+    let keyB = b.split("/");
+    if (keyA[0] === keyB[0]) {
+        return parseInt(keyA[1]) - parseInt(keyB[1]);
+    } else {
+        return parseInt(keyA[0]) - parseInt(keyB[0]);
+    }
+});
+let agendaItems = protocolAgendaData["agendaItems"];
+setProtocolButtons();
 
-    <#include "js/speechVis.js">
+<#include "js/speechVisMenu.js">
+
+<#include "js/speechVis.js">
 
 </script>
 
