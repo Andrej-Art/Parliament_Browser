@@ -45,13 +45,13 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="">SPD</a>
-                <a href="">CDU</a>
-                <a href="">AfD</a>
-                <a href="">FDP</a>
-                <a href="">Bündnis 90/Die Grünen</a>
-                <a href="">Die Linke</a>
-                <a href="">Parteilose/Unabhängige</a>
+                <a class="dropdown-party" href="#" data-value="SPD">SPD</a>
+                <a class="dropdown-party" href="#" data-value="CDU">CDU</a>
+                <a class="dropdown-party" href="#" data-value="AfD">AfD</a>
+                <a class="dropdown-party" href="#" data-value="FDP">FDP</a>
+                <a class="dropdown-party" href="#" data-value="BÜNDNIS 90/DIE GRÜNEN">Bündnis 90/Die Grünen</a>
+                <a class="dropdown-party" href="#" data-value="DIE LINKE">Die Linke</a>
+                <a class="dropdown-party" href="#" data-value="PARTEILOS">Parteilose/Unabhängige</a>
             </div>
         </div>
 
@@ -60,13 +60,13 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="">CDU/CSU-Fraktion</a>
-                <a href="">SPD-Fraktion</a>
-                <a href="">FDP-Fraktion</a>
-                <a href="">Fraktion Bündnis 90/Die Grünen</a>
-                <a href="">Fraktion Die Linke</a>
-                <a href="">AfD-Fraktion</a>
-                <a href="">Fraktionslose</a>
+                <a class="dropdown-frac" href="#" data-value="Fraktion der Christlich Demokratischen Union/Christlich - Sozialen Union">CDU/CSU-Fraktion</a>
+                <a class="dropdown-frac" href="#" data-value="Fraktion der Sozialdemokratischen Partei Deutschlands">SPD-Fraktion</a>
+                <a class="dropdown-frac" href="#" data-value="Fraktion der Freien Demokratischen Partei">FDP-Fraktion</a>
+                <a class="dropdown-frac" href="#" data-value="Fraktion BÜNDNIS 90/DIE GRÜNEN">Fraktion Bündnis 90/Die Grünen</a>
+                <a class="dropdown-frac" href="#" data-value="Fraktion DIE LINKE">Fraktion Die Linke</a>
+                <a class="dropdown-frac" href="#" data-value="Alternative für Deutschland">AfD-Fraktion</a>
+                <a class="dropdown-frac" href="#" data-value="FRAKTIONSLOS">Fraktionslose</a>
             </div>
         </div>
 
@@ -139,6 +139,30 @@
 
     //Event Listener for the Redner search field to trigger when the search button is clicked
     document.getElementById("personButt").addEventListener("click", updateCharts);
+
+    // Get all dropdown items from the party menu in one array
+    const allDropDownParty = document.getElementsByClassName('dropdown-party');
+
+    // Add an Event-listener to each
+    for(let i =0; i<allDropDownParty.length; i++){
+        allDropDownParty[i].addEventListener('click', (e) => {
+            // Prevents the typical event when an anchor tag is clicked which would direct to the href
+            e.preventDefault();
+            let chosenParty = allDropDownParty[i].getAttribute('data-value');
+            updateCharts(chosenParty, null);
+        })
+    }
+
+    // Repeating the process for the fraction dropdown menu
+    const allDropDownFrac = document.getElementsByClassName('dropdown-frac');
+    for(let i =0; i<allDropDownFrac.length; i++){
+        allDropDownFrac[i].addEventListener('click', (e) => {
+            // Prevents the typical event when an anchor tag is clicked which would direct to the href
+            e.preventDefault();
+            let chosenFraction = allDropDownFrac[i].getAttribute('data-value');
+            updateCharts(null, chosenFraction);
+        })
+    }
 
 
 

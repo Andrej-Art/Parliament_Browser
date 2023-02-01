@@ -371,7 +371,7 @@ function createLineChart(data, target) {
  * Function to update the charts with data filtered by the user entry on the website.
  * @author DavidJordan
  */
-function updateCharts() {
+function updateCharts(party = null, fraction = null) {
     // The date filters from the calendar fields
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
@@ -379,13 +379,22 @@ function updateCharts() {
     // The person filter from the search field selecting the personFilter
     const person = document.getElementById("personInput").value;
 
+    let partyName = "";
+    if(party != null){
+        partyName = party;
+    }
+    let fractionName = "";
+    if(fraction != null){
+        fractionName = fraction;
+    }
+
 
     //add the other updated parameters here: party, person, fraction I do not know how to get them from the
     // document at this point yet
 
     // Make an AJAX call to the backend
     var ajaxChartData = new XMLHttpRequest();
-    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person, true);
+    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person + "&fraction=" + fractionName + "&party=" + partyName, true);
     ajaxChartData.responseType = "json";
     ajaxChartData.onreadystatechange = function() {
         // if successful
