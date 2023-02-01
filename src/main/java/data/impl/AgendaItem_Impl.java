@@ -5,7 +5,6 @@ import org.bson.Document;
 import utility.TimeHelper;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +14,7 @@ import java.util.ArrayList;
  */
 public class AgendaItem_Impl implements AgendaItem {
 
-    private Document AgendaItemDoc;
+    protected Document agendaItemDoc;
     private String _id, subject;
     private LocalDate date;
     private ArrayList<String> speechIDs;
@@ -41,7 +40,7 @@ public class AgendaItem_Impl implements AgendaItem {
      * @author DavidJordan
      */
     public AgendaItem_Impl(Document document){
-        this.AgendaItemDoc = document;
+        this.agendaItemDoc = document;
         this._id = document.getString("_id");
         this.date = TimeHelper.dateToLocalDate(document.getDate("date"));
         this.subject = document.getString("subject");

@@ -98,7 +98,7 @@ public class SparkHandler {
     }
 
     /*
-     * GET routes
+     * Routes:
      */
 
     /** Test page. */
@@ -161,7 +161,7 @@ public class SparkHandler {
     };
 
     /** Returns a JSON containing all data for a specific speech. */
-    private final static Route getSpeechVis = (Request request, Response response) -> {
+    private static final Route getSpeechVis = (Request request, Response response) -> {
 
         String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
 
@@ -169,7 +169,7 @@ public class SparkHandler {
     };
 
     /** Returns a JSON containing all speech IDs matching the search. */
-    private final static Route getSpeechIDs = (Request request, Response response) -> {
+    private static final Route getSpeechIDs = (Request request, Response response) -> {
 
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
 
@@ -178,7 +178,7 @@ public class SparkHandler {
 
 
     @Unfinished("Not working currently. Attempted to test this in  the multi.ftl")
-    private final static Route getChartUpdatesAjax = (Request request, Response response) ->{
+    private static final Route getChartUpdatesAjax = (Request request, Response response) ->{
         // The Datefilters that are gotten through the calendar fields
         String dateFilterOne = request.queryParams("von") != null ? request.queryParams("von") : "";
         String dateFilterTwo = request.queryParams("bis") != null ? request.queryParams("bis") : "";
