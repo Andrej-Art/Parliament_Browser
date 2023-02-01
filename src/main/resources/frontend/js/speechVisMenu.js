@@ -1,7 +1,7 @@
 // Contains functions which change the displayed options on the site.
 
 /**
- * Replaces the "button-list" &lt;ul> with all protocols.
+ * Replaces the "button-list" list with all protocols.
  * @author Eric Lakhter
  */
 function setProtocolButtons() {
@@ -14,7 +14,7 @@ function setProtocolButtons() {
 }
 
 /**
- * Replaces the "button-list" &lt;ul> with all agenda points of that protocol.
+ * Replaces the "button-list" list with all agenda points of that protocol.
  * @param protocolID protocol ID by which to find the agenda points.
  * @author Eric Lakhter
  */
@@ -29,7 +29,7 @@ function setAgendaButtons(protocolID = "1/1") {
 }
 
 /**
- * Replaces the "button-list" &lt;ul> with all speeches held during the given agenda point
+ * Replaces the "button-list" list with all speeches held during the given agenda point
  * @param agendaID agenda point ID by which to find the speeches.
  * @author Eric Lakhter
  */
@@ -43,6 +43,40 @@ function setSpeechButtons(agendaID = "1/1/ID") {
 }
 
 /**
+ * Finds all speech IDs which contain the queried string, found in the "text-search" input field.
+ * @author Eric Lakhter
+ */
+function findSpeechIDs() {
+    let text = document.getElementById("text-search").value;
+    let req = new XMLHttpRequest();
+    req.open("GET", "/reden/speechIDs/?text=" + text);
+    req.responseType = "json";
+    req.onload = function () {
+        try {
+            let finalHTML = '';
+            let idArray = req.response["speechIDs"];
+            idArray.sort((a, b) => {
+                if (a.substring(0, 4) === b.substring(0, 4)) {
+                    return parseInt(a.substring(4)) - parseInt(b.substring(4));
+                }
+                if (parseInt(a.substring(2, 4)) < parseInt(b.substring(2, 4))) {
+                    return -1;
+                }
+                return 1;
+            });
+            for (let speechID of idArray) {
+                finalHTML += '<li><button type="button" onclick="getSpeechData(\''
+                    + speechID + '\')" class="speech-vis-sidebar-button">' + speechID + '</button>';
+            }
+            document.getElementById("button-list").innerHTML = finalHTML;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    req.send();
+}
+
+/**
  * Accesses speech data on button press and changes the displayed speech on the web page.
  * @param speechID The speech ID to <tt>GET</tt> data for.
  * @author Eric Lakhter
@@ -50,7 +84,7 @@ function setSpeechButtons(agendaID = "1/1/ID") {
 function getSpeechData(speechID = "ID") {
     setPageStatus("Auf Antwort von DB warten");
     let req = new XMLHttpRequest();
-    req.open("GET", "/reden/ajax/?speechID=" + speechID);
+    req.open("GET", "/reden/speechVis/?speechID=" + speechID);
     req.responseType = "json";
     req.onload = function () {
         try {

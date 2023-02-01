@@ -12,6 +12,11 @@
 <body style="margin: 0">
 <div class="speech-vis-sidebar">
     <h1 style="padding: 0 20px">Auswahl</h1>
+    <div class="speech-vis-sidebar-button-container speech-vis-text-search">
+        <label for="text-search"></label>
+        <input id="text-search" type="text" placeholder="Textsuche in Protokollen">
+        <button type="submit" onclick="findSpeechIDs()" >Suche</button>
+    </div>
     <div class="speech-vis-sidebar-button-container">
         <button type="button" onclick="setProtocolButtons()" class="speech-vis-sidebar-button">Protokolle anzeigen</button>
     </div>
@@ -21,7 +26,11 @@
 </div>
 <div class="speech-vis-text">
     <div class="speech-vis-text-legend">
-        <p>Legende Named Entites: Person Organisation Ort</p>
+        <p>Legende Named Entities:
+            <span style="word-spacing: 5em">
+                &nbsp;<span class="entity-per">Person</span> <span class="entity-org">Organisation</span> <span class="entity-loc">Ort</span>
+            </span>
+        </p>
     </div>
     <div class="speech-vis-text-field">
         <h1 id="speech-title"></h1>
@@ -34,14 +43,19 @@
     </div>
 </div>
 <script>
+    document.getElementById("text-search").addEventListener("keydown", (event) => {
+        if (event.key === "enter") findSpeechIDs();
+    });
     let protocolAgendaData = ${protocolAgendaData};
     let protocols = protocolAgendaData["protocols"];
     let protocolKeys = Object.keys(protocols);
     protocolKeys.sort((a, b) => {
-        if (parseInt(a.replace("/", "")) - parseInt(b.replace("/", "")) !== 0) {
-            return parseInt(a.replace("/", "")) - parseInt(b.replace("/", ""));
+        let keyA = a.split("/");
+        let keyB = b.split("/");
+        if (keyA[0] === keyB[0]) {
+            return parseInt(keyA[1]) - parseInt(keyB[1]);
         } else {
-            return parseInt(a.split("/")[0]) - parseInt(b.split("/")[0]);
+            return parseInt(keyA[0]) - parseInt(keyB[0]);
         }
     });
     let agendaItems = protocolAgendaData["agendaItems"];

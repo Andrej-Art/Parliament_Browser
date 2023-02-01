@@ -70,8 +70,9 @@ public class SparkHandler {
 
 
 
-        get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
-        get("/reden/ajax/", getSpeechVisAjax);
+        get("/reden/", getReden, new FreeMarkerEngine(cfg));
+        get("/reden/speechVis/", getSpeechVis);
+        get("/reden/speechIDs/", getSpeechIDs);
 
        //Route to deliver the updated Data for the charts according to the provided filters
         get("/update-charts/", (request, response) -> {
@@ -149,7 +150,7 @@ public class SparkHandler {
     };
 
     /** Speech visualisation page. */
-    private static final TemplateViewRoute getSpeechVis = (Request request, Response response) -> {
+    private static final TemplateViewRoute getReden = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
         JSONObject protocolAgendaData = mongoDBHandler.getProtocalAgendaData();
@@ -159,12 +160,20 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "speechVis.ftl");
     };
 
-    /** Returns a JSON list containing all data for a specific speech. */
-    private final static Route getSpeechVisAjax = (Request request, Response response) -> {
+    /** Returns a JSON containing all data for a specific speech. */
+    private final static Route getSpeechVis = (Request request, Response response) -> {
 
         String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
 
         return mongoDBHandler.allSpeechData(speechID);
+    };
+
+    /** Returns a JSON containing all speech IDs matching the search. */
+    private final static Route getSpeechIDs = (Request request, Response response) -> {
+
+        String text = request.queryParams("text") != null ? request.queryParams("text") : "";
+
+        return mongoDBHandler.findSpeech(text);
     };
 
 
