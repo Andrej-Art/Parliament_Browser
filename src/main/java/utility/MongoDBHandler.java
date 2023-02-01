@@ -155,7 +155,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("person").insertMany(mongoPersons);
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -277,17 +278,20 @@ public class MongoDBHandler {
         //Insert single processedSpeech into speech collection
         try {
             db.getCollection("speech").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
 
         //Insert single document into speech_cas collection
         try {
             db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
 
         //Insert single document into speech_tokens collection
         try {
             db.getCollection("speech_tokens").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -317,13 +321,16 @@ public class MongoDBHandler {
         // MongoBulkWriteExceptions are caught when inserting the Lists
         try {
             db.getCollection("speech").insertMany(speechDocs, imo);
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
         try {
             db.getCollection("speech_cas").insertMany(speechCasDocs, imo);
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
         try {
             db.getCollection("speech_token").insertMany(speechTokenDocs, imo);
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
 
     }
 
@@ -349,7 +356,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("agendaItem").insertMany(mongoAgendaItems);
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
     }
 
 
@@ -398,7 +406,8 @@ public class MongoDBHandler {
         }
         try {
             db.getCollection("poll").insertMany(pollDocs, imo);
-        } catch (MongoException | IllegalArgumentException ignored) {}
+        } catch (MongoException | IllegalArgumentException ignored) {
+        }
     }
 
     /**
@@ -519,8 +528,6 @@ public class MongoDBHandler {
      * @author Eric Lakhter
      * @modified DavidJordan
      */
-    @Unfinished("Probably, needs to be adapted to the fraction 19, fraction 20 options." +
-            " Possibly also needs to be changed to fit the needs of the visualisation in the front end.")
     public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String personFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
         // Setting each of the needed fields to be included in the results
@@ -585,6 +592,42 @@ public class MongoDBHandler {
     }
 
     /**
+     * Method to apply a party filter to an aggregation pipeline. Needed fields are optional to provide.
+     * If no party name is provided the pipeline is left unaltered. If no needed fields are provided no projection
+     * is performed and the pipeline is also unaltered.
+     *
+     * @param pipeline    The aggregation pipeline to apply the filter to.
+     * @param party       The String valued name of the party to filter for. Names may be chosen from the following list.
+     *                    Mind the exact spelling: {"CDU", "CSU", "SPD", "DIE LINKE", "BÜNDNIS 90/DIE GRÜNEN", "FDP", "AfD"}
+     * @param neededField Optionally provided fields to narrow the number of fields in the result to the specified fields.
+     * @author DavidJordan
+     */
+    public void applyPartyFilterToAggregation(List<Bson> pipeline, String party, String... neededField) {
+        Document projDoc = new Document();
+        //Add fields to projection Document if present
+        for (String field : neededField) {
+            projDoc.append(field, 1);
+        }
+        Bson project = project(projDoc);
+
+        Bson partyFilter = null;
+        // Create the Filter for the specified party
+        if (!party.isEmpty()) {
+            partyFilter = Filters.eq("party", party);
+        }
+        // Add as a match stage to the beginning of the pipeline
+        if (partyFilter != null) {
+            pipeline.add(0, match(partyFilter));
+        }
+
+        if (neededField.length != 0) {
+            pipeline.add(project);
+        }
+
+    }
+
+
+    /**
      * A Method that executes an aggregation query on a target collection, according to the given filter
      * parameters. The pipeline is created within the method and the aggregation is run once all filters have been
      * added. Returns the complete Bson Documents which may then be used for instantiating Java Objects.
@@ -598,7 +641,7 @@ public class MongoDBHandler {
      * @return MongoIterable
      * @author DavidJordan
      */
-    @Unfinished("Requires thorough testing still.")
+
     public MongoIterable<Document> runAggregationQueryWithFilters(
             String collection,
             String dateFilterOne,
@@ -789,7 +832,7 @@ public class MongoDBHandler {
                     objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
                     obj.put("" + (dateToLocalDate((Date) doc.get("_id"))), objEnt);
                 });
-         System.out.println(obj);
+        System.out.println(obj);
         return obj;
     }
 
@@ -997,6 +1040,7 @@ public class MongoDBHandler {
 
     /**
      * find all speeches that follow the search pattern*
+     *
      * @param textFilter
      * @author Edvin Nise
      */
@@ -1011,7 +1055,7 @@ public class MongoDBHandler {
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
-                   speechIDs.add(procBlock.getString("_id"));
+                    speechIDs.add(procBlock.getString("_id"));
                 });
         obj.put("speechIDs", speechIDs);
         System.out.println(obj);
@@ -1020,6 +1064,7 @@ public class MongoDBHandler {
 
     /**
      * returns all required Data for visualisation of a speech
+     *
      * @param redeID
      * @author Edvin Nise
      */
@@ -1058,7 +1103,7 @@ public class MongoDBHandler {
         }
         MongoIterable<Document> resultComments = db.getCollection("comment").aggregate(pipelineComments)
                 .allowDiskUse(false);
-        for (Document docComment : resultComments){
+        for (Document docComment : resultComments) {
 
             JSONObject objComment = new JSONObject();
             objComment.put("id", docComment.getString("_id"));
@@ -1197,9 +1242,10 @@ public class MongoDBHandler {
 
     /**
      * returns JSON Object for traversing through agendaitems to find speeches bound to them
+     *
      * @author Edvin Nise
      */
-    public JSONObject getProtocalAgendaData (){
+    public JSONObject getProtocalAgendaData() {
         JSONObject pageContent = new JSONObject();
 
         JSONObject protocols = new JSONObject();

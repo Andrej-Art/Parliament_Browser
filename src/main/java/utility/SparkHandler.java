@@ -68,13 +68,12 @@ public class SparkHandler {
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
 
-        get("/multi/", getMulti, new FreeMarkerEngine(cfg));
-        //get("/dashboard/data/", getChartUpdatesAjax);  // It is not clear how to combine the datefilters and person fraction party filters into one submit
+
 
         get("/reden/", getSpeechVis, new FreeMarkerEngine(cfg));
         get("/reden/ajax/", getSpeechVisAjax);
 
-        //trying something else
+       //Route to deliver the updated Data for the charts according to the provided filters
         get("/update-charts/", (request, response) -> {
             String von = request.queryParams("von") != null ? request.queryParams("von") : "";
             String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
@@ -126,27 +125,7 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "home.ftl");
     };
 
-    /** ADD SHORT DESCRIPTION */
-    @Testing
-    private static final TemplateViewRoute getMulti = (Request request, Response response) -> {
-        Map<String, Object> pageContent = new HashMap<>();
 
-       // JSONObject entitiesObject = mongoDBHandler.facetNamedEntities("", "");
-       // pageContent.put("entities", entitiesObject);
-
-        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "", "", "");
-        pageContent.put("pos", posAndCounts);
-
-        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30, "", "", "", "");
-        pageContent.put("token", tokenAndCounts);
-
-        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","", "","");
-        pageContent.put("entities", datesAndNamedEntities);
-
-
-
-        return new ModelAndView(pageContent, "multi.ftl");
-    };
 
 //    private static final TemplateViewRoute getDataUpdate = (Request request, Response response) -> {
 //        //.....
