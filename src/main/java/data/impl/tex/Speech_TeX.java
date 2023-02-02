@@ -34,7 +34,9 @@ public class Speech_TeX {
     }
 
     /**
-     * Builds a string which can be formatted by a TeX compiler.
+     * Builds a string which can be formatted by a TeX compiler.<br>
+     * TeX command looks like this:<br>
+     * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
      * @param showNamedEntities whether named entity markers should show up in the text.
      * @param showSentiment whether sentiment information should show up at the end of each sentence.
      * @param showComments whether comments should show up.
