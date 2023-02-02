@@ -375,7 +375,6 @@ function updateCharts(party = null, fraction = null) {
     // The date filters from the calendar fields
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
-
     // The person filter from the search field selecting the personFilter
     const person = document.getElementById("personInput").value;
 
@@ -411,16 +410,26 @@ function updateCharts(party = null, fraction = null) {
 
 
             let data = ajaxChartData.response
+            let data2 = ajaxChartData.response
+
             let entityData = data["entities"];
             let posdata = data["pos"];
             let tokenData = data["token"];
+            let speechDate = data2["speechesNumber"];
+
+
+
+
+
+
+
             // Create and insert new charts
             MultiLineEntities(entityData, '#entitiesMulti');
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
             drawSpiderChart("#spider");
             drawDoughnutChart('#pie');
-            speakerbarchart("#my_dataviz");
+            speakerbarchart(speechDate,"#my_dataviz");
 
         } else {
             console.log("Error: " + ajaxChartData.status);

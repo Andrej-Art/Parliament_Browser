@@ -53,6 +53,8 @@ let tokenData = [];
     tokenData.push(${tokenObject});
 </#list>
 
+
+
     $(document).ready(function() {
         updateCharts();
     })
@@ -60,6 +62,8 @@ let tokenData = [];
 console.log(entityData)
 console.log(posdata)
 console.log(tokenData)
+
+
 </script>
 
 </html>

@@ -90,6 +90,9 @@ public class SparkHandler {
             JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, "", person);
             newDBData.put("entities", entityData);
 
+            List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, "", person);
+            newDBData.put("speechesNumber", speechesCountData);
+
             // The Updates for the other charts could be added here
             response.type("application/json");
             return newDBData;
@@ -145,6 +148,9 @@ public class SparkHandler {
 
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","","", "");
         pageContent.put("entities", datesAndNamedEntities);
+
+        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "");
+        pageContent.put("speechesNumber", speechesCounts);
 
         return new ModelAndView(pageContent, "dashboard.ftl");
     };

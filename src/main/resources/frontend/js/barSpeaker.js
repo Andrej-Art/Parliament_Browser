@@ -1,13 +1,20 @@
-
 /**
  * @author Andrej Artuschenko
  */
 
-function speakerbarchart(target) {
+function speakerbarchart(data, target) {
+
 
     const margin = {top: 30, right: 30, bottom: 70, left: 60},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
+
+    // Set ranges for the axis
+    var x = d3.scaleBand()
+        .range([0, width])
+        .padding(0.1);
+    var y = d3.scaleLinear()
+        .range([height, 0]);
 
     // append the svg object to the body of the page
     const svg = d3.select(target)
@@ -17,85 +24,105 @@ function speakerbarchart(target) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv").then(function (data3) {
+    // sort data
 
-        // sort data
-        data3.sort(function (b, a) {
-            return a.Value - b.Value;
+
+    //d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv").then(function (data3) {
+
+    // sort data
+    /*
+data.sort(function (b, a) {
+    return a.Value - b.Value;
+});
+
+     */
+    // extracting the data and setting the key and value
+
+
+    // Selecting the right fields from the returned JSON object to match the right values
+    let apliedData = Object.entries(data).map(d => {
+        return {
+            speakerName: d[1].speakerName,
+            speechCount: d[1].speechCount,
+            picture: d[1].picture
+        }
+    });
+
+
+    // sort data by speechcount
+    apliedData.sort(function(b, a) {
+        return a.speechCount - b.speechCount;
+    });
+
+
+
+    // Scale the range of the data in the domains. We set the x and y axis here
+    // We tell the X axis to render the name and we tell the y axis to render the count
+    x.domain(apliedData.map(function (d) {
+        return d.speakerName;
+    }));
+    y.domain([0, d3.max(apliedData, function (d) {
+        return d.speechCount;
+    })]);
+
+    // Bars
+    svg.selectAll("bar")
+        .data(apliedData)
+        .enter()
+        .append("rect")
+        .attr("x", function (d) {
+            return x(d.speakerName);
+        })
+        .attr("y", function (d) {
+            return y(d.speechCount);
+        })
+        .attr("width", x.bandwidth()/2)
+        .attr("height", function (d) {
+            return height - y(d.speechCount);
+        })
+        .attr("fill", "#69b3a2")
+
+
+        // Adding a tooltip functionality to the chart, changing th opacity
+        // when the mouse hovers over
+        .on("mouseover", function (d) {
+            d3.select(this)
+                .style("opacity", 0.5);
+            svg.append("text")
+                .attr("id", "tooltip")
+                .attr("x", x(d.speakerName) + x.bandwidth() / 2)
+                .attr("y", y(d.speechCount) - 5)
+                .text(d.speakerName);
+        })
+        .on("mouseout", function (d) {
+            d3.select(this)
+                .style("opacity", 1);
+            d3.select("#tooltip").remove();
         });
 
-        // X axis
-        var x = d3.scaleBand()
-            .range([ 0, width ])
-            .domain(data3.map(function(d) { return d.Country; }))
-            .padding(0.2);
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-            .attr("transform", "translate(-10,0)rotate(-45)")
-            .style("text-anchor", "end");
+    // And now, after we got our bars, lets append the x and y axis
+    // Add x axis
+    /*
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
 
+     */
 
+    // Add y axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
 
-        // Add Y axis
-        var y = d3.scaleLinear()
-            .domain([0, 13000])
-            .range([ height, 0]);
-        svg.append("g")
-            .call(d3.axisLeft(y));
-
-        // Bars
-        svg.selectAll("mybar")
-            .data(data3)
-            .enter()
-            .append("rect")
-            .attr("x", function(d) { return x(d.Country); })
-            .attr("y", function(d) { return y(d.Value); })
-            .attr("width", x.bandwidth())
-            .attr("height", function(d) { return height - y(d.Value); })
-            .attr("fill", "#69b3a2")
-            // Adding a tooltip functionality to the chart, changing th opacity
-            // when the mouse hovers over
-            .on("mouseover", function(d) {
-                d3.select(this)
-                    .style("opacity", 0.5);
-                svg.append("text")
-                    .attr("id", "tooltip")
-                    .attr("x", x(d.key) + x.bandwidth() / 2)
-                    .attr("y", y(d.value) - 5)
-                    .text(d.value);
-            })
-            .on("mouseout", function(d) {
-                d3.select(this)
-                    .style("opacity", 1);
-                d3.select("#tooltip").remove();
-            });
-
-
-    })
-
-
-}
-
-function speechAjax(speakerID){
-    return $.ajax({
-        // hier muss ein von bis datum in den Link
-        url:encodeURI(globalUrl + "" + speakerID + "" ),
-        method: 'GET',
-        dataType: 'json',
-        success: function (data){
-            if(data.message == "SUCCESS") {
-                return data;
-            }else{
-                document.getElementById("my_dataviz").innerHTML = data.message;
-            }
-        },
-        error: function (){
-            document.getElementById("my_dataviz").innerHTML="Laden fehlgeschlagen";
-        }
-
-    })
+    // Add x axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-20)");
 }
 
 

@@ -75,6 +75,7 @@ function drawSpiderChart(target) {
         return {"x": width / 2 + x, "y": height / 2 - y};
     }
 
+
     let featureData = features.map((f, i) => {
         let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
         return {
