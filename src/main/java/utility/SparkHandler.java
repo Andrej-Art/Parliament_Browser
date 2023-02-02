@@ -25,7 +25,7 @@ public class SparkHandler {
     private static MongoDBHandler mongoDBHandler = null;
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
     // the added string redirects to the /resources/ directory
-    private static final String frontendPath = SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../src/main/resources/frontend/";
+    private static final String frontendPath = /*SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException {
         SparkHandler.init(new MongoDBHandler());
