@@ -2,6 +2,8 @@
  * @author Andrej Artuschenko
  */
 
+
+
 function speakerbarchart(data, target) {
 
 
@@ -23,6 +25,10 @@ function speakerbarchart(data, target) {
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
 
     // sort data
 
@@ -47,6 +53,11 @@ data.sort(function (b, a) {
             picture: d[1].picture
         }
     });
+
+    console.log(apliedData);
+
+
+
 
 
     // sort data by speechcount
@@ -83,16 +94,24 @@ data.sort(function (b, a) {
         .attr("fill", "#69b3a2")
 
 
-        // Adding a tooltip functionality to the chart, changing th opacity
+
+
+
+        // Adding a tooltip functionality to the chart, changing the opacity
         // when the mouse hovers over
         .on("mouseover", function (d) {
             d3.select(this)
-                .style("opacity", 0.5);
+                .style("opacity", 0.5)
+                .style(d.picture);
             svg.append("text")
                 .attr("id", "tooltip")
                 .attr("x", x(d.speakerName) + x.bandwidth() / 2)
                 .attr("y", y(d.speechCount) - 5)
                 .text(d.speakerName);
+        })
+        .on("mousemove", function(d) {
+                d3.style("top", d3.event.pageY - 10 + "px")
+                .style("left", d3.event.pageX + 10 + "px");
         })
         .on("mouseout", function (d) {
             d3.select(this)
@@ -100,20 +119,26 @@ data.sort(function (b, a) {
             d3.select("#tooltip").remove();
         });
 
+
+
     // And now, after we got our bars, lets append the x and y axis
     // Add x axis
+
     /*
+
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
 
      */
 
+
     // Add y axis
     svg.append("g")
         .call(d3.axisLeft(y));
 
     // Add x axis
+
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
@@ -123,7 +148,36 @@ data.sort(function (b, a) {
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
         .attr("transform", "rotate(-20)");
+
+
+
 }
+
+
+// This is a test. Not working
+let img = new Image();
+function handlePictureHover(chart) {
+
+    if (chart.getElementAtEvent.length > 0) {
+        let activeElement = chart.getElementAtEvent(evt)[0];
+        let idx = activeElement._index;
+
+        // Size of picture:
+        let width = 100;
+        let height = 100;
+
+        img.src = speakerbarchart.data.picture
+
+        // Positioning:
+        let y = activeElement._yScale.getPixelForValue(idx)-(height/2);
+        let x = activeElement._xScale.getPixelForValue(speakerChart.data.datasets[0].data[idx])-(width + 5);
+
+        // Draw the image:
+        chart.ctx.drawImage(img, x, y, width, height)
+    }
+}
+
+handlePictureHover(speakerbarchart());
 
 
 

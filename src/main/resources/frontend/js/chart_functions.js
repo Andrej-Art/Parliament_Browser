@@ -415,11 +415,9 @@ function updateCharts(party = null, fraction = null) {
             let entityData = data["entities"];
             let posdata = data["pos"];
             let tokenData = data["token"];
-            let speechDate = data2["speechesNumber"];
-
-
-
-
+            let speechData = data2["speechesNumber"];
+            let sentimentData = data["sentiment"];
+            let voteData = data["votes"];
 
 
 
@@ -428,8 +426,10 @@ function updateCharts(party = null, fraction = null) {
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
             drawSpiderChart("#spider");
-            drawDoughnutChart('#pie');
-            speakerbarchart(speechDate,"#my_dataviz");
+            drawDoughnutChart(voteData, '#pie');
+            speakerbarchart(speechData,"#my_dataviz");
+
+
 
         } else {
             console.log("Error: " + ajaxChartData.status);

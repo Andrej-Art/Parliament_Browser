@@ -24,6 +24,8 @@
 // This is our Radarchart for the sentiment analysis.
 function drawSpiderChart(target) {
 
+
+
     let data2 = [];
     let features = ["Positiv", "Neutral", "Negativ"];
 //generate the data

@@ -74,6 +74,7 @@ public class SparkHandler {
         get("/reden/speechVis/", getSpeechVis);
         get("/reden/speechIDs/", getSpeechIDs);
 
+
        //Route to deliver the updated Data for the charts according to the provided filters
         get("/update-charts/", (request, response) -> {
             String von = request.queryParams("von") != null ? request.queryParams("von") : "";
@@ -92,6 +93,12 @@ public class SparkHandler {
 
             List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, "", person);
             newDBData.put("speechesNumber", speechesCountData);
+
+           //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
+            //newDBData.put("sentiment", sentimentData);
+
+            List<JSONObject> votes = mongoDBHandler.getPollResults();
+            newDBData.put("votes", votes);
 
             // The Updates for the other charts could be added here
             response.type("application/json");
@@ -152,6 +159,12 @@ public class SparkHandler {
         List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "");
         pageContent.put("speechesNumber", speechesCounts);
 
+        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
+        //pageContent.put("sentiments", sentiments);
+
+        List<JSONObject> votes = mongoDBHandler.getPollResults();
+        pageContent.put("votes", votes);
+
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
@@ -181,6 +194,8 @@ public class SparkHandler {
 
         return mongoDBHandler.findSpeech(text);
     };
+
+
 
 
     @Unfinished("Not working currently. Attempted to test this in  the multi.ftl")

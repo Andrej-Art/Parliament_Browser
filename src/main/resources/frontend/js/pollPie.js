@@ -1,4 +1,4 @@
-function drawDoughnutChart(target) {
+function drawDoughnutChart(data, target) {
     // set the dimensions and margins of the graph
     const width = 450,
         height = 450,
@@ -16,7 +16,14 @@ function drawDoughnutChart(target) {
         .attr("transform", 'translate(' + width/2 + ',' + height/2 + ')');
 
 // Create dummy data
-    var data = {SPD_JA: 9, SPD_Nein: 20, SPD_Enthaltung:30, CDU_JA:8, CDU_NEIN:12, CDU_Enthaltung:3, FDP_JA:7, FDP_Nein:14}
+   // var data = {SPD_JA: 9, SPD_Nein: 20, SPD_Enthaltung:30, CDU_JA:8, CDU_NEIN:12, CDU_Enthaltung:3, FDP_JA:7, FDP_Nein:14}
+
+    let apliedData = Object.entries(data).map(d => {
+        return {
+        }
+    });
+    console.log(data);
+
 
 // set the color scale
     const color = d3.scaleOrdinal()
