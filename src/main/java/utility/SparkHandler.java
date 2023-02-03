@@ -68,12 +68,12 @@ public class SparkHandler {
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
 
-
-
         get("/reden/", getReden, new FreeMarkerEngine(cfg));
         get("/reden/speechVis/", getSpeechVis);
         get("/reden/speechIDs/", getSpeechIDs);
 
+        get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
+        post("/latex/post/", postLaTeX);
 
        //Route to deliver the updated Data for the charts according to the provided filters//
         get("/update-charts/", (request, response) -> {
@@ -139,6 +139,28 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "home.ftl");
     };
 
+    /** LaTeX editing page. */
+    @Unfinished("")
+    private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+//        JSONObject commands = mongoDBHandler.getLaTeXCommands();
+
+//        pageContent.put("commands", commands);
+
+        return new ModelAndView(pageContent, "LaTeXEditor.ftl");
+    };
+
+    /** Returns a PDF file. */
+    @Unfinished("Need to convert the LaTeX code to a pdf")
+    private static final Route postLaTeX = (Request request, Response response) -> {
+
+        System.out.println("POST aufgerufen");
+
+//        request.body(); this will be the LaTeX text field
+
+        return null;
+    };
 
 
 //    private static final TemplateViewRoute getDataUpdate = (Request request, Response response) -> {
@@ -207,9 +229,6 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "networkData.html");
     };
-
-
-
 
     @Unfinished("Not working currently. Attempted to test this in  the multi.ftl")
     private static final Route getChartUpdatesAjax = (Request request, Response response) ->{

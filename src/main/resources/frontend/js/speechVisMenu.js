@@ -56,10 +56,10 @@ function findSpeechIDs() {
             let finalHTML = '';
             let idArray = req.response["speechIDs"];
             idArray.sort((a, b) => {
-                if (a.substring(0, 4) === b.substring(0, 4)) {
+                if (a.substring(2, 4) === b.substring(2, 4)) {
                     return parseInt(a.substring(4)) - parseInt(b.substring(4));
                 }
-                if (parseInt(a.substring(2, 4)) < parseInt(b.substring(2, 4))) {
+                if (a.substring(2, 4) < b.substring(2, 4)) {
                     return -1;
                 }
                 return 1;

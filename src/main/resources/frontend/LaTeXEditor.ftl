@@ -14,11 +14,18 @@
 
 <#include "parliamentBrowser.ftl">
 
-<label> Editor
-<textarea>
+<div class="editor-textarea-container">
+    <form onsubmit="; return false">
+        <label> Editor
+            <textarea>
+            </textarea>
+        </label>
+    </form>
+</div>
 
-</textarea>
-</label>
+<script>
+
+</script>
 
 </body>
 </html>

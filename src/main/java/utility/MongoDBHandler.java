@@ -283,7 +283,7 @@ public class MongoDBHandler {
 
         //Insert single document into speech_cas collection
         try {
-            db.getCollection("speech_cas").insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
+            db.getCollection("speech_cas").insertOne(new Document("_id", processedSpeech.getID()).append("fullCas", processedSpeech.getFullCas()));
         } catch (MongoException | IllegalArgumentException ignored) {
         }
 
