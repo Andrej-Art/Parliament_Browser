@@ -1,4 +1,5 @@
 /* Style for speech visualisation sidebar*/
+
 .speech-vis-sidebar {
     background-color: #bbb;
     border-color: #333;
@@ -26,6 +27,7 @@
 }
 
 /* Style for speech visualisation text field*/
+
 .speech-vis-text {
     bottom: 0;
     height: 95vh;
@@ -49,6 +51,7 @@
 }
 
 /* Style for pictures */
+
 .speaker-pic {
     height:40px;
     width:60px;
@@ -56,6 +59,7 @@
 }
 
 /* Style for Named Entities */
+
 .entity-per {
     background-color: coral;
 }
@@ -69,11 +73,13 @@
 }
 
 /* Style for comments */
+
 .comment {
     color: darkgreen;
 }
 
 /* Style for sentiment info blob */
+
 .sentiment-pos {
     color: cornflowerblue;
 }

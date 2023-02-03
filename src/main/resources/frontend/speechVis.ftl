@@ -6,12 +6,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+        <#include "css/parliamentBrowser.css">
         <#include "css/speechVis.css">
     </style>
 </head>
-<body style="margin: 0">
+<body>
+
+<#include "parliamentBrowser.ftl">
+
 <div class="speech-vis-sidebar">
-    <h1 style="padding: 0 20px">Auswahl</h1>
+    <h1 style="padding: 50px 20px 0 20px">Auswahl</h1>
     <div class="speech-vis-sidebar-button-container speech-vis-text-search">
         <form onsubmit="findSpeechIDs(); return false;">
             <label>Volltextsuche in Protokollen<br><input id="text-search" type="text" placeholder="Hier eingeben"></label>
@@ -43,6 +47,7 @@
         </span>
     </p>
 </div>
+
 <script>
 
 let protocolAgendaData = ${protocolAgendaData};
