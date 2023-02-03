@@ -312,7 +312,7 @@ public class MongoDBHandler {
             speechDocs.add(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
 
             //parse into Bson Document for speech_cas and add to list
-            speechCasDocs.add(Document.parse(processedSpeech.toSpeechCasJson()).append("date", processedSpeech.getDate()));
+            speechCasDocs.add(new Document("_id", processedSpeech.getID()).append("fullCas", processedSpeech.getFullCas()));
 
             //parse into Bson Document for speech_tokens collection and add to list
             speechTokenDocs.add(Document.parse(processedSpeech.toSpeechTokensJson()).append("date", processedSpeech.getDate()));

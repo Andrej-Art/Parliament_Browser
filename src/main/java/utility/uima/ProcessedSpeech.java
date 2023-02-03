@@ -1,7 +1,6 @@
 package utility.uima;
 
 import data.Speech;
-import marmot.util.Sys;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,7 +43,7 @@ public class ProcessedSpeech {
             List<MongoNamedEntity> namedEntities) {
         this._id = speech.getID();
         this.speakerID = speech.getSpeakerID();
-        this.text = speech.getText().replace("\"", "\\\"");
+        this.text = speech.getText();
         this.date = speech.getDate();
         this.fullCas = fullCas;
         this.sentiment = sentiment;
@@ -56,11 +55,30 @@ public class ProcessedSpeech {
     }
 
     /**
+     *
+     * @return
+     * @author Eric Lakhter
+     */
+    public String getID() {
+        return this._id;
+    }
+
+    /**
      * Returns the date of this speech.
      * @return LocalDate object of this speech.
+     * @author Eric Lakhter
      */
     public LocalDate getDate(){
         return this.date;
+    }
+
+    /**
+     *
+     * @return
+     * @author Eric Lakhter
+     */
+    public String getFullCas() {
+        return this.fullCas;
     }
 
     /**
@@ -74,7 +92,7 @@ public class ProcessedSpeech {
         StringBuilder jsonString = new StringBuilder(
                 "{\n  _id:\"" + _id + "\","
                 + "\n  speakerID:\"" + speakerID + "\","
-                + "\n  text:\"" + text + "\",");
+                + "\n  text:\"" + text.replace("\"", "\\\"") + "\",");
 
         jsonString.append("\n  sentiment:").append(sentiment)
                 .append(",\n  mainTopic:\"").append(mainTopic)
@@ -135,21 +153,6 @@ public class ProcessedSpeech {
         jsonString.append(perString).append(orgString).append(locString)
                 .append("\n}");
         return jsonString.toString();
-    }
-
-    /**
-     * Converts all Speech fields + {@code fullCas}
-     * into a String compatible with {@code org.bson.Document.parse()}.<br>
-     * Intended to go into the {@code speech_cas} collection.
-     * @return JSON String.
-     * @author Eric Lakhter
-     */
-    public String toSpeechCasJson() {
-        return "{" +
-                "\n _id:\"" + _id
-                + "\",\n  speakerID:\"" + speakerID
-                + "\",\n  fullCas:'" + fullCas + "'" +
-                "\n}";
     }
 
     /**
