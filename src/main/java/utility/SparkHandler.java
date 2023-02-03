@@ -105,6 +105,8 @@ public class SparkHandler {
             return newDBData;
 
         });
+
+        get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
     }
 
     /*
@@ -193,6 +195,16 @@ public class SparkHandler {
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
 
         return mongoDBHandler.findSpeech(text);
+    };
+
+    private final static TemplateViewRoute getNetwork = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+        JSONObject networkData = mongoDBHandler.matchSpeakerToDDCTest();
+
+        pageContent.put("networkData", networkData);
+
+        return new ModelAndView(pageContent, "networkData.html");
     };
 
 

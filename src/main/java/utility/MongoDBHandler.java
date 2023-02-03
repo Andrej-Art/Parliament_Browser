@@ -699,7 +699,6 @@ public class MongoDBHandler {
 
     /**
      * Checks if a Document specified by the {@code id} has a given {@code field}.
-     *
      * @param col   Collection to search in.
      * @param id    Document key.
      * @param field Field name.
@@ -724,7 +723,6 @@ public class MongoDBHandler {
 
     /**
      * returns all Speakers with their speeches count.
-     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @author Edvin Nise
@@ -838,7 +836,6 @@ public class MongoDBHandler {
 
     /**
      * returns the count for all Parts of Speech
-     *
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
@@ -944,7 +941,6 @@ public class MongoDBHandler {
 
     /**
      * returns who commented on which speaker
-     *
      * @author Edvin Nise
      */
     @Unfinished("waiting for correct structure of collection")
@@ -979,7 +975,6 @@ public class MongoDBHandler {
 
     /**
      * returns speaker with corresponding topics
-     *
      * @author Edvin Nise
      */
     @Unfinished("Waiting for structure of collection")
@@ -992,11 +987,10 @@ public class MongoDBHandler {
                 .append("mainTopic", 1)
                 .append("maybeTopic", 1));
         Bson group = new Document("$group", new Document("_id", "$Abgeordneter")
-                .append("DDCKategorien", new Document("$push", "$mainTopic"))
-                .append("maybeKategorien", new Document("$push", "$maybeTopic")));
-        Bson projectTest = project(new Document("allDDC", new Document("$concatArrays", Arrays.asList("$DDCKategorien", "$maybeKategorien"))));
+                .append("DDCKategorien", new Document("$first", "$mainTopic")));
+        Bson limit = limit(20);
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group, projectTest));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group, limit));
 
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
@@ -1011,30 +1005,85 @@ public class MongoDBHandler {
 
         Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
-        Bson project = project(new Document("Abgeordneter", "$speakerData.fullName")
-                .append("mainTopic", 1)
-                .append("maybeTopic", 1));
-        Bson group = new Document("$group", new Document("_id", "$Abgeordneter")
-                .append("DDCKategorien", new Document("$push", "$mainTopic"))
-                .append("maybeKategorien", new Document("$push", "$maybeTopic")));
-        Bson projectTest = project(new Document("allDDC", new Document("$concatArrays", Arrays.asList("$DDCKategorien", "$maybeKategorien"))));
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group, projectTest));
+        Bson group = new Document("$group", new Document("_id", "$speakerData.fullName")
+                .append("DDCKategorien", new Document("$push", "$mainTopic"))
+                .append("fraction", new Document("$first", "$speakerData.party")));
+
+
+
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, group));
         JSONObject obj = new JSONObject();
         ArrayList<JSONObject> objNodes = new ArrayList<>();
+        ArrayList<JSONObject> objLinks = new ArrayList<>();
+
+        HashSet<JSONObject> allNamesUnique = new HashSet<>();
+        HashSet<String> allDDCUnique = new HashSet<>();
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> System.out.println(procBlock.toJson())
-//                        {
-//                            JSONObject objNode = new JSONObject();
-//                            objNode.put("name", procBlock.getString("_id"));
-//                            objNode.put("group", 1);
-//                            objNode.put("color", 1);
-//                            objNodes.add(objNode);
-//                            obj.put("nodes", objNodes);
-//                        }
+                .forEach((Consumer<? super Document>) procBlock ->
+                        {
+                            JSONObject objName = new JSONObject();
+                            objName.put("name", procBlock.getString("_id"));
+                            switch (procBlock.getString("fraction")){
+                                case "CDU" :
+                                case "CSU" :
+                                    objName.put("group", 1);
+                                    break;
+                                case "SPD" :
+                                    objName.put("group", 2);
+                                    break;
+                                case "FDP" :
+                                    objName.put("group", 3);
+                                    break;
+                                case "BÜNDNIS 90/DIE GRÜNEN/" :
+                                    objName.put("group", 4);
+                                    break;
+                                case "DIE LINKE." :
+                                    objName.put("group", 5);
+                                    break;
+                                case "AfD" :
+                                    objName.put("group", 6);
+                                    break;
+                                default:
+                                    objName.put("group", 7);
+                            }
+                            allNamesUnique.add(objName );
+                            //removes duplicates so that later on there won't be multiple similiar links
+                            HashSet<String> uniqueDDCPerSpeech = new HashSet<>();
+                            for (String ddc : (ArrayList<String>) procBlock.get("DDCKategorien")) {
+                                uniqueDDCPerSpeech.add(ddc);
+
+                                allDDCUnique.add(ddc);
+                        }
+                            for (String s : uniqueDDCPerSpeech){
+                                JSONObject objlink = new JSONObject();
+                                objlink.put("source", procBlock.getString("_id"));
+                                objlink.put("target", s);
+//                            objlink.put("source", allNodesList.indexOf(procBlock.getString("_id")));
+//                            objlink.put("target", allNodesList.indexOf(procBlock.getString("DDCKategorien")));
+                                objlink.put("value", 1);
+                                objLinks.add(objlink);
+                            }
+                        }
                 );
-        System.out.println(obj);
+
+        System.out.println(allNamesUnique);
+//        for (String s : allNamesUnique) {
+//            JSONObject objNodeNames = new JSONObject();
+//            objNodeNames.put("name", s);
+//            objNodeNames.put("group", 1);
+//            objNodes.add(objNodeNames);
+//        }
+        for (String s : allDDCUnique){
+            JSONObject objNodeDDC = new JSONObject();
+            objNodeDDC.put("name", s);
+            objNodeDDC.put("group", 2);
+            objNodes.add(objNodeDDC);
+        }
+        obj.put("nodes", objNodes);
+        obj.put("links", objLinks);
+
         return obj;
     }
 
