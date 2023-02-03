@@ -1,6 +1,7 @@
 package utility.uima;
 
 import data.Speech;
+import marmot.util.Sys;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,7 +44,7 @@ public class ProcessedSpeech {
             List<MongoNamedEntity> namedEntities) {
         this._id = speech.getID();
         this.speakerID = speech.getSpeakerID();
-        this.text = speech.getText();
+        this.text = speech.getText().replace("\"", "\\\"");
         this.date = speech.getDate();
         this.fullCas = fullCas;
         this.sentiment = sentiment;
@@ -170,7 +171,7 @@ public class ProcessedSpeech {
                     .append(",endPos:")
                     .append(token.getEndPos())
                     .append(",lemmaValue:\"")
-                    .append(token.getLemmaValue())
+                    .append(token.getLemmaValue().replace("\"", "\\\""))
                     .append("\",POS:\"")
                     .append(token.getPOS())
                     .append("\",coarsePOS:\"")

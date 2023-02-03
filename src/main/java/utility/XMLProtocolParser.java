@@ -62,7 +62,7 @@ public class XMLProtocolParser {
 
 
             // iterating over all xml-protocols
-            for (int i = 0; i < files.length; i++) {
+            for (int i = 114; i < files.length; i++) {
                 File file = files[i];
                 //check if the file is a xml-file
                 if (file.isFile() && file.getName().matches(".*\\.xml")) {
@@ -301,14 +301,6 @@ public class XMLProtocolParser {
                                                 break;
                                         }
                                     }
-                                    // aus den Protokollen: id, Titel, Vorname, namenszusatz, nachname, ortszusatz,
-                                    //fraktion, rolle
-
-                                    // aus den Stammdaten muss folgendes rein: Partei, Place (?)
-                                    /*
-                                    Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1], speakerProperties[2], speakerProperties[3], speakerProperties[4], speakerProperties[5], speakerProperties[6], speakerProperties[7], speakerProperties[8]);
-                                    personMap.put(person.getID(), person);
-                                    */
                                 }
 
 
