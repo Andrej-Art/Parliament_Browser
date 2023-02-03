@@ -31,6 +31,12 @@
             <input type="text"
                    placeholder=" Suche nach Rednern "
                    id="personInput">
+            <input type="text"
+                   placeholder=" Suche nach Partei "
+                   id="partyInput">
+            <input type="text"
+                   placeholder=" Suche nach Fraktion "
+                   id="fractionInput">
             <button type="button" id="personButt">
                 <i class="fa fa-search"
                    style="font-size: 18px;">
@@ -39,6 +45,7 @@
 
         </div>
 
+        <!--
 
         <div class="dropdown">
             <button class="dropbtn">Parteien
@@ -69,6 +76,7 @@
                 <a class="dropdown-frac" href="#" data-value="FRAKTIONSLOS">Fraktionslose</a>
             </div>
         </div>
+        -->
 
 
         <div class="calenderfield">

@@ -86,7 +86,7 @@ body {
 
 /* styling search bar */
 .search input[type=text]{
-    width:300px;
+    width:250px;
     height:25px;
     border-radius:25px;
     border: none;
@@ -116,5 +116,3 @@ body {
     column-gap: 50px;
     row-gap: 50px;
 }
-
-
