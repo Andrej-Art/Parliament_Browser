@@ -97,7 +97,7 @@ public class SparkHandler {
            //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
             //newDBData.put("sentiment", sentimentData);
 
-            List<JSONObject> votes = mongoDBHandler.getPollResults();
+            List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "");
             newDBData.put("votes", votes);
 
             // The Updates for the other charts could be added here
@@ -164,7 +164,7 @@ public class SparkHandler {
         //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
         //pageContent.put("sentiments", sentiments);
 
-        List<JSONObject> votes = mongoDBHandler.getPollResults();
+        List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "");
         pageContent.put("votes", votes);
 
         return new ModelAndView(pageContent, "dashboard.ftl");

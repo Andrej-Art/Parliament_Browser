@@ -1174,7 +1174,7 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("Dont know where we save this data")
-    public ArrayList<JSONObject> getPollResults() {
+    public ArrayList<JSONObject> getPollResults(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
 
         //calculates total votes for each party and also for each type of vote
         Bson addFieldsVotesData = new Document("$addFields", new Document()
@@ -1202,6 +1202,15 @@ public class MongoDBHandler {
 
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(addFieldsVotesData, addFieldsTotalVotes));
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+        if (!fractionFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+        }
+        if (!personFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
         ArrayList<JSONObject> objList = new ArrayList<>();
         db.getCollection("poll").aggregate(pipeline).allowDiskUse(false).forEach((Consumer<? super Document>) procBlock -> {
             JSONObject obj = new JSONObject();
@@ -1211,6 +1220,7 @@ public class MongoDBHandler {
             obj.put("totalVotesNo", procBlock.getInteger("totalVotesNo"));
             obj.put("totalVotesAbstained", procBlock.getInteger("totalVotesAbstained"));
             obj.put("totalVotesNoVotes", procBlock.getInteger("totalVotesNoVotes"));
+            obj.put("date", (dateToLocalDate((Date) procBlock.get("date"))));
 
             if (!procBlock.getInteger("totalVotesSPD").equals(0)) {
                 JSONObject objSPD = new JSONObject();
