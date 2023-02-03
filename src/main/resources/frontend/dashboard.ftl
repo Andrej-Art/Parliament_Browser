@@ -47,6 +47,7 @@
 
         <!--
 
+
         <div class="dropdown">
             <button class="dropbtn">Parteien
                 <i class="fa fa-caret-down"></i>
@@ -77,7 +78,6 @@
             </div>
         </div>
         -->
-
 
         <div class="calenderfield">
             <label for="von">von:</label>
@@ -148,29 +148,29 @@
     //Event Listener for the Redner search field to trigger when the search button is clicked
     document.getElementById("personButt").addEventListener("click", updateCharts);
 
-    // Get all dropdown items from the party menu in one array
-    const allDropDownParty = document.getElementsByClassName('dropdown-party');
-
-    // Add an Event-listener to each
-    for(let i =0; i<allDropDownParty.length; i++){
-        allDropDownParty[i].addEventListener('click', (e) => {
-            // Prevents the typical event when an anchor tag is clicked which would direct to the href
-            e.preventDefault();
-            let chosenParty = allDropDownParty[i].getAttribute('data-value');
-            updateCharts(chosenParty, null);
-        })
-    }
-
-    // Repeating the process for the fraction dropdown menu
-    const allDropDownFrac = document.getElementsByClassName('dropdown-frac');
-    for(let i =0; i<allDropDownFrac.length; i++){
-        allDropDownFrac[i].addEventListener('click', (e) => {
-            // Prevents the typical event when an anchor tag is clicked which would direct to the href
-            e.preventDefault();
-            let chosenFraction = allDropDownFrac[i].getAttribute('data-value');
-            updateCharts(null, chosenFraction);
-        })
-    }
+    // // Get all dropdown items from the party menu in one array
+    // const allDropDownParty = document.getElementsByClassName('dropdown-party');
+    //
+    // // Add an Event-listener to each
+    // for(let i =0; i<allDropDownParty.length; i++){
+    //     allDropDownParty[i].addEventListener('click', (e) => {
+    //         // Prevents the typical event when an anchor tag is clicked which would direct to the href
+    //         e.preventDefault();
+    //         let chosenParty = allDropDownParty[i].getAttribute('data-value');
+    //         updateCharts(chosenParty, null);
+    //     })
+    // }
+    //
+    // // Repeating the process for the fraction dropdown menu
+    // const allDropDownFrac = document.getElementsByClassName('dropdown-frac');
+    // for(let i =0; i<allDropDownFrac.length; i++){
+    //     allDropDownFrac[i].addEventListener('click', (e) => {
+    //         // Prevents the typical event when an anchor tag is clicked which would direct to the href
+    //         e.preventDefault();
+    //         let chosenFraction = allDropDownFrac[i].getAttribute('data-value');
+    //         updateCharts(null, chosenFraction);
+    //     })
+    // }
 
 
 

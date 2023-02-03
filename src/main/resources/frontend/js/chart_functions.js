@@ -171,7 +171,7 @@ function MultiLineEntities(data, target){
  */
 function createBarChart(data, target) {
     // Setting the margins to the same dimensions as all other charts
-    const margin = {top: 10, right: 30, bottom: 30, left: 40},
+    const margin = {top: 10, right: 30, bottom: 30, left: 80},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -192,10 +192,8 @@ function createBarChart(data, target) {
 
     // extracting the data and setting the key and value
     data.forEach(function(d) {
-        for (var key in d) {
-            d.key = key;
-            d.value = d[key];
-        }
+        d.key = Object.keys(d)[0];
+        d.value = d[d.key];
     });
 
     // Adjusting the scaling of the axes to fit the dataset scope
@@ -214,14 +212,14 @@ function createBarChart(data, target) {
         // Adding a tooltip functionality to the chart, changing th opacity
         // when the mouse hovers over
         .on("mouseover", function(d) {
-        d3.select(this)
-            .style("opacity", 0.5);
-        svg.append("text")
-            .attr("id", "tooltip")
-            .attr("x", x(d.key) + x.bandwidth() / 2)
-            .attr("y", y(d.value) - 5)
-            .text(d.value);
-    })
+            d3.select(this)
+                .style("opacity", 0.5);
+            //testing
+            svg.append("text")
+                .attr("id", "tooltip")
+                .attr("x", width - margin.right)
+                .attr("y", margin.top);
+        })
         .on("mouseout", function(d) {
             d3.select(this)
                 .style("opacity", 1);
@@ -261,7 +259,7 @@ function createBarChart(data, target) {
  */
 function createLineChart(data, target) {
     // Setting the margins to the same dimensions as all other charts
-    var margin = {top: 10, right: 30, bottom: 30, left: 40},
+    var margin = {top: 10, right: 30, bottom: 30, left: 80},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -269,8 +267,10 @@ function createLineChart(data, target) {
     var x = d3.scaleBand()
         .range([0, width])
         .padding(0.1);
+    //testing
     var y = d3.scaleLinear()
-        .range([height, 0]);
+        .range([height, 0])
+        .nice();
 
     // Selecting the target html element to insert the svg element
     var svg = d3.select(target).append("svg")
@@ -289,6 +289,7 @@ function createLineChart(data, target) {
 
     // Setting the values which will be assigned to both axis as x-domain and y-domain
     x.domain(data.map(function(d) { return d.label; }));
+    //testing
     y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
     //Constructing the svg element
@@ -301,20 +302,7 @@ function createLineChart(data, target) {
         .attr("d", d3.line()
             .x(function(d) { return x(d.label) + x.bandwidth()/2; })
             .y(function(d) { return y(d.value); }));
-        // .on("mouseover", function(d) {
-        //     d3.select(this)
-        //         .style("opacity", 0.5);
-        //     svg.append("text")
-        //         .attr("id", "tooltip")
-        //         .attr("x", x(d.key) + x.bandwidth() / 2)
-        //         .attr("y", y(d.value) - 5)
-        //         .text(d.value);
-        // })
-        // .on("mouseout", function(d) {
-        //     d3.select(this)
-        //         .style("opacity", 1);
-        //     d3.select("#tooltip").remove();
-        // });
+
 
     // More
     svg.append("g")
@@ -371,21 +359,16 @@ function createLineChart(data, target) {
  * Function to update the charts with data filtered by the user entry on the website.
  * @author DavidJordan
  */
-function updateCharts(party = null, fraction = null) {
+function updateCharts() {
     // The date filters from the calendar fields
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
     // The person filter from the search field selecting the personFilter
     const person = document.getElementById("personInput").value;
+    //The fraction and party filters
+    const fraction = document.getElementById("fractionInput").value;
+    const party = document.getElementById("partyInput").value;
 
-    let partyName = "";
-    if(party != null){
-        partyName = party;
-    }
-    let fractionName = "";
-    if(fraction != null){
-        fractionName = fraction;
-    }
 
 
     //add the other updated parameters here: party, person, fraction I do not know how to get them from the
@@ -393,7 +376,7 @@ function updateCharts(party = null, fraction = null) {
 
     // Make an AJAX call to the backend
     var ajaxChartData = new XMLHttpRequest();
-    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person + "&fraction=" + fractionName + "&party=" + partyName, true);
+    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person + "&fraction=" + fraction + "&party=" + party, true);
     ajaxChartData.responseType = "json";
     ajaxChartData.onreadystatechange = function() {
         // if successful

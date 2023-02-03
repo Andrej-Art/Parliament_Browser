@@ -75,23 +75,24 @@ public class SparkHandler {
         get("/reden/speechIDs/", getSpeechIDs);
 
 
-       //Route to deliver the updated Data for the charts according to the provided filters
+       //Route to deliver the updated Data for the charts according to the provided filters//
         get("/update-charts/", (request, response) -> {
             String von = request.queryParams("von") != null ? request.queryParams("von") : "";
             String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
             String person = request.queryParams("personInput") != null ? request.queryParams("personInput") : "";
+            String fraction = request.queryParams("fraction") != null ? request.queryParams("fraction") : "";
 
             JSONObject newDBData = new JSONObject();
-            List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, von, bis, "", person);
+            List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, von, bis, fraction, person);
             newDBData.put("token", tokenData);
 
-            List<JSONObject> posData = mongoDBHandler.getPOSCount(von, bis, "", person);
+            List<JSONObject> posData = mongoDBHandler.getPOSCount(von, bis, fraction, person);
             newDBData.put("pos", posData);
 
-            JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, "", person);
+            JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, fraction, person);
             newDBData.put("entities", entityData);
 
-            List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, "", person);
+            List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, person);
             newDBData.put("speechesNumber", speechesCountData);
 
            //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
