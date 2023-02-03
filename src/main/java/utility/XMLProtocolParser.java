@@ -26,6 +26,7 @@ import java.util.*;
  * I don't want to get in Julians way with the Stammdaten-Parser.
  *
  * @author Andrej
+ * @author Julian Ocker
  */
 @Unfinished("Some reason")
 public class XMLProtocolParser {
@@ -76,6 +77,7 @@ public class XMLProtocolParser {
 
                     //iterate through all dbtplenarptotokoll nodes
                     for (int a = 0; a < sessionInfoNodes.getLength(); a++) {
+
                         Node sessionInfoNode = sessionInfoNodes.item(a);
 
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -301,6 +303,14 @@ public class XMLProtocolParser {
                                                 break;
                                         }
                                     }
+                                    // aus den Protokollen: id, Titel, Vorname, namenszusatz, nachname, ortszusatz,
+                                    //fraktion, rolle
+
+                                    // aus den Stammdaten muss folgendes rein: Partei, Place (?)
+                                    /*
+                                    Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1], speakerProperties[2], speakerProperties[3], speakerProperties[4], speakerProperties[5], speakerProperties[6], speakerProperties[7], speakerProperties[8]);
+                                    personMap.put(person.getID(), person);
+                                    */
                                 }
 
 
