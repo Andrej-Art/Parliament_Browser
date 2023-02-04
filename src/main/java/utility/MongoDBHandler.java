@@ -1131,7 +1131,6 @@ public class MongoDBHandler {
                     speechIDs.add(procBlock.getString("_id"));
                 });
         obj.put("speechIDs", speechIDs);
-        System.out.println(obj);
         return obj;
     }
 
@@ -1188,7 +1187,6 @@ public class MongoDBHandler {
             comments.add(objComment);
         }
         obj.put("commentData", comments);
-        System.out.println(obj);
         return obj;
     }
 
@@ -1353,7 +1351,6 @@ public class MongoDBHandler {
 
         pageContent.put("protocols", protocols);
         pageContent.put("agendaItems", agendaItems);
-        System.out.println(pageContent);
         return pageContent;
     }
 

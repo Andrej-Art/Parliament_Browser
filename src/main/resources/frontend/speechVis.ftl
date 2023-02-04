@@ -41,11 +41,18 @@
 </div>
 
 <div class="speech-vis-legend">
-    <p>Legende Named Entities:
-        <span style="word-spacing: 5em">
-            &nbsp;<span class="entity-per">Person</span> <span class="entity-org">Organisation</span> <span class="entity-loc">Ort</span>
-        </span>
-    </p>
+    <div>
+        Legende Named Entities:
+    </div>
+    <div>
+        <span class="entity-per">Person</span>
+    </div>
+    <div>
+        <span class="entity-org">Organisation</span>
+    </div>
+    <div>
+        <span class="entity-loc">Ort</span>
+    </div>
 </div>
 
 <script>

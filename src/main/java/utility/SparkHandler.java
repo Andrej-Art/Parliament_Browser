@@ -6,6 +6,7 @@ import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
 import utility.annotations.*;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ public class SparkHandler {
         // If there aren't any query params redirect the user to a path with trailing slash
         before((req, res) -> {
             String path = req.pathInfo();
-            if (!path.endsWith("/") && req.queryParams().size() == 0) res.redirect(path + "/") ;
+            if (!path.endsWith("/") && req.queryParams().size() == 0)
+                res.redirect(path + "/") ;
         });
 
         // Test is for testing
@@ -64,6 +66,9 @@ public class SparkHandler {
          * ?fraktion=BÜNDNIS 90/DIE GRÜNEN     works without issues, spaces get percent-encoded: " " -> "%20"
          * CDU/CSU is equivalent to CDU%2FCSU  %2F is the percent-encoded slash
          */
+
+        get("/favicon.ico/", "image/x-icon", getIcon);
+
         get("/", getHome, new FreeMarkerEngine(cfg));
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
@@ -84,6 +89,11 @@ public class SparkHandler {
     /*
      * Routes:
      */
+
+    /** Website's favicon. */
+    private static final Route getIcon = (Request request, Response response) -> {
+        return ImageIO.read(new File(frontendPath + "favicon.ico"));
+    };
 
     /** Test page. */
     @Testing
@@ -128,7 +138,7 @@ public class SparkHandler {
 
         System.out.println("POST aufgerufen");
 
-//        request.body(); this will be the LaTeX text field
+        System.out.println(request.body()); // this will be the LaTeX text field
 
         return null;
     };

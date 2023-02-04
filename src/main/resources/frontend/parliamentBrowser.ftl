@@ -1,18 +1,33 @@
 <!-- to be inserted at the beginning of every page -->
+<!-- Parliament Browser navigation bar -->
 
-<div id="parliament-browser-main-navigation-bar">
-    <button onclick="showStatusBar()">button hide</button>
+<div style="position: absolute;">
+    <button class="nav-button" onclick="showStatusBar()"><i class='fa fa-angle-double-right' style="font-size:36px;"></i></button>
 </div>
-
+<div id="parliament-browser-main-navigation-bar">
+    <button class="nav-button" onclick="hideStatusBar()"><i class='fa fa-angle-double-left'></i></button>
+    <a href="/">Homepage</a>
+    <a href="/reden/">Reden-Visualisierung</a>
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/network/">Redner-Kategorien-Netzwerk</a>
+    <a href="/latex/">LaTeX-Editor</a>
+</div>
 <script>
-    function showStatusBar() {
-        let statusBar = document.getElementById("parliament-browser-main-navigation-bar");
-        statusBar.style.width = '10%';
-        statusBar.innerHTML = '<button onclick="hideStatusBar()">button show</button>';
-    }
-    function hideStatusBar() {
-        let statusBar = document.getElementById("parliament-browser-main-navigation-bar");
-        statusBar.style.width = '100%';
-        statusBar.innerHTML = '<button onclick="showStatusBar()">button hide</button>';
-    }
+/**
+ * Shows the status bar.
+ * @author Eric Lakhter
+ */
+function showStatusBar() {
+    document.getElementById("parliament-browser-main-navigation-bar").style.display = 'flex';
+}
+
+/**
+ * Hides the status bar.
+ * @author Eric Lakhter
+ */
+function hideStatusBar() {
+    document.getElementById("parliament-browser-main-navigation-bar").style.display = 'none';
+}
 </script>
+
+<!-- end navigation bar -->

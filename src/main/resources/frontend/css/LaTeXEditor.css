@@ -1,3 +1,35 @@
 /* Style for LaTeX protocol editor page */
 
+.editor-container {
+    box-sizing: border-box;
+    padding: 70px 30px;
+    width: 50%;
+    height: 100vh;
+}
 
+.editor-container-textarea {
+    background-color: #557192;
+    float: left;
+}
+
+#editor-textarea {
+    overflow: auto;
+    resize: none;
+    margin: 0 5%;
+    height: 90%;
+    width: 90%;
+}
+
+.editor-container-preview {
+    background-color: #f1aa64;
+    float: right;
+}
+
+#editor-preview {
+    background-color: white;
+    overflow: auto;
+    resize: none;
+    margin: 5%;
+    height: 90%;
+    width: 90%;
+}

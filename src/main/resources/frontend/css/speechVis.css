@@ -44,8 +44,10 @@
     border-width: 1px 0 0 0;
     box-shadow: 0 3px 5px #bbb;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
     height: 5vh;
-    align-content: center;
     text-align: center;
     overflow: hidden;
 }

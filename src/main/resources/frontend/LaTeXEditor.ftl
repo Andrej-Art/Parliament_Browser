@@ -14,17 +14,32 @@
 
 <#include "parliamentBrowser.ftl">
 
-<div class="editor-textarea-container">
-    <form onsubmit="; return false">
-        <label> Editor
-            <textarea>
-            </textarea>
+<div class="editor-container editor-container-textarea">
+    <form onsubmit="generatePDF(); return false;" style="height: 100%">
+        <label> Editor <button type="submit">Generate</button><br>
+            <textarea id="editor-textarea"></textarea>
         </label>
     </form>
 </div>
 
-<script>
+<div class="editor-container editor-container-preview">
+    Preview:
+    <iframe id="editor-preview">
 
+    </iframe>
+</div>
+
+<script>
+function generatePDF() {
+    let latexCode = document.getElementById("editor-textarea").value;
+    console.log(latexCode);
+    fetch("/latex/post/", {
+        method: 'POST',
+        body: latexCode
+    });
+    document.getElementById("editor-preview").src = "/reden/";
+    return false;
+}
 </script>
 
 </body>
