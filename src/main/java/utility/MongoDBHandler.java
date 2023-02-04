@@ -727,7 +727,7 @@ public class MongoDBHandler {
      * @param dateFilterTwo
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
+    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String partyFilter, String personFilter) {
         Bson group = new Document("$group", new Document("_id", "$speakerID").append("speechesCount", new Document("$sum", 1)));
         Bson lookup = lookup("person", "_id", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
@@ -742,6 +742,9 @@ public class MongoDBHandler {
         }
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
+        if (!partyFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
         }
 
         ArrayList<JSONObject> objList = new ArrayList<>();
@@ -766,7 +769,7 @@ public class MongoDBHandler {
      * @param limit
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
+    public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo, String fractionFilter, String partyFilter, String personFilter) {
         Bson unwind = unwind("$tokens");
         Bson group = group("$tokens.lemmaValue", sum("count", 1));
         Bson sort = sort(descending("count"));
@@ -782,6 +785,9 @@ public class MongoDBHandler {
         }
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
+        if(!partyFilter.isEmpty()){
+            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
         }
 
         MongoIterable<Document> result = db.getCollection("speech_token")
@@ -801,7 +807,7 @@ public class MongoDBHandler {
      *
      * @author Edvin Nise
      */
-    public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
+    public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String partyFilter, String personFilter) {
         Bson group = group(new Document("_id", "$date"),
                 sum("namedEntityPerson", new Document("$size", "$namedEntitiesPer")),
                 sum("namedEntityLocation", new Document("$size", "$namedEntitiesLoc")),
@@ -818,6 +824,9 @@ public class MongoDBHandler {
         }
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
+        if (!partyFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
         }
 
         db.getCollection("speech").aggregate(pipeline).allowDiskUse(false)
@@ -840,7 +849,7 @@ public class MongoDBHandler {
      */
     @Unfinished("waiting for final structure of collection")
     public ArrayList<JSONObject> getPOSCount(String dateFilterOne, String dateFilterTwo,
-                                             String fractionFilter, String personFilter) {
+                                             String fractionFilter, String partyFilter, String personFilter) {
         Bson unwind = unwind("$tokens");
         Bson project = project(new Document("OnlyPOS", "$tokens.coarsePOS"));
         Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
@@ -856,6 +865,9 @@ public class MongoDBHandler {
         }
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+        }
+        if (!partyFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
         }
 
         db.getCollection("speech_token").aggregate(pipeline)

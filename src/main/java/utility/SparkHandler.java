@@ -67,6 +67,8 @@ public class SparkHandler {
         get("/", getHome, new FreeMarkerEngine(cfg));
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
+        //Route to deliver the updated Data for the charts according to the provided filters//
+        get("/update-charts/", getChartUpdates);
 
         get("/reden/", getReden, new FreeMarkerEngine(cfg));
         get("/reden/speechVis/", getSpeechVis);
@@ -75,37 +77,6 @@ public class SparkHandler {
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         post("/latex/post/", postLaTeX);
 
-       //Route to deliver the updated Data for the charts according to the provided filters//
-        get("/update-charts/", (request, response) -> {
-            String von = request.queryParams("von") != null ? request.queryParams("von") : "";
-            String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
-            String person = request.queryParams("personInput") != null ? request.queryParams("personInput") : "";
-            String fraction = request.queryParams("fraction") != null ? request.queryParams("fraction") : "";
-
-            JSONObject newDBData = new JSONObject();
-            List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, von, bis, fraction, person);
-            newDBData.put("token", tokenData);
-
-            List<JSONObject> posData = mongoDBHandler.getPOSCount(von, bis, fraction, person);
-            newDBData.put("pos", posData);
-
-            JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, fraction, person);
-            newDBData.put("entities", entityData);
-
-            List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, person);
-            newDBData.put("speechesNumber", speechesCountData);
-
-           //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
-            //newDBData.put("sentiment", sentimentData);
-
-            List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "");
-            newDBData.put("votes", votes);
-
-            // The Updates for the other charts could be added here
-            response.type("application/json");
-            return newDBData;
-
-        });
 
         get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
     }
@@ -172,16 +143,16 @@ public class SparkHandler {
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("","", "", "");
+        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
         pageContent.put("pos", posAndCounts);
 
-        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "", "", "");
+        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
         pageContent.put("token", tokenAndCounts);
 
-        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("","","", "");
+        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
         pageContent.put("entities", datesAndNamedEntities);
 
-        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "");
+        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "");
         pageContent.put("speechesNumber", speechesCounts);
 
         //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
@@ -193,6 +164,36 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
+    private static final Route getChartUpdates = (Request request, Response response) -> {
+        String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
+        String person = request.queryParams("personInput") != null ? request.queryParams("personInput") : "";
+        String fraction = request.queryParams("fraction") != null ? request.queryParams("fraction") : "";
+        String party = request.queryParams("party") != null ? request.queryParams("party") : "";
+
+        JSONObject newDBData = new JSONObject();
+        List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, von, bis, fraction, party, person);
+        newDBData.put("token", tokenData);
+
+        List<JSONObject> posData = mongoDBHandler.getPOSCount(von, bis, fraction, party, person);
+        newDBData.put("pos", posData);
+
+        JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, fraction, party, person);
+        newDBData.put("entities", entityData);
+
+        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, party, person);
+        newDBData.put("speechesNumber", speechesCountData);
+
+        //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
+        //newDBData.put("sentiment", sentimentData);
+
+        List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "");
+        newDBData.put("votes", votes);
+
+        // The Updates for the other charts could be added here
+        response.type("application/json");
+        return newDBData;
+    };
     /** Speech visualisation page. */
     private static final TemplateViewRoute getReden = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -230,7 +231,10 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "networkData.html");
     };
 
-    @Unfinished("Not working currently. Attempted to test this in  the multi.ftl")
+    /**
+     * Route for handling the data to update the charts on the dashboard
+     * @author DavidJordan
+     */
     private static final Route getChartUpdatesAjax = (Request request, Response response) ->{
         // The Datefilters that are gotten through the calendar fields
         String dateFilterOne = request.queryParams("von") != null ? request.queryParams("von") : "";
@@ -241,14 +245,14 @@ public class SparkHandler {
         Add the party and fraction filters here that are input through the dropdown menus. Not sure how to do that yet
          */
         JSONObject newDBData = new JSONObject();
-        List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, dateFilterOne, dateFilterTwo, "", personFilter);
-        newDBData.put("token", tokenData);
+//        List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, dateFilterOne, dateFilterTwo, "", personFilter);
+//        newDBData.put("token", tokenData);
 
-        List<JSONObject> posData = mongoDBHandler.getPOSCount(dateFilterOne, dateFilterTwo, "", personFilter);
-        newDBData.put("pos", posData);
+//        List<JSONObject> posData = mongoDBHandler.getPOSCount(dateFilterOne, dateFilterTwo, "", personFilter);
+//        newDBData.put("pos", posData);
 
-        JSONObject entityData = mongoDBHandler.getNamedEntityCount(dateFilterOne, dateFilterTwo, "", personFilter);
-        newDBData.put("entities", entityData);
+//        JSONObject entityData = mongoDBHandler.getNamedEntityCount(dateFilterOne, dateFilterTwo, "", personFilter);
+//        newDBData.put("entities", entityData);
 
         // The Updates for the other charts could be added here
         response.type("application/json");

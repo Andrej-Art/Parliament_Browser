@@ -132,9 +132,6 @@ function MultiLineEntities(data, target){
     });
 
 
-
-
-
     // Adding a legend to the chart
     let legend = svg.selectAll(".legend")
         .data(color.domain().slice().reverse())
@@ -258,7 +255,7 @@ function createBarChart(data, target) {
  * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
  */
 function createLineChart(data, target) {
-    // Setting the margins to the same dimensions as all other charts
+    // Setting the margins and dimensions, adjust margins to allow for large numbers
     var margin = {top: 10, right: 30, bottom: 30, left: 80},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
