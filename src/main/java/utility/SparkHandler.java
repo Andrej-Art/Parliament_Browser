@@ -1,5 +1,6 @@
 package utility;
 
+import exceptions.EditorFormattingException;
 import freemarker.template.Configuration;
 import org.json.JSONObject;
 import spark.*;
@@ -83,6 +84,8 @@ public class SparkHandler {
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         post("/latex/post/", postLaTeX);
 
+        get("/redeeditor/", getRedeEditor, new FreeMarkerEngine(cfg));
+        post("/redeeditor/post/", postRedeEditor);
 
         get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
     }
@@ -139,14 +142,38 @@ public class SparkHandler {
     /** Returns a PDF file. */
     @Unfinished("Need to convert the LaTeX code to a pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
-
-        System.out.println("POST aufgerufen");
+        System.out.println("POST postLaTeX aufgerufen");
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
         return null;
     };
 
+    /** Speech editing page. */
+    @Unfinished("Nothing more than a text field so far")
+    private static final TemplateViewRoute getRedeEditor = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+        return new ModelAndView(pageContent, "RedeEditor.ftl");
+    };
+
+    /** Parses a custom protocol/agenda item/speech and inserts it into the DB. */
+    @Unfinished("Need to turn the speech into a database object")
+    private static final Route postRedeEditor = (Request request, Response response) -> {
+        System.out.println("POST postRedeEditor aufgerufen");
+
+        if (request.queryParams("editType") == null)
+            throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is null");
+
+        String editType = request.queryParams("editType");
+        if (!(editType.equals("protocol") || editType.equals("aItem") || editType.equals("speech"))) {
+            throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is " + editType);
+        }
+
+        System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
+
+        return null;
+    };
 
 //    private static final TemplateViewRoute getDataUpdate = (Request request, Response response) -> {
 //        //.....

@@ -2,7 +2,7 @@
 <!-- Parliament Browser navigation bar -->
 
 <div style="position: absolute;">
-    <button class="nav-button" onclick="showStatusBar()"><i class='fa fa-angle-double-right' style="font-size:36px;"></i></button>
+    <button class="nav-button" onclick="showStatusBar()"><i class='fa fa-angle-double-right' style="font-size:35px;"></i></button>
 </div>
 <div id="parliament-browser-main-navigation-bar">
     <button class="nav-button" onclick="hideStatusBar()"><i class='fa fa-angle-double-left'></i></button>
@@ -11,6 +11,7 @@
     <a href="/dashboard/">Dashboard</a>
     <a href="/network/">Redner-Kategorien-Netzwerk</a>
     <a href="/latex/">LaTeX-Editor</a>
+    <a href="/redeeditor/">Rede-Editor</a>
 </div>
 <script>
 /**

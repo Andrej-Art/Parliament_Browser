@@ -21,6 +21,7 @@
         <li><a href="/dashboard/">Dashboard</a></li>
         <li><a href="/network/">Redner-Kategorien-Netzwerk</a></li>
         <li><a href="/latex/">LaTeX-Editor</a></li>
+        <li><a href="/redeeditor/">Rede-Editor</a></li>
     </ul>
 </div>
 
