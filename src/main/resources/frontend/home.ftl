@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-    <title>butter</title>
-    <link rel="shortcut icon" href="/favicon.ico/?v1" type="image/x-icon">
+    <title>Parliament Browser Homepage</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src = "https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         <#include "css/parliamentBrowser.css">
         <#include "css/home.css">
@@ -27,7 +25,11 @@
 </div>
 
 <script>
-    showStatusBar();
+    document.getElementById("parliament-browser-main-navigation-bar").style.display = 'flex';
+    for (let button of document.getElementsByClassName("nav-button")) {
+        button.style.color = "#bbb";
+        button.onclick = '';
+    }
 </script>
 
 </body>

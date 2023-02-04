@@ -7,6 +7,7 @@ import spark.template.freemarker.FreeMarkerEngine;
 import utility.annotations.*;
 
 import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class SparkHandler {
          * CDU/CSU is equivalent to CDU%2FCSU  %2F is the percent-encoded slash
          */
 
-        get("/favicon.ico/", "image/x-icon", getIcon);
+        get("/favicon.ico/", "image/png", getIcon);
 
         get("/", getHome, new FreeMarkerEngine(cfg));
 
@@ -92,7 +93,10 @@ public class SparkHandler {
 
     /** Website's favicon. */
     private static final Route getIcon = (Request request, Response response) -> {
-        return ImageIO.read(new File(frontendPath + "favicon.ico"));
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(ImageIO.read(new File(frontendPath + "favicon.png")),"png" , baos);
+            return baos.toByteArray();
+        }
     };
 
     /** Test page. */
