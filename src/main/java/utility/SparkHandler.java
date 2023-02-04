@@ -187,7 +187,7 @@ public class SparkHandler {
         //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
         //newDBData.put("sentiment", sentimentData);
 
-        List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
+        List<JSONObject> votes = mongoDBHandler.getPollResults(von, bis, fraction, party, person);
         newDBData.put("votes", votes);
 
         // The Updates for the other charts could be added here
