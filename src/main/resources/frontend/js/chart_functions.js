@@ -18,7 +18,7 @@ function MultiLineEntities(data, target){
  let originalData = sortedData;
 
     // Setting the margins to the same dimensions as all other charts
-    let margin = {top: 10, right: 30, bottom: 30, left: 40},
+    let margin = {top: 10, right: 30, bottom: 60, left: 40},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -168,7 +168,7 @@ function MultiLineEntities(data, target){
  */
 function createBarChart(data, target) {
     // Setting the margins to the same dimensions as all other charts
-    const margin = {top: 10, right: 30, bottom: 30, left: 80},
+    const margin = {top: 10, right: 30, bottom: 60, left: 80},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -256,7 +256,7 @@ function createBarChart(data, target) {
  */
 function createLineChart(data, target) {
     // Setting the margins and dimensions, adjust margins to allow for large numbers
-    var margin = {top: 10, right: 30, bottom: 30, left: 80},
+    var margin = {top: 10, right: 30, bottom: 70, left: 80},
         width = 460 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -366,6 +366,9 @@ function updateCharts() {
     const fraction = document.getElementById("fractionInput").value;
     const party = document.getElementById("partyInput").value;
 
+    // Here we could still implement somehting so if f.e. SPD is entered as fraction
+    // it is internally converted to Fraktion der Sozialdemokratischen Partei Deutschlands
+    // will do tomorrow
 
 
     //add the other updated parameters here: party, person, fraction I do not know how to get them from the
@@ -400,7 +403,6 @@ function updateCharts() {
             let voteData = data["votes"];
 
 
-
             // Create and insert new charts
             MultiLineEntities(entityData, '#entitiesMulti');
             createLineChart(tokenData, '#tokenLine');
@@ -408,8 +410,6 @@ function updateCharts() {
             drawSpiderChart("#spider");
             drawDoughnutChart(voteData, '#pie');
             speakerbarchart(speechData,"#my_dataviz");
-
-
 
         } else {
             console.log("Error: " + ajaxChartData.status);

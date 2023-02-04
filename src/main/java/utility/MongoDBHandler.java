@@ -549,7 +549,7 @@ public class MongoDBHandler {
             pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
         }
         if (!partyFilter.isEmpty()) {
-            pipeline.add(0, match(new Document("persondata.party", fractionFilter)));
+            pipeline.add(0, match(new Document("persondata.party", partyFilter)));
             pipeline.add(0, unwind("$persondata"));
             pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
         }
