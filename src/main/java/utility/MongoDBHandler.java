@@ -528,7 +528,8 @@ public class MongoDBHandler {
      * @author Eric Lakhter
      * @modified DavidJordan
      */
-    public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String personFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
+    public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String personFilter,
+                                                        String partyFilter,String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
         // Setting each of the needed fields to be included in the results
         for (String field : neededField) {
@@ -543,6 +544,11 @@ public class MongoDBHandler {
             pipeline.add(0, lookup("person", "speakerID", "_id", "personDaten"));
         }
         if (!fractionFilter.isEmpty()) {
+            pipeline.add(0, match(new Document("persondata.fraction19", fractionFilter)));
+            pipeline.add(0, unwind("$persondata"));
+            pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
+        }
+        if (!partyFilter.isEmpty()) {
             pipeline.add(0, match(new Document("persondata.party", fractionFilter)));
             pipeline.add(0, unwind("$persondata"));
             pipeline.add(0, lookup("person", "speakerID", "_id", "persondata"));
@@ -648,7 +654,8 @@ public class MongoDBHandler {
             String dateFilterTwo,
             String personFilter,
             String fractionFilter,
-            String sentimentFilter) {
+            String sentimentFilter,
+            String partyFilter) {
 
         //create the pipeline
         List<Bson> pipeline = new ArrayList<>(0);
@@ -659,7 +666,7 @@ public class MongoDBHandler {
         }
         // if person or fraction filters are present, add them as well
         if (!personFilter.isEmpty() || !fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, personFilter, fractionFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, personFilter, fractionFilter, partyFilter);
         }
         //if sentiment filter is provided add it
         if (!sentimentFilter.isEmpty()) {
@@ -738,13 +745,13 @@ public class MongoDBHandler {
         }
 
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
         }
         if (!partyFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
 
         ArrayList<JSONObject> objList = new ArrayList<>();
@@ -781,13 +788,13 @@ public class MongoDBHandler {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
         }
-        if(!partyFilter.isEmpty()){
-            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
+        if (!partyFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
 
         MongoIterable<Document> result = db.getCollection("speech_token")
@@ -820,13 +827,13 @@ public class MongoDBHandler {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
         }
         if (!partyFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
 
         db.getCollection("speech").aggregate(pipeline).allowDiskUse(false)
@@ -861,13 +868,13 @@ public class MongoDBHandler {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
         }
         if (!partyFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, partyFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
 
         db.getCollection("speech_token").aggregate(pipeline)
@@ -883,7 +890,7 @@ public class MongoDBHandler {
     }
 
     public JSONObject getSentimentData(String dateFilterOne, String dateFilterTwo,
-                                       String fractionFilter, String personFilter) {
+                                       String fractionFilter, String personFilter, String partyFilter) {
         //Create two pipelines to get the total amount of positive, negative and neutral sentiments for both speeches and comments
         Bson facet = new Document("$facet", new Document()
                 .append("speechSentimentPipeline", Arrays.asList(
@@ -936,10 +943,13 @@ public class MongoDBHandler {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
+        }
+        if (!partyFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
         JSONObject obj = new JSONObject();
         db.getCollection("speech").aggregate(pipeline).forEach((Consumer<? super Document>) procBlock -> {
@@ -1021,6 +1031,7 @@ public class MongoDBHandler {
         Bson group = new Document("$group", new Document("_id", "$speakerData.fullName")
                 .append("DDCKategorien", new Document("$push", "$mainTopic"))
                 .append("fraction", new Document("$first", "$speakerData.party")));
+        Bson limit = limit(50);
 
 
 
@@ -1060,7 +1071,7 @@ public class MongoDBHandler {
                                 default:
                                     objName.put("group", 7);
                             }
-                            allNamesUnique.add(objName );
+                            objNodes.add(objName);
                             //removes duplicates so that later on there won't be multiple similiar links
                             HashSet<String> uniqueDDCPerSpeech = new HashSet<>();
                             for (String ddc : (ArrayList<String>) procBlock.get("DDCKategorien")) {
@@ -1080,7 +1091,7 @@ public class MongoDBHandler {
                         }
                 );
 
-        System.out.println(allNamesUnique);
+
 //        for (String s : allNamesUnique) {
 //            JSONObject objNodeNames = new JSONObject();
 //            objNodeNames.put("name", s);
@@ -1090,12 +1101,13 @@ public class MongoDBHandler {
         for (String s : allDDCUnique){
             JSONObject objNodeDDC = new JSONObject();
             objNodeDDC.put("name", s);
-            objNodeDDC.put("group", 2);
+            objNodeDDC.put("group", 8);
             objNodes.add(objNodeDDC);
         }
+
         obj.put("nodes", objNodes);
         obj.put("links", objLinks);
-
+        System.out.println(obj);
         return obj;
     }
 
@@ -1186,7 +1198,8 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("Dont know where we save this data")
-    public ArrayList<JSONObject> getPollResults(String dateFilterOne, String dateFilterTwo, String fractionFilter, String personFilter) {
+    public ArrayList<JSONObject> getPollResults(String dateFilterOne, String dateFilterTwo, String fractionFilter,
+                                                String partyFilter, String personFilter) {
 
         //calculates total votes for each party and also for each type of vote
         Bson addFieldsVotesData = new Document("$addFields", new Document()
@@ -1218,10 +1231,13 @@ public class MongoDBHandler {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "");
+            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter);
+            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
+        }
+        if (!partyFilter.isEmpty()) {
+            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
         ArrayList<JSONObject> objList = new ArrayList<>();
         db.getCollection("poll").aggregate(pipeline).allowDiskUse(false).forEach((Consumer<? super Document>) procBlock -> {
