@@ -1059,7 +1059,7 @@ public class MongoDBHandler {
                                 case "FDP" :
                                     objName.put("group", 3);
                                     break;
-                                case "BÜNDNIS 90/DIE GRÜNEN/" :
+                                case "BÜNDNIS 90/DIE GRÜNEN" :
                                     objName.put("group", 4);
                                     break;
                                 case "DIE LINKE." :

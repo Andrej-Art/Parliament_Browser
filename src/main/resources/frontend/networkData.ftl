@@ -44,9 +44,6 @@
         </div>
     </div>
 </div>
-
-
-</body>
 <script>
     const width = "1920";
     const height = "1080";
@@ -293,4 +290,8 @@
     simulation.force("link")
         .links(graph.links);
 </script>
+
+
+</body>
+
 </html>
