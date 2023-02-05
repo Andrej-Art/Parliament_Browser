@@ -1,6 +1,7 @@
 package utility;
 
 import exceptions.EditorFormattingException;
+import exceptions.WrongInputException;
 import freemarker.template.Configuration;
 import org.json.JSONObject;
 import spark.*;
@@ -24,12 +25,15 @@ import static spark.Spark.*;
 @Unfinished("Only some routes are finished")
 public class SparkHandler {
     private static MongoDBHandler mongoDBHandler = null;
+    private static EditorProtocolParser epParser = null;
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
     // the added string redirects to the /resources/ directory
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException {
-        SparkHandler.init(new MongoDBHandler());
+        MongoDBHandler mdbh = new MongoDBHandler();
+        EditorProtocolParser editorProtocolParser = new EditorProtocolParser(mdbh);
+        SparkHandler.init(mdbh, editorProtocolParser);
 //        openInDefaultBrowser();
     }
 
@@ -38,7 +42,8 @@ public class SparkHandler {
      * @see #getHome
      * @author Eric Lakhter
      */
-    public static void init(MongoDBHandler mdbh) throws IOException {
+    public static void init(MongoDBHandler mdbh, EditorProtocolParser editorProtocolParser) throws IOException {
+        epParser = editorProtocolParser;
         mongoDBHandler = mdbh;
 //        staticFiles.externalLocation(frontendPath);
         cfg.setDirectoryForTemplateLoading(new File(frontendPath));
@@ -162,22 +167,31 @@ public class SparkHandler {
     @Unfinished("Need to turn the speech into a database object")
     private static final Route postProtokollEditor = (Request request, Response response) -> {
         System.out.println("POST postProtokollEditor aufgerufen");
+        System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
 
         try {
             if (request.queryParams("editMode") == null)
                 throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
-
             String editMode = request.queryParams("editMode");
-            if (!(editMode.equals("protocol") || editMode.equals("aItem") || editMode.equals("speech")))
-                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is " + editMode);
-
-            System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
-
-            /* parse the input, probably with the help of a new handler */
-            String successMessage = "null";
-
+            String successMessage;
+            switch (editMode) {
+                case "protocol":
+                    epParser.parseEditorProtocol(request.body());
+                    successMessage = "Protocol successfully inserted";
+                    break;
+                case "aItem":
+                    epParser.parseEditorAgendaItem(request.body());
+                    successMessage = "AgendaItem successfully inserted";
+                    break;
+                case "speech":
+                    epParser.parseEditorSpeech(request.body());
+                    successMessage = "Speech successfully inserted";
+                    break;
+                default:
+                    throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is " + editMode);
+            }
             return successJson(successMessage);
-        } catch (EditorFormattingException e) {
+        } catch (EditorFormattingException | WrongInputException e) {
             return errorJson(e.getMessage());
         }
     };

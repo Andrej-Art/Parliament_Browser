@@ -20,6 +20,11 @@
 }
 
 #status-message-box {
+    background-color: white;
+    border-color: darkgray;
+    border-style: solid;
+    border-width: 1px;
+    font-family: monospace;
     overflow: auto;
     resize: none;
     height: 80%;

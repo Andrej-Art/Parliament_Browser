@@ -22,7 +22,7 @@
         </form>
     </div>
     <div class="box-status">
-        <label><textarea id="status-message-box" readonly="readonly"></textarea></label>
+        <div id="status-message-box"></div>
     </div>
 </div>
 
@@ -34,6 +34,7 @@
 </div>
 
 <script>
+document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status messages:<br>';
 <#include "js/editor.js">
 </script>
 

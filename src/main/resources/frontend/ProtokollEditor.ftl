@@ -20,7 +20,7 @@
         <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="speech">Rede</label>
     </div>
     <div class="box-status">
-        <textarea id="status-message-box" readonly="readonly"></textarea>
+        <div id="status-message-box"></div>
     </div>
     <div class="box-editor">
         <form onsubmit="parseContent(); return false;" style="height: 100%">
@@ -32,7 +32,7 @@
 </div>
 
 <script>
-document.getElementById("status-message-box").value = new Date().toLocaleDateString('DE') + '\nStatus messages:';
+document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status messages:<br>';
 changeDefaultText();
 <#include "js/editor.js">
 </script>

@@ -43,11 +43,13 @@ async function parseContent() {
  */
 function handleResponse(responseJson = {status : "Success", message : "Successfully did a thing"}) {
     console.log(responseJson.status);
+    let statusBox = document.getElementById("status-message-box");
     if (responseJson.status === "Success") {
-        let textArea = document.getElementById("status-message-box");
-        textArea.value += '\n' + responseJson.message;
-        textArea.scrollTop = textArea.scrollHeight;
+        statusBox.innerHTML += responseJson.message + '<br>';
+        statusBox.scrollTop = statusBox.scrollHeight;
     } else {
+        statusBox.innerHTML += '<span style="color: red">' + responseJson.message + '</span><br>';
+        statusBox.scrollTop = statusBox.scrollHeight;
         throw Error(responseJson.message);
     }
 }

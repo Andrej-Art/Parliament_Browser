@@ -31,6 +31,7 @@
     document.getElementById("parliament-browser-main-navigation-bar").style.display = 'flex';
     for (let button of document.getElementsByClassName("nav-button")) {
         button.style.color = '#bbb';
+        button.style['text-shadow'] = 'none';
         button.onclick = '';
     }
 </script>
