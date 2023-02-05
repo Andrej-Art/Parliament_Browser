@@ -44,7 +44,7 @@ public class Protocol_Impl implements Protocol {
     public Protocol_Impl(String id, LocalDate date, LocalTime beginTime, LocalTime endTime, long duration, int electionPeriod, int protocolNumber, Set<String> sessionLeaders, ArrayList<String> agendaItems){
         this._id = id;
         this.date = date;
-        this.beginTime =beginTime;
+        this.beginTime = beginTime;
         this.endTime = endTime;
         this.duration = duration;
         this.electionPeriod = electionPeriod;

@@ -145,7 +145,9 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        return successJson();
+        String successMessage = "null";
+
+        return successJson(successMessage);
     };
 
     /** Speech editing page. */
@@ -162,18 +164,19 @@ public class SparkHandler {
         System.out.println("POST postProtokollEditor aufgerufen");
 
         try {
-            if (request.queryParams("editType") == null)
-                throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is null");
+            if (request.queryParams("editMode") == null)
+                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
 
-            String editType = request.queryParams("editType");
-            if (!(editType.equals("protocol") || editType.equals("aItem") || editType.equals("speech")))
-                throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is " + editType);
+            String editMode = request.queryParams("editMode");
+            if (!(editMode.equals("protocol") || editMode.equals("aItem") || editMode.equals("speech")))
+                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is " + editMode);
 
             System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
 
             /* parse the input, probably with the help of a new handler */
+            String successMessage = "null";
 
-            return successJson();
+            return successJson(successMessage);
         } catch (EditorFormattingException e) {
             return errorJson(e.getMessage());
         }
@@ -310,12 +313,19 @@ public class SparkHandler {
      */
 
     /**
-     *
-     * @return
+     * Returns a JSON signaling that the request was handled without errors.
+     * @return JSON with successMessage
+     * @author Eric Lakhter
      */
-    private static String successJson() {
-        return "{\"status\":\"Success\"}";
+    private static String successJson(String successMessage) {
+        return "{\"status\":\"Success\",\"message\":\"" + successMessage.replace("\"", "\\\"") + "\"}";
     }
+
+    /**
+     * Returns a JSON signaling that an error occurred while handling the request.
+     * @return JSON with errorMessage
+     * @author Eric Lakhter
+     */
     private static String errorJson(String errorMessage){
         return "{\"status\":\"Error\",\"message\":\"" + errorMessage.replace("\"", "\\\"") + "\"}";
     }

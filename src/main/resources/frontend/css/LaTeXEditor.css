@@ -5,6 +5,10 @@
     padding: 70px 30px;
     width: 50%;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .editor-container-textarea {
@@ -12,12 +16,31 @@
     float: left;
 }
 
+.box-editor {
+    box-sizing: border-box;
+    height: 80%;
+    width: 90%;
+}
+
 #editor-textarea {
     overflow: auto;
     resize: none;
-    margin: 0 5%;
     height: 90%;
+    width: 100%;
+}
+
+.box-status {
+    box-sizing: border-box;
+    resize: none;
+    height: 20%;
     width: 90%;
+}
+
+#status-message-box {
+    overflow: auto;
+    resize: none;
+    height: 100%;
+    width: 100%;
 }
 
 .editor-container-preview {

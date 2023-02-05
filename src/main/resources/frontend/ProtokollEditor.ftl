@@ -4,7 +4,6 @@
     <title>Protokoll-Editor</title>
     <meta name="author" content="Eric Lakhter">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         <#include "css/parliamentBrowser.css">
         <#include "css/ProtokollEditor.css">
@@ -14,20 +13,27 @@
 
 <#include "parliamentBrowser.ftl">
 
-<div class="speech-editor">
-    <form onsubmit="return false;">
-        <label><input type="radio" name="edit-type" value="protocol">Protokoll</label>
-        <label><input type="radio" name="edit-type" value="aItem">Tagesordnungspunkt</label>
-        <label><input type="radio" name="edit-type" value="speech">Rede</label>
-    </form>
-    <form onsubmit="parseContent(); return false;" style="height: 100%">
-        <label> Editor <button type="submit">Generate</button><br><br>
-            <textarea id="editor-textarea"></textarea>
-        </label>
-    </form>
+<div class="protocol-editor">
+    <div class="box-buttons"> Editor:<br>
+        <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="protocol" checked="checked">Protokoll</label><br>
+        <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
+        <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="speech">Rede</label>
+    </div>
+    <div class="box-status">
+        <textarea id="status-message-box" readonly="readonly"></textarea>
+    </div>
+    <div class="box-editor">
+        <form onsubmit="parseContent(); return false;" style="height: 100%">
+            <label><button type="submit">Generate</button><br><br>
+                <textarea id="editor-textarea" placeholder=""></textarea>
+            </label>
+        </form>
+    </div>
 </div>
 
 <script>
+document.getElementById("status-message-box").value = new Date().toLocaleDateString('DE') + '\nStatus messages:';
+changeDefaultText();
 <#include "js/editor.js">
 </script>
 

@@ -17,12 +17,13 @@
 <div class="homepage-description">
     <h1 id="title">Homepage 🔥</h1>
     <ul>
+        <li><a href="test/">✨ Test-Seite ✨</a></li>
         <li><a href="#title">Homepage</a></li>
-        <li><a href="/dashboard/">Dashboard</a></li>
-        <li><a href="/network/1/">Redner-Kategorien-Netzwerk</a></li>
-        <li><a href="/reden/">Reden-Visualisierung</a></li>
-        <li><a href="/protokolleditor/">Protokoll-Editor</a></li>
-        <li><a href="/latex/">LaTeX-Editor</a></li>
+        <li><a href="dashboard/">Dashboard</a></li>
+        <li><a href="network/1/">Redner-Kategorien-Netzwerk</a></li>
+        <li><a href="reden/">Reden-Visualisierung</a></li>
+        <li><a href="protokolleditor/">Protokoll-Editor</a></li>
+        <li><a href="latex/">LaTeX-Editor</a></li>
     </ul>
 </div>
 
