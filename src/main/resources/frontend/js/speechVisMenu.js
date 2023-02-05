@@ -128,10 +128,12 @@ function setPageSpeechVis(speechData = {}) {
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speech-title").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speech-header").innerHTML =
-        '<li>Redner: ' + fullName + ' <img alt="Profilbild" src="' + speakerData["picture"][0] + '" class="speaker-pic"></li>' +
+        '<li>Redner: ' + fullName + '</li>' +
         '<li>Partei: ' + speakerData["party"] + '</li>' +
         '<li>Datum: ' + speechData["date"] + '</li>' +
         '<li>Durchschnittliches Sentiment: ' + speechData["speechSentiment"].toFixed(4) + '</li>';
+    document.getElementById("speaker-pic").innerHTML =
+        '<img alt="Profilbild" src="' + speakerData["picture"][0] + '" class="speaker-pic-header">';
     document.getElementById("speech-text").innerHTML = applyDataToSpeech(
         speechData["text"],
         perData,

@@ -31,9 +31,14 @@
 </div>
 
 <div class="speech-vis-text">
-    <h1 id="speech-title"></h1>
+    <div class="speech-header-container">
+        <div>
+            <h1 id="speech-title"></h1>
 
-    <ul id="speech-header"></ul>
+            <ul id="speech-header"></ul>
+        </div>
+        <div id="speaker-pic"></div>
+    </div>
 
     <div style="text-align: justify">
         <p id="speech-text"></p>

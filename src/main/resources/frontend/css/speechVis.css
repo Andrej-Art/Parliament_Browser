@@ -28,13 +28,21 @@
 
 /* Style for speech visualisation text field*/
 
+.speech-header-container {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+}
+
 .speech-vis-text {
+    box-sizing: border-box;
     bottom: 0;
     height: 95vh;
     margin-left: 300px;
-    padding: 30px;
     overflow: auto;
-    box-sizing: border-box;
+    padding: 30px;
 }
 
 .speech-vis-legend {
@@ -54,9 +62,15 @@
 
 /* Style for pictures */
 
-.speaker-pic {
+.speaker-pic-comment {
     height:40px;
     width:60px;
+    vertical-align: middle;
+}
+
+.speaker-pic-header {
+    height:80px;
+    width:120px;
     vertical-align: middle;
 }
 

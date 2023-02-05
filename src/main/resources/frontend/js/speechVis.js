@@ -105,9 +105,9 @@ function formatSentimentBlob(sentiment = 0.0) {
  * @return Formatted String which is to be inserted in the displayed speech.
  * @author Eric Lakhter
  */
-function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) {
+function formatCommentData(commentDatum = {commentText: "Heiterkeit", commentPos: 22}) {
     let returnText = '';
-    let fullText = commentDatum["commentText"];
+    let fullText = commentDatum.commentText;
     // If the comment has more than one part it gets split into multiple lines
     // example: "Beifall bei der AfD – Dr. Marco Buschmann [FDP]: Traditionen wollten Sie doch direkt brechen!"
     // =>
@@ -117,7 +117,7 @@ function formatCommentData(commentDatum = {text: "Heiterkeit", commentPos: 22}) 
     for (let textPart of splitText) {
         if (commentDatum.hasOwnProperty("commentator") && textPart.includes(commentDatum["commentator"]["fullName"])) {
             returnText += ('<p>' +
-                '<img alt="Profilbild" src="' + commentDatum["commentator"]["picture"][0] + '" class="speaker-pic"> ' +
+                '<img alt="Profilbild" src="' + commentDatum["commentator"]["picture"][0] + '" class="speaker-pic-comment"> ' +
                 '<span class="comment">' + textPart + '</span>');
         } else {
             returnText += ('<p><span class="comment">' + textPart + '</span>');
