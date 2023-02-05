@@ -14,59 +14,64 @@
         <#--    <legend>Fractionfilter</legend>-->
 
         <div>
-            <input type="checkbox" id="SPD" name="SPD" checked>
+            <input type="checkbox" id="SPD" name="SPD" checked onclick="spdCheckbox()">
             <label style="color: red" for="SPD">SPD</label>
         </div>
 
         <div>
-            <input type="checkbox" id="CDU/CSU" name="CDU/CSU" checked>
+            <input type="checkbox" id="CDU/CSU" name="CDU/CSU" checked onclick="cxuCheckbox()">
             <label style="color: black" for="CDU/CSU">CDU/CSU</label>
         </div>
 
         <div>
-            <input type="checkbox" id="FDP" name="FDP" checked>
+            <input type="checkbox" id="FDP" name="FDP" checked onclick="fdpCheckbox()">
             <label style="color: yellow" for="FDP">FDP</label>
         </div>
         <div>
-            <input type="checkbox" id="Grünen" name="Grünen" checked>
+            <input type="checkbox" id="Grünen" name="Grünen" checked onclick="grueneCheckbox()">
             <label style="color:green" for="Grünen">BÜNDNIS90/Die Grünen</label>
         </div>
         <div>
-            <input type="checkbox" id="AfD" name="AfD" checked>
+            <input type="checkbox" id="AfD" name="AfD" checked onclick="afdCheckbox()">
             <label style="color: blue" for="AfD">AfD</label>
         </div>
         <div>
-            <input type="checkbox" id="DIE LINKE." name="DIE LINKE." checked>
+            <input type="checkbox" id="DIE LINKE." name="DIE LINKE." checked onclick="linkeCheckbox()">
             <label style="color: deeppink" for="DIE LINKE.">DIE LINKE.</label>
+        </div>
+        <div>
+            <input type="checkbox" id="parteilos" name="Parteilos" checked onclick="parteilosCheckbox()">
+            <label style="color: gray" for="parteilos">Parteilos</label>
         </div>
     </div>
 </div>
-
 
 
 </body>
 <script>
     const width = "1920";
     const height = "1080";
-    const radius = 6;
 
-    // const sourceRadius = 10;
-    // const entityRadius = 5;
+
+    const sourceRadius = 10;
+    const entityRadius = 5;
 
     let graph = ${networkData}
-    <!--var graph = {nodes:[{"name" : "Eric", "group" : 1},-->
-    <!--                    {"name" : "David", "group" : 1},-->
-    <!--                    {"name" : "Edvin", "group" : 1},-->
-    <!--                    {"name" : "Julian", "group" : 1},-->
-    <!--                    {"name" : "Andrej", "group" : 1},-->
-    <!--                    {"name" : "Informatik", "group" : 2},-->
-    <!--                    {"name" : "Mathe", "group" : 2},-->
-    <!--                    {"name" : "Physik", "group" : 2}],-->
-    <!--            links:[{"source" : "Eric", "target" : "Informatik", "value" : 1},-->
-    <!--                    {"source" : "Edvin", "target" : "Mathe", "value" : 1},-->
-    <!--                    {"source" : "Edvin", "target" : "Informatik", "value" : 1},-->
-    <!--                    {"source" : "David", "target" : "Mathe" , "value" : 1},-->
-    <!--                    {"source" : "David", "target" : "Physik", "value" : 1}]};-->
+    // let graph = {
+    //     nodes: [{"name": "Eric", "group": 1},
+    //         {"name": "David", "group": 2},
+    //         {"name": "Edvin", "group": 2},
+    //         {"name": "Julian", "group": 2},
+    //         {"name": "Andrej", "group": 2},
+    //         {"name": "Informatik", "group": 8},
+    //         {"name": "Mathe", "group": 8},
+    //         {"name": "Physik", "group": 8}],
+    //     links: [{"source": "Eric", "target": "Informatik", "value": 1},
+    //         {"source": "Edvin", "target": "Mathe", "value": 1},
+    //         {"source": "Edvin", "target": "Informatik", "value": 1},
+    //         {"source": "David", "target": "Mathe", "value": 1},
+    //         {"source": "David", "target": "Physik", "value": 1}]
+    // };
 
     var svg = d3.select("#networkGraph")
         .append("svg")
@@ -81,7 +86,7 @@
             return d.name;
         }))
         .force('charge', d3.forceManyBody()
-            .strength(-50000)
+            .strength(-20000)
             .theta(0.5)
             .distanceMax(500)
         )
@@ -106,7 +111,8 @@
         //I made the article/source nodes larger than the entity nodes
         .attr("r", function (d) {
             return d.group == 8 ? 25 : 5
-        });
+        })
+
 
     node
         .style("fill", function (d) {
@@ -148,6 +154,105 @@
         .style("font-size", "10.5px");
 
 
+    function spdCheckbox() {
+        let checkboxSPD = document.getElementById("SPD");
+
+        if (checkboxSPD.checked === false) {
+            node.filter(function (d){return d.group === 2}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 2}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 2}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 2}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 2}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 2}).style("visibility", "visible");
+        }
+    }
+    function cxuCheckbox() {
+        let checkboxCxU = document.getElementById("CDU/CSU");
+
+        if (checkboxCxU.checked === false) {
+            node.filter(function (d){return d.group === 1}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 1}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 1}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 1}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 1}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 1}).style("visibility", "visible");
+        }
+    }
+    function fdpCheckbox() {
+        let checkboxFDP = document.getElementById("FDP");
+
+        if (checkboxFDP.checked === false) {
+            node.filter(function (d){return d.group === 3}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 3}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 3}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 3}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 3}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 3}).style("visibility", "visible");
+        }
+    }
+    function grueneCheckbox() {
+        let checkboxGruene = document.getElementById("Grünen");
+
+        if (checkboxGruene.checked === false) {
+            node.filter(function (d){return d.group === 4}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 4}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 4}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 4}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 4}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 4}).style("visibility", "visible");
+        }
+    }
+    function afdCheckbox() {
+        let checkboxAfD = document.getElementById("AfD");
+
+        if (checkboxAfD.checked === false) {
+            node.filter(function (d){return d.group === 5}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 5}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 5}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 5}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 5}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 5}).style("visibility", "visible");
+        }
+    }
+    function linkeCheckbox() {
+        let checkboxLinke = document.getElementById("DIE LINKE.");
+
+        if (checkboxLinke.checked === false) {
+            node.filter(function (d){return d.group === 6}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 6}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 6}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 6}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 6}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 6}).style("visibility", "visible");
+        }
+    }
+    function parteilosCheckbox() {
+        let checkboxParteilos = document.getElementById("parteilos");
+
+        if (checkboxParteilos.checked === false) {
+            node.filter(function (d){return d.group === 7}).style("visibility", "hidden");
+            label.filter(function (d){return d.group === 7}).style("visibility", "hidden");
+            link.filter(function (d){return d.source.group === 7}).style("visibility", "hidden");
+
+        } else {
+            node.filter(function (d){return d.group === 7}).style("visibility", "visible");
+            label.filter(function (d){return d.group === 7}).style("visibility", "visible");
+            link.filter(function (d){return d.source.group === 7}).style("visibility", "visible");
+        }
+    }
+
     function ticked() {
         link
             .attr("x1", function (d) {
@@ -184,6 +289,7 @@
     simulation
         .nodes(graph.nodes)
         .on("tick", ticked);
+
 
     simulation.force("link")
         .links(graph.links);
