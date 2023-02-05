@@ -2,14 +2,13 @@
 <head>
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <link rel="stylesheet" href="network.css">
     <style><#include "css/network.css"></style>
 
 </head>
 
 
 <body>
-<div style="overflow : auto" id="networkGraph">
+<div id="networkGraph">
     <div class="flex-container">
         <#--    <legend>Fractionfilter</legend>-->
 
