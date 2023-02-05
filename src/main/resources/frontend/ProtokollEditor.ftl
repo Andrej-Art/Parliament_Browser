@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <title>Parliament Browser Homepage</title>
+    <title>Protokoll-Editor</title>
     <meta name="author" content="Eric Lakhter">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
