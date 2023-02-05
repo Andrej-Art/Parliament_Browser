@@ -30,23 +30,7 @@
 </div>
 
 <script>
-/**
- * Tries to generate a pdf based on user input.
- * @author Eric Lakhter
- */
-async function parseLaTeX() {
-    try {
-        let latexCode = document.getElementById("editor-textarea").value;
-        let response = await fetch("/latex/post/", {
-            method: 'POST',
-            body: latexCode
-        });
-        console.log((await response.text()).valueOf());
-        document.getElementById("editor-preview").src = "/reden/";
-    } catch (e) {
-        console.error(e);
-    }
-}
+<#include "js/editor.js">
 </script>
 
 </body>

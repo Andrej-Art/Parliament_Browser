@@ -7,7 +7,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         <#include "css/parliamentBrowser.css">
-        <#include "css/RedeEditor.css">
+        <#include "css/ProtokollEditor.css">
     </style>
 </head>
 <body>
@@ -28,23 +28,7 @@
 </div>
 
 <script>
-/**
- * Tries to insert data into the database based on user input.
- * @author Eric Lakhter
- */
-async function parseContent() {
-    try {
-        let editType = document.querySelector('input[name="edit-type"]:checked').value;
-        let content = document.getElementById("editor-textarea").value;
-        let response = await fetch("/redeeditor/post/?editType=" + editType, {
-            method: 'POST',
-            body: content
-        });
-        console.log((await response.text()).valueOf());
-    } catch (e) {
-        console.error(e);
-    }
-}
+<#include "js/editor.js">
 </script>
 
 </body>

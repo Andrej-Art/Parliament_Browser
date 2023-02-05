@@ -8,9 +8,7 @@ import spark.template.freemarker.FreeMarkerEngine;
 import utility.annotations.*;
 
 import javax.imageio.ImageIO;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +21,12 @@ import static spark.Spark.*;
  * @author Eric Lakhter
  */
 @Testing
-@Unfinished("Is missing most routes")
+@Unfinished("Only some routes are finished")
 public class SparkHandler {
     private static MongoDBHandler mongoDBHandler = null;
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
     // the added string redirects to the /resources/ directory
-    private static final String frontendPath = /*SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
+    private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException {
         SparkHandler.init(new MongoDBHandler());
@@ -42,6 +40,7 @@ public class SparkHandler {
      */
     public static void init(MongoDBHandler mdbh) throws IOException {
         mongoDBHandler = mdbh;
+//        staticFiles.externalLocation(frontendPath);
         cfg.setDirectoryForTemplateLoading(new File(frontendPath));
         cfg.setDefaultEncoding("UTF-8");
         port(4567);
@@ -78,14 +77,14 @@ public class SparkHandler {
         get("/update-charts/", getChartUpdates);
 
         get("/reden/", getReden, new FreeMarkerEngine(cfg));
-        get("/reden/speechVis/", getSpeechVis);
-        get("/reden/speechIDs/", getSpeechIDs);
+        get("/reden/speechVis/", "application/json", getSpeechVis);
+        get("/reden/speechIDs/", "application/json", getSpeechIDs);
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
-        post("/latex/post/", "text/plaintext", postLaTeX);
+        post("/latex/post/", "application/json", postLaTeX);
 
-        get("/redeeditor/", getRedeEditor, new FreeMarkerEngine(cfg));
-        post("/redeeditor/post/", "text/plaintext", postRedeEditor);
+        get("/protokolleditor/", getProtokollEditor, new FreeMarkerEngine(cfg));
+        post("/protokolleditor/post/", "application/json", postProtokollEditor);
 
         get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
     }
@@ -128,7 +127,7 @@ public class SparkHandler {
     };
 
     /** LaTeX editing page. */
-    @Unfinished("")
+    @Unfinished("Doesn't do anything yet")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
@@ -146,38 +145,37 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        return "null but this is a test";
+        return successJson();
     };
 
     /** Speech editing page. */
     @Unfinished("Nothing more than a text field so far")
-    private static final TemplateViewRoute getRedeEditor = (Request request, Response response) -> {
+    private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        return new ModelAndView(pageContent, "RedeEditor.ftl");
+        return new ModelAndView(pageContent, "ProtokollEditor.ftl");
     };
 
     /** Tries to parse a custom protocol/agenda item/speech and to insert it into the DB. */
     @Unfinished("Need to turn the speech into a database object")
-    private static final Route postRedeEditor = (Request request, Response response) -> {
-        System.out.println("POST postRedeEditor aufgerufen");
+    private static final Route postProtokollEditor = (Request request, Response response) -> {
+        System.out.println("POST postProtokollEditor aufgerufen");
 
         try {
             if (request.queryParams("editType") == null)
                 throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is null");
 
             String editType = request.queryParams("editType");
-            if (!(editType.equals("protocol") || editType.equals("aItem") || editType.equals("speech"))) {
+            if (!(editType.equals("protocol") || editType.equals("aItem") || editType.equals("speech")))
                 throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is " + editType);
-            }
 
             System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
 
             /* parse the input, probably with the help of a new handler */
 
-            return "Success, hooray";
+            return successJson();
         } catch (EditorFormattingException e) {
-            return e.getMessage();
+            return errorJson(e.getMessage());
         }
     };
 
@@ -310,6 +308,17 @@ public class SparkHandler {
     /*
      * MISC:
      */
+
+    /**
+     *
+     * @return
+     */
+    private static String successJson() {
+        return "{\"status\":\"Success\"}";
+    }
+    private static String errorJson(String errorMessage){
+        return "{\"status\":\"Error\",\"message\":\"" + errorMessage.replace("\"", "\\\"") + "\"}";
+    }
 
     /**
      * Opens <a href="http://localhost:4567/">http://localhost:4567/</a> in the system's default browser.

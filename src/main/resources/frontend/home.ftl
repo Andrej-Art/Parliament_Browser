@@ -19,9 +19,9 @@
     <ul>
         <li><a href="#title">Homepage</a></li>
         <li><a href="/dashboard/">Dashboard</a></li>
-        <li><a href="/network/">Redner-Kategorien-Netzwerk</a></li>
+        <li><a href="/network/1/">Redner-Kategorien-Netzwerk</a></li>
         <li><a href="/reden/">Reden-Visualisierung</a></li>
-        <li><a href="/redeeditor/">Rede-Editor</a></li>
+        <li><a href="/protokolleditor/">Protokoll-Editor</a></li>
         <li><a href="/latex/">LaTeX-Editor</a></li>
     </ul>
 </div>
@@ -29,7 +29,7 @@
 <script>
     document.getElementById("parliament-browser-main-navigation-bar").style.display = 'flex';
     for (let button of document.getElementsByClassName("nav-button")) {
-        button.style.color = "#bbb";
+        button.style.color = '#bbb';
         button.onclick = '';
     }
 </script>
