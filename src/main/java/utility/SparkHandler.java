@@ -273,7 +273,7 @@ public class SparkHandler {
     private final static TemplateViewRoute getNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        JSONObject networkData = mongoDBHandler.matchSpeakerToDDCTest();
+        JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
 
         pageContent.put("networkData", networkData);
 

@@ -963,67 +963,107 @@ public class MongoDBHandler {
 
     /**
      * returns who commented on which speaker
+     *
+     * @return
      * @author Edvin Nise
      */
     @Unfinished("waiting for correct structure of collection")
-    public ArrayList<Object> commentatorToSpeaker() {
-        ArrayList<Object> commentatorToSpeakerData = new ArrayList<>();
+    public JSONObject commentatorToSpeaker() {
 
+
+        Bson match = new Document("$match", new Document("$and", Arrays.asList(
+                new Document("commentatorID", new Document("$ne", "N/A")),
+                new Document("speakerID", new Document("$ne", "")))));
         Bson lookupCommentator = lookup("person", "commentatorID", "_id", "CommentatorPerson");
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
-        Bson project = project(new Document("CommentatorName", new Document("$concat",
-                Arrays.asList("$CommentatorPerson.firstName", " ", "$CommentatorPerson.lastName")))
-                .append("SpeakerName", new Document("$concat", Arrays.asList("$SpeakerPerson.firstName", " ", "$SpeakerPerson.lastName")))
-                .append("sentiment", 1));
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker, project));
+
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match,lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
 //        if (!sent.isEmpty()) {
 //            applySentimentFilterToAggregation(pipeline, sent);
 //        }
+        JSONObject obj = new JSONObject();
+        HashSet<String> objNodes = new HashSet<>();
+        HashSet<String> objLinks = new HashSet<>();
         db.getCollection("comment").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
-                    JSONObject obj = new JSONObject();
-                    obj.put("commentatorName", procBlock.getString("CommentatorName"));
-                    obj.put("speakerName", procBlock.getString("SpeakerName"));
-                    obj.put("sentiment", procBlock.getDouble("sentiment"));
-                    commentatorToSpeakerData.add(obj);
+                    JSONObject objLink = new JSONObject();
+                    objLink.put("source", procBlock.getString("CommentatorName"));
+                    objLink.put("target", procBlock.getString("SpeakerName"));
+                    objLink.put("sentiment", procBlock.getDouble("sentiment"));
+                    objLinks.add(objLink.toString());
+                    Document docComment = (Document) procBlock.get("CommentatorPerson");
+                    JSONObject objCommentator = new JSONObject();
+                    objCommentator.put("name", docComment.getString("fullName"));
+                    switch (docComment.getString("party")){
+                        case "CDU" :
+                        case "CSU" :
+                            objCommentator.put("group", 1);
+                            break;
+                        case "SPD" :
+                            objCommentator.put("group", 2);
+                            break;
+                        case "FDP" :
+                            objCommentator.put("group", 3);
+                            break;
+                        case "BÜNDNIS 90/DIE GRÜNEN" :
+                            objCommentator.put("group", 4);
+                            break;
+                        case "DIE LINKE." :
+                            objCommentator.put("group", 5);
+                            break;
+                        case "AfD" :
+                            objCommentator.put("group", 6);
+                            break;
+                        default:
+                            objCommentator.put("group", 7);
+                    }
+                    objNodes.add(objCommentator.toString());
+
+                    Document docSpeaker = (Document) procBlock.get("SpeakerPerson");
+                    JSONObject objSpeaker = new JSONObject();
+                    objCommentator.put("name", docSpeaker.getString("fullName"));
+                    switch (docSpeaker.getString("party")){
+                        case "CDU" :
+                        case "CSU" :
+                            objCommentator.put("group", 1);
+                            break;
+                        case "SPD" :
+                            objCommentator.put("group", 2);
+                            break;
+                        case "FDP" :
+                            objCommentator.put("group", 3);
+                            break;
+                        case "BÜNDNIS 90/DIE GRÜNEN" :
+                            objCommentator.put("group", 4);
+                            break;
+                        case "DIE LINKE." :
+                            objCommentator.put("group", 5);
+                            break;
+                        case "AfD" :
+                            objCommentator.put("group", 6);
+                            break;
+                        default:
+                            objCommentator.put("group", 7);
+                    }
+                    objNodes.add(objSpeaker.toString());
                 });
-        System.out.println(commentatorToSpeakerData);
-        return commentatorToSpeakerData;
+        obj.put("nodes", objNodes);
+        obj.put("links", objLinks);
+        return obj;
+
     }
 
     /**
      * returns speaker with corresponding topics
      * @author Edvin Nise
+     * @return JSONObject
      */
-    @Unfinished("Waiting for structure of collection")
-    public JSONObject matchSpeakerToDDC() {
-        JSONObject speakerWithDDCJSON = new JSONObject();
-
-        Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
-        Bson unwind = unwind("$speakerData");
-        Bson project = project(new Document("Abgeordneter", new Document("$concat", Arrays.asList("$speakerData.firstName", " ", "$speakerData.lastName")))
-                .append("mainTopic", 1)
-                .append("maybeTopic", 1));
-        Bson group = new Document("$group", new Document("_id", "$Abgeordneter")
-                .append("DDCKategorien", new Document("$first", "$mainTopic")));
-        Bson limit = limit(20);
-
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, project, group, limit));
-
-        db.getCollection("speech").aggregate(pipeline)
-                .allowDiskUse(false)
-                .forEach((Consumer<? super Document>) procBlock -> speakerWithDDCJSON.put(procBlock.getString("_id"),
-                        ((ArrayList<String>) procBlock.get("allDDC"))));
-        System.out.println(speakerWithDDCJSON);
-        return speakerWithDDCJSON;
-    }
-
     @Testing
-    public JSONObject matchSpeakerToDDCTest() {
+    public JSONObject matchSpeakerToDDC() {
 
         Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
@@ -1032,8 +1072,6 @@ public class MongoDBHandler {
                 .append("DDCKategorien", new Document("$push", "$mainTopic"))
                 .append("fraction", new Document("$first", "$speakerData.party")));
         Bson limit = limit(50);
-
-
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, group));
         JSONObject obj = new JSONObject();
@@ -1091,23 +1129,16 @@ public class MongoDBHandler {
                         }
                 );
 
-
-//        for (String s : allNamesUnique) {
-//            JSONObject objNodeNames = new JSONObject();
-//            objNodeNames.put("name", s);
-//            objNodeNames.put("group", 1);
-//            objNodes.add(objNodeNames);
-//        }
         for (String s : allDDCUnique){
             JSONObject objNodeDDC = new JSONObject();
             objNodeDDC.put("name", s);
             objNodeDDC.put("group", 8);
             objNodes.add(objNodeDDC);
         }
-
+        System.out.println(objLinks);
         obj.put("nodes", objNodes);
         obj.put("links", objLinks);
-        System.out.println(obj);
+
         return obj;
     }
 
