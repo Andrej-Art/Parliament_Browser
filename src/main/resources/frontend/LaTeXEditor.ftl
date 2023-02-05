@@ -15,8 +15,8 @@
 <#include "parliamentBrowser.ftl">
 
 <div class="editor-container editor-container-textarea">
-    <form onsubmit="generatePDF(); return false;" style="height: 100%">
-        <label> Editor <button type="submit">Generate</button><br>
+    <form onsubmit="parseLaTeX(); return false;" style="height: 100%">
+        <label> Editor <button type="submit">Generate</button><br><br>
             <textarea id="editor-textarea"></textarea>
         </label>
     </form>
@@ -30,15 +30,22 @@
 </div>
 
 <script>
-function generatePDF() {
-    let latexCode = document.getElementById("editor-textarea").value;
-    console.log(latexCode);
-    fetch("/latex/post/", {
-        method: 'POST',
-        body: latexCode
-    });
-    document.getElementById("editor-preview").src = "/reden/";
-    return false;
+/**
+ * Tries to generate a pdf based on user input.
+ * @author Eric Lakhter
+ */
+async function parseLaTeX() {
+    try {
+        let latexCode = document.getElementById("editor-textarea").value;
+        let response = await fetch("/latex/post/", {
+            method: 'POST',
+            body: latexCode
+        });
+        console.log((await response.text()).valueOf());
+        document.getElementById("editor-preview").src = "/reden/";
+    } catch (e) {
+        console.error(e);
+    }
 }
 </script>
 

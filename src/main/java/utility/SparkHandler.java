@@ -82,10 +82,10 @@ public class SparkHandler {
         get("/reden/speechIDs/", getSpeechIDs);
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
-        post("/latex/post/", postLaTeX);
+        post("/latex/post/", "text/plaintext", postLaTeX);
 
         get("/redeeditor/", getRedeEditor, new FreeMarkerEngine(cfg));
-        post("/redeeditor/post/", postRedeEditor);
+        post("/redeeditor/post/", "text/plaintext", postRedeEditor);
 
         get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
     }
@@ -139,14 +139,14 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
-    /** Returns a PDF file. */
+    /** Tries to return a PDF file. */
     @Unfinished("Need to convert the LaTeX code to a pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
         System.out.println("POST postLaTeX aufgerufen");
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        return null;
+        return "null but this is a test";
     };
 
     /** Speech editing page. */
@@ -157,22 +157,28 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "RedeEditor.ftl");
     };
 
-    /** Parses a custom protocol/agenda item/speech and inserts it into the DB. */
+    /** Tries to parse a custom protocol/agenda item/speech and to insert it into the DB. */
     @Unfinished("Need to turn the speech into a database object")
     private static final Route postRedeEditor = (Request request, Response response) -> {
         System.out.println("POST postRedeEditor aufgerufen");
 
-        if (request.queryParams("editType") == null)
-            throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is null");
+        try {
+            if (request.queryParams("editType") == null)
+                throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is null");
 
-        String editType = request.queryParams("editType");
-        if (!(editType.equals("protocol") || editType.equals("aItem") || editType.equals("speech"))) {
-            throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is " + editType);
+            String editType = request.queryParams("editType");
+            if (!(editType.equals("protocol") || editType.equals("aItem") || editType.equals("speech"))) {
+                throw new EditorFormattingException("editType must be either \"protocol\", \"aItem\" or \"speech\" but is " + editType);
+            }
+
+            System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
+
+            /* parse the input, probably with the help of a new handler */
+
+            return "Success, hooray";
+        } catch (EditorFormattingException e) {
+            return e.getMessage();
         }
-
-        System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
-
-        return null;
     };
 
 //    private static final TemplateViewRoute getDataUpdate = (Request request, Response response) -> {
@@ -235,6 +241,7 @@ public class SparkHandler {
         response.type("application/json");
         return newDBData;
     };
+
     /** Speech visualisation page. */
     private static final TemplateViewRoute getReden = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();

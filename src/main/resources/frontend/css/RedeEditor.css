@@ -1,0 +1,15 @@
+/* Style for speech editing */
+
+.speech-editor {
+    box-sizing: border-box;
+    padding: 80px 30px;
+    width: 100vw;
+    height: 100vh;
+}
+
+#editor-textarea {
+    overflow: auto;
+    resize: none;
+    height: 90%;
+    width: 100%;
+}
