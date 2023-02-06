@@ -294,33 +294,6 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "networkData.ftl");
     };
 
-    /**
-     * Route for handling the data to update the charts on the dashboard
-     * @author DavidJordan
-     */
-    private static final Route getChartUpdatesAjax = (Request request, Response response) ->{
-        // The Datefilters that are gotten through the calendar fields
-        String dateFilterOne = request.queryParams("von") != null ? request.queryParams("von") : "";
-        String dateFilterTwo = request.queryParams("bis") != null ? request.queryParams("bis") : "";
-        // The Redner person gotten through the search field
-        String personFilter = request.queryParams("personFilter") != null ? request.queryParams("personFilter") : "";
-        /*
-        Add the party and fraction filters here that are input through the dropdown menus. Not sure how to do that yet
-         */
-        JSONObject newDBData = new JSONObject();
-//        List<JSONObject> tokenData = mongoDBHandler.getTokenCount(30, dateFilterOne, dateFilterTwo, "", personFilter);
-//        newDBData.put("token", tokenData);
-
-//        List<JSONObject> posData = mongoDBHandler.getPOSCount(dateFilterOne, dateFilterTwo, "", personFilter);
-//        newDBData.put("pos", posData);
-
-//        JSONObject entityData = mongoDBHandler.getNamedEntityCount(dateFilterOne, dateFilterTwo, "", personFilter);
-//        newDBData.put("entities", entityData);
-
-        // The Updates for the other charts could be added here
-        response.type("application/json");
-        return newDBData;
-    };
 
     /*
      * MISC:
