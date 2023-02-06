@@ -1,15 +1,13 @@
-package data.impl.tex;
+package data.tex;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Arrays.copyOf;
 
 /**
  * The {@code Speech_TeX} class.

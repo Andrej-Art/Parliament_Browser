@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
 import utility.annotations.*;
+import utility.webservice.EditorProtocolParser;
 
 import javax.imageio.ImageIO;
 import java.io.*;

@@ -24,6 +24,8 @@
     border-color: darkgray;
     border-style: solid;
     border-width: 1px;
+    box-sizing: border-box;
+    padding: 5px;
     font-family: monospace;
     overflow: auto;
     resize: none;

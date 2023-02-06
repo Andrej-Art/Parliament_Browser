@@ -1,3 +1,15 @@
+/*
+ * Current last poll is https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=830
+ * The page's source has elements which directly correspond to the poll results.
+ * Polls (seemingly) start at ID 1: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=1
+ * The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
+ * and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
+ * Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i = 1 upward we won't
+ * ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
+ * Some IDs seem to be missing, e.g. 470. The noPollCounter variable controls whether missing polls are
+ * consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
+ */
+
 package utility;
 
 import data.Poll;
@@ -21,24 +33,12 @@ import java.util.*;
  * @author Eric Lakhter
  */
 public class PollScraper {
-    /*
-     * Current last poll is https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=830
-     * The page's source has elements which directly correspond to the poll results.
-     * Polls (seemingly) start at ID 1: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=1
-     * The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
-     * and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
-     * Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i = 1 upward we won't
-     * ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
-     * Some IDs seem to be missing, e.g. 470. The noPollCounter variable controls whether missing polls are
-     * consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
-     */
-
     // Private to restrict other classes from instantiating a PollScraper.
     private PollScraper() {}
 
     /**
      * Iterates over polls on the german Bundestag's webpage and returns them,
-     * starting at ID = {@code start} and ending at ID = {@code end}.
+     * starting at ID = 1 and ending when 15 polls in a row don't exist.
      * @return A list of {@link Poll} objects.
      * @see #getOnePoll(int)
      * @author Eric Lakhter
@@ -67,8 +67,7 @@ public class PollScraper {
             } catch (NullPointerException e) {
                 noPollCounter++;
                 System.err.println(e.getMessage() + "; noPollCounter is at " + noPollCounter);
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) {}
         }
 
         return polls;

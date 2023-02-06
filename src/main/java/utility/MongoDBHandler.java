@@ -180,7 +180,7 @@ public class MongoDBHandler {
     }
 
     /**
-     * Method to insert a single Protocol into the database in serialised form.
+     * Method to insert a single Protocol into the database in serialized form.
      *
      * @param protocol The Protocol Object to be inserted
      * @throws WrongInputException
@@ -207,7 +207,7 @@ public class MongoDBHandler {
     }
 
     /**
-     * Method to insert a list of Protocol Object into the database in serilised form.
+     * Method to insert a list of Protocol Object into the database in serialized form.
      *
      * @param protocols the ArrayList of Protocol Objects
      * @throws WrongInputException

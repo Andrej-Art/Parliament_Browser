@@ -16,8 +16,8 @@
 
 
     <style>
-        <#include "css/dashboard.css">
         <#include "css/parliamentBrowser.css">
+        <#include "css/dashboard.css">
     </style>
 </head>
 

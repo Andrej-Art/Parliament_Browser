@@ -85,7 +85,7 @@ function changeDefaultText() {
                 '[TOP]Tagesordnungspunkt 1\n' +
                 '[REDEID]ID1234567\n' +
                 '[REDNERID]11001100\n' +
-                'Mein sehr geehrten Damen und Herren!\n' +
+                'Meine sehr geehrten Damen und Herren!\n' +
                 '[KOMMENTAR]Heiterkeit';
             break;
         default: break;
