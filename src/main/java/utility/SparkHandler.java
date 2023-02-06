@@ -33,8 +33,7 @@ public class SparkHandler {
 
     public static void main(String[] args) throws IOException {
         MongoDBHandler mdbh = new MongoDBHandler();
-        EditorProtocolParser editorProtocolParser = new EditorProtocolParser(mdbh);
-        SparkHandler.init(mdbh, editorProtocolParser);
+        SparkHandler.init(mdbh, new EditorProtocolParser(mdbh));
 //        openInDefaultBrowser();
     }
 
@@ -86,11 +85,11 @@ public class SparkHandler {
         get("/reden/speechVis/", "application/json", getSpeechVis);
         get("/reden/speechIDs/", "application/json", getSpeechIDs);
 
-        get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
-        post("/latex/post/", "application/json", postLaTeX);
-
         get("/protokolleditor/", getProtokollEditor, new FreeMarkerEngine(cfg));
-        post("/protokolleditor/post/", "application/json", postProtokollEditor);
+        post("/protokolleditor/", "application/json", postProtokollEditor);
+
+        get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
+        post("/latex/", "application/json", postLaTeX);
 
         get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
     }
@@ -153,7 +152,7 @@ public class SparkHandler {
 
         String successMessage = "null";
 
-        return successJson(successMessage);
+        return successJSON(successMessage);
     };
 
     /** Speech editing page. */
@@ -167,9 +166,6 @@ public class SparkHandler {
     /** Tries to parse a custom protocol/agenda item/speech and to insert it into the DB. */
     @Unfinished("Need to turn the speech into a database object")
     private static final Route postProtokollEditor = (Request request, Response response) -> {
-        System.out.println("POST postProtokollEditor aufgerufen");
-        System.out.println(request.body()); // this will be what's going to be parsed into a protocol/agenda item/speech
-
         try {
             if (request.queryParams("editMode") == null)
                 throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
@@ -191,9 +187,11 @@ public class SparkHandler {
                 default:
                     throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is " + editMode);
             }
-            return successJson(successMessage);
+            return successJSON(successMessage);
         } catch (EditorFormattingException | WrongInputException e) {
-            return errorJson(e.getMessage());
+            return errorJSON(e.getMessage());
+        } catch (Exception e) {
+            return errorJSON(e.getMessage());
         }
     };
 
@@ -305,8 +303,9 @@ public class SparkHandler {
      * @return JSON with successMessage
      * @author Eric Lakhter
      */
-    private static String successJson(String successMessage) {
-        return "{\"status\":\"Success\",\"message\":\"" + successMessage.replace("\"", "\\\"") + "\"}";
+    private static JSONObject successJSON(String successMessage) {
+        if (successMessage == null) successMessage = "null";
+        return new JSONObject().put("status", "Success").put("message", successMessage);
     }
 
     /**
@@ -314,8 +313,9 @@ public class SparkHandler {
      * @return JSON with errorMessage
      * @author Eric Lakhter
      */
-    private static String errorJson(String errorMessage){
-        return "{\"status\":\"Error\",\"message\":\"" + errorMessage.replace("\"", "\\\"") + "\"}";
+    private static JSONObject errorJSON(String errorMessage){
+        if (errorMessage == null) errorMessage = "null";
+        return new JSONObject().put("status", "Error").put("message", errorMessage);
     }
 
     /**

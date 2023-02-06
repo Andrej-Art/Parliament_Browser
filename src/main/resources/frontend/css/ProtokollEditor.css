@@ -7,16 +7,18 @@
     height: 100vh;
 }
 
-.box-buttons {
+.button-box {
     height: 20%;
     width: 40%;
     float: left;
 }
 
-.box-status {
+.status-box {
+    background-color: white;
     height: 20%;
     width: 60%;
     float: right;
+    cursor: text;
 }
 
 #status-message-box {
@@ -33,7 +35,7 @@
     width: 80%;
 }
 
-.box-editor {
+.editor-box {
     height: 80%;
 }
 

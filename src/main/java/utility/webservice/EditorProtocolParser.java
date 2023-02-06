@@ -9,6 +9,7 @@ import utility.annotations.Unfinished;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,10 +43,10 @@ public class EditorProtocolParser {
             throw new EditorFormattingException("Text area is empty");
         String[] lines = rawText.split("\n");
         String id = null;
-        int electionPeriod = 0;
-        int protocolNumber = 0;
         LocalDate date = null;
         LocalTime begin = null, end = null;
+        int electionPeriod = 0;
+        int protocolNumber = 0;
         Set<String> sessionLeaders = new HashSet<>(0);
         ArrayList<String> agendaIDs = new ArrayList<>(0);
 
@@ -55,22 +56,32 @@ public class EditorProtocolParser {
                 electionPeriod = periodAndProtocol[0];
                 protocolNumber = periodAndProtocol[1];
                 id = electionPeriod + "/" + protocolNumber;
-            } else if (line.startsWith("[DATUM]")) {
+            }
+            else if (line.startsWith("[DATUM]")) {
                 line = line.substring(7).replaceAll(" ", "");
                 date = convertToISOdate(line);
-            } else if (line.startsWith("[BEGINN]")) {
+            }
+            else if (line.startsWith("[BEGINN]")) {
                 line = line.substring(8).replaceAll(" ", "");
                 begin = convertToISOtime(line);
-            } else if (line.substring(6).startsWith("[ENDE]")) {
+            }
+            else if (line.substring(6).startsWith("[ENDE]")) {
                 line = line.replaceAll(" ", "");
                 end = convertToISOtime(line);
-            } else if (line.startsWith("[SITZUNGSLEITER]")) {
-                line = line.substring(16);
-                sessionLeaders.add(line);
-            } else if (line.startsWith("[TOPS]")) {
-                line = line.substring(6).replaceAll(" ", "");
-                agendaIDs.add(line);
             }
+            else if (line.startsWith("[SITZUNGSLEITER]")) {
+                String[] leaders = line.substring(16).split(",");
+                if (leaders.length == 0) {
+                    sessionLeaders.addAll(Arrays.asList(leaders));
+                } else throw new EditorFormattingException("A protocol needs at least one session leader");
+            }
+            else if (line.startsWith("[TOPS]")) {
+                String[] aItems = line.substring(6).replaceAll(" ", "").split(",");
+                if (aItems.length == 0) {
+                    agendaIDs.addAll(Arrays.asList(aItems));
+                } else throw new EditorFormattingException("A protocol needs at least one agenda item");
+            }
+            else throw new EditorFormattingException("All lines must begin with a proper code when editing protocols");
         }
         mdbh.insertProtocol(new Protocol_Impl(id, date, begin, end, durationBetweenTimesInMinutes(begin, end), electionPeriod, protocolNumber, sessionLeaders, agendaIDs));
     }

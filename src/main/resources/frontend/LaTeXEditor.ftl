@@ -14,14 +14,14 @@
 <#include "parliamentBrowser.ftl">
 
 <div class="editor-container editor-container-textarea">
-    <div class="box-editor">
+    <div class="editor-box">
         <form onsubmit="parseLaTeX(); return false;" style="height: 100%">
             <label> Editor <button type="submit">Generate</button><br><br>
                 <textarea id="editor-textarea"></textarea>
             </label>
         </form>
     </div>
-    <div class="box-status">
+    <div class="status-box">
         <div id="status-message-box"></div>
     </div>
 </div>

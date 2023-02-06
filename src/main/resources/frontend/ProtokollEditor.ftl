@@ -14,15 +14,15 @@
 <#include "parliamentBrowser.ftl">
 
 <div class="protocol-editor">
-    <div class="box-buttons"> Editor:<br>
+    <div class="button-box"> Editor:<br>
         <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="protocol" checked="checked">Protokoll</label><br>
         <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
         <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="speech">Rede</label>
     </div>
-    <div class="box-status">
+    <div class="status-box">
         <div id="status-message-box"></div>
     </div>
-    <div class="box-editor">
+    <div class="editor-box">
         <form onsubmit="parseContent(); return false;" style="height: 100%">
             <label><button type="submit">Generate</button><br><br>
                 <textarea id="editor-textarea" placeholder=""></textarea>

@@ -28,7 +28,7 @@ public class TimeHelper {
 
     /**
      * Converts a Java {@code Date} object to an equivalent LocalDate.
-     * @param date Date object form the database
+     * @param date Date object from the database
      * @return LocalDate of this Date
      */
     public static LocalDate dateToLocalDate(Date date) {
@@ -37,7 +37,7 @@ public class TimeHelper {
 
     /**
      * Converts a Java {@code Date} object to an equivalent LocalTime.
-     * @param date Date object form the database
+     * @param date Date object from the database
      * @return LocalTime of this Date
      */
     public static LocalTime dateToLocalTime(Date date) {
@@ -46,7 +46,7 @@ public class TimeHelper {
 
     /**
      * Converts Date objects to a String of format {@code EE, dd.MM.yyyy}.
-     * @param date Date object form the database
+     * @param date Date object from the database
      * @return String with the day of week and date, e.g. "Di, 24.07.2017"
      */
     public static String mongoDateToGermanDate(Date date) {
