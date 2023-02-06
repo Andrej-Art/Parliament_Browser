@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * Class that implements the Protocol Interface. Provides Constructors for parameter-based instantiation of the variables.
- * And for instatiation from a BSON Document. Test to check if previous commit was successful.
+ * And for instatiation from a BSON Document.
  * @author DavidJordan
  */
 public class Protocol_Impl implements Protocol {

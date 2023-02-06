@@ -4,7 +4,7 @@
  * Polls (seemingly) start at ID 1: https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=1
  * The query ID doesn't have a limit, https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=900
  * and even https://www.bundestag.de/parlament/plenum/abstimmung/abstimmung?id=-30000 exist.
- * Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i = 1 upward we won't
+ * Polls with ID = 0 and lower all seem to have a default result (and since we are iterating from i > 0 upward we won't
  * ever need to worry about them anyway) while polls with IDs which are too high don't have any results at all.
  * Some IDs seem to be missing, e.g. 470. The noPollCounter variable controls whether missing polls are
  * consistent (which means they are truly over) or if it's just an outlier, after which it gets reset to 0.
@@ -21,6 +21,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -33,12 +34,13 @@ import java.util.*;
  * @author Eric Lakhter
  */
 public class PollScraper {
+    private static final LocalDate period19begin = LocalDate.parse("2017-10-24");
     // Private to restrict other classes from instantiating a PollScraper.
     private PollScraper() {}
 
     /**
      * Iterates over polls on the german Bundestag's webpage and returns them,
-     * starting at ID = 1 and ending when 15 polls in a row don't exist.
+     * starting at ID = 485 and ending when 15 polls in a row don't exist.
      * @return A list of {@link Poll} objects.
      * @see #getOnePoll(int)
      * @author Eric Lakhter
@@ -49,13 +51,13 @@ public class PollScraper {
 
         // if 15 polls in a row don't exist it's a safe bet that there won't be more
         // there is a 10 poll gap between ID 422 and 431
-        for (int id = 1; noPollCounter < 15; id++) {
+        for (int id = 485; noPollCounter < 15; id++) {
             try {
                 if (mongoDBHandler != null && mongoDBHandler.checkIfDocumentExists("poll", Integer.toString(id))) {
                     noPollCounter = 0;
                     continue;
                 }
-                Thread.sleep(250);
+                Thread.sleep(150);
                 polls.add(getOnePoll(id));
                 // if no exception is thrown the poll counter gets reset
                 noPollCounter = 0;
@@ -67,6 +69,9 @@ public class PollScraper {
             } catch (NullPointerException e) {
                 noPollCounter++;
                 System.err.println(e.getMessage() + "; noPollCounter is at " + noPollCounter);
+            } catch (DateTimeException e) {
+                // this exception is expected to occur
+                noPollCounter = 0;
             } catch (InterruptedException ignored) {}
         }
 
@@ -77,10 +82,10 @@ public class PollScraper {
      * Generates a new {@code Poll} object based on the given ID.
      * @param id This is the ID the poll has on the Bundestag's website.
      * @return A new {@code Poll}.
-     * @throws NoPollException If the poll with the given ID cannot be found.
+     * @throws NullPointerException If the poll with the given ID cannot be found.
      * @author Eric Lakhter
      */
-    public static Poll getOnePoll(int id) throws NoPollException, IOException {
+    public static Poll getOnePoll(int id) throws NullPointerException, IOException, DateTimeException {
 
         if (id < 1) throw new NoPollException("There are no polls with an ID < 1");
 
@@ -92,7 +97,9 @@ public class PollScraper {
         // If pollElements isn't empty poll results were found
         LocalDate date = TimeHelper.convertToISOdate(
                 pollHTML.getElementsByClass("bt-dachzeile").first().text(), 2);
+        if (date.isBefore(period19begin)) throw new DateTimeException("The poll with ID " + id + " is before the beginning of legislation period 19");
 
+        String topic = pollHTML.getElementsByClass("bt-artikel__title").first().html().split("<br>")[1];
         /*
          * Each index represents a party's votes:
          * [0]: # of YES votes
@@ -120,6 +127,7 @@ public class PollScraper {
 
         return new Poll_Impl(
                 id,
+                topic,
                 date,
                 pollMap.get("SPD"),
                 pollMap.get("CDU/CSU"),

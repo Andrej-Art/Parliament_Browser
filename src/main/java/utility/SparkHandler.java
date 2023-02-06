@@ -164,24 +164,24 @@ public class SparkHandler {
     };
 
     /** Tries to parse a custom protocol/agenda item/speech and to insert it into the DB. */
-    @Unfinished("Need to turn the speech into a database object")
+    @Unfinished("Need to implement speech/agenda point functionality")
     private static final Route postProtokollEditor = (Request request, Response response) -> {
         try {
-            if (request.queryParams("editMode") == null)
-                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
             String editMode = request.queryParams("editMode");
+            if (editMode == null)
+                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
             String successMessage;
             switch (editMode) {
                 case "protocol":
-                    epParser.parseEditorProtocol(request.body());
+                    epParser.parseEditorProtocol(request.body(), false);
                     successMessage = "Protocol successfully inserted";
                     break;
                 case "aItem":
-                    epParser.parseEditorAgendaItem(request.body());
+                    epParser.parseEditorAgendaItem(request.body(), false);
                     successMessage = "AgendaItem successfully inserted";
                     break;
                 case "speech":
-                    epParser.parseEditorSpeech(request.body());
+                    epParser.parseEditorSpeech(request.body(), false);
                     successMessage = "Speech successfully inserted";
                     break;
                 default:
@@ -191,7 +191,7 @@ public class SparkHandler {
         } catch (EditorFormattingException | WrongInputException e) {
             return errorJSON(e.getMessage());
         } catch (Exception e) {
-            return errorJSON(e.getMessage());
+            return errorJSON("General Exception: " + e.getMessage());
         }
     };
 
