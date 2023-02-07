@@ -93,6 +93,7 @@ public class SparkHandler {
         post("/protokolleditor/post/", "application/json", postProtokollEditor);
 
         get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
+        get("/network/2/", getNetwork2, new FreeMarkerEngine(cfg));
     }
 
     /*
@@ -215,7 +216,7 @@ public class SparkHandler {
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
         pageContent.put("entities", datesAndNamedEntities);
 
-        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "");
+        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 1200);
         pageContent.put("speechesNumber", speechesCounts);
 
         //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
@@ -244,7 +245,7 @@ public class SparkHandler {
         JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, fraction, party, person);
         newDBData.put("entities", entityData);
 
-        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, party, person);
+        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, party, person, 1200);
         newDBData.put("speechesNumber", speechesCountData);
 
         //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
@@ -290,9 +291,18 @@ public class SparkHandler {
 
         JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
 
-        pageContent.put("networkData", networkData);
+        pageContent.put("redeNetworkData", networkData);
 
-        return new ModelAndView(pageContent, "networkData.ftl");
+        return new ModelAndView(pageContent, "speechNetwork.ftl");
+    };
+    private final static TemplateViewRoute getNetwork2 = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+        JSONObject networkData = mongoDBHandler.commentatorToSpeaker();
+
+        pageContent.put("commentNetworkData", networkData);
+
+        return new ModelAndView(pageContent, "commentNetwork.ftl");
     };
 
 

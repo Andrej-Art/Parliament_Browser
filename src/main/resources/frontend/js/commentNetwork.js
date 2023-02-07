@@ -1,24 +1,47 @@
 const width = "1920";
 const height = "1080";
 
+let graph = ${commentNetworkData}
+// let graph = {
+//     nodes: [{"name": "Eric", "group": 1},
+//         {"name": "David", "group": 2},
+//         {"name": "Edvin", "group": 2},
+//         {"name": "Julian", "group": 2},
+//         {"name": "Andrej", "group": 3}],
+//         // {"name": "Informatik", "group": 8},
+//         // {"name": "Mathe", "group": 8},
+//         // {"name": "Physik", "group": 8}],
+//     links: [{"source": "Eric", "target": "Julian", "sentiment": 1},
+//         {"source": "Edvin", "target": "Eric", "sentiment": 0.5},
+//         {"source": "Edvin", "target": "Andrej", "sentiment": -0.1},
+//         {"source": "David", "target": "Andrej", "sentiment": 0},
+//         {"source": "Eric", "target": "Edvin", "sentiment": -0.2},
+//         {"source": "Andrej", "target": "Eric", "sentiment": 0}]};
 
-let graph = ${redeNetworkData}
-    // let graph = {
-    //     nodes: [{"name": "Eric", "group": 1},
-    //         {"name": "David", "group": 2},
-    //         {"name": "Edvin", "group": 2},
-    //         {"name": "Julian", "group": 2},
-    //         {"name": "Andrej", "group": 2},
-    //         {"name": "Informatik", "group": 8},
-    //         {"name": "Mathe", "group": 8},
-    //         {"name": "Physik", "group": 8}],
-    //     links: [{"source": "Eric", "target": "Informatik", "value": 1},
-    //         {"source": "Edvin", "target": "Mathe", "value": 1},
-    //         {"source": "Edvin", "target": "Informatik", "value": 1},
-    //         {"source": "David", "target": "Mathe", "value": 1},
-    //         {"source": "David", "target": "Physik", "value": 1}]
-    // };
-svg = d3.select("#networkGraph")
+// let graph = {
+//     nodes: [{"name": "Jan Korte", "group": 5},
+//         {"name": "Martin Schulz", "group": 2},
+//         {"name": "Michael Grosse-Brömer", "group": 1},
+//         {"name": "Dietmar Bartsch", "group": 5},
+//         {"name": "Petra Pau", "group": 5},
+//         {"name": "Katrin Göring-Eckardt", "group": 4},
+//         {"name": "Britta Haßelmann", "group": 4},
+//         {"name": "Volker Kauder", "group": 1},
+//         {"name": "Christian Lindner", "group": 3},
+//         {"name": "Test", "group": 8}],
+//     links: [{"source": "Britta Haßelmann", "target": "Carsten Schneider"},
+//         {"sentiment": 0.1582, "source": "Jan Korte", "target": "Britta Haßelmann"},
+//         {"sentiment": 0, "source": "Christian Lindner", "target": "Bernd Baumann"},
+//         {"sentiment": 0, "source": "Petra Pau", "target": "Britta Haßelmann"},
+//         {"source": "Michael Grosse-Brömer", "target": "Britta Haßelmann"},
+//         {"source": "Jan Korte", "target": "Britta Haßelmann"},
+//         {"source": "Martin Schulz", "target": "Bernd Baumann"},
+//         {"source": "Volker Kauder", "target": "Carsten Schneider"},
+//         {"source": "Katrin Göring-Eckardt", "target": "Carsten Schneider"},
+//         {"source": "Dietmar Bartsch", "target": "Britta Haßelmann"}]
+// };
+
+ svg = d3.select("#commentNetworkGraph")
     .append("svg")
     .attr("width", width)
     .attr("height", height)
@@ -32,31 +55,48 @@ let simulation = d3.forceSimulation()
         return d.name;
     }))
     .force('charge', d3.forceManyBody()
-        .strength(-20000)
+        .strength(-2000)
         .theta(0.5)
-        .distanceMax(500)
+        .distanceMax(200)
     )
     .force('collision', d3.forceCollide().radius(function (d) {
         return d.radius
     }))
-    .force("center", d3.forceCenter(document.getElementById("networkGraph").clientWidth / 2, document.getElementById("networkGraph").clientHeight / 2));
+    .force("center", d3.forceCenter(document.getElementById("commentNetworkGraph").clientWidth / 2, document.getElementById("commentNetworkGraph").clientHeight / 2));
 
 let link = svg.append("g")
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
-
 link
     .style("stroke", "#aaa");
+
+// link
+//     .style("stroke", "#e60f0f");
+// // .style("stroke", function (d) {
+// //     switch (true) {
+// //         case d.sentiment < 0:
+// //             return "#e60f0f"
+// //         case d.sentiment === 0:
+// //             return "#7b7676";
+// //         default:
+// //             return "#33DF21"
+// //         case d.sentiment > 0:
+// //             return "#33df21"
+// //
+// //     }
+// // });
+
+
 
 let node = svg.append("g")
     .attr("class", "nodes")
     .selectAll("circle")
     .data(graph.nodes)
     .enter().append("circle")
-    //I made the article/source nodes larger than the entity nodes
+
     .attr("r", function (d) {
-        return d.group === 8 ? 25 : 5
+        return d.group === 8 ? 25 : 20
     })
 
 

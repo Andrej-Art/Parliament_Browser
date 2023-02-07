@@ -11,6 +11,8 @@ import exceptions.WrongInputException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
@@ -734,11 +736,14 @@ public class MongoDBHandler {
      * @param dateFilterTwo
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String partyFilter, String personFilter) {
+    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo, String fractionFilter,
+                                                           String partyFilter, String personFilter, Integer limiter) {
         Bson group = new Document("$group", new Document("_id", "$speakerID").append("speechesCount", new Document("$sum", 1)));
         Bson lookup = lookup("person", "_id", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(group, lookup, unwind));
+        Bson limit = limit(limiter);
+        Bson sort = sort(descending("speechescount"));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(group, lookup, unwind, limit));
 
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
@@ -968,7 +973,7 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("waiting for correct structure of collection")
-    public JSONObject commentatorToSpeaker() {
+    public JSONObject commentatorToSpeaker() throws ParseException {
 
 
         Bson match = new Document("$match", new Document("$and", Arrays.asList(
@@ -978,24 +983,29 @@ public class MongoDBHandler {
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
+        Bson limit = limit(10);
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match,lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match,limit,lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
 //        if (!sent.isEmpty()) {
 //            applySentimentFilterToAggregation(pipeline, sent);
 //        }
         JSONObject obj = new JSONObject();
-        HashSet<String> objNodes = new HashSet<>();
-        HashSet<String> objLinks = new HashSet<>();
+        HashSet<String> objNodesStrings = new HashSet<>();
+        HashSet<String> objLinksStrings = new HashSet<>();
+        ArrayList<JSONObject> objNodes = new ArrayList<>();
+        ArrayList<JSONObject> objLinks = new ArrayList<>();
         db.getCollection("comment").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
-                    JSONObject objLink = new JSONObject();
-                    objLink.put("source", procBlock.getString("CommentatorName"));
-                    objLink.put("target", procBlock.getString("SpeakerName"));
-                    objLink.put("sentiment", procBlock.getDouble("sentiment"));
-                    objLinks.add(objLink.toString());
                     Document docComment = (Document) procBlock.get("CommentatorPerson");
+                    Document docSpeaker = (Document) procBlock.get("SpeakerPerson");
+                    JSONObject objLink = new JSONObject();
+                    objLink.put("source", docComment.getString("fullName"));
+                    objLink.put("target", docSpeaker.getString("fullName"));
+                    objLink.put("sentiment", procBlock.getDouble("sentiment"));
+                    objLinks.add(objLink);
+
                     JSONObject objCommentator = new JSONObject();
                     objCommentator.put("name", docComment.getString("fullName"));
                     switch (docComment.getString("party")){
@@ -1021,11 +1031,10 @@ public class MongoDBHandler {
                         default:
                             objCommentator.put("group", 7);
                     }
-                    objNodes.add(objCommentator.toString());
+                    objNodes.add(objCommentator);
 
-                    Document docSpeaker = (Document) procBlock.get("SpeakerPerson");
                     JSONObject objSpeaker = new JSONObject();
-                    objCommentator.put("name", docSpeaker.getString("fullName"));
+                    objSpeaker.put("name", docSpeaker.getString("fullName"));
                     switch (docSpeaker.getString("party")){
                         case "CDU" :
                         case "CSU" :
@@ -1049,12 +1058,21 @@ public class MongoDBHandler {
                         default:
                             objCommentator.put("group", 7);
                     }
-                    objNodes.add(objSpeaker.toString());
+                    objNodes.add(objSpeaker);
                 });
+//        JSONParser parser = new JSONParser();
+//        for (String s : objLinksStrings){
+//           org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+//           objLinks.add(json);
+//        }
+//        for (String s : objNodesStrings){
+//            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+//            objNodes.add(json);
+//        }
         obj.put("nodes", objNodes);
         obj.put("links", objLinks);
+        System.out.println(obj);
         return obj;
-
     }
 
     /**
