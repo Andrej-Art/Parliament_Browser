@@ -62,8 +62,8 @@
 
 
 <div class="main">
-    <h1>Große Überschrift</h1>
-    <h2>Überschrift etwas kleiner</h2>
+
+    <h1>Dashboard</h1>
 
     <div class="wrapper" id="chartContainer">
         <div>

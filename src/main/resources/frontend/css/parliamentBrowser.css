@@ -5,6 +5,7 @@ body {
 }
 
 .nav-button {
+    cursor: pointer;
     height: 50px;
     width: 50px;
     background-color: inherit;

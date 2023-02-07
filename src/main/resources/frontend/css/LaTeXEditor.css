@@ -16,7 +16,7 @@
     float: left;
 }
 
-.box-editor {
+.editor-box {
     box-sizing: border-box;
     height: 80%;
     width: 90%;
@@ -29,11 +29,13 @@
     width: 100%;
 }
 
-.box-status {
+.status-box {
+    background-color: white;
     box-sizing: border-box;
     resize: none;
     height: 20%;
     width: 90%;
+    cursor: text;
 }
 
 #status-message-box {

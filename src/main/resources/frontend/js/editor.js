@@ -7,7 +7,7 @@
 async function parseLaTeX() {
     try {
         let content = document.getElementById("editor-textarea").value;
-        let response = await fetch("post/", {
+        let response = await fetch("#", {
             method: 'POST',
             body: content
         });
@@ -26,7 +26,7 @@ async function parseContent() {
     try {
         let editType = document.querySelector('input[name="edit-mode"]:checked').value;
         let content = document.getElementById("editor-textarea").value;
-        let response = await fetch("post/?editMode=" + editType, {
+        let response = await fetch("?editMode=" + editType, {
             method: 'POST',
             body: content
         });
@@ -48,7 +48,7 @@ function handleResponse(responseJson = {status : "Success", message : "Successfu
         statusBox.innerHTML += responseJson.message + '<br>';
         statusBox.scrollTop = statusBox.scrollHeight;
     } else {
-        statusBox.innerHTML += '<span style="color: red">' + responseJson.message + '</span><br>';
+        statusBox.innerHTML += '<span style="color: red">[ERROR]: ' + responseJson.message + '</span><br>';
         statusBox.scrollTop = statusBox.scrollHeight;
         throw Error(responseJson.message);
     }

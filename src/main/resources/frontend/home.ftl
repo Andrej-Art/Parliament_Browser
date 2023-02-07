@@ -32,6 +32,7 @@
     for (let button of document.getElementsByClassName("nav-button")) {
         button.style.color = '#bbb';
         button.style['text-shadow'] = 'none';
+        button.style.cursor = 'default';
         button.onclick = '';
     }
 </script>
