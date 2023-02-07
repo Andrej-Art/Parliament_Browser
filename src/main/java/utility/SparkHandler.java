@@ -3,6 +3,7 @@ package utility;
 import exceptions.EditorFormattingException;
 import exceptions.WrongInputException;
 import freemarker.template.Configuration;
+import org.apache.uima.UIMAException;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -31,9 +32,9 @@ public class SparkHandler {
     // the added string redirects to the /resources/ directory
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, UIMAException {
         MongoDBHandler mdbh = new MongoDBHandler();
-        SparkHandler.init(mdbh, new EditorProtocolParser(mdbh));
+        SparkHandler.init(mdbh, new EditorProtocolParser(mdbh, new UIMAPerformer()));
 //        openInDefaultBrowser();
     }
 
@@ -45,7 +46,7 @@ public class SparkHandler {
     public static void init(MongoDBHandler mdbh, EditorProtocolParser editorProtocolParser) throws IOException {
         epParser = editorProtocolParser;
         mongoDBHandler = mdbh;
-//        staticFiles.externalLocation(frontendPath);
+        staticFiles.externalLocation(frontendPath + "pdfOutput/");
         cfg.setDirectoryForTemplateLoading(new File(frontendPath));
         cfg.setDefaultEncoding("UTF-8");
         port(4567);
@@ -151,9 +152,10 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        String successMessage = "null";
+        String successStatus = "PDF successfully generated";
+        String successMessage = "/pdfOutput/Abschluss.pdf";
 
-        return successJSON(successMessage);
+        return successJSON(successStatus, successMessage);
     };
 
     /** Speech editing page. */
@@ -171,24 +173,25 @@ public class SparkHandler {
             String editMode = request.queryParams("editMode");
             if (editMode == null)
                 throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
-            String successMessage;
+            String id;
+            String successStatus;
             switch (editMode) {
                 case "protocol":
-                    epParser.parseEditorProtocol(request.body(), false);
-                    successMessage = "Protocol successfully inserted";
+                    id = epParser.parseEditorProtocol(request.body(), false);
+                    successStatus = "Protocol \"" + id + "\" successfully inserted";
                     break;
                 case "aItem":
-                    epParser.parseEditorAgendaItem(request.body(), false);
-                    successMessage = "AgendaItem successfully inserted";
+                    id = epParser.parseEditorAgendaItem(request.body(), false);
+                    successStatus = "AgendaItem \"" + id + "\"  successfully inserted";
                     break;
                 case "speech":
-                    epParser.parseEditorSpeech(request.body(), false);
-                    successMessage = "Speech successfully inserted";
+                    id = epParser.parseEditorSpeech(request.body(), false);
+                    successStatus = "Speech \"" + id + "\"  successfully inserted";
                     break;
                 default:
                     throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is " + editMode);
             }
-            return successJSON(successMessage);
+            return successJSON(successStatus, "null");
         } catch (EditorFormattingException | WrongInputException e) {
             return errorJSON(e.getMessage());
         } catch (Exception e) {
@@ -313,9 +316,10 @@ public class SparkHandler {
      * @return JSON with successMessage
      * @author Eric Lakhter
      */
-    private static JSONObject successJSON(String successMessage) {
+    private static JSONObject successJSON(String successStatus, String successMessage) {
+        if (successStatus == null) successStatus = "null";
         if (successMessage == null) successMessage = "null";
-        return new JSONObject().put("status", "Success").put("message", successMessage);
+        return new JSONObject().put("status", successStatus).put("message", successMessage);
     }
 
     /**

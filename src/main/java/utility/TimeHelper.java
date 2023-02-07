@@ -92,7 +92,7 @@ public class TimeHelper {
      * @author Eric Lakhter
      */
     public static LocalTime convertToISOtime(String time){
-        return LocalTime.parse(time.replace(".", ":").replace(" Uhr", ""), CLOCK_FORMAT);
+        return LocalTime.parse(time.replace(".", ":").replaceAll("\\s*Uhr", ""), CLOCK_FORMAT);
     }
 
     /**
