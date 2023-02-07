@@ -17,7 +17,8 @@
     <div class="button-box"> Editor:<br>
         <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="protocol" checked="checked">Protokoll</label><br>
         <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
-        <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="speech">Rede</label>
+        <label><input type="radio" onclick="changeDefaultText()" name="edit-mode" value="speech">Rede</label><br>
+        <label><input type="checkbox" id="overwrite-checkbox">Überschreibe Eintrag mit bereits existierender ID?</label>
     </div>
     <div class="status-box">
         <div id="status-message-box"></div>

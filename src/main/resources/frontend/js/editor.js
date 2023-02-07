@@ -7,8 +7,9 @@
 async function parseContent() {
     try {
         let editType = document.querySelector('input[name="edit-mode"]:checked').value;
+        let overwrite = document.getElementById("overwrite-checkbox").checked;
         let content = document.getElementById("editor-textarea").value;
-        let response = await fetch("?editMode=" + editType, {
+        let response = await fetch("?editMode=" + editType + "&overwrite=" + overwrite, {
             method: 'POST',
             body: content
         });

@@ -12,10 +12,7 @@ import utility.webservice.EditorProtocolParser;
 
 import javax.imageio.ImageIO;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static spark.Spark.*;
 
@@ -167,25 +164,31 @@ public class SparkHandler {
     };
 
     /** Tries to parse a custom protocol/agenda item/speech and to insert it into the DB. */
-    @Unfinished("Need to implement speech/agenda point functionality")
+    @Unfinished("Need to implement the part which grabs info from the db first before this is considered done")
     private static final Route postProtokollEditor = (Request request, Response response) -> {
         try {
             String editMode = request.queryParams("editMode");
             if (editMode == null)
                 throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
+
+            boolean allowOverwrite = Objects.equals(request.queryParams("overwrite"), "true");
+            // Testing
+            System.out.println("allowOverwrite is: " + allowOverwrite);
+            allowOverwrite = false;
+
             String id;
             String successStatus;
             switch (editMode) {
                 case "protocol":
-                    id = epParser.parseEditorProtocol(request.body(), false);
+                    id = epParser.parseEditorProtocol(request.body(), allowOverwrite);
                     successStatus = "Protocol \"" + id + "\" successfully inserted";
                     break;
                 case "aItem":
-                    id = epParser.parseEditorAgendaItem(request.body(), false);
+                    id = epParser.parseEditorAgendaItem(request.body(), allowOverwrite);
                     successStatus = "AgendaItem \"" + id + "\"  successfully inserted";
                     break;
                 case "speech":
-                    id = epParser.parseEditorSpeech(request.body(), false);
+                    id = epParser.parseEditorSpeech(request.body(), allowOverwrite);
                     successStatus = "Speech \"" + id + "\"  successfully inserted";
                     break;
                 default:
