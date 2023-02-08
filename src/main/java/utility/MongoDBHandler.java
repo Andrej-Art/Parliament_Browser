@@ -1566,11 +1566,7 @@ public class MongoDBHandler {
 
     public boolean changePassword(String cookie, String newPassword, String oldPassword) {
         String username = getTag("cookies", "_id", cookie, "user");
-        System.out.println(username);
-        System.out.println(newPassword);
-        System.out.println(oldPassword);
         String rank = getTag("cookies", "_id", cookie, "rank");
-        System.out.println(checkUserAndPassword(username, oldPassword));
         if (checkUserAndPassword(username, oldPassword)) {
             db.getCollection("user").deleteOne(
                     new Document("_id", username)
@@ -1589,11 +1585,8 @@ public class MongoDBHandler {
 
     public String getTag(String collection, String column, String id, String tag) throws NullPointerException {
         Document result = db.getCollection(collection).find(new Document(column, id)).iterator().tryNext();
-
         if (result == null)
             throw new NullPointerException("The Document with _id = " + id + " does not exist in this collection.");
-
-        System.out.println(result.getString(tag));
         return result.getString(tag);
     }
 

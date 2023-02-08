@@ -111,7 +111,19 @@ public class SparkHandler {
 
     /** This returns the login page. */
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
-        return new ModelAndView(new HashMap<String, Object>(0), "login.ftl");
+        Map pageContent = new HashMap<String, Object>(0);
+        String cookie = request.cookie("key");
+        if(mongoDBHandler.checkUser(cookie)||mongoDBHandler.checkManager(cookie)||mongoDBHandler.checkAdmin(cookie)) {
+            pageContent.put("loginStatus", true);
+        }else {
+            pageContent.put("loginStatus", false);
+        }
+        if (mongoDBHandler.checkAdmin(cookie)){
+            pageContent.put("adminStatus", true);
+        }else {
+            pageContent.put("adminStatus", false);
+        }
+        return new ModelAndView(pageContent, "login.ftl");
     };
 
     /**  */

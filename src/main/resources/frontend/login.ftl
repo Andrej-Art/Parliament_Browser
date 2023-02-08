@@ -9,7 +9,7 @@
     </script>
 </head>
 
-
+<#if loginStatus==false >
 <h3>Login</h3>
 <div>
     <form onsubmit="login(); return false;">
@@ -32,14 +32,41 @@
 
 <br>
 <br>
-
-
+</#if>
+<#if loginStatus==true >
 <h3>Logout</h3>
 <div>
-    <form onsubmit="logout(); return false;">
+    <form onsubmit="logout();">
         <div>
             <br>
             <button type="submit">logout</button>
+        </div>
+    </form>
+</div>
+</#if>
+
+<br>
+<br>
+
+
+
+<h3>Passwort ändern</h3>
+
+<div>
+    <form onsubmit="changePw();">
+        <div>
+            Altes Password
+            <br>
+            <input type="password" id="OldPw" maxlength="32">
+        </div>
+        <div>
+            Neues Passwort
+            <br>
+            <input type="password" id="NewPw" minlength="8" maxlength="32">
+        </div>
+        <div>
+            <br>
+            <button type="submit">Passwort ändern</button>
         </div>
     </form>
 </div>
@@ -47,7 +74,6 @@
 
 <br>
 <br>
-
 
 <h3>Registriere einen neuen User</h3>
 
@@ -85,34 +111,9 @@
     </form>
 </div>
 
-
 <br>
 <br>
 
-<h3>Passwort ändern</h3>
-
-<div>
-    <form onsubmit="changePw(); return false;">
-        <div>
-            Altes Password
-            <br>
-            <input type="password" id="OldPw" maxlength="32">
-        </div>
-        <div>
-            Neues Passwort
-            <br>
-            <input type="password" id="NewPw" minlength="8" maxlength="32">
-        </div>
-        <div>
-            <br>
-            <button type="submit">Passwort ändern</button>
-        </div>
-    </form>
-</div>
-
-
-<br>
-<br>
 
 <h3>User löschen</h3>
 
@@ -137,5 +138,8 @@
 <script>
     <#include "js/login.js">
 </script>
+<#if admin==true>
+    <#include "js/userManagement.js">
+</#if>
 
 </html>
