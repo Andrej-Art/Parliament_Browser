@@ -16,12 +16,11 @@ async function login() {
     let loginResult = await response.json()
 
     if (loginResult.loginSuccess===true){
-
-        document.cookie = "key=" + loginResult.cookie;
+        document.cookie = "key=" + loginResult.cookie + ";path=/";
         console.log(document.cookie);
 
     } else {
-        document.cookie = "key=";
+        document.cookie = "key=" + ";path=/";
         console.log(document.cookie)
         window.alert(loginResult.cookie);
     }
@@ -63,7 +62,7 @@ async function changePw() {
         body: JSON.stringify({oldPw: oldPassword, newPw: newPassword, cookie: document.cookie.split("=")[1]})
     })
     console.log(response)
-    document.cookie = "key="
+    document.cookie = "key=" + ";path=/"
 
     return false;
 }
@@ -73,7 +72,7 @@ function logout() {
     fetch("/post/applicationDataLogoutUser/", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({logoutUser: document.cookie.split("=")[1]})
+        body: JSON.stringify({logoutUser: document.cookie.split(";")[0].split("=")[1]})
 
     })
 
@@ -89,7 +88,7 @@ async function deleteUser() {
     let response = await fetch("/post/applicationDataDeleteUser/", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({deleteUser: userToDelete, cookie: document.cookie.split("=")[1]})
+        body: JSON.stringify({deleteUser: userToDelete, cookie: document.cookie.split(";")[0].split("=")[1]})
 
     })
     console.log(response)

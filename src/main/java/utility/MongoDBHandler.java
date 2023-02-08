@@ -16,9 +16,14 @@ import org.json.simple.parser.ParseException;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -1430,4 +1435,180 @@ public class MongoDBHandler {
     public void dropTextIndex(String col, String field) {
         db.getCollection(col).dropIndex(field + "_text");
     }
+
+
+    /**
+     * This function creates a unique cookie from the username and password
+     * @param message
+     * @return
+     * @author Julian Ocker
+     */
+    public String hashDataIntoCookie(String message) {
+        String finalMessage;
+        try {
+            byte[] byteMessage = message.getBytes();
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            MessageDigest messageDigest1 = MessageDigest.getInstance("SHA-1");
+            MessageDigest messageDigest2 = MessageDigest.getInstance("SHA-512");
+            MessageDigest messageDigest3 = MessageDigest.getInstance("MD5");
+            messageDigest3.update(byteMessage);
+            byte[] md5Message = messageDigest3.digest();
+            messageDigest1.update(byteMessage);
+            byte[] sha1Message = messageDigest1.digest();
+            byte[] concat1Message = (DatatypeConverter.printHexBinary(sha1Message).toLowerCase() + Math.random() +
+                    LocalDateTime.now() + DatatypeConverter.printHexBinary(md5Message).toLowerCase()).getBytes();
+            byte[] concat2Message = (DatatypeConverter.printHexBinary(md5Message).toLowerCase() + Math.random() +
+                    LocalDateTime.now() + DatatypeConverter.printHexBinary(sha1Message).toLowerCase()).getBytes();
+            messageDigest.update(concat1Message);
+            messageDigest2.update(concat2Message);
+            byte[] result = (DatatypeConverter.printHexBinary(messageDigest.digest()).toLowerCase() + Math.random()
+                    + DatatypeConverter.printHexBinary(messageDigest2.digest()).toLowerCase()).getBytes();
+            finalMessage = DatatypeConverter.printHexBinary(result).toLowerCase();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return finalMessage;
+    }
+
+    public String generateCookie(String name, String password) {
+        String cookie = "";
+        if (checkUserAndPassword(name, password)) {
+            String rank = getTag("user", "_id", name, "rank");
+            cookie = hashDataIntoCookie(Math.random() + name + password + rank + LocalDateTime.now() + Math.random());
+            db.getCollection("cookies").insertOne(
+                    new Document()
+                            .append("user", name)
+                            .append("_id", cookie)
+                            .append("rank", rank)
+                            .append("expiring", LocalTime.now())
+            );
+        }
+        return cookie;
+    }
+
+    public boolean checkIfAvailable(String name) {
+        if (db.getCollection("user").find(new Document("_id", name)).iterator().hasNext()) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public Boolean registrate(String name, String password, String rank) {
+        try {
+            db.getCollection("user").insertOne(
+                    new Document("_id", name)
+                            .append("rank", rank)
+                            .append("password", password)
+            );
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+
+    }
+
+    public boolean checkAdmin(String cookie) {
+        String cookieRank = "";
+        try {
+            cookieRank = getTag("cookies", "_id", cookie, "rank");
+        } catch (Exception ignored) {
+        }
+        return (cookieRank.equals("admin"));
+    }
+
+    public boolean checkManager(String cookie) {
+        String cookieRank = "";
+        try {
+            cookieRank = getTag("cookies", "cookie", cookie, "rank");
+        } catch (Exception ignored) {
+        }
+        return cookieRank.equals("manager");
+    }
+
+
+    public boolean checkUser(String cookie) {
+        String cookieRank = "";
+        try {
+            cookieRank = getTag("cookies", "cookie", cookie, "rank");
+        } catch (Exception ignored) {
+        }
+        return cookieRank.equals("user");
+    }
+
+    /**
+     * This function creates a User of the rank admin.
+     * Username: Admin1
+     * password: admin
+     * @author Julian Ocker
+     */
+    public void createUserCollection() {
+
+        this.db.getCollection("user").insertOne(new Document()
+                .append("_id", "Admin1")
+                .append("rank", "admin")
+                .append("password", "aa24c92b27947466817de3162f0be0c07af2ede2")//Klartextpasswort: admin
+        );
+    }
+
+    public boolean changePassword(String cookie, String newPassword, String oldPassword) {
+        String username = getTag("cookies", "_id", cookie, "user");
+        System.out.println(username);
+        System.out.println(newPassword);
+        System.out.println(oldPassword);
+        String rank = getTag("cookies", "_id", cookie, "rank");
+        System.out.println(checkUserAndPassword(username, oldPassword));
+        if (checkUserAndPassword(username, oldPassword)) {
+            db.getCollection("user").deleteOne(
+                    new Document("_id", username)
+            );
+            db.getCollection("user").insertOne(
+                    new Document("_id", username)
+                            .append("rank", rank)
+                            .append("password", newPassword)
+            );
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public String getTag(String collection, String column, String id, String tag) throws NullPointerException {
+        Document result = db.getCollection(collection).find(new Document(column, id)).iterator().tryNext();
+
+        if (result == null)
+            throw new NullPointerException("The Document with _id = " + id + " does not exist in this collection.");
+
+        System.out.println(result.getString(tag));
+        return result.getString(tag);
+    }
+
+    public boolean checkUserAndPassword(String id, String password) {
+        if (db.getCollection("user").find(new Document("_id", id)).iterator().hasNext()) {
+            if (db.getCollection("user").find(new Document("_id", id)).iterator().next()
+                    .getString("password").equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean logout(String name) {
+        if (db.getCollection("cookies").find(new Document("_id", name)).iterator().hasNext()) {
+            db.getCollection("cookies").deleteOne(new Document("_id", name));
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean deleteUser(String name) {
+        try {
+            db.getCollection("user").deleteOne(new Document("_id", name));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
 }

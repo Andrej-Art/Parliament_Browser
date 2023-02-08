@@ -18,6 +18,7 @@ import static spark.Spark.*;
 
 /**
  * Starts the localhost server for the protocol visualisation.
+ *
  * @author Eric Lakhter
  */
 @Testing
@@ -37,8 +38,9 @@ public class SparkHandler {
 
     /**
      * Sets up the website's paths.
-     * @see #getHome
+     *
      * @author Eric Lakhter
+     * @see #getHome
      */
     public static void init(MongoDBHandler mdbh, EditorProtocolParser editorProtocolParser) throws IOException {
         epParser = editorProtocolParser;
@@ -51,7 +53,7 @@ public class SparkHandler {
         before((req, res) -> {
             String path = req.pathInfo();
             if (!path.endsWith("/") && req.queryParams().size() == 0)
-                res.redirect(path + "/") ;
+                res.redirect(path + "/");
         });
 
         // Test is for testing
@@ -90,21 +92,124 @@ public class SparkHandler {
 
         get("/network/speech/", getspeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
+
+        get("/loginSite/", getLoginSite,   new FreeMarkerEngine(cfg));
+        post("/post/applicationDataLogin/", postLogin);
+        post("/post/applicationDataRegister/", postRegister);
+        post("/post/applicationDataAdminCheck/", postCheckAdmin);
+        post("/post/applicationDataManagerCheck/", postCheckManager);
+        post("/post/applicationDataUserCheck/", postCheckUser);
+        post("/post/applicationDataLogoutUser/", postLogout);
+        post("/post/applicationDataDeleteUser/", postDeleteUser);
+        post("/post/applicationDataPwChange/", postChangePassword);
+
     }
 
     /*
      * Routes:
      */
 
-    /** Website's favicon. */
+    /** This returns the login page. */
+    private static final TemplateViewRoute getLoginSite = (request, response) -> {
+        return new ModelAndView(new HashMap<String, Object>(0), "login.ftl");
+    };
+
+    /**  */
+    private static final Route postChangePassword = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String oldPassword = req.getString("oldPw");
+        String newPassword = req.getString("newPw");
+        String cookie = req.getString("cookie");
+        Boolean success = mongoDBHandler.changePassword(cookie, newPassword, oldPassword);
+        mongoDBHandler.logout(cookie);
+        return new JSONObject().put("pwChangeSuccess",success);
+    };
+
+    private static final Route postDeleteUser = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String deleteUser = req.getString("deleteUser");
+        String cookie = req.getString("cookie");
+        System.out.println(mongoDBHandler.checkAdmin(cookie));
+        if (mongoDBHandler.checkAdmin(cookie)) {
+            JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
+            return uDeletionSuccess;
+        }
+        return new JSONObject().put("deletionSuccess",false);
+    };
+
+    private static final Route postLogout = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String deleteCookie = req.getString("logoutUser");
+        return new JSONObject().put("cDeletionSuccess",mongoDBHandler.logout(deleteCookie));
+    };
+
+    private static final Route postCheckUser =(request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String cookie = req.getString("cookie");
+        JSONObject answer = new JSONObject();
+        answer.put("answer",mongoDBHandler.checkUser(cookie));
+        return answer;
+    };
+
+     private static final Route postCheckManager = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String cookie = req.getString("cookie");
+        JSONObject answer = new JSONObject();
+        answer.put("answer",mongoDBHandler.checkManager(cookie));
+        return answer;
+    };
+
+    private static final Route postCheckAdmin = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String cookie = req.getString("cookie");
+        JSONObject answer = new JSONObject();
+        answer.put("answer", mongoDBHandler.checkAdmin(cookie));
+        return answer;
+    };
+
+    private static final Route postRegister = (request, response) -> {
+        System.out.println(request.body());
+        JSONObject req = new JSONObject(request.body());
+        String name = req.getString("name");
+        String password = req.getString("pw");
+        String rank = req.getString("rank");
+        boolean registrationSuccess = false;
+
+        if (mongoDBHandler.checkIfAvailable(name)) {
+            registrationSuccess = mongoDBHandler.registrate(name, password, rank);
+        }
+        return new JSONObject().put("registration", registrationSuccess);
+    };
+
+    private static final Route postLogin = (Request request, Response response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String name = req.getString("name");
+        String password = req.getString("pw");
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkUserAndPassword(name, password)) {
+            String cookie = mongoDBHandler.generateCookie(name, password);
+            answer.put("cookie", cookie);
+            answer.put("loginSuccess", true);
+        } else {
+            answer.put("cookie", "Deine Anmeldedaten sind Falsch!");
+            answer.put("loginSuccess", false);
+        }
+        return answer;
+    };
+
+    /**
+     * Website's favicon.
+     */
     private static final Route getIcon = (Request request, Response response) -> {
-        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(ImageIO.read(new File(frontendPath + "favicon.png")),"png" , baos);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(ImageIO.read(new File(frontendPath + "favicon.png")), "png", baos);
             return baos.toByteArray();
         }
     };
 
-    /** Test page. */
+    /**
+     * Test page.
+     */
     @Testing
     private static final TemplateViewRoute getTest = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -120,7 +225,9 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "test.ftl");
     };
 
-    /** Homepage. */
+    /**
+     * Homepage.
+     */
     private static final TemplateViewRoute getHome = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
@@ -129,7 +236,9 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "home.ftl");
     };
 
-    /** LaTeX editing page. */
+    /**
+     * LaTeX editing page.
+     */
     @Unfinished("Doesn't do anything yet")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -141,7 +250,9 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
-    /** Tries to return a PDF file. */
+    /**
+     * Tries to return a PDF file.
+     */
     @Unfinished("Need to convert the LaTeX code to a pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
         System.out.println("POST postLaTeX aufgerufen");
@@ -154,7 +265,9 @@ public class SparkHandler {
         return successJSON(successStatus, successMessage);
     };
 
-    /** Speech editing page. */
+    /**
+     * Speech editing page.
+     */
     @Unfinished("Nothing more than a text field so far")
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -162,7 +275,9 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "ProtokollEditor.ftl");
     };
 
-    /** Tries to parse a custom protocol/agenda item/speech and to insert it into the DB. */
+    /**
+     * Tries to parse a custom protocol/agenda item/speech and to insert it into the DB.
+     */
     @Unfinished("Need to implement the part which grabs info from the db first before this is considered done")
     private static final Route postProtokollEditor = (Request request, Response response) -> {
         try {
@@ -205,7 +320,9 @@ public class SparkHandler {
 //        //.....
 //    }
 
-    /** ADD SHORT DESCRIPTION */
+    /**
+     * ADD SHORT DESCRIPTION
+     */
 
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -248,7 +365,7 @@ public class SparkHandler {
         JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, fraction, party, person);
         newDBData.put("entities", entityData);
 
-        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount( von, bis, fraction, party, person, 15);
+        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, party, person, 15);
         newDBData.put("speechesNumber", speechesCountData);
 
         //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
@@ -262,7 +379,9 @@ public class SparkHandler {
         return newDBData;
     };
 
-    /** Speech visualisation page. */
+    /**
+     * Speech visualisation page.
+     */
     private static final TemplateViewRoute getReden = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
@@ -273,7 +392,9 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "speechVis.ftl");
     };
 
-    /** Returns a JSON containing all data for a specific speech. */
+    /**
+     * Returns a JSON containing all data for a specific speech.
+     */
     private static final Route getSpeechVis = (Request request, Response response) -> {
 
 
@@ -282,7 +403,9 @@ public class SparkHandler {
         return mongoDBHandler.allSpeechData(speechID);
     };
 
-    /** Returns a JSON containing all speech IDs matching the search. */
+    /**
+     * Returns a JSON containing all speech IDs matching the search.
+     */
     private static final Route getSpeechIDs = (Request request, Response response) -> {
 
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
@@ -318,6 +441,7 @@ public class SparkHandler {
 
     /**
      * Returns a JSON signaling that the request was handled without errors.
+     *
      * @return JSON with successMessage
      * @author Eric Lakhter
      */
@@ -329,16 +453,18 @@ public class SparkHandler {
 
     /**
      * Returns a JSON signaling that an error occurred while handling the request.
+     *
      * @return JSON with errorMessage
      * @author Eric Lakhter
      */
-    private static JSONObject errorJSON(String errorMessage){
+    private static JSONObject errorJSON(String errorMessage) {
         if (errorMessage == null) errorMessage = "null";
         return new JSONObject().put("status", "Error").put("message", errorMessage);
     }
 
     /**
      * Opens <a href="http://localhost:4567/">http://localhost:4567/</a> in the system's default browser.
+     *
      * @throws IOException if an I/O error occurs during execution
      * @author Eric Lakhter
      */
@@ -348,6 +474,7 @@ public class SparkHandler {
 
     /**
      * Opens the given URL in the system's default browser.
+     *
      * @param url Page to open
      * @throws IOException if an I/O error occurs during execution
      * @author Eric Lakhter
