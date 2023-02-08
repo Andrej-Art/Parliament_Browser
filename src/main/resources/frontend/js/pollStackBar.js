@@ -24,13 +24,6 @@ function drawStackedBarChart(data, target) {
     // List of subgroups -> get the fractions
 
 
-
-
-
-
-
-
-
     let apliedData = Object.entries(data).map(d => {
         return {
             AfDresults: d[1].AfDresults,

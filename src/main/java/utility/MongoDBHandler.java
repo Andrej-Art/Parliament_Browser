@@ -16,9 +16,14 @@ import org.json.simple.parser.ParseException;
 import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -531,7 +536,7 @@ public class MongoDBHandler {
      * @modified DavidJordan
      */
     public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String personFilter,
-                                                        String partyFilter,String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
+                                                        String partyFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
         // Setting each of the needed fields to be included in the results
         for (String field : neededField) {
@@ -708,6 +713,7 @@ public class MongoDBHandler {
 
     /**
      * Checks if a Document specified by the {@code id} has a given {@code field}.
+     *
      * @param col   Collection to search in.
      * @param id    Document key.
      * @param field Field name.
@@ -732,6 +738,7 @@ public class MongoDBHandler {
 
     /**
      * returns all Speakers with their speeches count.
+     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @author Edvin Nise
@@ -748,7 +755,6 @@ public class MongoDBHandler {
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
-
         if (!fractionFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
@@ -857,6 +863,7 @@ public class MongoDBHandler {
 
     /**
      * returns the count for all Parts of Speech
+     *
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
@@ -894,74 +901,84 @@ public class MongoDBHandler {
         return objList;
     }
 
-    public JSONObject getSentimentData(String dateFilterOne, String dateFilterTwo,
-                                       String fractionFilter, String personFilter, String partyFilter) {
-        //Create two pipelines to get the total amount of positive, negative and neutral sentiments for both speeches and comments
-        Bson facet = new Document("$facet", new Document()
-                .append("speechSentimentPipeline", Arrays.asList(
-                        new Document("$group", new Document("_id", null)
-                                .append("count", new Document("$sum", 1))
-                                .append("pos", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$gt", Arrays.asList("$sentiment", 0)), 1, 0))))
-                                .append("neg", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$lt", Arrays.asList("$sentiment", 0)), 1, 0))))
-                                .append("neu", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0))))
-                        )))
-                .append("commentSentimentPipeline", Arrays.asList(
-                        new Document("$lookup", new Document("from", "comment")
-                                .append("localField", "_id")
-                                .append("foreignField", "speechID")
-                                .append("as", "comments")),
-                        new Document("$unwind", "$comments"),
-                        new Document("$group", new Document("_id", null)
-                                .append("count", new Document("$sum", 1))
-                                .append("pos", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$gt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
-                                .append("neg", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$lt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
-                                .append("neu", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$eq", Arrays.asList("$comments.sentiment", 0)), 1, 0)))))
-                ))
-        );
+    /**
+     * return the percentage for each sentiment option
+     *
+     * @param dateFilterOne
+     * @param dateFilterTwo
+     * @param fractionFilter
+     * @param personFilter
+     * @param partyFilter
+     * @return JSONObject
+     * @author Edvin Nise
+     */
+    public JSONObject getSentimentData(String dateFilterOne,
+                                       String dateFilterTwo,
+                                       String fractionFilter,
+                                       String personFilter,
+                                       String partyFilter) {
+
+        Bson group = new Document("$group", new Document("_id", null)
+                .append("count", new Document("$sum", 1))
+                .append("pos", new Document("$sum", new Document("$cond",
+                        Arrays.asList(new Document("$gt", Arrays.asList("$sentiment", 0)), 1, 0))))
+                .append("neg", new Document("$sum", new Document("$cond",
+                        Arrays.asList(new Document("$lt", Arrays.asList("$sentiment", 0)), 1, 0))))
+                .append("neu", new Document("$sum", new Document("$cond",
+                        Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0)))));
+
         Bson unwindSpeech = unwind("$speechSentimentPipeline");
         Bson unwindComments = unwind("$commentSentimentPipeline");
 
         //adds Fields for the summed amount of all sentiment counts
-        Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
-                Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
-                .append("posCount", new Document("$add",
-                        Arrays.asList("$speechSentimentPipeline.pos", "$commentSentimentPipeline.pos")))
-                .append("negCount", new Document("$add",
-                        Arrays.asList("$speechSentimentPipeline.neg", "$commentSentimentPipeline.neg")))
-                .append("neuCount", new Document("$add",
-                        Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
+//        Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
+//                Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
+//                .append("posCount", new Document("$add",
+//                        Arrays.asList("$speechSentimentPipeline.pos", "$commentSentimentPipeline.pos")))
+//                .append("negCount", new Document("$add",
+//                        Arrays.asList("$speechSentimentPipeline.neg", "$commentSentimentPipeline.neg")))
+//                .append("neuCount", new Document("$add",
+//                        Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
 
         //calculates the percentage of positive, negative and neutral sentiments over all comments and speeches
-        Bson project = project(new Document("posPercent", new Document("$divide", Arrays.asList("$posCount", "$allCount")))
-                .append("negPercent", new Document("$divide", Arrays.asList("$negCount", "$allCount")))
-                .append("neuPercent", new Document("$divide", Arrays.asList("$neuCount", "$allCount"))));
+        Bson addFields = new Document("$addFields", new Document()
+                .append("posPercent", new Document("$divide", Arrays.asList("$pos", "$count")))
+                .append("negPercent", new Document("$divide", Arrays.asList("$neg", "$count")))
+                .append("neuPercent", new Document("$divide", Arrays.asList("$neu", "$count"))));
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(facet, unwindSpeech, unwindComments, addFields, project));
+
+
+        List<Bson> pipelineSpeech = new ArrayList<>(Arrays.asList(group, addFields));
+        List<Bson> pipelineComment = new ArrayList<>(Arrays.asList(group, addFields));
         if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+            applyDateFiltersToAggregation(pipelineComment, dateFilterOne, dateFilterTwo);
+            applyDateFiltersToAggregation(pipelineSpeech, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
+            applyPersonFractionFiltersToAggregation(pipelineComment, fractionFilter, "", "");
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
+            applyPersonFractionFiltersToAggregation(pipelineComment, "", personFilter, "");
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
         }
         if (!partyFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
+            applyPersonFractionFiltersToAggregation(pipelineComment, "", "", partyFilter);
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
         }
         JSONObject obj = new JSONObject();
-        db.getCollection("speech").aggregate(pipeline).forEach((Consumer<? super Document>) procBlock -> {
-            obj.put("positive", procBlock.getDouble("posPercent") * 100);
-            obj.put("negative", procBlock.getDouble("negPercent") * 100);
-            obj.put("neutral", procBlock.getDouble("neuPercent") * 100);
+        db.getCollection("speech").aggregate(pipelineSpeech).forEach((Consumer<? super Document>) procBlock ->
+        {
+            obj.put("speechPos", procBlock.getDouble("posPercent") * 100);
+            obj.put("speechNeg", procBlock.getDouble("negPercent") * 100);
+            obj.put("speechNeu", procBlock.getDouble("neuPercent") * 100);
         });
+        db.getCollection("comment").aggregate(pipelineComment).forEach((Consumer<? super Document>) procBlock -> {
+            obj.put("commentPos", procBlock.getDouble("posPercent") * 100);
+            obj.put("commentNeg", procBlock.getDouble("negPercent") * 100);
+            obj.put("commentNeu", procBlock.getDouble("neuPercent") * 100);
+                });
         System.out.println(obj);
         return obj;
     }
@@ -985,7 +1002,7 @@ public class MongoDBHandler {
         Bson limit = limit(100);
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match,limit, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, limit, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
@@ -1010,24 +1027,24 @@ public class MongoDBHandler {
 
                     JSONObject objCommentator = new JSONObject();
                     objCommentator.put("name", docComment.getString("fullName"));
-                    switch (docComment.getString("party")){
-                        case "CDU" :
-                        case "CSU" :
+                    switch (docComment.getString("party")) {
+                        case "CDU":
+                        case "CSU":
                             objCommentator.put("group", 1);
                             break;
-                        case "SPD" :
+                        case "SPD":
                             objCommentator.put("group", 2);
                             break;
-                        case "FDP" :
+                        case "FDP":
                             objCommentator.put("group", 3);
                             break;
-                        case "BÜNDNIS 90/DIE GRÜNEN" :
+                        case "BÜNDNIS 90/DIE GRÜNEN":
                             objCommentator.put("group", 4);
                             break;
-                        case "DIE LINKE." :
+                        case "DIE LINKE.":
                             objCommentator.put("group", 5);
                             break;
-                        case "AfD" :
+                        case "AfD":
                             objCommentator.put("group", 6);
                             break;
                         default:
@@ -1037,24 +1054,24 @@ public class MongoDBHandler {
 
                     JSONObject objSpeaker = new JSONObject();
                     objSpeaker.put("name", docSpeaker.getString("fullName"));
-                    switch (docSpeaker.getString("party")){
-                        case "CDU" :
-                        case "CSU" :
+                    switch (docSpeaker.getString("party")) {
+                        case "CDU":
+                        case "CSU":
                             objSpeaker.put("group", 1);
                             break;
-                        case "SPD" :
+                        case "SPD":
                             objSpeaker.put("group", 2);
                             break;
-                        case "FDP" :
+                        case "FDP":
                             objSpeaker.put("group", 3);
                             break;
-                        case "BÜNDNIS 90/DIE GRÜNEN" :
+                        case "BÜNDNIS 90/DIE GRÜNEN":
                             objSpeaker.put("group", 4);
                             break;
-                        case "DIE LINKE." :
+                        case "DIE LINKE.":
                             objSpeaker.put("group", 5);
                             break;
-                        case "AfD" :
+                        case "AfD":
                             objSpeaker.put("group", 6);
                             break;
                         default:
@@ -1063,11 +1080,11 @@ public class MongoDBHandler {
                     objNodesStrings.add(objSpeaker.toString());
                 });
         JSONParser parser = new JSONParser();
-        for (String s : objLinksStrings){
-           org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
-           objLinks.add(json);
+        for (String s : objLinksStrings) {
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+            objLinks.add(json);
         }
-        for (String s : objNodesStrings){
+        for (String s : objNodesStrings) {
             org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
             objNodes.add(json);
         }
@@ -1079,8 +1096,9 @@ public class MongoDBHandler {
 
     /**
      * returns speaker with corresponding topics
-     * @author Edvin Nise
+     *
      * @return JSONObject
+     * @author Edvin Nise
      */
     @Testing
     public JSONObject matchSpeakerToDDC() {
@@ -1106,24 +1124,24 @@ public class MongoDBHandler {
                         {
                             JSONObject objName = new JSONObject();
                             objName.put("name", procBlock.getString("_id"));
-                            switch (procBlock.getString("fraction")){
-                                case "CDU" :
-                                case "CSU" :
+                            switch (procBlock.getString("fraction")) {
+                                case "CDU":
+                                case "CSU":
                                     objName.put("group", 1);
                                     break;
-                                case "SPD" :
+                                case "SPD":
                                     objName.put("group", 2);
                                     break;
-                                case "FDP" :
+                                case "FDP":
                                     objName.put("group", 3);
                                     break;
-                                case "BÜNDNIS 90/DIE GRÜNEN" :
+                                case "BÜNDNIS 90/DIE GRÜNEN":
                                     objName.put("group", 4);
                                     break;
-                                case "DIE LINKE." :
+                                case "DIE LINKE.":
                                     objName.put("group", 5);
                                     break;
-                                case "AfD" :
+                                case "AfD":
                                     objName.put("group", 6);
                                     break;
                                 default:
@@ -1136,8 +1154,8 @@ public class MongoDBHandler {
                                 uniqueDDCPerSpeech.add(ddc);
 
                                 allDDCUnique.add(ddc);
-                        }
-                            for (String s : uniqueDDCPerSpeech){
+                            }
+                            for (String s : uniqueDDCPerSpeech) {
                                 JSONObject objlink = new JSONObject();
                                 objlink.put("source", procBlock.getString("_id"));
                                 objlink.put("target", s);
@@ -1149,7 +1167,7 @@ public class MongoDBHandler {
                         }
                 );
 
-        for (String s : allDDCUnique){
+        for (String s : allDDCUnique) {
             JSONObject objNodeDDC = new JSONObject();
             objNodeDDC.put("name", s);
             objNodeDDC.put("group", 8);
@@ -1290,88 +1308,85 @@ public class MongoDBHandler {
         }
         ArrayList<JSONObject> objList = new ArrayList<>();
         db.getCollection("poll").aggregate(pipeline).allowDiskUse(false).forEach((Consumer<? super Document>) procBlock -> {
-            JSONObject obj = new JSONObject();
-            obj.put("totalVotes", procBlock.getInteger("totalVotes"));
-            obj.put("pollID", procBlock.getString("_id"));
-            obj.put("totalVotesYes", procBlock.getInteger("totalVotesYes"));
-            obj.put("totalVotesNo", procBlock.getInteger("totalVotesNo"));
-            obj.put("totalVotesAbstained", procBlock.getInteger("totalVotesAbstained"));
-            obj.put("totalVotesNoVotes", procBlock.getInteger("totalVotesNoVotes"));
-            obj.put("date", (dateToLocalDate(procBlock.getDate("date"))));
-            obj.put("topic", procBlock.getString("topic"));
+            JSONObject objTotal = new JSONObject();
+            objTotal.put("totalVotes", procBlock.getInteger("totalVotes"));
+            objTotal.put("totalYes", procBlock.getInteger("totalVotesYes"));
+            objTotal.put("totalNo", procBlock.getInteger("totalVotesNo"));
+            objTotal.put("totalAbstained", procBlock.getInteger("totalVotesAbstained"));
+            objTotal.put("totalNoVotes", procBlock.getInteger("totalVotesNoVotes"));
+            objTotal.put("date", (dateToLocalDate(procBlock.getDate("date"))));
+            objTotal.put("topic", procBlock.getString("topic"));
+            objTotal.put("pollID", procBlock.getString("_id"));
 
             if (!procBlock.getInteger("totalVotesSPD").equals(0)) {
-                JSONObject objSPD = new JSONObject();
-                objSPD.put("totalVotesSPD", procBlock.getInteger("totalVotesSPD"));
-                objSPD.put("SPDYes", procBlock.getInteger("SPDYes"));
-                objSPD.put("SPDNo", procBlock.getInteger("SPDNo"));
-                objSPD.put("SPDAbstained", procBlock.getInteger("SPDAbstained"));
-                objSPD.put("SPDNoVotes", procBlock.getInteger("SPDNoVotes"));
-                obj.put("SPDresults", objSPD);
+
+                objTotal.put("SPDtotalVotes", procBlock.getInteger("totalVotesSPD"));
+                objTotal.put("SPDYes", procBlock.getInteger("SPDYes"));
+                objTotal.put("SPDNo", procBlock.getInteger("SPDNo"));
+                objTotal.put("SPDAbstained", procBlock.getInteger("SPDAbstained"));
+                objTotal.put("SPDNoVotes", procBlock.getInteger("SPDNoVotes"));
+
             }
 
             if (!procBlock.getInteger("totalVotesAfD").equals(0)) {
-                JSONObject objAfD = new JSONObject();
-                objAfD.put("totalVotesAfD", procBlock.getInteger("totalVotesAfD"));
-                objAfD.put("AfDYes", procBlock.getInteger("AfDYes"));
-                objAfD.put("AfdNo", procBlock.getInteger("AfdNo"));
-                objAfD.put("AfDAbstained", procBlock.getInteger("AfDAbstained"));
-                objAfD.put("AfDNoVotes", procBlock.getInteger("AfDNoVotes"));
-                obj.put("AfDresults", objAfD);
+
+                objTotal.put("AfDtotalVotes", procBlock.getInteger("totalVotesAfD"));
+                objTotal.put("AfDYes", procBlock.getInteger("AfDYes"));
+                objTotal.put("AfDNo", procBlock.getInteger("AfdNo"));
+                objTotal.put("AfDAbstained", procBlock.getInteger("AfDAbstained"));
+                objTotal.put("AfDNoVotes", procBlock.getInteger("AfDNoVotes"));
+
             }
 
             if (!procBlock.getInteger("totalVotesCxU").equals(0)) {
-                JSONObject objCxU = new JSONObject();
-                objCxU.put("totalVotesCxU", procBlock.getInteger("totalVotesCxU"));
-                objCxU.put("CxUYes", procBlock.getInteger("CxUYes"));
-                objCxU.put("CxUNo", procBlock.getInteger("CxUNo"));
-                objCxU.put("CxUAbstained", procBlock.getInteger("CxUAbstained"));
-                objCxU.put("CxUNoVotes", procBlock.getInteger("CxUNoVotes"));
-                obj.put("CxUresults", objCxU);
+
+                objTotal.put("CxUtotalVotes", procBlock.getInteger("totalVotesCxU"));
+                objTotal.put("CxUYes", procBlock.getInteger("CxUYes"));
+                objTotal.put("CxUNo", procBlock.getInteger("CxUNo"));
+                objTotal.put("CxUAbstained", procBlock.getInteger("CxUAbstained"));
+                objTotal.put("CxUNoVotes", procBlock.getInteger("CxUNoVotes"));
+
             }
 
             if (!procBlock.getInteger("totalVotesB90").equals(0)) {
-                JSONObject objB90 = new JSONObject();
-                objB90.put("totalVotesB90", procBlock.getInteger("totalVotesB90"));
-                objB90.put("B90Yes", procBlock.getInteger("B90Yes"));
-                objB90.put("B90No", procBlock.getInteger("B90No"));
-                objB90.put("B90Abstained", procBlock.getInteger("B90Abstained"));
-                objB90.put("B90NoVotes", procBlock.getInteger("B90NoVotes"));
-                obj.put("B90results", objB90);
+
+                objTotal.put("B90totalVotes", procBlock.getInteger("totalVotesB90"));
+                objTotal.put("B90Yes", procBlock.getInteger("B90Yes"));
+                objTotal.put("B90No", procBlock.getInteger("B90No"));
+                objTotal.put("B90Abstained", procBlock.getInteger("B90Abstained"));
+                objTotal.put("B90NoVotes", procBlock.getInteger("B90NoVotes"));
+
             }
 
             if (!procBlock.getInteger("totalVotesFDP").equals(0)) {
-                JSONObject objFDP = new JSONObject();
-                objFDP.put("totalVotesFDP", procBlock.getInteger("totalVotesFDP"));
-                objFDP.put("FDPYes", procBlock.getInteger("FDPYes"));
-                objFDP.put("FDPNo", procBlock.getInteger("FDPNo"));
-                objFDP.put("FDPAbstained", procBlock.getInteger("FDPAbstained"));
-                objFDP.put("FDPNoVotes", procBlock.getInteger("FDPNoVotes"));
-                obj.put("FDPresults", objFDP);
+
+                objTotal.put("FDPtotalVotes", procBlock.getInteger("totalVotesFDP"));
+                objTotal.put("FDPYes", procBlock.getInteger("FDPYes"));
+                objTotal.put("FDPNo", procBlock.getInteger("FDPNo"));
+                objTotal.put("FDPAbstained", procBlock.getInteger("FDPAbstained"));
+                objTotal.put("FDPNoVotes", procBlock.getInteger("FDPNoVotes"));
+
             }
 
             if (!procBlock.getInteger("totalVotesLINKE").equals(0)) {
-                JSONObject objLINKE = new JSONObject();
-                objLINKE.put("totalVotesLINKE", procBlock.getInteger("totalVotesLINKE"));
-                objLINKE.put("LINKEYes", procBlock.getInteger("LINKEYes"));
-                objLINKE.put("LINKENo", procBlock.getInteger("LINKENo"));
-                objLINKE.put("LINKEAbstained", procBlock.getInteger("LINKEAbstained"));
-                objLINKE.put("LINKENoVotes", procBlock.getInteger("LINKENoVotes"));
-                obj.put("LINKEresults", objLINKE);
+
+                objTotal.put("LINKEtotalVotes", procBlock.getInteger("totalVotesLINKE"));
+                objTotal.put("LINKEYes", procBlock.getInteger("LINKEYes"));
+                objTotal.put("LINKENo", procBlock.getInteger("LINKENo"));
+                objTotal.put("LINKEAbstained", procBlock.getInteger("LINKEAbstained"));
+                objTotal.put("LINKENoVotes", procBlock.getInteger("LINKENoVotes"));
+
             }
 
             if (!procBlock.getInteger("totalVotesindependent").equals(0)) {
-                JSONObject objindependent = new JSONObject();
-                objindependent.put("totalVotesindependent", procBlock.getInteger("totalVotesindependent"));
-                objindependent.put("independentYes", procBlock.getInteger("independentYes"));
-                objindependent.put("independentNo", procBlock.getInteger("independentNo"));
-                objindependent.put("independentAbstained", procBlock.getInteger("independentAbstained"));
-                objindependent.put("independentNoVotes", procBlock.getInteger("independentNoVotes"));
-                obj.put("independentresults", objindependent);
+
+                objTotal.put("independenttotalVotes", procBlock.getInteger("totalVotesindependent"));
+                objTotal.put("independentYes", procBlock.getInteger("independentYes"));
+                objTotal.put("independentNo", procBlock.getInteger("independentNo"));
+                objTotal.put("independentAbstained", procBlock.getInteger("independentAbstained"));
+                objTotal.put("independentNoVotes", procBlock.getInteger("independentNoVotes"));
             }
-
-
-            objList.add(obj);
+            objList.add(objTotal);
         });
         System.out.println(objList);
         return objList;
@@ -1379,6 +1394,7 @@ public class MongoDBHandler {
 
     /**
      * returns JSON Object for traversing through agendaitems to find speeches bound to them
+     *
      * @author Edvin Nise
      */
     public JSONObject getProtocalAgendaData() {
@@ -1407,6 +1423,7 @@ public class MongoDBHandler {
 
     /**
      * create a text index for a collection by indexing a specific field
+     *
      * @param col
      * @param field
      * @author Edvin Nise
@@ -1418,6 +1435,7 @@ public class MongoDBHandler {
 
     /**
      * drops the text index of a given collection
+     *
      * @param col
      * @param field
      * @author Edvin Nise
@@ -1425,4 +1443,260 @@ public class MongoDBHandler {
     public void dropTextIndex(String col, String field) {
         db.getCollection(col).dropIndex(field + "_text");
     }
+
+
+    /**
+     * This method creates a unique cookie from the username and password
+     *
+     * @param message
+     * @return
+     * @author Julian Ocker
+     */
+    public String hashDataIntoCookie(String message) {
+        String finalMessage;
+        try {
+            byte[] byteMessage = message.getBytes();
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            MessageDigest messageDigest1 = MessageDigest.getInstance("SHA-1");
+            MessageDigest messageDigest2 = MessageDigest.getInstance("SHA-512");
+            MessageDigest messageDigest3 = MessageDigest.getInstance("MD5");
+            messageDigest3.update(byteMessage);
+            byte[] md5Message = messageDigest3.digest();
+            messageDigest1.update(byteMessage);
+            byte[] sha1Message = messageDigest1.digest();
+            byte[] concat1Message = (DatatypeConverter.printHexBinary(sha1Message).toLowerCase() + Math.random() +
+                    LocalDateTime.now() + DatatypeConverter.printHexBinary(md5Message).toLowerCase()).getBytes();
+            byte[] concat2Message = (DatatypeConverter.printHexBinary(md5Message).toLowerCase() + Math.random() +
+                    LocalDateTime.now() + DatatypeConverter.printHexBinary(sha1Message).toLowerCase()).getBytes();
+            messageDigest.update(concat1Message);
+            messageDigest2.update(concat2Message);
+            byte[] result = (DatatypeConverter.printHexBinary(messageDigest.digest()).toLowerCase() + Math.random()
+                    + DatatypeConverter.printHexBinary(messageDigest2.digest()).toLowerCase()).getBytes();
+            finalMessage = DatatypeConverter.printHexBinary(result).toLowerCase();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return finalMessage;
+    }
+
+    /**
+     * This method checks whether the login-data are valid and if that is the case request and returns a cookie;
+     *
+     * @param name
+     * @param password
+     * @return
+     * @author Julian Ocker
+     */
+    public String generateCookie(String name, String password) {
+        String cookie = "";
+        if (checkUserAndPassword(name, password)) {
+            String rank = getTag("user", "_id", name, "rank");
+            cookie = hashDataIntoCookie(Math.random() + name + password + rank + LocalDateTime.now() + Math.random());
+            db.getCollection("cookies").insertOne(
+                    new Document()
+                            .append("user", name)
+                            .append("_id", cookie)
+                            .append("rank", rank)
+                            .append("expiring", LocalTime.now())
+            );
+        }
+        return cookie;
+    }
+
+    /**
+     * This method checks whether a username is available
+     *
+     * @param name
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean checkIfAvailable(String name) {
+        if (db.getCollection("user").find(new Document("_id", name)).iterator().hasNext()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This method registers a new User if the Username is available.
+     *
+     * @param name
+     * @param password
+     * @param rank
+     * @return
+     * @author Julian Ocker
+     */
+    public Boolean registrate(String name, String password, String rank) {
+        try {
+            db.getCollection("user").insertOne(
+                    new Document("_id", name)
+                            .append("rank", rank)
+                            .append("password", password)
+            );
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+
+    }
+
+    /**
+     * This method checks whether a user is an Admin and returns true if that is the case.
+     *
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean checkAdmin(String cookie) {
+        String cookieRank = "";
+        try {
+            cookieRank = getTag("cookies", "_id", cookie, "rank");
+        } catch (Exception ignored) {
+        }
+        return (cookieRank.equals("admin"));
+    }
+
+    /**
+     * This method checks whether a user is an Manager and returns true if that is the case.
+     *
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean checkManager(String cookie) {
+        String cookieRank = "";
+        try {
+            cookieRank = getTag("cookies", "cookie", cookie, "rank");
+        } catch (Exception ignored) {
+        }
+        return cookieRank.equals("manager");
+    }
+
+    /**
+     * This method checks whether a user is an User and returns true if that is the case.
+     *
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean checkUser(String cookie) {
+        String cookieRank = "";
+        try {
+            cookieRank = getTag("cookies", "cookie", cookie, "rank");
+        } catch (Exception ignored) {
+        }
+        return cookieRank.equals("user");
+    }
+
+    /**
+     * This function creates a User of the rank admin.
+     * Username: Admin1
+     * password: admin
+     *
+     * @author Julian Ocker
+     */
+    public void createUserCollection() {
+
+        this.db.getCollection("user").insertOne(new Document()
+                .append("_id", "Admin1")
+                .append("rank", "admin")
+                .append("password", "aa24c92b27947466817de3162f0be0c07af2ede2")//Klartextpasswort: admin
+        );
+    }
+
+    /**
+     * This function checks if the password is correct and changes it to  new password if thet is the case.
+     *
+     * @param cookie
+     * @param newPassword
+     * @param oldPassword
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean changePassword(String cookie, String newPassword, String oldPassword) {
+        String username = getTag("cookies", "_id", cookie, "user");
+        String rank = getTag("cookies", "_id", cookie, "rank");
+        if (checkUserAndPassword(username, oldPassword)) {
+            db.getCollection("user").deleteOne(
+                    new Document("_id", username)
+            );
+            db.getCollection("user").insertOne(
+                    new Document("_id", username)
+                            .append("rank", rank)
+                            .append("password", newPassword)
+            );
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * This Method returns a specific field from a document.
+     *
+     * @param collection
+     * @param column
+     * @param id
+     * @param tag
+     * @return
+     * @throws NullPointerException
+     * @author JulianOcker
+     */
+    public String getTag(String collection, String column, String id, String tag) throws NullPointerException {
+        Document result = db.getCollection(collection).find(new Document(column, id)).iterator().tryNext();
+        if (result == null)
+            throw new NullPointerException("The Document with _id = " + id + " does not exist in this collection.");
+        return result.getString(tag);
+    }
+
+    /**
+     * This method checks whether a user exists and if the password is correct.
+     *
+     * @param id
+     * @param password
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean checkUserAndPassword(String id, String password) {
+        if (db.getCollection("user").find(new Document("_id", id)).iterator().hasNext()) {
+            if (db.getCollection("user").find(new Document("_id", id)).iterator().next()
+                    .getString("password").equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This method deletes a cookie.
+     *
+     * @param name
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean logout(String name) {
+        if (db.getCollection("cookies").find(new Document("_id", name)).iterator().hasNext()) {
+            db.getCollection("cookies").deleteOne(new Document("_id", name));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * This method delestes a User by Username.
+     *
+     * @param name
+     * @return
+     * @author Julian Ocker
+     */
+    public Boolean deleteUser(String name) {
+        try {
+            db.getCollection("user").deleteOne(new Document("_id", name));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
 }

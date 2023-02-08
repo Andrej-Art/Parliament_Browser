@@ -2,7 +2,7 @@
 
 (3)
 
-Oberes layer ist eine skala von -1 bis 1 für sntiment
+Oberes layer ist eine skala von -1 bis 1 für sentiment
 
 mittleres layer sind knoten für reden
 

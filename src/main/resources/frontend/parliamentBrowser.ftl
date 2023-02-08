@@ -11,6 +11,7 @@
     <a href="/reden/">Reden-Visualisierung</a>
     <a href="/protokolleditor/">Protokoll-Editor</a>
     <a href="/latex/">LaTeX-Editor</a>
+    <a href="/loginSite/">Login-Management</a>
 </div>
 <script>
 /**

@@ -63,7 +63,7 @@ public class XMLProtocolParser {
 
 
             // iterating over all xml-protocols
-            for (int i = 114; i < files.length; i++) {
+            for (int i = 0; i < files.length; i++) {
                 File file = files[i];
                 //check if the file is a xml-file
                 if (file.isFile() && file.getName().matches(".*\\.xml")) {

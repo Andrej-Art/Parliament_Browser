@@ -29,3 +29,8 @@ body {
     gap: 15px;
     justify-content: flex-start;
 }
+
+#parliament-browser-main-navigation-bar a:last-child {
+    margin-left: auto;
+    margin-right: 5%;
+}
