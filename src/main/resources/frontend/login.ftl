@@ -43,94 +43,92 @@
             </div>
         </form>
     </div>
-</#if>
-<#if loginStatus==false >
-<br>
-<br>
+    <br>
+    <br>
 
 
-<h3>Passwort ändern</h3>
+    <h3>Passwort ändern</h3>
 
-<div>
-    <form onsubmit="changePw();">
-        <div>
-            Altes Password
-            <br>
-            <input type="password" id="OldPw" maxlength="32">
-        </div>
-        <div>
-            Neues Passwort
-            <br>
-            <input type="password" id="NewPw" minlength="8" maxlength="32">
-        </div>
-        <div>
-            <br>
-            <button type="submit">Passwort ändern</button>
-        </div>
-    </form>
-</div>
+    <div>
+        <form onsubmit="changePw();">
+            <div>
+                Altes Password
+                <br>
+                <input type="password" id="OldPw" maxlength="32">
+            </div>
+            <div>
+                Neues Passwort
+                <br>
+                <input type="password" id="NewPw" minlength="8" maxlength="32">
+            </div>
+            <div>
+                <br>
+                <button type="submit">Passwort ändern</button>
+            </div>
+        </form>
+    </div>
 </#if>
 
 <#if adminStatus==true>
 
-<br>
-<br>
+    <br>
+    <br>
 
-<h3>Registriere einen neuen User</h3>
+    <h3>Registriere einen neuen User</h3>
 
-<div>
-    <form onsubmit="register(); return false;">
-        <div>
-            Username
+    <div>
+        <form onsubmit="register(); return false;">
+            <div>
+                Username
+                <br>
+                <input id="Name" minlength="4" maxlength="128">
+            </div>
+            <div>
+                Passwort
+                <br>
+                <input type="password" id="Password" minlength="8" maxlength="32">
+            </div>
+            <div>
+                Rang
+                <br>
+                <select id="Rank">
+                    <option value="user">
+                        User
+                    </option>
+                    <option value="manager">
+                        Manager
+                    </option>
+                    <option value="admin">
+                        Admin
+                    </option>
+                </select>
+            </div>
+            <div>
+                <br>
+                <button type="submit">Registrieren</button>
+            </div>
+        </form>
+    </div>
+
+    <br>
+    <br>
+
+
+    <h3>User löschen</h3>
+
+    <div>
+        <form onsubmit="deleteUser(); return false;">
+            <div>
+                Nutzername des zu löschenden Users.
+                <br>
+                <input id="userToDelete">
+            </div>
             <br>
-            <input id="Name" minlength="4" maxlength="128">
-        </div>
-        <div>
-            Passwort
-            <br>
-            <input type="password" id="Password" minlength="8" maxlength="32">
-        </div>
-        <div>
-            Rang
-            <br>
-            <select id="Rank">
-                <option value="user">
-                    User
-                </option>
-                <option value="manager">
-                    Manager
-                </option>
-                <option value="admin">
-                    Admin
-                </option>
-            </select>
-        </div>
-        <div>
-            <br>
-            <button type="submit">Registrieren</button>
-        </div>
-    </form>
-</div>
-
-<br>
-<br>
-
-
-<h3>User löschen</h3>
-
-<div>
-    <form onsubmit="deleteUser(); return false;">
-        <div>
-            Nutzername des zu löschenden Users.
-            <br>
-            <input id="userToDelete">
-        </div>
-        <br>
-        <div>
-            <button type="submit">User löschen</button>
-        </div>
-    </form>
-</div>
+            <div>
+                <button type="submit">User löschen</button>
+            </div>
+        </form>
+    </div>
 </#if>
 
 </html>

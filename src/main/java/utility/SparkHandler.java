@@ -113,13 +113,14 @@ public class SparkHandler {
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map pageContent = new HashMap<String, Object>(0);
         String cookie = request.cookie("key");
-        if(mongoDBHandler.checkUser(cookie)||mongoDBHandler.checkManager(cookie)||mongoDBHandler.checkAdmin(cookie)) {
+        if(mongoDBHandler.checkUser(cookie)||mongoDBHandler.checkManager(cookie)) {
             pageContent.put("loginStatus", true);
         }else {
             pageContent.put("loginStatus", false);
         }
         if (mongoDBHandler.checkAdmin(cookie)){
             pageContent.put("adminStatus", true);
+            pageContent.put("loginStatus", true);
         }else {
             pageContent.put("adminStatus", false);
         }
