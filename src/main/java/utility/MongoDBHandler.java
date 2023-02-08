@@ -748,7 +748,6 @@ public class MongoDBHandler {
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
-
         if (!fractionFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
@@ -894,8 +893,11 @@ public class MongoDBHandler {
         return objList;
     }
 
-    public JSONObject getSentimentData(String dateFilterOne, String dateFilterTwo,
-                                       String fractionFilter, String personFilter, String partyFilter) {
+    public JSONObject getSentimentData(String dateFilterOne,
+                                       String dateFilterTwo,
+                                       String fractionFilter,
+                                       String personFilter,
+                                       String partyFilter) {
         //Create two pipelines to get the total amount of positive, negative and neutral sentiments for both speeches and comments
         Bson facet = new Document("$facet", new Document()
                 .append("speechSentimentPipeline", Arrays.asList(
@@ -1290,83 +1292,86 @@ public class MongoDBHandler {
         }
         ArrayList<JSONObject> objList = new ArrayList<>();
         db.getCollection("poll").aggregate(pipeline).allowDiskUse(false).forEach((Consumer<? super Document>) procBlock -> {
+            JSONObject objTotal = new JSONObject();
             JSONObject obj = new JSONObject();
-            obj.put("totalVotes", procBlock.getInteger("totalVotes"));
-            obj.put("pollID", procBlock.getString("_id"));
-            obj.put("totalVotesYes", procBlock.getInteger("totalVotesYes"));
-            obj.put("totalVotesNo", procBlock.getInteger("totalVotesNo"));
-            obj.put("totalVotesAbstained", procBlock.getInteger("totalVotesAbstained"));
-            obj.put("totalVotesNoVotes", procBlock.getInteger("totalVotesNoVotes"));
+            objTotal.put("totalVotes", procBlock.getInteger("totalVotes"));
+            objTotal.put("Yes", procBlock.getInteger("totalVotesYes"));
+            objTotal.put("No", procBlock.getInteger("totalVotesNo"));
+            objTotal.put("Abstained", procBlock.getInteger("totalVotesAbstained"));
+            objTotal.put("NoVotes", procBlock.getInteger("totalVotesNoVotes"));
+            obj.put("totalResults", objTotal);
+
             obj.put("date", (dateToLocalDate(procBlock.getDate("date"))));
             obj.put("topic", procBlock.getString("topic"));
+            obj.put("pollID", procBlock.getString("_id"));
 
             if (!procBlock.getInteger("totalVotesSPD").equals(0)) {
                 JSONObject objSPD = new JSONObject();
-                objSPD.put("totalVotesSPD", procBlock.getInteger("totalVotesSPD"));
-                objSPD.put("SPDYes", procBlock.getInteger("SPDYes"));
-                objSPD.put("SPDNo", procBlock.getInteger("SPDNo"));
-                objSPD.put("SPDAbstained", procBlock.getInteger("SPDAbstained"));
-                objSPD.put("SPDNoVotes", procBlock.getInteger("SPDNoVotes"));
+                objSPD.put("totalVotes", procBlock.getInteger("totalVotesSPD"));
+                objSPD.put("Yes", procBlock.getInteger("SPDYes"));
+                objSPD.put("No", procBlock.getInteger("SPDNo"));
+                objSPD.put("Abstained", procBlock.getInteger("SPDAbstained"));
+                objSPD.put("NoVotes", procBlock.getInteger("SPDNoVotes"));
                 obj.put("SPDresults", objSPD);
             }
 
             if (!procBlock.getInteger("totalVotesAfD").equals(0)) {
                 JSONObject objAfD = new JSONObject();
-                objAfD.put("totalVotesAfD", procBlock.getInteger("totalVotesAfD"));
-                objAfD.put("AfDYes", procBlock.getInteger("AfDYes"));
-                objAfD.put("AfdNo", procBlock.getInteger("AfdNo"));
-                objAfD.put("AfDAbstained", procBlock.getInteger("AfDAbstained"));
-                objAfD.put("AfDNoVotes", procBlock.getInteger("AfDNoVotes"));
+                objAfD.put("totalVotes", procBlock.getInteger("totalVotesAfD"));
+                objAfD.put("Yes", procBlock.getInteger("AfDYes"));
+                objAfD.put("No", procBlock.getInteger("AfdNo"));
+                objAfD.put("Abstained", procBlock.getInteger("AfDAbstained"));
+                objAfD.put("NoVotes", procBlock.getInteger("AfDNoVotes"));
                 obj.put("AfDresults", objAfD);
             }
 
             if (!procBlock.getInteger("totalVotesCxU").equals(0)) {
                 JSONObject objCxU = new JSONObject();
-                objCxU.put("totalVotesCxU", procBlock.getInteger("totalVotesCxU"));
-                objCxU.put("CxUYes", procBlock.getInteger("CxUYes"));
-                objCxU.put("CxUNo", procBlock.getInteger("CxUNo"));
-                objCxU.put("CxUAbstained", procBlock.getInteger("CxUAbstained"));
-                objCxU.put("CxUNoVotes", procBlock.getInteger("CxUNoVotes"));
+                objCxU.put("totalVotes", procBlock.getInteger("totalVotesCxU"));
+                objCxU.put("Yes", procBlock.getInteger("CxUYes"));
+                objCxU.put("No", procBlock.getInteger("CxUNo"));
+                objCxU.put("Abstained", procBlock.getInteger("CxUAbstained"));
+                objCxU.put("NoVotes", procBlock.getInteger("CxUNoVotes"));
                 obj.put("CxUresults", objCxU);
             }
 
             if (!procBlock.getInteger("totalVotesB90").equals(0)) {
                 JSONObject objB90 = new JSONObject();
-                objB90.put("totalVotesB90", procBlock.getInteger("totalVotesB90"));
-                objB90.put("B90Yes", procBlock.getInteger("B90Yes"));
-                objB90.put("B90No", procBlock.getInteger("B90No"));
-                objB90.put("B90Abstained", procBlock.getInteger("B90Abstained"));
-                objB90.put("B90NoVotes", procBlock.getInteger("B90NoVotes"));
+                objB90.put("totalVotes", procBlock.getInteger("totalVotesB90"));
+                objB90.put("Yes", procBlock.getInteger("B90Yes"));
+                objB90.put("No", procBlock.getInteger("B90No"));
+                objB90.put("Abstained", procBlock.getInteger("B90Abstained"));
+                objB90.put("NoVotes", procBlock.getInteger("B90NoVotes"));
                 obj.put("B90results", objB90);
             }
 
             if (!procBlock.getInteger("totalVotesFDP").equals(0)) {
                 JSONObject objFDP = new JSONObject();
-                objFDP.put("totalVotesFDP", procBlock.getInteger("totalVotesFDP"));
-                objFDP.put("FDPYes", procBlock.getInteger("FDPYes"));
-                objFDP.put("FDPNo", procBlock.getInteger("FDPNo"));
-                objFDP.put("FDPAbstained", procBlock.getInteger("FDPAbstained"));
-                objFDP.put("FDPNoVotes", procBlock.getInteger("FDPNoVotes"));
+                objFDP.put("totalVotes", procBlock.getInteger("totalVotesFDP"));
+                objFDP.put("Yes", procBlock.getInteger("FDPYes"));
+                objFDP.put("No", procBlock.getInteger("FDPNo"));
+                objFDP.put("Abstained", procBlock.getInteger("FDPAbstained"));
+                objFDP.put("NoVotes", procBlock.getInteger("FDPNoVotes"));
                 obj.put("FDPresults", objFDP);
             }
 
             if (!procBlock.getInteger("totalVotesLINKE").equals(0)) {
                 JSONObject objLINKE = new JSONObject();
-                objLINKE.put("totalVotesLINKE", procBlock.getInteger("totalVotesLINKE"));
-                objLINKE.put("LINKEYes", procBlock.getInteger("LINKEYes"));
-                objLINKE.put("LINKENo", procBlock.getInteger("LINKENo"));
-                objLINKE.put("LINKEAbstained", procBlock.getInteger("LINKEAbstained"));
-                objLINKE.put("LINKENoVotes", procBlock.getInteger("LINKENoVotes"));
+                objLINKE.put("totalVotes", procBlock.getInteger("totalVotesLINKE"));
+                objLINKE.put("Yes", procBlock.getInteger("LINKEYes"));
+                objLINKE.put("No", procBlock.getInteger("LINKENo"));
+                objLINKE.put("Abstained", procBlock.getInteger("LINKEAbstained"));
+                objLINKE.put("NoVotes", procBlock.getInteger("LINKENoVotes"));
                 obj.put("LINKEresults", objLINKE);
             }
 
             if (!procBlock.getInteger("totalVotesindependent").equals(0)) {
                 JSONObject objindependent = new JSONObject();
-                objindependent.put("totalVotesindependent", procBlock.getInteger("totalVotesindependent"));
-                objindependent.put("independentYes", procBlock.getInteger("independentYes"));
-                objindependent.put("independentNo", procBlock.getInteger("independentNo"));
-                objindependent.put("independentAbstained", procBlock.getInteger("independentAbstained"));
-                objindependent.put("independentNoVotes", procBlock.getInteger("independentNoVotes"));
+                objindependent.put("totalVotes", procBlock.getInteger("totalVotesindependent"));
+                objindependent.put("Yes", procBlock.getInteger("independentYes"));
+                objindependent.put("No", procBlock.getInteger("independentNo"));
+                objindependent.put("Abstained", procBlock.getInteger("independentAbstained"));
+                objindependent.put("NoVotes", procBlock.getInteger("independentNoVotes"));
                 obj.put("independentresults", objindependent);
             }
 
