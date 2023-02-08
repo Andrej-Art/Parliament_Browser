@@ -402,7 +402,7 @@ function updateCharts() {
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
             drawSpiderChart("#spider");
-            drawStackedBarChart(voteData,'#pie');
+           // drawStackedBarChart(voteData,'#pie');
             speakerbarchart(speechData,"#my_dataviz");
 
         } else {
