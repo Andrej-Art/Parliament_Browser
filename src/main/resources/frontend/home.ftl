@@ -19,7 +19,7 @@
     <ul>
         <li><a href="test/">✨ Test-Seite ✨</a></li>
         <li><a href="#title">Homepage</a></li>
-        <li><a href="login/">Login-Management</a></li>
+        <li><a href="loginSite/">Login-Management</a></li>
         <li><a href="dashboard/">Dashboard</a></li>
         <li><a href="network/1/">Redner-Kategorien-Netzwerk</a></li>
         <li><a href="reden/">Reden-Visualisierung</a></li>

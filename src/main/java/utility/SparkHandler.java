@@ -40,7 +40,18 @@ public class SparkHandler {
      * Sets up the website's paths.
      *
      * @author Eric Lakhter
+     * @see #getIcon
      * @see #getHome
+     * @see #getDashboard
+     * @see #getChartUpdates
+     * @see #getReden
+     * @see #getSpeechVis
+     * @see #getSpeechIDs
+     * @see #getProtokollEditor
+     * @see #getLaTeX
+     * @see #getspeechNetwork
+     * @see #getCommentNetwork
+     * @see #getLoginSite
      */
     public static void init(MongoDBHandler mdbh, EditorProtocolParser editorProtocolParser) throws IOException {
         epParser = editorProtocolParser;
@@ -110,6 +121,7 @@ public class SparkHandler {
 
     /**
      * Website's favicon.
+     * @author Eric Lakhter
      */
     private static final Route getIcon = (Request request, Response response) -> {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -349,7 +361,7 @@ public class SparkHandler {
      * @author Julian Ocker
      */
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
-        Map pageContent = new HashMap<String, Object>(0);
+        Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
         if (mongoDBHandler.checkUser(cookie) || mongoDBHandler.checkManager(cookie)) {
             pageContent.put("loginStatus", true);
