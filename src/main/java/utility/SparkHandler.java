@@ -225,7 +225,7 @@ public class SparkHandler {
 //        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
 //        //pageContent.put("sentiments", sentiments);
 //
-        List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
+        ArrayList<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
 //        pageContent.put("votes", votes);
 
         return new ModelAndView(pageContent, "dashboard.ftl");
@@ -254,7 +254,7 @@ public class SparkHandler {
         //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);
         //newDBData.put("sentiment", sentimentData);
 
-        List<JSONObject> votes = mongoDBHandler.getPollResults(von, bis, fraction, party, person);
+        ArrayList<JSONObject> votes = mongoDBHandler.getPollResults(von, bis, fraction, party, person);
         newDBData.put("votes", votes);
 
         // The Updates for the other charts could be added here
@@ -289,6 +289,7 @@ public class SparkHandler {
 
         return mongoDBHandler.findSpeech(text);
     };
+
 
     private final static TemplateViewRoute getspeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
