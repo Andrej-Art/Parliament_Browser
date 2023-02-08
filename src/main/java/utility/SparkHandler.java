@@ -220,7 +220,7 @@ public class SparkHandler {
         JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
         pageContent.put("entities", datesAndNamedEntities);
 
-        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 1200);
+        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
         pageContent.put("speechesNumber", speechesCounts);
 
         //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
@@ -249,7 +249,7 @@ public class SparkHandler {
         JSONObject entityData = mongoDBHandler.getNamedEntityCount(von, bis, fraction, party, person);
         newDBData.put("entities", entityData);
 
-        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, party, person, 1200);
+        List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount( von, bis, fraction, party, person, 15);
         newDBData.put("speechesNumber", speechesCountData);
 
         //JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", person);

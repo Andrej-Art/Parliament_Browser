@@ -408,7 +408,7 @@ function updateCharts() {
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
             drawSpiderChart("#spider");
-            drawDoughnutChart(voteData, '#pie');
+            drawStackedBarChart(voteData,'#pie');
             speakerbarchart(speechData,"#my_dataviz");
 
         } else {

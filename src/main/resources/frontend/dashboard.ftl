@@ -4,15 +4,17 @@
 <head>
     <meta name="author" content="Andrej Artuschenko, DavidJordan">
     <title> Dashboard </title>
+
     <#-- Include d3.js for graphs -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-
 
     <#-- Include ajax -->
     <link rel="stylesheet" href=
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <#-- Include jquery for better javascript usage -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
 
 
     <style>
@@ -97,6 +99,7 @@
         <div>
             <h3>Abstimmungsergebnisse mit Visualisierung von Namen</h3>
             <div id="pie"></div>
+
         </div>
 
     </div>
@@ -123,7 +126,7 @@
     <#include "js/chart_functions.js">
     <#include "js/balkentest.js">
     <#include  "js/barSpeaker.js">
-    <#include "js/pollPie.js">
+    <#include "js/pollStackBar.js">
 
 
 </script>
