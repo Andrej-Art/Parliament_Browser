@@ -912,73 +912,68 @@ public class MongoDBHandler {
                                        String fractionFilter,
                                        String personFilter,
                                        String partyFilter) {
-        //Create two pipelines to get the total amount of positive, negative and neutral sentiments for both speeches and comments
-        Bson facet = new Document("$facet", new Document()
-                .append("speechSentimentPipeline", Arrays.asList(
-                        new Document("$group", new Document("_id", null)
-                                .append("count", new Document("$sum", 1))
-                                .append("pos", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$gt", Arrays.asList("$sentiment", 0)), 1, 0))))
-                                .append("neg", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$lt", Arrays.asList("$sentiment", 0)), 1, 0))))
-                                .append("neu", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0))))
-                        )))
-                .append("commentSentimentPipeline", Arrays.asList(
-                        new Document("$lookup", new Document("from", "comment")
-                                .append("localField", "_id")
-                                .append("foreignField", "speechID")
-                                .append("as", "comments")),
-                        new Document("$unwind", "$comments"),
-                        new Document("$group", new Document("_id", null)
-                                .append("count", new Document("$sum", 1))
-                                .append("pos", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$gt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
-                                .append("neg", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$lt", Arrays.asList("$comments.sentiment", 0)), 1, 0))))
-                                .append("neu", new Document("$sum", new Document("$cond",
-                                        Arrays.asList(new Document("$eq", Arrays.asList("$comments.sentiment", 0)), 1, 0)))))
-                ))
-        );
+
+        Bson group = new Document("$group", new Document("_id", null)
+                .append("count", new Document("$sum", 1))
+                .append("pos", new Document("$sum", new Document("$cond",
+                        Arrays.asList(new Document("$gt", Arrays.asList("$sentiment", 0)), 1, 0))))
+                .append("neg", new Document("$sum", new Document("$cond",
+                        Arrays.asList(new Document("$lt", Arrays.asList("$sentiment", 0)), 1, 0))))
+                .append("neu", new Document("$sum", new Document("$cond",
+                        Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0)))));
+
         Bson unwindSpeech = unwind("$speechSentimentPipeline");
         Bson unwindComments = unwind("$commentSentimentPipeline");
 
         //adds Fields for the summed amount of all sentiment counts
-        Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
-                Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
-                .append("posCount", new Document("$add",
-                        Arrays.asList("$speechSentimentPipeline.pos", "$commentSentimentPipeline.pos")))
-                .append("negCount", new Document("$add",
-                        Arrays.asList("$speechSentimentPipeline.neg", "$commentSentimentPipeline.neg")))
-                .append("neuCount", new Document("$add",
-                        Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
+//        Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
+//                Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
+//                .append("posCount", new Document("$add",
+//                        Arrays.asList("$speechSentimentPipeline.pos", "$commentSentimentPipeline.pos")))
+//                .append("negCount", new Document("$add",
+//                        Arrays.asList("$speechSentimentPipeline.neg", "$commentSentimentPipeline.neg")))
+//                .append("neuCount", new Document("$add",
+//                        Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
 
         //calculates the percentage of positive, negative and neutral sentiments over all comments and speeches
-        Bson project = project(new Document("posPercent", new Document("$divide", Arrays.asList("$posCount", "$allCount")))
-                .append("negPercent", new Document("$divide", Arrays.asList("$negCount", "$allCount")))
-                .append("neuPercent", new Document("$divide", Arrays.asList("$neuCount", "$allCount"))));
-        Bson limit = limit(1000);
+        Bson addFields = new Document("$addFields", new Document()
+                .append("posPercent", new Document("$divide", Arrays.asList("$pos", "$count")))
+                .append("negPercent", new Document("$divide", Arrays.asList("$neg", "$count")))
+                .append("neuPercent", new Document("$divide", Arrays.asList("$neu", "$count"))));
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(limit, facet, unwindSpeech, unwindComments, addFields, project));
+
+
+        List<Bson> pipelineSpeech = new ArrayList<>(Arrays.asList(group, addFields));
+        List<Bson> pipelineComment = new ArrayList<>(Arrays.asList(group, addFields));
         if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+            applyDateFiltersToAggregation(pipelineComment, dateFilterOne, dateFilterTwo);
+            applyDateFiltersToAggregation(pipelineSpeech, dateFilterOne, dateFilterTwo);
         }
         if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
+            applyPersonFractionFiltersToAggregation(pipelineComment, fractionFilter, "", "");
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
         }
         if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
+            applyPersonFractionFiltersToAggregation(pipelineComment, "", personFilter, "");
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
         }
         if (!partyFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
+            applyPersonFractionFiltersToAggregation(pipelineComment, "", "", partyFilter);
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
         }
         JSONObject obj = new JSONObject();
-        db.getCollection("speech").aggregate(pipeline).forEach((Consumer<? super Document>) procBlock -> {
-            obj.put("positive", procBlock.getDouble("posPercent") * 100);
-            obj.put("negative", procBlock.getDouble("negPercent") * 100);
-            obj.put("neutral", procBlock.getDouble("neuPercent") * 100);
+        db.getCollection("speech").aggregate(pipelineSpeech).forEach((Consumer<? super Document>) procBlock ->
+        {
+            obj.put("speechPos", procBlock.getDouble("posPercent") * 100);
+            obj.put("speechNeg", procBlock.getDouble("negPercent") * 100);
+            obj.put("speechNeu", procBlock.getDouble("neuPercent") * 100);
         });
+        db.getCollection("comment").aggregate(pipelineComment).forEach((Consumer<? super Document>) procBlock -> {
+            obj.put("commentPos", procBlock.getDouble("posPercent") * 100);
+            obj.put("commentNeg", procBlock.getDouble("negPercent") * 100);
+            obj.put("commentNeu", procBlock.getDouble("neuPercent") * 100);
+                });
         System.out.println(obj);
         return obj;
     }
