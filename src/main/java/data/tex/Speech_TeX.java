@@ -3,7 +3,6 @@ package data.tex;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import utility.MongoDBHandler;
-import utility.uima.MongoSentence;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,7 +32,7 @@ public class Speech_TeX {
      * @return String in TeX format.
      * @author Eric Lakhter
      */
-    public static String toTeX(String speechID, boolean showNamedEntities, boolean showSentiment, boolean showComments) {
+    public String toTeX(String speechID, boolean showNamedEntities, boolean showSentiment, boolean showComments) {
         MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
         Document speechDoc = speechCursor.tryNext();
         if (speechDoc == null) return "";
@@ -55,18 +54,20 @@ public class Speech_TeX {
 //        int orgIndex = 0;
 //        int locIndex = 0;
 //        int sentenceIndex = 0;
-        int commentIndex = 0;
         for (int i = 0; textIter.hasNext(); i++) {
 //            if (sentenceIndex < sentences.size() && sentences.get(sentenceIndex).getEndPos() == i) {
 //                speechTeX.append(sentences.get(sentenceIndex).getSentiment());
 //                sentenceIndex++;
 //            }
             if (commentDoc != null && commentDoc.getInteger("commentPos") == i) {
-                speechTeX.append(commentDoc.getString("text"));
+                speechTeX.append("\n\n\\textcolor{green}{");
+
+
                 if (!commentDoc.getString("commentatorID").equals("")) {
 //                    mdbh.pictureURL(commentDoc.getString("commentatorID"));
                 }
-
+                speechTeX.append(commentDoc.getString("text"));
+                speechTeX.append("}\n\n");
                 commentCursor.tryNext();
             }
 
