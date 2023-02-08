@@ -5,6 +5,8 @@
 </div>
 <div id="parliament-browser-main-navigation-bar">
     <button class="nav-button" onclick="hideStatusBar()"><i class='fa fa-angle-double-up'></i></button>
+    <a href="/login/">Login-Management</a>
+    &emsp;
     <a href="/">Homepage</a>
     <a href="/dashboard/">Dashboard</a>
     <a href="/network/1/">Redner-Kategorien-Netzwerk</a>
