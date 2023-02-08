@@ -102,13 +102,11 @@ public class SparkHandler {
         post("/post/applicationDataLogoutUser/", postLogout);
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
-
     }
 
     /*
      * Routes:
      */
-
 
     /**
      * Website's favicon.
@@ -135,11 +133,14 @@ public class SparkHandler {
         pageContent.put("obj", obj);
         pageContent.put("objList", objList);
 
+        String dbInfo = "admin";
+        pageContent.put("userRank", dbInfo);
         return new ModelAndView(pageContent, "test.ftl");
     };
 
     /**
      * Homepage.
+     * @author Eric Lakhter
      */
     private static final TemplateViewRoute getHome = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -151,6 +152,7 @@ public class SparkHandler {
 
     /**
      * LaTeX editing page.
+     * @author Eric Lakhter
      */
     @Unfinished("Doesn't do anything yet")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
@@ -165,6 +167,7 @@ public class SparkHandler {
 
     /**
      * Tries to return a PDF file.
+     * @author Eric Lakhter
      */
     @Unfinished("Need to convert the LaTeX code to a pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
@@ -180,6 +183,7 @@ public class SparkHandler {
 
     /**
      * Speech editing page.
+     * @author Eric Lakhter
      */
     @Unfinished("Nothing more than a text field so far")
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
@@ -190,6 +194,7 @@ public class SparkHandler {
 
     /**
      * Tries to parse a custom protocol/agenda item/speech and to insert it into the DB.
+     * @author Eric Lakhter
      */
     @Unfinished("Need to implement the part which grabs info from the db first before this is considered done")
     private static final Route postProtokollEditor = (Request request, Response response) -> {
@@ -228,14 +233,6 @@ public class SparkHandler {
             return errorJSON("General Exception: " + e.getMessage());
         }
     };
-
-//    private static final TemplateViewRoute getDataUpdate = (Request request, Response response) -> {
-//        //.....
-//    }
-
-    /**
-     * ADD SHORT DESCRIPTION
-     */
 
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -294,6 +291,7 @@ public class SparkHandler {
 
     /**
      * Speech visualisation page.
+     * @author Eric Lakhter
      */
     private static final TemplateViewRoute getReden = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -307,22 +305,19 @@ public class SparkHandler {
 
     /**
      * Returns a JSON containing all data for a specific speech.
+     * @author Eric Lakhter
      */
     private static final Route getSpeechVis = (Request request, Response response) -> {
-
-
         String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
-
         return mongoDBHandler.allSpeechData(speechID);
     };
 
     /**
      * Returns a JSON containing all speech IDs matching the search.
+     * @author Eric Lakhter
      */
     private static final Route getSpeechIDs = (Request request, Response response) -> {
-
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
-
         return mongoDBHandler.findSpeech(text);
     };
 
