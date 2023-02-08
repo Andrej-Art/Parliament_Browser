@@ -109,106 +109,6 @@ public class SparkHandler {
      * Routes:
      */
 
-    /** This returns the login page. */
-    private static final TemplateViewRoute getLoginSite = (request, response) -> {
-        Map pageContent = new HashMap<String, Object>(0);
-        String cookie = request.cookie("key");
-        if(mongoDBHandler.checkUser(cookie)||mongoDBHandler.checkManager(cookie)) {
-            pageContent.put("loginStatus", true);
-        }else {
-            pageContent.put("loginStatus", false);
-        }
-        if (mongoDBHandler.checkAdmin(cookie)){
-            pageContent.put("adminStatus", true);
-            pageContent.put("loginStatus", true);
-        }else {
-            pageContent.put("adminStatus", false);
-        }
-        return new ModelAndView(pageContent, "login.ftl");
-    };
-
-    /**  */
-    private static final Route postChangePassword = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String oldPassword = req.getString("oldPw");
-        String newPassword = req.getString("newPw");
-        String cookie = req.getString("cookie");
-        Boolean success = mongoDBHandler.changePassword(cookie, newPassword, oldPassword);
-        mongoDBHandler.logout(cookie);
-        return new JSONObject().put("pwChangeSuccess",success);
-    };
-
-    private static final Route postDeleteUser = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String deleteUser = req.getString("deleteUser");
-        String cookie = req.getString("cookie");
-        System.out.println(mongoDBHandler.checkAdmin(cookie));
-        if (mongoDBHandler.checkAdmin(cookie)) {
-            JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
-            return uDeletionSuccess;
-        }
-        return new JSONObject().put("deletionSuccess",false);
-    };
-
-    private static final Route postLogout = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String deleteCookie = req.getString("logoutUser");
-        return new JSONObject().put("cDeletionSuccess",mongoDBHandler.logout(deleteCookie));
-    };
-
-    private static final Route postCheckUser =(request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer",mongoDBHandler.checkUser(cookie));
-        return answer;
-    };
-
-     private static final Route postCheckManager = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer",mongoDBHandler.checkManager(cookie));
-        return answer;
-    };
-
-    private static final Route postCheckAdmin = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkAdmin(cookie));
-        return answer;
-    };
-
-    private static final Route postRegister = (request, response) -> {
-        System.out.println(request.body());
-        JSONObject req = new JSONObject(request.body());
-        String name = req.getString("name");
-        String password = req.getString("pw");
-        String rank = req.getString("rank");
-        boolean registrationSuccess = false;
-
-        if (mongoDBHandler.checkIfAvailable(name)) {
-            registrationSuccess = mongoDBHandler.registrate(name, password, rank);
-        }
-        return new JSONObject().put("registration", registrationSuccess);
-    };
-
-    private static final Route postLogin = (Request request, Response response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String name = req.getString("name");
-        String password = req.getString("pw");
-        JSONObject answer = new JSONObject();
-        if (mongoDBHandler.checkUserAndPassword(name, password)) {
-            String cookie = mongoDBHandler.generateCookie(name, password);
-            answer.put("cookie", cookie);
-            answer.put("loginSuccess", true);
-        } else {
-            answer.put("cookie", "Deine Anmeldedaten sind Falsch!");
-            answer.put("loginSuccess", false);
-        }
-        return answer;
-    };
 
     /**
      * Website's favicon.
@@ -448,6 +348,107 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "commentNetwork.ftl");
     };
 
+//TODO
+    /** This returns the login page. */
+    private static final TemplateViewRoute getLoginSite = (request, response) -> {
+        Map pageContent = new HashMap<String, Object>(0);
+        String cookie = request.cookie("key");
+        if(mongoDBHandler.checkUser(cookie)||mongoDBHandler.checkManager(cookie)) {
+            pageContent.put("loginStatus", true);
+        }else {
+            pageContent.put("loginStatus", false);
+        }
+        if (mongoDBHandler.checkAdmin(cookie)){
+            pageContent.put("adminStatus", true);
+            pageContent.put("loginStatus", true);
+        }else {
+            pageContent.put("adminStatus", false);
+        }
+        return new ModelAndView(pageContent, "login.ftl");
+    };
+
+    /**  */
+    private static final Route postChangePassword = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String oldPassword = req.getString("oldPw");
+        String newPassword = req.getString("newPw");
+        String cookie = req.getString("cookie");
+        Boolean success = mongoDBHandler.changePassword(cookie, newPassword, oldPassword);
+        mongoDBHandler.logout(cookie);
+        return new JSONObject().put("pwChangeSuccess",success);
+    };
+
+    private static final Route postDeleteUser = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String deleteUser = req.getString("deleteUser");
+        String cookie = req.getString("cookie");
+        System.out.println(mongoDBHandler.checkAdmin(cookie));
+        if (mongoDBHandler.checkAdmin(cookie)) {
+            JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
+            return uDeletionSuccess;
+        }
+        return new JSONObject().put("deletionSuccess",false);
+    };
+
+    private static final Route postLogout = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String deleteCookie = req.getString("logoutUser");
+        return new JSONObject().put("cDeletionSuccess",mongoDBHandler.logout(deleteCookie));
+    };
+
+    private static final Route postCheckUser =(request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String cookie = req.getString("cookie");
+        JSONObject answer = new JSONObject();
+        answer.put("answer",mongoDBHandler.checkUser(cookie));
+        return answer;
+    };
+
+    private static final Route postCheckManager = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String cookie = req.getString("cookie");
+        JSONObject answer = new JSONObject();
+        answer.put("answer",mongoDBHandler.checkManager(cookie));
+        return answer;
+    };
+
+    private static final Route postCheckAdmin = (request, response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String cookie = req.getString("cookie");
+        JSONObject answer = new JSONObject();
+        answer.put("answer", mongoDBHandler.checkAdmin(cookie));
+        return answer;
+    };
+
+    private static final Route postRegister = (request, response) -> {
+        System.out.println(request.body());
+        JSONObject req = new JSONObject(request.body());
+        String name = req.getString("name");
+        String password = req.getString("pw");
+        String rank = req.getString("rank");
+        boolean registrationSuccess = false;
+
+        if (mongoDBHandler.checkIfAvailable(name)) {
+            registrationSuccess = mongoDBHandler.registrate(name, password, rank);
+        }
+        return new JSONObject().put("registration", registrationSuccess);
+    };
+
+    private static final Route postLogin = (Request request, Response response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String name = req.getString("name");
+        String password = req.getString("pw");
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkUserAndPassword(name, password)) {
+            String cookie = mongoDBHandler.generateCookie(name, password);
+            answer.put("cookie", cookie);
+            answer.put("loginSuccess", true);
+        } else {
+            answer.put("cookie", "Deine Anmeldedaten sind Falsch!");
+            answer.put("loginSuccess", false);
+        }
+        return answer;
+    };
 
     /*
      * MISC:
@@ -505,4 +506,5 @@ public class SparkHandler {
             rt.exec("xdg-open " + url);
         }
     }
+
 }

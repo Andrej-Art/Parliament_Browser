@@ -1451,7 +1451,7 @@ public class MongoDBHandler {
 
 
     /**
-     * This function creates a unique cookie from the username and password
+     * This method creates a unique cookie from the username and password
      * @param message
      * @return
      * @author Julian Ocker
@@ -1483,6 +1483,14 @@ public class MongoDBHandler {
         return finalMessage;
     }
 
+    /**
+     * This method checks whether the login-data are valid and if that is the case request and returns a cookie;
+     * @param name
+     * @param password
+     * @return
+     *
+     * @author Julian Ocker
+     */
     public String generateCookie(String name, String password) {
         String cookie = "";
         if (checkUserAndPassword(name, password)) {
@@ -1499,6 +1507,13 @@ public class MongoDBHandler {
         return cookie;
     }
 
+    /**
+     * This method checks whether a username is available
+     * @param name
+     * @return
+     *
+     * @author Julian Ocker
+     */
     public boolean checkIfAvailable(String name) {
         if (db.getCollection("user").find(new Document("_id", name)).iterator().hasNext()) {
             return false;
@@ -1506,7 +1521,14 @@ public class MongoDBHandler {
         return true;
     }
 
-
+    /**
+     * This method registers a new User if the Username is available.
+     * @param name
+     * @param password
+     * @param rank
+     * @return
+     * @author Julian Ocker
+     */
     public Boolean registrate(String name, String password, String rank) {
         try {
             db.getCollection("user").insertOne(
@@ -1521,6 +1543,12 @@ public class MongoDBHandler {
 
     }
 
+    /**
+     * This method checks whether a user is an Admin and returns true if that is the case.
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
     public boolean checkAdmin(String cookie) {
         String cookieRank = "";
         try {
@@ -1530,6 +1558,12 @@ public class MongoDBHandler {
         return (cookieRank.equals("admin"));
     }
 
+    /**
+     * This method checks whether a user is an Manager and returns true if that is the case.
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
     public boolean checkManager(String cookie) {
         String cookieRank = "";
         try {
@@ -1539,7 +1573,12 @@ public class MongoDBHandler {
         return cookieRank.equals("manager");
     }
 
-
+    /**
+     * This method checks whether a user is an User and returns true if that is the case.
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
     public boolean checkUser(String cookie) {
         String cookieRank = "";
         try {
@@ -1564,6 +1603,14 @@ public class MongoDBHandler {
         );
     }
 
+    /**
+     * This function checks if the password is correct and changes it to  new password if thet is the case.
+     * @param cookie
+     * @param newPassword
+     * @param oldPassword
+     * @return
+     * @author Julian Ocker
+     */
     public boolean changePassword(String cookie, String newPassword, String oldPassword) {
         String username = getTag("cookies", "_id", cookie, "user");
         String rank = getTag("cookies", "_id", cookie, "rank");
@@ -1583,6 +1630,16 @@ public class MongoDBHandler {
 
     }
 
+    /**
+     * This Method returns a specific field from a document.
+     * @param collection
+     * @param column
+     * @param id
+     * @param tag
+     * @return
+     * @throws NullPointerException
+     * @author JulianOcker
+     */
     public String getTag(String collection, String column, String id, String tag) throws NullPointerException {
         Document result = db.getCollection(collection).find(new Document(column, id)).iterator().tryNext();
         if (result == null)
@@ -1590,6 +1647,13 @@ public class MongoDBHandler {
         return result.getString(tag);
     }
 
+    /**
+     * This method checks whether a user exists and if the password is correct.
+     * @param id
+     * @param password
+     * @return
+     * @author Julian Ocker
+     */
     public boolean checkUserAndPassword(String id, String password) {
         if (db.getCollection("user").find(new Document("_id", id)).iterator().hasNext()) {
             if (db.getCollection("user").find(new Document("_id", id)).iterator().next()
@@ -1600,6 +1664,12 @@ public class MongoDBHandler {
         return false;
     }
 
+    /**
+     * This method deletes a cookie.
+     * @param name
+     * @return
+     * @author Julian Ocker
+     */
     public boolean logout(String name) {
         if (db.getCollection("cookies").find(new Document("_id", name)).iterator().hasNext()) {
             db.getCollection("cookies").deleteOne(new Document("_id", name));
@@ -1608,6 +1678,12 @@ public class MongoDBHandler {
         return false;
     }
 
+    /**
+     * This method delestes a User by Username.
+     * @param name
+     * @return
+     * @author Julian Ocker
+     */
     public Boolean deleteUser(String name) {
         try {
             db.getCollection("user").deleteOne(new Document("_id", name));
