@@ -1,7 +1,9 @@
 package data.tex;
 
-import org.json.JSONObject;
-import org.json.JSONArray;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
+import utility.MongoDBHandler;
+import utility.uima.MongoSentence;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,48 +17,59 @@ import static java.util.Arrays.asList;
  * @author Eric Lakhter
  */
 public class Speech_TeX {
-    private final String id, text, date;
-    private final JSONObject speaker;
-    private final JSONArray perEntities, orgEntities, locEntities, sentences, comments;
-
-    public Speech_TeX(JSONObject speechTeXObj) {
-        id = speechTeXObj.getString("id");
-        text = speechTeXObj.getString("text");
-        date = speechTeXObj.getString("date");
-        speaker = speechTeXObj.getJSONObject("speaker");
-        perEntities = speechTeXObj.getJSONArray("perEntities");
-        orgEntities = speechTeXObj.getJSONArray("orgEntities");
-        locEntities = speechTeXObj.getJSONArray("locEntities");
-        sentences = speechTeXObj.getJSONArray("sentences");
-        comments = speechTeXObj.getJSONArray("comments");
+    private static MongoDBHandler mdbh;
+    public Speech_TeX(MongoDBHandler mongoDBHandler) {
+        mdbh = mongoDBHandler;
     }
 
     /**
      * Builds a string which can be formatted by a TeX compiler.<br>
      * TeX command looks like this:<br>
      * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
+     * @param speechID the speechID to texify.
      * @param showNamedEntities whether named entity markers should show up in the text.
      * @param showSentiment whether sentiment information should show up at the end of each sentence.
      * @param showComments whether comments should show up.
      * @return String in TeX format.
      * @author Eric Lakhter
      */
-    public String toTeX(boolean showNamedEntities, boolean showSentiment, boolean showComments) {
-        List<String> textArray = new ArrayList<>(asList(text.split("")));
+    public static String toTeX(String speechID, boolean showNamedEntities, boolean showSentiment, boolean showComments) {
+        MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
+        Document speechDoc = speechCursor.tryNext();
+        if (speechDoc == null) return "";
+
+        MongoCursor<Document> commentCursor = mdbh.getDB().getCollection("comment").find(new Document("speechID", speechID)).iterator();
+        Document commentDoc = commentCursor.tryNext();
+
+        List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));
         textArray.add("");
         Iterator<String> textIter = textArray.iterator();
         StringBuilder speechTeX = new StringBuilder();
 
-        int perIndex = 0;
-        int orgIndex = 0;
-        int locIndex = 0;
-        int sentenceIndex = 0;
+//        List<MongoSentence> sentences = new ArrayList<>(0);
+//        for (Document doc : (ArrayList<Document>) speechDoc.get("sentences")) {
+//            sentences.add(new MongoSentence(doc.getInteger("startPos"), doc.getInteger("endPos"), doc.getDouble("sentiment")));
+//        }
+
+//        int perIndex = 0;
+//        int orgIndex = 0;
+//        int locIndex = 0;
+//        int sentenceIndex = 0;
         int commentIndex = 0;
         for (int i = 0; textIter.hasNext(); i++) {
-            if (sentenceIndex < sentences.length() && sentences.getJSONObject(sentenceIndex).getInt("endPos") == i) {
-                speechTeX.append(sentences.getJSONObject(sentenceIndex).getString("sentiment"));
-                sentenceIndex++;
+//            if (sentenceIndex < sentences.size() && sentences.get(sentenceIndex).getEndPos() == i) {
+//                speechTeX.append(sentences.get(sentenceIndex).getSentiment());
+//                sentenceIndex++;
+//            }
+            if (commentDoc != null && commentDoc.getInteger("commentPos") == i) {
+                speechTeX.append(commentDoc.getString("text"));
+                if (!commentDoc.getString("commentatorID").equals("")) {
+//                    mdbh.pictureURL(commentDoc.getString("commentatorID"));
+                }
+
+                commentCursor.tryNext();
             }
+
             speechTeX.append(textIter.next());
         }
 
