@@ -76,7 +76,6 @@ public class SparkHandler {
         get("/", getHome, new FreeMarkerEngine(cfg));
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
-        //Route to deliver the updated Data for the charts according to the provided filters//
         get("/update-charts/", getChartUpdates);
 
         get("/reden/", getReden, new FreeMarkerEngine(cfg));
@@ -207,27 +206,27 @@ public class SparkHandler {
 //    }
 
     /** ADD SHORT DESCRIPTION */
-    @Testing
+
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
-        pageContent.put("pos", posAndCounts);
-
-        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
-        pageContent.put("token", tokenAndCounts);
-
-        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
-        pageContent.put("entities", datesAndNamedEntities);
-
-        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
-        pageContent.put("speechesNumber", speechesCounts);
-
-        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
-        //pageContent.put("sentiments", sentiments);
-
+//        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
+//        pageContent.put("pos", posAndCounts);
+//
+//        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
+//        pageContent.put("token", tokenAndCounts);
+//
+//        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
+//        pageContent.put("entities", datesAndNamedEntities);
+//
+//        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
+//        pageContent.put("speechesNumber", speechesCounts);
+//
+//        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
+//        //pageContent.put("sentiments", sentiments);
+//
         List<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
-        pageContent.put("votes", votes);
+//        pageContent.put("votes", votes);
 
         return new ModelAndView(pageContent, "dashboard.ftl");
     };

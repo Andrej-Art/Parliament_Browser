@@ -65,7 +65,11 @@
 
 <div class="main">
 
+
+
     <h1>Dashboard</h1>
+
+    <div id="status-message-box"> </div>
 
     <div class="wrapper" id="chartContainer">
         <div>
@@ -112,7 +116,7 @@
 
     $(document).ready(function () {
         console.log("Im up and running!");
-        updateCharts();
+       // updateCharts();
     });
 
     // Event Listener for the calendar field to trigger the updateCharts function
@@ -124,7 +128,6 @@
 
     <#include "js/spiderSentiment.js">
     <#include "js/chart_functions.js">
-    <#include "js/balkentest.js">
     <#include  "js/barSpeaker.js">
     <#include "js/pollStackBar.js">
 

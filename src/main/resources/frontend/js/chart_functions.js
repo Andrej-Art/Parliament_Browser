@@ -365,20 +365,14 @@ function updateCharts() {
     //The fraction and party filters
     const fraction = document.getElementById("fractionInput").value;
     const party = document.getElementById("partyInput").value;
-
-    // Here we could still implement somehting so if f.e. SPD is entered as fraction
-    // it is internally converted to Fraktion der Sozialdemokratischen Partei Deutschlands
-    // will do tomorrow
-
-
-    //add the other updated parameters here: party, person, fraction I do not know how to get them from the
-    // document at this point yet
+    $('#status-message-box').text('Waiting for response from DB ...');
 
     // Make an AJAX call to the backend
     var ajaxChartData = new XMLHttpRequest();
     ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person + "&fraction=" + fraction + "&party=" + party, true);
     ajaxChartData.responseType = "json";
     ajaxChartData.onreadystatechange = function() {
+        $('#status-message-box').text('');
         // if successful
         if (ajaxChartData.readyState === XMLHttpRequest.DONE && ajaxChartData.status === 200) {
 
@@ -417,7 +411,6 @@ function updateCharts() {
     };
     ajaxChartData.send();
 }
-
 
 
 
