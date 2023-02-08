@@ -93,7 +93,7 @@ public class SparkHandler {
         get("/network/speech/", getspeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
 
-        get("/loginSite/", getLoginSite,   new FreeMarkerEngine(cfg));
+        get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
         post("/post/applicationDataRegister/", postRegister);
         post("/post/applicationDataAdminCheck/", postCheckAdmin);
@@ -348,26 +348,33 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "commentNetwork.ftl");
     };
 
-//TODO
-    /** This returns the login page. */
+    /**
+     * This returns the login page.
+     *
+     * @author Julian Ocker
+     */
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map pageContent = new HashMap<String, Object>(0);
         String cookie = request.cookie("key");
-        if(mongoDBHandler.checkUser(cookie)||mongoDBHandler.checkManager(cookie)) {
+        if (mongoDBHandler.checkUser(cookie) || mongoDBHandler.checkManager(cookie)) {
             pageContent.put("loginStatus", true);
-        }else {
+        } else {
             pageContent.put("loginStatus", false);
         }
-        if (mongoDBHandler.checkAdmin(cookie)){
+        if (mongoDBHandler.checkAdmin(cookie)) {
             pageContent.put("adminStatus", true);
             pageContent.put("loginStatus", true);
-        }else {
+        } else {
             pageContent.put("adminStatus", false);
         }
         return new ModelAndView(pageContent, "login.ftl");
     };
 
-    /**  */
+    /**
+     * accepts cookie oldPw newPw returns whether the change was successfull
+     *
+     * @author Julian Ocker
+     */
     private static final Route postChangePassword = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String oldPassword = req.getString("oldPw");
@@ -375,9 +382,14 @@ public class SparkHandler {
         String cookie = req.getString("cookie");
         Boolean success = mongoDBHandler.changePassword(cookie, newPassword, oldPassword);
         mongoDBHandler.logout(cookie);
-        return new JSONObject().put("pwChangeSuccess",success);
+        return new JSONObject().put("pwChangeSuccess", success);
     };
 
+    /**
+     * accepts cookie deleteUser returns whether the deletion was successful
+     *
+     * @author Julian Ocker
+     */
     private static final Route postDeleteUser = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String deleteUser = req.getString("deleteUser");
@@ -387,31 +399,51 @@ public class SparkHandler {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
             return uDeletionSuccess;
         }
-        return new JSONObject().put("deletionSuccess",false);
+        return new JSONObject().put("deletionSuccess", false);
     };
 
+    /**
+     * accepts cookie logs a User out
+     *
+     * @author Julian Ocker
+     */
     private static final Route postLogout = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String deleteCookie = req.getString("logoutUser");
-        return new JSONObject().put("cDeletionSuccess",mongoDBHandler.logout(deleteCookie));
+        return new JSONObject().put("cDeletionSuccess", mongoDBHandler.logout(deleteCookie));
     };
 
-    private static final Route postCheckUser =(request, response) -> {
+    /**
+     * accepts cookie returns whether a user ist registered
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postCheckUser = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String cookie = req.getString("cookie");
         JSONObject answer = new JSONObject();
-        answer.put("answer",mongoDBHandler.checkUser(cookie));
+        answer.put("answer", mongoDBHandler.checkUser(cookie));
         return answer;
     };
 
+    /**
+     * accepts cookie returns whether a User is a Manager
+     *
+     * @author Julian Ocker
+     */
     private static final Route postCheckManager = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String cookie = req.getString("cookie");
         JSONObject answer = new JSONObject();
-        answer.put("answer",mongoDBHandler.checkManager(cookie));
+        answer.put("answer", mongoDBHandler.checkManager(cookie));
         return answer;
     };
 
+    /**
+     * accepts cookie returns whether a User is an Admin
+     *
+     * @author Julian Ocker
+     */
     private static final Route postCheckAdmin = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String cookie = req.getString("cookie");
@@ -420,6 +452,12 @@ public class SparkHandler {
         return answer;
     };
 
+    /**
+     * accepts cookie name password rank
+     *
+     * @returns
+     * @author Julian Ocker
+     */
     private static final Route postRegister = (request, response) -> {
         System.out.println(request.body());
         JSONObject req = new JSONObject(request.body());
@@ -434,6 +472,11 @@ public class SparkHandler {
         return new JSONObject().put("registration", registrationSuccess);
     };
 
+    /**
+     * accepts name and pw returns cookie
+     *
+     * @author Julian Ocker
+     */
     private static final Route postLogin = (Request request, Response response) -> {
         JSONObject req = new JSONObject(request.body());
         String name = req.getString("name");
