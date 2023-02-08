@@ -21,6 +21,14 @@ function drawStackedBarChart(data, target) {
 
     // Selecting the right fields from the returned JSON object to match the right values
 
+    // List of subgroups -> get the fractions
+
+
+
+
+
+
+
 
 
     let apliedData = Object.entries(data).map(d => {
@@ -34,6 +42,9 @@ function drawStackedBarChart(data, target) {
             independentresults: d[1].independentresults
         }
     });
+
+   ;
+   console.log(apliedData.map(data));
 
 
 
@@ -71,7 +82,6 @@ function drawStackedBarChart(data, target) {
 
         d.independentresults = Object.keys(d)[6];
         d.independentvalues = d[d.independentresults]
-
     });
 
 
@@ -98,7 +108,7 @@ function drawStackedBarChart(data, target) {
 
     // List of subgroups
 
-    /*
+
 
     data.forEach(function (d) {
         d.SPD = Object.keys(d)[1];
@@ -123,9 +133,9 @@ function drawStackedBarChart(data, target) {
         d.Linkevalues = d[d.Linke];
         // -------------------------
     });
-      */
 
-   var fractions = new Array( 'CDU', 'SPD', 'AfD', 'B90', 'FDP', 'Linke', 'Independent');
+
+   //var fractions = new Array( 'CDU', 'SPD', 'AfD', 'B90', 'FDP', 'Linke', 'Independent');
 
 
 
@@ -138,7 +148,7 @@ function drawStackedBarChart(data, target) {
 
     // Add X axis
     const x = d3.scaleBand()
-        .domain(fractions)
+        .domain(apliedData)
         .range([0, width])
         .padding([0.2])
     svg.append("g")
@@ -161,17 +171,17 @@ function drawStackedBarChart(data, target) {
     // color palette = one color per subgroup
     const color = d3.scaleOrdinal()
         .domain(apliedData)
-        .range(['#C7EFCF', '#FE5F55', '#EEF5DB'])
+        .range(['#C7EFCF', '#FE5F55', '#EEF5DB', '#2f2a5a'])
 
     //stack the data? --> stack per subgroup
     const stackedData = d3.stack()
-        .keys(apliedData)
+        .keys(d3.AfDresult)
         (apliedData)
 
     // ----------------
     // Create a tooltip
     // ----------------
-    var tooltip = d3.select("#my_dataviz")
+    var tooltip = d3.select(target)
         .append("div")
         .style("opacity", 0)
         .attr("class", "tooltip")

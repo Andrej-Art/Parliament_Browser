@@ -88,8 +88,8 @@ public class SparkHandler {
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         post("/latex/", "application/json", postLaTeX);
 
-        get("/network/1/", getNetwork, new FreeMarkerEngine(cfg));
-        get("/network/2/", getNetwork2, new FreeMarkerEngine(cfg));
+        get("/network/speech/", getspeechNetwork, new FreeMarkerEngine(cfg));
+        get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
     }
 
     /*
@@ -276,6 +276,7 @@ public class SparkHandler {
     /** Returns a JSON containing all data for a specific speech. */
     private static final Route getSpeechVis = (Request request, Response response) -> {
 
+
         String speechID = request.queryParams("speechID") != null ? request.queryParams("speechID") : "";
 
         return mongoDBHandler.allSpeechData(speechID);
@@ -289,7 +290,7 @@ public class SparkHandler {
         return mongoDBHandler.findSpeech(text);
     };
 
-    private final static TemplateViewRoute getNetwork = (Request request, Response response) -> {
+    private final static TemplateViewRoute getspeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
         JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
@@ -298,10 +299,12 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "speechNetwork.ftl");
     };
-    private final static TemplateViewRoute getNetwork2 = (Request request, Response response) -> {
+    private final static TemplateViewRoute getCommentNetwork = (Request request, Response response) -> {
+        String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
         Map<String, Object> pageContent = new HashMap<>();
 
-        JSONObject networkData = mongoDBHandler.commentatorToSpeaker();
+        JSONObject networkData = mongoDBHandler.commentatorToSpeaker(von, bis);
 
         pageContent.put("commentNetworkData", networkData);
 
