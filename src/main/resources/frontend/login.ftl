@@ -10,44 +10,43 @@
 </head>
 
 <#if loginStatus==false >
-<h3>Login</h3>
-<div>
-    <form onsubmit="login(); return false;">
-        <div>
-            Username
-            <br>
-            <input id="Username" minlength="4" maxlength="128">
-        </div>
-        <div>
-            Passwort
-            <br>
-            <input type="password" id="Pw" maxlength="32">
-        </div>
-        <div>
-            <br>
-            <button type="submit">Login</button>
-        </div>
-    </form>
-</div>
+    <h3>Login</h3>
+    <div>
+        <form onsubmit="login(); return false;">
+            <div>
+                Username
+                <br>
+                <input id="Username" minlength="4" maxlength="128">
+            </div>
+            <div>
+                Passwort
+                <br>
+                <input type="password" id="Pw" maxlength="32">
+            </div>
+            <div>
+                <br>
+                <button type="submit">Login</button>
+            </div>
+        </form>
+    </div>
 
-<br>
-<br>
+    <br>
+    <br>
 </#if>
 <#if loginStatus==true >
-<h3>Logout</h3>
-<div>
-    <form onsubmit="logout();">
-        <div>
-            <br>
-            <button type="submit">logout</button>
-        </div>
-    </form>
-</div>
+    <h3>Logout</h3>
+    <div>
+        <form onsubmit="logout();">
+            <div>
+                <br>
+                <button type="submit">logout</button>
+            </div>
+        </form>
+    </div>
 </#if>
-
+<#if loginStatus==false >
 <br>
 <br>
-
 
 
 <h3>Passwort ändern</h3>
@@ -70,7 +69,9 @@
         </div>
     </form>
 </div>
+</#if>
 
+<#if adminStatus==true>
 
 <br>
 <br>
@@ -130,16 +131,17 @@
         </div>
     </form>
 </div>
-
-
+</#if>
 
 </html>
 
 <script>
     <#include "js/login.js">
 </script>
-<#if admin==true>
-    <#include "js/userManagement.js">
+<#if adminStatus==true>
+    <script>
+        <#include "js/userManagement.js">
+    </script>
 </#if>
 
 </html>
