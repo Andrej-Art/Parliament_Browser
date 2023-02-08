@@ -1271,7 +1271,7 @@ public class MongoDBHandler {
      */
     @Unfinished("Dont know where we save this data")
     public ArrayList<JSONObject> getPollResults(String dateFilterOne, String dateFilterTwo, String fractionFilter,
-                                     String partyFilter, String personFilter) {
+                                                String partyFilter, String personFilter) {
 
         //calculates total votes for each party and also for each type of vote
         Bson addFieldsVotesData = new Document("$addFields", new Document()
@@ -1452,6 +1452,7 @@ public class MongoDBHandler {
 
     /**
      * This method creates a unique cookie from the username and password
+     *
      * @param message
      * @return
      * @author Julian Ocker
@@ -1485,10 +1486,10 @@ public class MongoDBHandler {
 
     /**
      * This method checks whether the login-data are valid and if that is the case request and returns a cookie;
+     *
      * @param name
      * @param password
      * @return
-     *
      * @author Julian Ocker
      */
     public String generateCookie(String name, String password) {
@@ -1509,9 +1510,9 @@ public class MongoDBHandler {
 
     /**
      * This method checks whether a username is available
+     *
      * @param name
      * @return
-     *
      * @author Julian Ocker
      */
     public boolean checkIfAvailable(String name) {
@@ -1523,6 +1524,7 @@ public class MongoDBHandler {
 
     /**
      * This method registers a new User if the Username is available.
+     *
      * @param name
      * @param password
      * @param rank
@@ -1545,6 +1547,7 @@ public class MongoDBHandler {
 
     /**
      * This method checks whether a user is an Admin and returns true if that is the case.
+     *
      * @param cookie
      * @return
      * @author Julian Ocker
@@ -1560,6 +1563,7 @@ public class MongoDBHandler {
 
     /**
      * This method checks whether a user is an Manager and returns true if that is the case.
+     *
      * @param cookie
      * @return
      * @author Julian Ocker
@@ -1575,6 +1579,7 @@ public class MongoDBHandler {
 
     /**
      * This method checks whether a user is an User and returns true if that is the case.
+     *
      * @param cookie
      * @return
      * @author Julian Ocker
@@ -1592,6 +1597,7 @@ public class MongoDBHandler {
      * This function creates a User of the rank admin.
      * Username: Admin1
      * password: admin
+     *
      * @author Julian Ocker
      */
     public void createUserCollection() {
@@ -1605,6 +1611,7 @@ public class MongoDBHandler {
 
     /**
      * This function checks if the password is correct and changes it to  new password if thet is the case.
+     *
      * @param cookie
      * @param newPassword
      * @param oldPassword
@@ -1632,6 +1639,7 @@ public class MongoDBHandler {
 
     /**
      * This Method returns a specific field from a document.
+     *
      * @param collection
      * @param column
      * @param id
@@ -1649,6 +1657,7 @@ public class MongoDBHandler {
 
     /**
      * This method checks whether a user exists and if the password is correct.
+     *
      * @param id
      * @param password
      * @return
@@ -1666,6 +1675,7 @@ public class MongoDBHandler {
 
     /**
      * This method deletes a cookie.
+     *
      * @param name
      * @return
      * @author Julian Ocker
@@ -1680,6 +1690,7 @@ public class MongoDBHandler {
 
     /**
      * This method delestes a User by Username.
+     *
      * @param name
      * @return
      * @author Julian Ocker
