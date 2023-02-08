@@ -973,8 +973,7 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Unfinished("waiting for correct structure of collection")
-    public JSONObject commentatorToSpeaker() throws ParseException {
-
+    public JSONObject commentatorToSpeaker(String dateFilterOne, String dateFilterTwo) throws ParseException {
 
         Bson match = new Document("$match", new Document("$and", Arrays.asList(
                 new Document("commentatorID", new Document("$ne", "N/A")),
@@ -983,18 +982,21 @@ public class MongoDBHandler {
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
-        Bson limit = limit(10);
+        Bson limit = limit(100);
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match,limit,lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match,limit, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
 //        if (!sent.isEmpty()) {
 //            applySentimentFilterToAggregation(pipeline, sent);
 //        }
         JSONObject obj = new JSONObject();
         HashSet<String> objNodesStrings = new HashSet<>();
         HashSet<String> objLinksStrings = new HashSet<>();
-        ArrayList<JSONObject> objNodes = new ArrayList<>();
-        ArrayList<JSONObject> objLinks = new ArrayList<>();
+        ArrayList<org.json.simple.JSONObject> objNodes = new ArrayList<>();
+        ArrayList<org.json.simple.JSONObject> objLinks = new ArrayList<>();
         db.getCollection("comment").aggregate(pipeline)
                 .allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock -> {
@@ -1004,7 +1006,7 @@ public class MongoDBHandler {
                     objLink.put("source", docComment.getString("fullName"));
                     objLink.put("target", docSpeaker.getString("fullName"));
                     objLink.put("sentiment", procBlock.getDouble("sentiment"));
-                    objLinks.add(objLink);
+                    objLinksStrings.add(objLink.toString());
 
                     JSONObject objCommentator = new JSONObject();
                     objCommentator.put("name", docComment.getString("fullName"));
@@ -1031,44 +1033,44 @@ public class MongoDBHandler {
                         default:
                             objCommentator.put("group", 7);
                     }
-                    objNodes.add(objCommentator);
+                    objNodesStrings.add(objCommentator.toString());
 
                     JSONObject objSpeaker = new JSONObject();
                     objSpeaker.put("name", docSpeaker.getString("fullName"));
                     switch (docSpeaker.getString("party")){
                         case "CDU" :
                         case "CSU" :
-                            objCommentator.put("group", 1);
+                            objSpeaker.put("group", 1);
                             break;
                         case "SPD" :
-                            objCommentator.put("group", 2);
+                            objSpeaker.put("group", 2);
                             break;
                         case "FDP" :
-                            objCommentator.put("group", 3);
+                            objSpeaker.put("group", 3);
                             break;
                         case "BÜNDNIS 90/DIE GRÜNEN" :
-                            objCommentator.put("group", 4);
+                            objSpeaker.put("group", 4);
                             break;
                         case "DIE LINKE." :
-                            objCommentator.put("group", 5);
+                            objSpeaker.put("group", 5);
                             break;
                         case "AfD" :
-                            objCommentator.put("group", 6);
+                            objSpeaker.put("group", 6);
                             break;
                         default:
-                            objCommentator.put("group", 7);
+                            objSpeaker.put("group", 7);
                     }
-                    objNodes.add(objSpeaker);
+                    objNodesStrings.add(objSpeaker.toString());
                 });
-//        JSONParser parser = new JSONParser();
-//        for (String s : objLinksStrings){
-//           org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
-//           objLinks.add(json);
-//        }
-//        for (String s : objNodesStrings){
-//            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
-//            objNodes.add(json);
-//        }
+        JSONParser parser = new JSONParser();
+        for (String s : objLinksStrings){
+           org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+           objLinks.add(json);
+        }
+        for (String s : objNodesStrings){
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+            objNodes.add(json);
+        }
         obj.put("nodes", objNodes);
         obj.put("links", objLinks);
         System.out.println(obj);
@@ -1295,7 +1297,8 @@ public class MongoDBHandler {
             obj.put("totalVotesNo", procBlock.getInteger("totalVotesNo"));
             obj.put("totalVotesAbstained", procBlock.getInteger("totalVotesAbstained"));
             obj.put("totalVotesNoVotes", procBlock.getInteger("totalVotesNoVotes"));
-            obj.put("date", (dateToLocalDate((Date) procBlock.get("date"))));
+            obj.put("date", (dateToLocalDate(procBlock.getDate("date"))));
+            obj.put("topic", procBlock.getString("topic"));
 
             if (!procBlock.getInteger("totalVotesSPD").equals(0)) {
                 JSONObject objSPD = new JSONObject();
@@ -1376,7 +1379,6 @@ public class MongoDBHandler {
 
     /**
      * returns JSON Object for traversing through agendaitems to find speeches bound to them
-     *
      * @author Edvin Nise
      */
     public JSONObject getProtocalAgendaData() {
@@ -1405,7 +1407,6 @@ public class MongoDBHandler {
 
     /**
      * create a text index for a collection by indexing a specific field
-     *
      * @param col
      * @param field
      * @author Edvin Nise
@@ -1417,7 +1418,6 @@ public class MongoDBHandler {
 
     /**
      * drops the text index of a given collection
-     *
      * @param col
      * @param field
      * @author Edvin Nise
