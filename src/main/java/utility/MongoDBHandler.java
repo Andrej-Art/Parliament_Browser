@@ -947,8 +947,6 @@ public class MongoDBHandler {
                 .append("neuPercent", new Document("$divide", Arrays.asList("$neu", "$count"))));
 
 
-
-
         List<Bson> pipelineSpeech = new ArrayList<>(Arrays.asList(group, addFields));
         List<Bson> pipelineComment = new ArrayList<>(Arrays.asList(group, addFields));
         if (!dateFilterOne.isEmpty()) {
@@ -978,7 +976,7 @@ public class MongoDBHandler {
             obj.put("commentPos", procBlock.getDouble("posPercent") * 100);
             obj.put("commentNeg", procBlock.getDouble("negPercent") * 100);
             obj.put("commentNeu", procBlock.getDouble("neuPercent") * 100);
-                });
+        });
         System.out.println(obj);
         return obj;
     }
@@ -1528,10 +1526,12 @@ public class MongoDBHandler {
      */
     public Boolean registrate(String name, String password, String rank) {
         try {
+            String salt = generateSalt();
             db.getCollection("user").insertOne(
                     new Document("_id", name)
                             .append("rank", rank)
-                            .append("password", password)
+                            .append("password", hashPasswordWithSalt(password, salt))
+                            .append("salt", salt)
             );
             return true;
         } catch (Exception ignored) {
@@ -1596,11 +1596,12 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public void createUserCollection() {
-
+        String salt = generateSalt();
         this.db.getCollection("user").insertOne(new Document()
                 .append("_id", "Admin1")
                 .append("rank", "admin")
-                .append("password", "aa24c92b27947466817de3162f0be0c07af2ede2")//Klartextpasswort: admin
+                .append("password", hashPasswordWithSalt("d033e22ae348aeb5660fc2140aec35850c4da997", salt))
+                .append("salt", salt)
         );
     }
 
@@ -1616,6 +1617,7 @@ public class MongoDBHandler {
     public boolean changePassword(String cookie, String newPassword, String oldPassword) {
         String username = getTag("cookies", "_id", cookie, "user");
         String rank = getTag("cookies", "_id", cookie, "rank");
+        String salt = getTag("user", "_id", username, "salt");
         if (checkUserAndPassword(username, oldPassword)) {
             db.getCollection("user").deleteOne(
                     new Document("_id", username)
@@ -1623,7 +1625,7 @@ public class MongoDBHandler {
             db.getCollection("user").insertOne(
                     new Document("_id", username)
                             .append("rank", rank)
-                            .append("password", newPassword)
+                            .append("password", hashPasswordWithSalt(newPassword, salt))
             );
             return true;
         } else {
@@ -1660,8 +1662,9 @@ public class MongoDBHandler {
      */
     public boolean checkUserAndPassword(String id, String password) {
         if (db.getCollection("user").find(new Document("_id", id)).iterator().hasNext()) {
-            if (db.getCollection("user").find(new Document("_id", id)).iterator().next()
-                    .getString("password").equals(password)) {
+            Document userInQuestion = db.getCollection("user").find(new Document("_id", id)).iterator().next();
+            if (hashPasswordWithSalt(password, userInQuestion.getString("salt")).equals(
+                    userInQuestion.getString("password"))) {
                 return true;
             }
         }
@@ -1697,6 +1700,71 @@ public class MongoDBHandler {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    /**
+     * This method deletes a user from the db and creates a new one with partly changed attributes
+     *
+     * @param oldID
+     * @param newID
+     * @param newPassword
+     * @param newRank
+     * @return
+     * @author Julian Ocker
+     */
+    public Boolean editUser(String oldID, String newID, String newPassword, String newRank) throws NoSuchAlgorithmException {
+        if (db.getCollection("user").find(new Document("_id", oldID)).iterator().hasNext()
+                && !checkIfDocumentExists("User", newID)) {
+            Document editUser = db.getCollection("user").find(new Document("_id", oldID)).iterator().next();
+            db.getCollection("user").deleteOne(new Document("_id", oldID));
+            if (!newID.isEmpty()) {
+                editUser.put("_id", newID);
+            }
+            if (!newPassword.isEmpty()) {
+                editUser.put("password", hashPasswordWithSalt(newPassword, editUser.getString("salt")));
+            }
+            if (!newRank.isEmpty()) {
+                editUser.put("rank", newRank);
+            }
+            db.getCollection("user").insertOne(editUser);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * creates a random Salt for any password
+     *
+     * @return
+     * @author Julian Ocker
+     */
+    public String generateSalt() {
+        String salt = String.valueOf(Math.random());
+        return salt;
+    }
+
+    ;
+
+    /**
+     * Hashes again with a salt
+     *
+     * @param password
+     * @param salt
+     * @return
+     * @author Julian Ocker
+     */
+    public String hashPasswordWithSalt(String password, String salt) {
+        String saltedPassword = "";
+        try {
+            String message = password + salt;
+            byte[] byteMessage = message.getBytes();
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
+            messageDigest.update(byteMessage);
+            saltedPassword = (DatatypeConverter.printHexBinary(byteMessage)).toString();
+        } catch (Exception ignored) {
+        }
+        return saltedPassword;
     }
 
 }
