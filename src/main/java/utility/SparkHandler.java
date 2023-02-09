@@ -36,7 +36,6 @@ public class SparkHandler {
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException, UIMAException {
-        MongoDBHandler mdbh = new MongoDBHandler();
         SparkHandler.init();
 //        openInDefaultBrowser();
     }
