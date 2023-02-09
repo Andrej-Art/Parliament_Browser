@@ -16,10 +16,8 @@ import static java.util.Arrays.asList;
  * @author Eric Lakhter
  */
 public class Speech_TeX {
-    private static MongoDBHandler mdbh;
-    public Speech_TeX(MongoDBHandler mongoDBHandler) {
-        mdbh = mongoDBHandler;
-    }
+    private static final MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+    private Speech_TeX() {}
 
     /**
      * Builds a string which can be formatted by a TeX compiler.<br>
@@ -32,12 +30,12 @@ public class Speech_TeX {
      * @return String in TeX format.
      * @author Eric Lakhter
      */
-    public String toTeX(String speechID, boolean showNamedEntities, boolean showSentiment, boolean showComments) {
-        MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
+    public static String toTeX(String speechID, boolean showNamedEntities, boolean showSentiment, boolean showComments) {
+        MongoCursor<Document> speechCursor = mongoDBHandler.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
         Document speechDoc = speechCursor.tryNext();
         if (speechDoc == null) return "";
 
-        MongoCursor<Document> commentCursor = mdbh.getDB().getCollection("comment").find(new Document("speechID", speechID)).iterator();
+        MongoCursor<Document> commentCursor = mongoDBHandler.getDB().getCollection("comment").find(new Document("speechID", speechID)).iterator();
         Document commentDoc = commentCursor.tryNext();
 
         List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));

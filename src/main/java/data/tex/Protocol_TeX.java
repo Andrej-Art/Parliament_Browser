@@ -1,17 +1,18 @@
 package data.tex;
 
-import org.json.JSONObject;
+import utility.MongoDBHandler;
 
 /**
- * The {@code Protocl_TeX} class.
+ * The {@code Protocol_TeX} class.
  *
  * @author Eric Lakhter
  */
 public class Protocol_TeX {
-    public Protocol_TeX(JSONObject protocolTeXObj) {
-    }
+    private static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+    private Protocol_TeX() {}
 
-    public String toTeX() {
+    public static String toTeX() {
+        mongoDBHandler.getDB(); // something
         return "";
     }
 }

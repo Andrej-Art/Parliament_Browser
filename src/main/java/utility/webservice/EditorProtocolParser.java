@@ -1,5 +1,6 @@
 package utility.webservice;
 
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.UpdateOptions;
 import data.Comment;
 import data.Person;
@@ -10,12 +11,14 @@ import org.bson.Document;
 import utility.MongoDBHandler;
 import utility.UIMAPerformer;
 import utility.annotations.*;
-import utility.uima.ProcessedSpeech;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Sorts.ascending;
+import static java.util.Arrays.asList;
 import static utility.TimeHelper.*;
 
 /**
@@ -24,7 +27,7 @@ import static utility.TimeHelper.*;
  * @author Eric Lakhter
  */
 public class EditorProtocolParser {
-    private final MongoDBHandler mdbh;
+    private final MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
     private final UpdateOptions uo = new UpdateOptions().upsert(true);
     private final UIMAPerformer uima;
     private final String[] protocolReqs = {"[PROTOKOLL]", "[DATUM]", "[BEGINN]", "[ENDE]", "[SITZUNGSLEITER]", "[TOPS]"};
@@ -33,11 +36,9 @@ public class EditorProtocolParser {
     /**
      * Initiates a new {@code EditorProtocolParser}.
      *
-     * @param mdbh MongoDBConnection to check/insert documents in.
      * @param uima UIMAPerformer to parse speeches with.
      */
-    public EditorProtocolParser(MongoDBHandler mdbh, UIMAPerformer uima) {
-        this.mdbh = mdbh;
+    public EditorProtocolParser(UIMAPerformer uima) {
         this.uima = uima;
     }
 
@@ -165,7 +166,7 @@ public class EditorProtocolParser {
                 ? agendaID
                 : subject.substring(1);
 
-        LocalDate date = dateToLocalDate(mdbh.getDocument("protocol", protocolID).getDate("date"));
+        LocalDate date = dateToLocalDate(mongoDBHandler.getDocument("protocol", protocolID).getDate("date"));
         // TODO remove testing
 //        mdbh.insertAgendaItems(Collections.singletonList(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs)));
         insertIntoTest(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs));
@@ -191,7 +192,7 @@ public class EditorProtocolParser {
             throw new EditorFormattingException("First line must start with \"[PROTOKOLL]\"");
         int[] periodAndProtocol = validateProtocolID(lines[0].substring(11).trim());
         String protocolID = periodAndProtocol[0] + "/" + periodAndProtocol[1];
-        LocalDate date = dateToLocalDate(mdbh.getDocument("protocol", protocolID).getDate("date"));
+        LocalDate date = dateToLocalDate(mongoDBHandler.getDocument("protocol", protocolID).getDate("date"));
 
         if (!lines[1].startsWith("[REDEID]"))
             throw new EditorFormattingException("Second line must start with \"[REDEID]\"");
@@ -203,7 +204,7 @@ public class EditorProtocolParser {
 
         String text = "";
         List<Comment> comments = new ArrayList<>();
-        ArrayList<Person_Impl> personList = mdbh.getPersons();
+        ArrayList<Person_Impl> personList = mongoDBHandler.getPersons();
 
         int commentCounter = 0;
 
@@ -258,6 +259,46 @@ public class EditorProtocolParser {
         }
     }
 
+    public String getProtocolFromDB(String protocolID) {
+        Document protocolDoc = mongoDBHandler.getDocument("protocol", protocolID);
+        return null;
+    }
+
+    public String getAgendaFromDB(String agendaID) {
+        return null;
+    }
+
+    public String getSpeechFromDB(String speechID) {
+        Document speechDoc = mongoDBHandler.getDocument("speech", speechID);
+        List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));
+        textArray.add("");
+        Iterator<String> textIter = textArray.iterator();
+        MongoCursor<Document> commentCursor = mongoDBHandler.getDB().getCollection("comment")
+                .aggregate(Arrays.asList(
+                        match(new Document("speechID", speechID)),
+                        new Document("$addFields", new Document("commentNum", new Document("$toInt", new Document("$arrayElemAt", asList(new Document("$split", asList("$_id", "/")), 1))))),
+                        sort(ascending("commentNum"))
+                )).iterator();
+
+        Document commentDoc = commentCursor.tryNext();
+        int offSet = 0;
+        int previousPos = 0;
+        int currentPos = 0;
+        StringBuilder speechEditorText = new StringBuilder(speechDoc.getString("text"));
+
+        while (commentDoc != null) {
+            currentPos = commentDoc.getInteger("commentPos");
+            if (previousPos > currentPos || speechEditorText.length() < currentPos + offSet) break;
+
+            String commentText = commentDoc.getString("text");
+            speechEditorText.insert(currentPos + offSet, "\n[KOMMENTAR]" + commentText + "\n");
+            previousPos = currentPos;
+            offSet += commentText.length() + 13;
+            commentDoc = commentCursor.tryNext();
+        }
+        return speechEditorText.toString();
+    }
+
     // FOR TESTING
 
     @Testing
@@ -293,7 +334,7 @@ public class EditorProtocolParser {
     }
     @Testing
     private boolean testVersionExists(String col, String id) {
-        return mdbh.getDB()
+        return mongoDBHandler.getDB()
                 .getCollection("editor_test_" + col)
                 .find(new Document("_id", id))
                 .iterator()
