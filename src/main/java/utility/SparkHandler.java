@@ -345,7 +345,6 @@ public class SparkHandler {
         return mongoDBHandler.findSpeech(text);
     };
 
-
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
@@ -394,7 +393,7 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie oldPw newPw, returns whether the change was successfull
+     * accepts cookie oldPw newPw, returns whether the change was successful
      *
      * @author Julian Ocker
      */
