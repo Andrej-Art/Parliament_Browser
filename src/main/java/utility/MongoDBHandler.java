@@ -17,8 +17,9 @@ import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -40,8 +41,16 @@ import static utility.TimeHelper.dateToLocalDate;
  * @author Eric Lakhter
  * @author DavidJordan
  */
-@Unfinished("This class is unfinished")
+@Unfinished("Needs a few more web-related methods")
 public class MongoDBHandler {
+    private static final MongoDBHandler mongoDBHandler;
+    static {
+        try {
+            mongoDBHandler = new MongoDBHandler();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private final MongoDatabase db;
     private final InsertManyOptions imo = new InsertManyOptions().ordered(false);
     private final Gson gson = new Gson();
@@ -49,12 +58,11 @@ public class MongoDBHandler {
     /**
      * Connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
      *
-     * @throws IOException if an error occurred while handling the properties file.
      * @author Eric Lakhter
      */
     public MongoDBHandler() throws IOException {
         Properties prop = new Properties();
-        prop.load(new FileInputStream(MongoDBHandler.class.getClassLoader().getResource("PRG_WiSe22_Group_9_4.txt").getPath()));
+        prop.load(Files.newInputStream(Paths.get("src/main/resources/PRG_WiSe22_Group_9_4.txt")));
         MongoClient client = MongoClients.create(
                 "mongodb://" + prop.getProperty("remote_user") +
                         ":" + prop.getProperty("remote_password") +
@@ -62,6 +70,15 @@ public class MongoDBHandler {
                         ":" + prop.getProperty("remote_port") +
                         "/?authSource=" + prop.getProperty("remote_user"));
         db = client.getDatabase(prop.getProperty("remote_database"));
+    }
+
+    /**
+     * Returns the instance of the {@code MongoDBHandler}.
+     * @return Singleton instance of {@code MongoDBHandler}.
+     * @author Eric Lakhter
+     */
+    public static MongoDBHandler getHandler() {
+        return mongoDBHandler;
     }
 
     /**
