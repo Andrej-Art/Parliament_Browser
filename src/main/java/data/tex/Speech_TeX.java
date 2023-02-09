@@ -17,8 +17,10 @@ import static java.util.Arrays.asList;
  */
 public class Speech_TeX {
     private static MongoDBHandler mdbh;
-    public Speech_TeX(MongoDBHandler mongoDBHandler) {
+    private Document speechDoc;
+    public Speech_TeX(MongoDBHandler mongoDBHandler, Document speechDocument) {
         mdbh = mongoDBHandler;
+        speechDoc = speechDocument;
     }
 
     /**
@@ -26,13 +28,10 @@ public class Speech_TeX {
      * TeX command looks like this:<br>
      * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
      * @param speechID the speechID to texify.
-     * @param showNamedEntities whether named entity markers should show up in the text.
-     * @param showSentiment whether sentiment information should show up at the end of each sentence.
-     * @param showComments whether comments should show up.
      * @return String in TeX format.
      * @author Eric Lakhter
      */
-    public String toTeX(String speechID, boolean showNamedEntities, boolean showSentiment, boolean showComments) {
+    public String toTeX(String speechID) {
         MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
         Document speechDoc = speechCursor.tryNext();
         if (speechDoc == null) return "";

@@ -270,6 +270,10 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
+    /**
+     * Route which delivers the data according to the provided query parameters
+     * @author DavidJordan
+     */
     private static final Route getChartUpdates = (Request request, Response response) -> {
         String von = request.queryParams("von") != null ? request.queryParams("von") : "";
         String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
