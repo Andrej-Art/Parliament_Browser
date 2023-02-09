@@ -70,12 +70,9 @@
 </#if>
 
 <#if adminStatus==true>
-
     <br>
     <br>
-
     <h3>Registriere einen neuen User</h3>
-
     <div>
         <form onsubmit="register(); return false;">
             <div>
@@ -109,13 +106,9 @@
             </div>
         </form>
     </div>
-
     <br>
     <br>
-
-
     <h3>User löschen</h3>
-
     <div>
         <form onsubmit="deleteUser(); return false;">
             <div>
@@ -129,10 +122,60 @@
             </div>
         </form>
     </div>
+    <br>
+    <br>
+    <h3>Editiere einen neuen User</h3>
+    <div>
+        <form onsubmit="editUserAccess(); return false;">
+            <div>
+                <select id="userToChange">
+                    <#list userList as user>
+                        <option value=${user.getID()}>
+                            ${user.getID()}, ${user.getRank()}
+                        </option>
+                    </#list>
+                </select>
+            </div>
+            <br>
+            <h4>Bitte füllen Sie nur die Felder aus deren Inhalt sie ändern wollen</h4>
+            <br>
+            <div>
+                Username
+                <br>
+                <input id="ChangeName" minlength="4" maxlength="128">
+            </div>
+            <div>
+                Passwort
+                <br>
+                <input type="password" id="ChangePassword" minlength="8" maxlength="32">
+            </div>
+            <div>
+                Rang
+                <br>
+                <select selected="" id="ChangeRank" >
+                    <option value="">
+                        (nicht ändern)
+                    </option>
+                    <option value="user">
+                        User
+                    </option>
+                    <option value="manager">
+                        Manager
+                    </option>
+                    <option value="admin">
+                        Admin
+                    </option>
+                </select>
+            </div>
+            <div>
+                <br>
+                <button type="submit">Editieren</button>
+            </div>
+        </form>
+    </div>
 </#if>
 
 </html>
-
 <script>
     <#include "js/login.js">
 </script>
@@ -141,5 +184,4 @@
         <#include "js/userManagement.js">
     </script>
 </#if>
-
 </html>

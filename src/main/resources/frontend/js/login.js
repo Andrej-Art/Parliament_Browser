@@ -2,7 +2,8 @@
 
 async function login() {
     let username = document.getElementById("Username").value;
-    let pw =  sha1(document.getElementById("Pw").value + document.getElementById("username"));
+    let pw =  sha1(document.getElementById("Pw").value);
+    console.log(pw);
     let response = await fetch("/post/applicationDataLogin/", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
@@ -24,16 +25,25 @@ async function login() {
 
 
 async function changePw() {
-    let oldPassword = sha1(document.getElementById("OldPw").value + document.getElementById("username"));
-    let newPassword = sha1(document.getElementById("NewPw").value + document.getElementById("username"));
-    let response = await fetch("/post/applicationDataPwChange/", {
-        method: "POST",
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({oldPw: oldPassword, newPw: newPassword, cookie: document.cookie.split(";")[0].split("=")[1]})
-    });
-    console.log(response);
-    logout(document.cookie);
-    document.cookie = "key=" + "; path=/";
+    let oldPassword = sha1(document.getElementById("OldPw").value);
+    if(document.getElementById("newPW").value==="") {
+        window.alert("Das Passwort ist zu kurz");
+    } else {
+        let newPassword = sha1(document.getElementById("NewPw").value);
+        let response = await fetch("/post/applicationDataPwChange/", {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                oldPw: oldPassword,
+                newPw: newPassword,
+                cookie: document.cookie.split(";")[0].split("=")[1]
+            })
+        });
+        console.log(response);
+        logout(document.cookie);
+        document.cookie = "key=" + "; path=/";
+        window.location.reload();
+    }
 }
 
 function logout() {
@@ -44,6 +54,7 @@ function logout() {
     });
     document.cookie="key=" + "; path=/";
     console.log(document.cookie);
+    window.location.reload();
 }
 
 

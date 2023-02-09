@@ -401,8 +401,8 @@ function updateCharts() {
             MultiLineEntities(entityData, '#entitiesMulti');
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
-            drawSpiderChart("#spider");
-           // drawStackedBarChart(voteData,'#pie');
+            drawSpiderChart(sentimentData, "#spider");
+            drawStackedBarChart(voteData,'#pie');
             speakerbarchart(speechData,"#my_dataviz");
 
         } else {

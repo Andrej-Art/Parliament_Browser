@@ -22,22 +22,113 @@
 // })
 
 // This is our Radarchart for the sentiment analysis.
-function drawSpiderChart(target) {
+function drawSpiderChart(data, target) {
 
+    //console.log(data);
+
+    /*
+    let speechSentiment = Object.entries(data).map(d =>{
+        return {
+            speechNeg: d[1].speechNeg,
+            speechNeu: d[1].speechNeu,
+            speechPos: d[1].speechPos,
+        }
+
+    })
+
+     */
+   // let subgroups = (Object.keys(data) + " " + Object.values(data));
+
+    /*
+
+ speechSentiment.forEach(function (d) {
+     d.key = Object.keys(d)[0];
+     d.key1 = Object.keys(d)[1];
+     d.key2 = Object.keys(d)[2];
+
+     d.speechNeg = d[d.key];
+     d.spechNeu = d[d.key1];
+     d.speechPos = d[d.key2];
+    // d.key3 = Object.keys(d)[3];
+     //d.key4 = Object.keys(d)[4];
+     //d.key5 = Object.keys(d)[5];
+
+     console.log(d.key);
+     console.log(d.speechNeg);
+     console.log(d.key1);
+     console.log(d.speechNeu);
+     console.log(d.key2);
+     console.log(d.speechPos);
+
+
+
+       // console.log(d.key3);
+        //console.log(d.key4);
+        //console.log(d.key5);
+    });
+   // console.log(speechSentiment);
+
+     */
 
 
     let data2 = [];
     let features = ["Positiv", "Neutral", "Negativ"];
 //generate the data
 
-    for (var i = 0; i < 3; i++) {
+    /*
+
+    for (var i = 0; i < 3; i++){
         var point = {}
         //each feature will be a random number from 1-9
         features.forEach(f => point[f] = 1 + Math.random() * 8);
         data2.push(point);
     }
+    console.log(data2);
+
+     */
+
+    let subgroups = Object.entries(data);
+    console.log(subgroups);
+
+    var point = {}
+
+    // speech komponenten im Array
+    let speechPos = Object.values(subgroups[0])
+    let speechNeu = Object.values(subgroups[5])
+    let speechNeg = Object.values(subgroups[4])
+
+    let speechSentimentPoint = {speechPos, speechNeu, speechNeg};
+
+    /*
+    console.log(Object.values(subgroups[0]));
+    console.log(Object.values(subgroups[5]));
+    console.log(Object.values(subgroups[4]));
+
+     */
+    console.log(speechSentimentPoint);
+
+    data2.push(point)
+
+    console.log(data2);
 
 
+
+
+    /*
+    for (var i = 0 ; i< 2; i++){
+        features.forEach(f => point[f] = );
+        data2.push(point);
+    }
+
+     */
+
+
+    /*
+    data2.push(subgroups[0], subgroups[1], subgroups[2]);
+    data2.push(subgroups[1]);
+    data2.push(subgroups[2]);
+
+     */
 
     let width = 600;
     let height = 600;
@@ -46,9 +137,9 @@ function drawSpiderChart(target) {
         .attr("height", height);
 
     let radialScale = d3.scaleLinear()
-        .domain([0, 10])
+        .domain([0, 100])
         .range([0, 250]);
-    let ticks = [2, 4, 6, 8, 10];
+    let ticks = [20, 40, 60, 80, 100];
 
     svg.selectAll("circle")
         .data(ticks)
@@ -78,13 +169,15 @@ function drawSpiderChart(target) {
     }
 
 
+
+
     let featureData = features.map((f, i) => {
         let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
         return {
             "name": f,
             "angle": angle,
-            "line_coord": angleToCoordinate(angle, 10),
-            "label_coord": angleToCoordinate(angle, 10.5)
+            "line_coord": angleToCoordinate(angle, 100),
+            "label_coord": angleToCoordinate(angle, 110)
         };
     });
 
