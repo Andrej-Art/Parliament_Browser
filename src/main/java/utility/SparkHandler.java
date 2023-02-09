@@ -1,18 +1,22 @@
 package utility;
 
+import data.impl.Person_Impl;
 import exceptions.EditorFormattingException;
 import exceptions.WrongInputException;
 import freemarker.template.Configuration;
 import org.apache.uima.UIMAException;
+import org.bson.Document;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
 import utility.annotations.*;
 import utility.webservice.EditorProtocolParser;
+import utility.webservice.User;
 
 import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static spark.Spark.*;
 
@@ -113,6 +117,7 @@ public class SparkHandler {
         post("/post/applicationDataLogoutUser/", postLogout);
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
+        post("/post/applicationDataEditUser/", postEditUser);
     }
 
     /*
@@ -121,6 +126,7 @@ public class SparkHandler {
 
     /**
      * Website's favicon.
+     *
      * @author Eric Lakhter
      */
     private static final Route getIcon = (Request request, Response response) -> {
@@ -152,6 +158,7 @@ public class SparkHandler {
 
     /**
      * Homepage.
+     *
      * @author Eric Lakhter
      */
     private static final TemplateViewRoute getHome = (Request request, Response response) -> {
@@ -164,6 +171,7 @@ public class SparkHandler {
 
     /**
      * LaTeX editing page.
+     *
      * @author Eric Lakhter
      */
     @Unfinished("Doesn't do anything yet")
@@ -179,6 +187,7 @@ public class SparkHandler {
 
     /**
      * Tries to return a PDF file.
+     *
      * @author Eric Lakhter
      */
     @Unfinished("Need to convert the LaTeX code to a pdf")
@@ -195,6 +204,7 @@ public class SparkHandler {
 
     /**
      * Speech editing page.
+     *
      * @author Eric Lakhter
      */
     @Unfinished("Nothing more than a text field so far")
@@ -206,6 +216,7 @@ public class SparkHandler {
 
     /**
      * Tries to parse a custom protocol/agenda item/speech and to insert it into the DB.
+     *
      * @author Eric Lakhter
      */
     @Unfinished("Need to implement the part which grabs info from the db first before this is considered done")
@@ -307,6 +318,7 @@ public class SparkHandler {
 
     /**
      * Speech visualisation page.
+     *
      * @author Eric Lakhter
      */
     private static final TemplateViewRoute getReden = (Request request, Response response) -> {
@@ -321,6 +333,7 @@ public class SparkHandler {
 
     /**
      * Returns a JSON containing all data for a specific speech.
+     *
      * @author Eric Lakhter
      */
     private static final Route getSpeechVis = (Request request, Response response) -> {
@@ -330,6 +343,7 @@ public class SparkHandler {
 
     /**
      * Returns a JSON containing all speech IDs matching the search.
+     *
      * @author Eric Lakhter
      */
     private static final Route getSpeechIDs = (Request request, Response response) -> {
@@ -375,6 +389,10 @@ public class SparkHandler {
         if (mongoDBHandler.checkAdmin(cookie)) {
             pageContent.put("adminStatus", true);
             pageContent.put("loginStatus", true);
+            ArrayList<User> userList = new ArrayList<>(0);
+            mongoDBHandler.getDB().getCollection("user").find().forEach(
+                    (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
+            pageContent.put("userList", userList);
         } else {
             pageContent.put("adminStatus", false);
         }
@@ -382,7 +400,7 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie oldPw newPw returns whether the change was successfull
+     * accepts cookie oldPw newPw, returns whether the change was successfull
      *
      * @author Julian Ocker
      */
@@ -397,7 +415,7 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie deleteUser returns whether the deletion was successful
+     * accepts cookie deleteUser, returns whether the deletion was successful
      *
      * @author Julian Ocker
      */
@@ -406,7 +424,7 @@ public class SparkHandler {
         String deleteUser = req.getString("deleteUser");
         String cookie = req.getString("cookie");
         System.out.println(mongoDBHandler.checkAdmin(cookie));
-        if (mongoDBHandler.checkAdmin(cookie)) {
+        if (mongoDBHandler.checkAdmin(cookie) && !deleteUser.equals("Admin1")) {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
             return uDeletionSuccess;
         }
@@ -414,7 +432,7 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie logs a User out
+     * accepts cookie, logs a User out
      *
      * @author Julian Ocker
      */
@@ -425,7 +443,7 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie returns whether a user ist registered
+     * accepts cookie, returns whether a user ist registered
      *
      * @author Julian Ocker
      */
@@ -501,6 +519,31 @@ public class SparkHandler {
             answer.put("cookie", "Deine Anmeldedaten sind Falsch!");
             answer.put("loginSuccess", false);
         }
+        return answer;
+    };
+
+    /**
+     * accepts oldID newID newPassword new Rank, returns if Success
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postEditUser = (Request request, Response response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String oldID = req.getString("editOldID");
+        String newID = req.getString("editNewID");
+        String newPassword = req.getString("editPassword");
+        String newRank = req.getString("editRank");
+        JSONObject answer = new JSONObject();
+        if(oldID.equals("Admin1")){
+            newRank = "admin";
+            newID = "Admin1";
+        }
+        if (mongoDBHandler.checkAdmin(req.getString("cookie"))) {
+            if (mongoDBHandler.editUser(oldID, newID, newPassword, newRank)) {
+                answer.put("EditSuccess", true);
+            }
+        }
+        answer.put("EditSuccess", false);
         return answer;
     };
 
