@@ -393,7 +393,7 @@ function updateCharts() {
             let posdata = data["pos"];
             let tokenData = data["token"];
             let speechData = data2["speechesNumber"];
-            //let sentimentData = data["sentiment"];
+            let sentimentData = data["sentiment"];
             let voteData = data["votes"];
 
 
@@ -401,8 +401,8 @@ function updateCharts() {
             MultiLineEntities(entityData, '#entitiesMulti');
             createLineChart(tokenData, '#tokenLine');
             createBarChart(posdata, '#pos');
-            //drawSpiderChart(sentimentData, "#spider");
-           // drawStackedBarChart(voteData,'#pie');
+            drawSpiderChart(sentimentData, "#spider");
+            drawStackedBarChart(voteData,'#pie');
             speakerbarchart(speechData,"#my_dataviz");
 
         } else {

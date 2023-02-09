@@ -22,7 +22,31 @@
 // })
 
 // This is our Radarchart for the sentiment analysis.
-function drawSpiderChart(target) {
+function drawSpiderChart(data, target) {
+
+    let speechSentiment = Object.entries(data).map(d =>{
+        return {
+            speechNeg: d[1].speechNeg,
+            speechNeu: d[1].speechNeu,
+            speechPos: d[1].speechPos
+        }
+    })
+
+    speechSentiment.forEach(function (d) {
+        d.key = Object.keys(d)[1];
+        d.values = d[d.key]
+
+        console.log(d.key);
+        console.log(d.values);
+
+    });
+    console.log(speechSentiment);
+
+
+
+
+
+
 
 
 
@@ -30,10 +54,10 @@ function drawSpiderChart(target) {
     let features = ["Positiv", "Neutral", "Negativ"];
 //generate the data
 
-    for (var i = 0; i < 3; i++) {
-        var point = {}
+    for (var i = 0; i < 2; i++) {
+        var point = data
         //each feature will be a random number from 1-9
-        features.forEach(f => point[f] = 1 + Math.random() * 8);
+        //features.forEach(f => point[f] = 1 + Math.random() * 8);
         data2.push(point);
     }
 
@@ -76,6 +100,8 @@ function drawSpiderChart(target) {
         let y = Math.sin(angle) * radialScale(value);
         return {"x": width / 2 + x, "y": height / 2 - y};
     }
+
+
 
 
     let featureData = features.map((f, i) => {
