@@ -16,7 +16,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
 
-
     <style>
         <#include "css/parliamentBrowser.css">
         <#include "css/dashboard.css">
@@ -56,7 +55,7 @@
             <input type="date" id="von" name="von">
             <label for="bis">bis:</label>
             <input type="date" id="bis" name="bis">
-            <input type="submit"  value="Anzeigen" id="submitBtn"/>
+            <input type="submit" value="Anzeigen" id="submitBtn"/>
         </div>
 
     </div>
@@ -66,10 +65,9 @@
 <div class="main">
 
 
-
     <h1>Dashboard</h1>
 
-    <div id="status-message-box"> </div>
+    <div id="status-message-box"></div>
 
     <div class="wrapper" id="chartContainer">
         <div>
@@ -86,6 +84,15 @@
         <div>
             <h3>Sentiment als Radar Chart</h3>
             <div id="spider"></div>
+            <div class="Legend-item">
+                <span class="Legend-colorBox" style="background-color: darkorange;"></span>
+                <span class="Legend-label">Reden</span>
+            </div>
+            <div class="Legend-item">
+                <span class="Legend-colorBox" style="background-color: navy;"></span>
+                <span class="Legend-label">Kommentare</span>
+            </div>
+
         </div>
 
         <div>
@@ -116,7 +123,7 @@
 
     $(document).ready(function () {
         console.log("Im up and running!");
-       // updateCharts();
+        // updateCharts();
     });
 
     // Event Listener for the calendar field to trigger the updateCharts function
