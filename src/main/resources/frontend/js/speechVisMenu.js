@@ -124,7 +124,9 @@ function setPageSpeechVis(speechData = {}) {
     let locData = speechData["namedEntitiesLoc"];
     let sentenceData = speechData["sentences"];
     let commentData = speechData["commentData"];
-    commentData.sort((a, b) => {return parseInt(a["id"].split("/")[1]) - parseInt(b["id"].split("/")[1])});
+    commentData.sort((a, b) => {
+        return parseInt(a["id"].split("/")[1]) - parseInt(b["id"].split("/")[1])
+    });
     let fullName = speakerData["firstName"] + ' ' + speakerData["lastName"];
     document.getElementById("speech-title").innerHTML = 'Rede ' + speechData["speechID"] + ' von ' + fullName;
     document.getElementById("speech-header").innerHTML =

@@ -1,4 +1,6 @@
 function drawStackedBarChart(data, target) {
+    console.log(data);
+
 
 
 // set the dimensions and margins of the graph
@@ -20,7 +22,7 @@ function drawStackedBarChart(data, target) {
 
     // die pollID sind die IDs, der einzelnen Abstimmungen, die auf die x-Achse gehören.
 
-    /*
+
 
     let pollID = Object.entries(data).map(d =>{
         return {
@@ -33,13 +35,14 @@ function drawStackedBarChart(data, target) {
 
     });
     var pollIDs = d3.map(pollID, function (d){return(d.pollIDValue)})
-    console.log(data);
+    const slicedpollIDs = pollIDs.slice(1, 5);
+    console.log(slicedpollIDs);
 
+
+
+    /*
+    Definition of Subgroups
      */
-
-   var pollIDs = [1, 2, 3, 4, 5]
-
-
 
     // hier sind die Abstimmungen für total und die einzelnen Fraktionen
     let totalData = Object.entries(data).map(d =>{
@@ -51,16 +54,16 @@ function drawStackedBarChart(data, target) {
             totalNoVotes: d[1].totalNoVotes,
         }
     })
-   console.log(totalData);
 
     // Subgroups sind die gestackten Abschnitte
     let subgroups = Object.keys(totalData[1])
     console.log(subgroups);
-
+    let subgroupvotes = Object.values(totalData[1])
+    console.log(subgroupvotes);
 
     // Add X axis
     const x = d3.scaleBand()
-        .domain(pollIDs)
+        .domain(slicedpollIDs)
         .range([0, width])
         .padding([0.2])
     svg.append("g")
@@ -69,24 +72,29 @@ function drawStackedBarChart(data, target) {
 
     // Add Y axis
     const y = d3.scaleLinear()
-        .domain([0, 800])
+        .domain([0, 1000])
         .range([height, 0]);
+
     svg.append("g")
         .call(d3.axisLeft(y));
 
     // color palette = one color per subgroup
     const color = d3.scaleOrdinal()
         .domain(subgroups)
-        .range(['#e41a1c', '#377eb8', '#4daf4a', '#FFFF00'])
+        .range(['#e41a1c', '#FFC0CB', '#FFFF00', '#4daf4a'])
+    //'#4daf4a', '#FFFF00'
 
-    console.log(color);
+
+
+
 
     //stack the data? --> stack per subgroup
     const stackedData = d3.stack()
         .keys(subgroups)
-        (data)
+        (totalData)
+   console.log(stackedData);
 
-    console.log(stackedData)
+
 
     // Show the bars
     svg.append("g")
@@ -104,6 +112,6 @@ function drawStackedBarChart(data, target) {
         .attr("height", d => y(d[0]) - y(d[1]))
         .attr("width", x.bandwidth())
 
-}
 
+}
 

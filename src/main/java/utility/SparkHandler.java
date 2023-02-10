@@ -1,6 +1,6 @@
 package utility;
 
-import data.impl.Person_Impl;
+import data.tex.Speech_TeX;
 import exceptions.EditorFormattingException;
 import exceptions.WrongInputException;
 import freemarker.template.Configuration;
@@ -28,17 +28,19 @@ import static spark.Spark.*;
 @Testing
 @Unfinished("Only some routes are finished")
 public class SparkHandler {
-    private static MongoDBHandler mongoDBHandler = null;
-    private static EditorProtocolParser epParser = null;
+    private final static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+    private static EditorProtocolParser epParser;
+
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
     // the added string redirects to the /resources/ directory
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException, UIMAException {
-        MongoDBHandler mdbh = new MongoDBHandler();
-        SparkHandler.init(mdbh, new EditorProtocolParser(mdbh, new UIMAPerformer()));
+        SparkHandler.init();
 //        openInDefaultBrowser();
     }
+
+    private SparkHandler() {}
 
     /**
      * Sets up the website's paths.
@@ -53,13 +55,13 @@ public class SparkHandler {
      * @see #getSpeechIDs
      * @see #getProtokollEditor
      * @see #getLaTeX
-     * @see #getspeechNetwork
+     * @see #getSpeechNetwork
      * @see #getCommentNetwork
      * @see #getLoginSite
      */
-    public static void init(MongoDBHandler mdbh, EditorProtocolParser editorProtocolParser) throws IOException {
-        epParser = editorProtocolParser;
-        mongoDBHandler = mdbh;
+    public static void init() throws UIMAException, IOException {
+        epParser = new EditorProtocolParser(new UIMAPerformer());
+
         staticFiles.externalLocation(frontendPath + "pdfOutput/");
         cfg.setDirectoryForTemplateLoading(new File(frontendPath));
         cfg.setDefaultEncoding("UTF-8");
@@ -105,7 +107,7 @@ public class SparkHandler {
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         post("/latex/", "application/json", postLaTeX);
 
-        get("/network/speech/", getspeechNetwork, new FreeMarkerEngine(cfg));
+        get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
 
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
@@ -171,30 +173,26 @@ public class SparkHandler {
 
     /**
      * LaTeX editing page.
-     *
-     * @author Eric Lakhter
+     * @author
      */
     @Unfinished("Doesn't do anything yet")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
-
-//        JSONObject commands = mongoDBHandler.getLaTeXCommands();
-
-//        pageContent.put("commands", commands);
 
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
     /**
      * Tries to return a PDF file.
-     *
-     * @author Eric Lakhter
+     * @author
      */
-    @Unfinished("Need to convert the LaTeX code to a pdf")
+    @Unfinished("Need to create TeX based on input to compile to a new pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
         System.out.println("POST postLaTeX aufgerufen");
 
         System.out.println(request.body()); // this will be the LaTeX text field
+
+        String speechTexString = Speech_TeX.toTeX("ID19100100", true, true, true);
 
         String successStatus = "PDF successfully generated";
         String successMessage = "/pdfOutput/Abschluss.pdf";
@@ -351,8 +349,7 @@ public class SparkHandler {
         return mongoDBHandler.findSpeech(text);
     };
 
-
-    private final static TemplateViewRoute getspeechNetwork = (Request request, Response response) -> {
+    private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
         JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
@@ -361,7 +358,7 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "speechNetwork.ftl");
     };
-    private final static TemplateViewRoute getCommentNetwork = (Request request, Response response) -> {
+    private static final TemplateViewRoute getCommentNetwork = (Request request, Response response) -> {
         String von = request.queryParams("von") != null ? request.queryParams("von") : "";
         String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
         Map<String, Object> pageContent = new HashMap<>();
@@ -400,7 +397,7 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie oldPw newPw, returns whether the change was successfull
+     * accepts cookie oldPw newPw, returns whether the change was successful
      *
      * @author Julian Ocker
      */
