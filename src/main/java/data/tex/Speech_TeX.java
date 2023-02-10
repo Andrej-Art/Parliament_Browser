@@ -3,6 +3,7 @@ package data.tex;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import utility.MongoDBHandler;
+import utility.annotations.Unfinished;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import static java.util.Arrays.asList;
  *
  * @author Eric Lakhter
  */
+@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
 public class Speech_TeX {
     private static MongoDBHandler mdbh;
     private Document speechDoc;

@@ -15,7 +15,7 @@ import java.util.List;
  * @author Eric Lakhter
  */
 @Testing
-@Unfinished("Not currently working")
+@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
 public class AgendaItem_TeX {
 
     private Document aiDoc;

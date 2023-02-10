@@ -192,7 +192,7 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        String speechTexString = Speech_TeX.toTeX("ID19100100", true, true, true);
+       // String speechTexString = Speech_TeX.toTeX("ID19100100");
 
         String successStatus = "PDF successfully generated";
         String successMessage = "/pdfOutput/Abschluss.pdf";

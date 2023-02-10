@@ -15,7 +15,7 @@ import java.util.List;
  * @author Eric Lakhter
  */
 @Testing
-@Unfinished("Not currently working")
+@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
 public class Protocol_TeX {
     private Document protDoc;
     private MongoDBHandler mdbh;
@@ -33,12 +33,14 @@ public class Protocol_TeX {
 
         for (Document agDoc : agendaItems) {
             List<String> speechIDs = null;
-            if (agDoc.getList("speechIDs", String.class).size() > 0){
+            if (agDoc.getList("speechIDs", String.class) != null){
                 speechIDs = new ArrayList<>((agDoc.getList("speechIDs", String.class)));
             }
             List<Document> speechDocs = new ArrayList<>(0);
-            for (String speechID : speechIDs) {
-                speechDocs.add(mdbh.getDocument("speech", speechID));
+            if(speechIDs != null) {
+                for (String speechID : speechIDs) {
+                    speechDocs.add(mdbh.getDocument("speech", speechID));
+                }
             }
             AgendaItem_TeX agTEX = new AgendaItem_TeX(agDoc, mdbh);
             sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" +  agTEX.toTeX(speechDocs));
