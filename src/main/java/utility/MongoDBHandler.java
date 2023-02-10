@@ -944,19 +944,6 @@ public class MongoDBHandler {
                 .append("neu", new Document("$sum", new Document("$cond",
                         Arrays.asList(new Document("$eq", Arrays.asList("$sentiment", 0)), 1, 0)))));
 
-        Bson unwindSpeech = unwind("$speechSentimentPipeline");
-        Bson unwindComments = unwind("$commentSentimentPipeline");
-
-        //adds Fields for the summed amount of all sentiment counts
-//        Bson addFields = new Document("$addFields", new Document("allCount", new Document("$add",
-//                Arrays.asList("$speechSentimentPipeline.count", "$commentSentimentPipeline.count")))
-//                .append("posCount", new Document("$add",
-//                        Arrays.asList("$speechSentimentPipeline.pos", "$commentSentimentPipeline.pos")))
-//                .append("negCount", new Document("$add",
-//                        Arrays.asList("$speechSentimentPipeline.neg", "$commentSentimentPipeline.neg")))
-//                .append("neuCount", new Document("$add",
-//                        Arrays.asList("$speechSentimentPipeline.neu", "$commentSentimentPipeline.neu"))));
-
         //calculates the percentage of positive, negative and neutral sentiments over all comments and speeches
         Bson addFields = new Document("$addFields", new Document()
                 .append("posPercent", new Document("$divide", Arrays.asList("$pos", "$count")))
@@ -993,7 +980,7 @@ public class MongoDBHandler {
             obj.put("commentPos", procBlock.getDouble("posPercent") * 100);
             obj.put("commentNeg", procBlock.getDouble("negPercent") * 100);
             obj.put("commentNeu", procBlock.getDouble("neuPercent") * 100);
-        });
+                });
         System.out.println(obj);
         return obj;
     }
@@ -1017,7 +1004,7 @@ public class MongoDBHandler {
         Bson limit = limit(100);
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, limit, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
@@ -1634,7 +1621,6 @@ public class MongoDBHandler {
     public boolean changePassword(String cookie, String newPassword, String oldPassword) {
         String username = getTag("cookies", "_id", cookie, "user");
         String rank = getTag("cookies", "_id", cookie, "rank");
-        String salt = getTag("user", "_id", username, "salt");
         if (checkUserAndPassword(username, oldPassword)) {
             db.getCollection("user").deleteOne(
                     new Document("_id", username)
@@ -1642,7 +1628,7 @@ public class MongoDBHandler {
             db.getCollection("user").insertOne(
                     new Document("_id", username)
                             .append("rank", rank)
-                            .append("password", hashPasswordWithSalt(newPassword, salt))
+                            .append("password", newPassword)
             );
             return true;
         } else {
