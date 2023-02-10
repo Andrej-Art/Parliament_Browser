@@ -242,8 +242,7 @@ public class XMLPersonParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        MongoDBHandler mongoDBHandler = new MongoDBHandler();
-        mongoDBHandler.insertPersons(persons);
+        MongoDBHandler.getHandler().insertPersons(persons);
     }
 
 

@@ -44,12 +44,8 @@ public class XMLProtocolParser {
 
         //Reset Maps
         //Create connection to mongoDB
-        MongoDBHandler mongoDBHandler = null;
-        try {
-            mongoDBHandler = new MongoDBHandler();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+
         UIMAPerformer uima = new UIMAPerformer();
 
         try {
