@@ -29,7 +29,7 @@ public class AgendaItem_TeX {
         StringBuilder sb = new StringBuilder();
         List<Speech_TeX> speechTexs = new ArrayList<>(0);
         for(Document speech: speeches){
-           Speech_TeX speechTex = new Speech_TeX(mdbh, speech);
+           Speech_TeX speechTex = new Speech_TeX(mdbh);
            sb.append("\\subsection{Rede: " + speech.getString("_id") + "}\n\n" + speechTex.toTeX(speech.getString("_id")) + "\n\n");
         }
         return sb.toString();

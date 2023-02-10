@@ -1241,7 +1241,7 @@ public class MongoDBHandler {
             obj.put("namedEntitiesPer", docSpeech.get("namedEntitiesPer"));
             obj.put("namedEntitiesLoc", docSpeech.get("namedEntitiesLoc"));
             obj.put("namedEntitiesOrg", docSpeech.get("namedEntitiesOrg"));
-            obj.put("date", TimeHelper.mongoDateToGermanDate(docSpeech.getDate("date")));
+            obj.put("date", TimeHelper.mongoDateToPrettyGermanDate(docSpeech.getDate("date")));
             obj.put("speaker", docSpeech.get("speaker"));
         }
         MongoIterable<Document> resultComments = db.getCollection("comment").aggregate(pipelineComments)

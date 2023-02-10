@@ -121,7 +121,8 @@ public class EditorProtocolParser {
      * @param rawText The String to be parsed.
      * @param allowOverwrite if true, allows overwriting the agenda item with the same ID in the database.
      * @return The ID of the freshly inserted agenda item.
-     * @throws EditorFormattingException
+     * @throws EditorFormattingException if any part of the text does
+     *                                   not fit the standards for editing/creating protocols.
      * @author Eric Lakhter
      */
     @Unfinished("Pretty much finished, but inserts into a test collection")
@@ -164,7 +165,7 @@ public class EditorProtocolParser {
             throw new EditorFormattingException("This agenda item exists already and isn't allowed to be overwritten");
         subject = subject.isEmpty()
                 ? agendaID
-                : subject.substring(1);
+                : subject.substring(1); // cut off the leading "\n"
 
         LocalDate date = dateToLocalDate(mongoDBHandler.getDocument("protocol", protocolID).getDate("date"));
         // TODO remove testing
@@ -178,7 +179,8 @@ public class EditorProtocolParser {
      * @param rawText The String to be parsed.
      * @param allowOverwrite if true, allows overwriting the speech with the same ID in the database.
      * @return The ID of the freshly inserted speech.
-     * @throws EditorFormattingException
+     * @throws EditorFormattingException if any part of the text does
+     *                                   not fit the standards for editing/creating protocols.
      * @author Eric Lakhter
      */
 
@@ -226,6 +228,9 @@ public class EditorProtocolParser {
                 text += " " + lines[i].trim();
             }
         }
+
+        if (text.isEmpty())
+            throw new EditorFormattingException("The speech's text cannot be empty");
         // TODO remove testing
 //        if (!allowOverwrite && mdbh.checkIfDocumentExists("agendaItem", fullAgendaID))
         if (!allowOverwrite && testVersionExists("speech", speechID))
@@ -252,27 +257,61 @@ public class EditorProtocolParser {
         try {
             String[] periodAndProtocol = id.split("/");
             if (periodAndProtocol.length != 2)
-                throw new EditorFormattingException("Protocol ID has illegal format");
+                throw new EditorFormattingException("Protocol ID can only have 1 '/' character");
             return new int[]{Integer.parseInt(periodAndProtocol[0]), Integer.parseInt(periodAndProtocol[1])};
         } catch (NumberFormatException e) {
             throw new EditorFormattingException("Protocol ID can only contain integers divided by a slash");
         }
     }
 
-    public String getProtocolFromDB(String protocolID) {
+    public String getEditorProtocolFromDB(String protocolID) {
         Document protocolDoc = mongoDBHandler.getDocument("protocol", protocolID);
-        return null;
+        StringBuilder protocolEditorText = new StringBuilder();
+        protocolEditorText.append("[PROTOKOLL]").append(protocolDoc.getString("_id"));
+        protocolEditorText.append("\n[DATUM]").append(mongoDateToGermanDate(protocolDoc.getDate("date")));
+        protocolEditorText.append("\n[BEGINN]").append(mongoTimeToLocalTime(protocolDoc.getDate("beginTime")));
+        protocolEditorText.append("\n[ENDE]").append(mongoTimeToLocalTime(protocolDoc.getDate("endTime")));
+        protocolEditorText.append("\n[SITZUNGSLEITER]");
+
+        StringBuilder leaderText = new StringBuilder();
+        for (String speechID : protocolDoc.getList("sessionLeaders", String.class)) {
+            leaderText.append(", ").append(speechID);
+        }
+        protocolEditorText.append(leaderText.substring(2));
+
+        protocolEditorText.append("\n[TOPS]");
+        StringBuilder agendaText = new StringBuilder();
+        for (String speechID : protocolDoc.getList("agendaItems", String.class)) {
+            agendaText.append(", ").append(speechID);
+        }
+        protocolEditorText.append(agendaText.substring(2));
+
+        return protocolEditorText.toString();
     }
 
-    public String getAgendaFromDB(String agendaID) {
-        return null;
+    public String getEditorAgendaFromDB(String agendaID) {
+        Document agendaDoc = mongoDBHandler.getDocument("agendaItem", agendaID);
+        StringBuilder agendaEditorText = new StringBuilder();
+        String[] agendaIDparts = agendaDoc.getString("_id").split("/");
+        agendaEditorText.append("[PROTOKOLL]").append(agendaIDparts[0]).append("/").append(agendaIDparts[1]);
+        agendaEditorText.append("\n[TOP]").append(agendaIDparts[2]);
+
+        for (String subject : agendaDoc.getString("subject").split("\n")) {
+            agendaEditorText.append("\n[INHALT]").append(subject);
+        }
+
+        agendaEditorText.append("\n[REDEIDS]");
+        StringBuilder speechIDString = new StringBuilder();
+        for (String speechID : agendaDoc.getList("speechIDs", String.class)) {
+            speechIDString.append(", ").append(speechID);
+        }
+        agendaEditorText.append(speechIDString.substring(2));
+
+        return agendaEditorText.toString();
     }
 
-    public String getSpeechFromDB(String speechID) {
+    public String getEditorSpeechFromDB(String speechID) {
         Document speechDoc = mongoDBHandler.getDocument("speech", speechID);
-        List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));
-        textArray.add("");
-        Iterator<String> textIter = textArray.iterator();
         MongoCursor<Document> commentCursor = mongoDBHandler.getDB().getCollection("comment")
                 .aggregate(Arrays.asList(
                         match(new Document("speechID", speechID)),
@@ -280,13 +319,12 @@ public class EditorProtocolParser {
                         sort(ascending("commentNum"))
                 )).iterator();
 
-        Document commentDoc = commentCursor.tryNext();
         int offSet = 0;
         int previousPos = 0;
         int currentPos = 0;
         StringBuilder speechEditorText = new StringBuilder(speechDoc.getString("text"));
 
-        while (commentDoc != null) {
+        for (Document commentDoc = commentCursor.tryNext(); commentDoc != null; commentDoc = commentCursor.tryNext()) {
             currentPos = commentDoc.getInteger("commentPos");
             if (previousPos > currentPos || speechEditorText.length() < currentPos + offSet) break;
 
@@ -294,7 +332,6 @@ public class EditorProtocolParser {
             speechEditorText.insert(currentPos + offSet, "\n[KOMMENTAR]" + commentText + "\n");
             previousPos = currentPos;
             offSet += commentText.length() + 13;
-            commentDoc = commentCursor.tryNext();
         }
         return speechEditorText.toString();
     }
