@@ -135,7 +135,7 @@ function changeLayout() {
 function advanceOnEnter(element){
     if (event.which === 13) {
         let index = element.tabIndex;
-        document.getElementById("button-" + (index + 1)).focus();
+        document.getElementById("input-" + (index + 1)).focus();
     }
 }
 
@@ -173,34 +173,73 @@ let cachedPerson =   {personID: "", firstName: "", lastName: "", role: "", title
 
 const protocolEditHTML =
     '<div class="input-column" style="background-color: aquamarine">' +
-    '<label for="button-1">Protokoll-ID</label>' +
-    '<label for="button-2">Datum</label>' +
-    '<label for="button-3">Beginn</label>' +
-    '<label for="button-4">Ende</label>' +
-    '<label for="button-5">Sitzungsleiter</label>' +
-    '<label for="button-6">Tagesordnungspunkte</label>' +
+    '<label for="input-1">Protokoll-ID</label>' +
+    '<label for="input-2">Datum</label>' +
+    '<label for="input-3">Beginn</label>' +
+    '<label for="input-4">Ende</label>' +
+    '<label for="input-5">Sitzungsleiter</label>' +
+    '<label for="input-6">Tagesordnungspunkte</label>' +
     '</div>' +
     '<div class="input-column" style="background-color: #f1aa64">' +
-    '<input id="button-1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
-    '<input id="button-2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="01.01.2000">' +
-    '<input id="button-3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="9:00">' +
-    '<input id="button-4" tabindex="4" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="21:00">' +
-    '<input id="button-5" tabindex="5" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Präsident Max Mustermann, Vizepräsident Dr. Bob Baumeister">' +
-    '<input id="button-6" tabindex="6" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Tagesordnungspunkt 1, Zusatzpunkt 1">' +
+    '<input id="input-1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="01.01.2000">' +
+    '<input id="input-3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="9:00">' +
+    '<input id="input-4" tabindex="4" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="21:00">' +
+    '<input id="input-5" tabindex="5" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Präsident Max Mustermann, Vizepräsident Dr. Bob Baumeister">' +
+    '<input id="input-6" tabindex="6" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Tagesordnungspunkt 1, Zusatzpunkt 1">' +
     '</div>';
-const agendaEditHTML = '';
-const speechEditHTML = '';
-const personEditHTML = '';
-
-
-
-
-
-
-
-
-
-
-
-
-
+const agendaEditHTML =
+    '<div class="input-column" style="background-color: aquamarine">' +
+    '<label for="input-1">Protokoll-ID</label>' +
+    '<label for="input-2">Titel</label>' +
+    '<label for="input-3">Themen</label>' +
+    '<label for="input-4">Reden-IDs</label>' +
+    '</div>' +
+    '<div class="input-column" style="background-color: #f1aa64">' +
+    '<input id="input-1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Tagesordnungspunkt 1">' +
+    '<input id="input-3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Reden über\n-Wichtige Themen">' +
+    '<input id="input-4" tabindex="4" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="ID100100, ID100200">' +
+    '</div>';
+const speechEditHTML =
+    '<div class="input-column" style="background-color: aquamarine">' +
+    '<label for="input-1">Rede-ID</label>' +
+    '<label for="input-2">Redner-ID</label>' +
+    '<label for="input-3">Text</label>' +
+    '</div>' +
+    '<div class="input-column" style="background-color: #f1aa64">' +
+    '<input id="input-1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<textarea id="input-3" tabindex="3" class="editor-input" placeholder="Es war einmal"></textarea>' +
+    '</div>';
+const personEditHTML =
+    '<div class="input-column" style="background-color: aquamarine">' +
+    '<label for="input-1">Person-ID</label>' +
+    '<label for="input-2">Vorname</label>' +
+    '<label for="input-3">Nachname</label>' +
+    '<label for="input-4">Rolle</label>' +
+    '<label for="input-5">Titel</label>' +
+    '<label for="input-6">Ortszusatz</label>' +
+    '<label for="input-7">Partei</label>' +
+    '<label for="input-8">Fraktion WP 19</label>' +
+    '<label for="input-9">Fraktion WP 20</label>' +
+    '<label for="input-10">Geschlecht</label>' +
+    '<label for="input-11">Geburtsdatum</label>' +
+    '<label for="input-12">Sterbedatum</label>' +
+    '<label for="input-13">Geburtsort</label>' +
+    '</div>' +
+    '<div class="input-column" style="background-color: #f1aa64">' +
+    '<input id="input-1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="123456">' +
+    '<input id="input-2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Max">' +
+    '<input id="input-3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Mustermann">' +
+    '<input id="input-4" tabindex="4" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-5" tabindex="5" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-6" tabindex="6" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-7" tabindex="7" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-8" tabindex="8" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-9" tabindex="9" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-10" tabindex="10" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-11" tabindex="11" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-12" tabindex="12" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '<input id="input-13" tabindex="13" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1">' +
+    '</div>';
