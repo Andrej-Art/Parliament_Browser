@@ -1334,7 +1334,7 @@ public class MongoDBHandler {
 
                 objTotal.put("AfDtotalVotes", procBlock.getInteger("totalVotesAfD"));
                 objTotal.put("AfDYes", procBlock.getInteger("AfDYes"));
-                objTotal.put("AfDNo", procBlock.getInteger("AfdNo"));
+                objTotal.put("AfDNo", procBlock.getInteger("AfDNo"));
                 objTotal.put("AfDAbstained", procBlock.getInteger("AfDAbstained"));
                 objTotal.put("AfDNoVotes", procBlock.getInteger("AfDNoVotes"));
 
