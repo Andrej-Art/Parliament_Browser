@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Date;
@@ -45,12 +44,30 @@ public class TimeHelper {
     }
 
     /**
+     * Converts Date objects to a String of format {@code dd.MM.yyyy}.
+     * @param date Date object from the database
+     * @return String with the day of week and date, e.g. "24.07.2017"
+     */
+    public static String mongoDateToGermanDate(Date date) {
+        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_1);
+    }
+
+    /**
      * Converts Date objects to a String of format {@code EE, dd.MM.yyyy}.
      * @param date Date object from the database
      * @return String with the day of week and date, e.g. "Di, 24.07.2017"
      */
-    public static String mongoDateToGermanDate(Date date) {
+    public static String mongoDateToPrettyGermanDate(Date date) {
         return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_3);
+    }
+
+    /**
+     * Converts Date objects to a String of format {@code EE, dd.MM.yyyy}.
+     * @param date Date object from the database
+     * @return String with the day of week and date, e.g. "Di, 24.07.2017"
+     */
+    public static String mongoTimeToLocalTime(Date date) {
+        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalTime().format(CLOCK_FORMAT);
     }
 
     /**

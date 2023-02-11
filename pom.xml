@@ -27,9 +27,29 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+
+
+        <repository>
+            <id>AsposeJavaAPI</id>
+            <name>Aspose Java API</name>
+            <url>https://releases.aspose.com/java/repo/</url>
+        </repository>
+
+
+
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-pdf</artifactId>
+            <version>22.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-tex</artifactId>
+            <version>22.12</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -151,6 +171,13 @@
             <groupId>net.lingala.zip4j</groupId>
             <artifactId>zip4j</artifactId>
             <version>2.11.2</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.groupdocs/groupdocs-conversion -->
+        <dependency>
+            <groupId>com.groupdocs</groupId>
+            <artifactId>groupdocs-conversion</artifactId>
+            <version>22.12.1</version>
         </dependency>
 
     </dependencies>

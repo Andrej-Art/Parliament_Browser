@@ -1,9 +1,9 @@
 package data.tex;
 
+
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import utility.MongoDBHandler;
-import utility.annotations.Unfinished;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,13 +16,10 @@ import static java.util.Arrays.asList;
  *
  * @author Eric Lakhter
  */
-@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
 public class Speech_TeX {
     private static MongoDBHandler mdbh;
-    private Document speechDoc;
-    public Speech_TeX(MongoDBHandler mongoDBHandler, Document speechDocument) {
+    public Speech_TeX(MongoDBHandler mongoDBHandler) {
         mdbh = mongoDBHandler;
-        speechDoc = speechDocument;
     }
 
     /**
@@ -31,7 +28,11 @@ public class Speech_TeX {
      * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
      * @param speechID the speechID to texify.
      * @return String in TeX format.
-     * @author Eric Lakhter
+     */
+    /*
+     * @param showNamedEntities whether named entity markers should show up in the text.
+     * @param showSentiment whether sentiment information should show up at the end of each sentence.
+     * @param showComments whether comments should show up.
      */
     public String toTeX(String speechID) {
         MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
