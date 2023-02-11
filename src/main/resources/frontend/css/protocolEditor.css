@@ -39,9 +39,25 @@
     height: 80%;
 }
 
-#editor-textarea {
+#input-area {
+    display: flex;
     overflow: auto;
-    resize: none;
     height: 90%;
     width: 100%;
+}
+
+.input-column {
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: flex-end;
+}
+.editor-input {
+    width: 20em;
+}
+
+.select-box {
+
 }

@@ -43,12 +43,12 @@ import static utility.TimeHelper.dateToLocalDate;
  */
 @Unfinished("Needs a few more web-related methods")
 public class MongoDBHandler {
-    private static final MongoDBHandler mongoDBHandler;
+    private static MongoDBHandler mongoDBHandler;
     static {
         try {
             mongoDBHandler = new MongoDBHandler();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            mongoDBHandler = null;
         }
     }
     private final MongoDatabase db;
