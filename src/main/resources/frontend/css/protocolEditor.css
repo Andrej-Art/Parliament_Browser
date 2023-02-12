@@ -36,12 +36,32 @@
 }
 
 .editor-box {
-    height: 80%;
+    float: right;
 }
 
-#editor-textarea {
+#input-area {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 10px;
     overflow: auto;
-    resize: none;
     height: 90%;
     width: 100%;
+}
+
+.input-column {
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.editor-input {
+    width: 300px;
+    resize: none;
+}
+
+.select-box {
+    float: left;
 }

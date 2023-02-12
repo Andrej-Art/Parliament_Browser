@@ -4,8 +4,10 @@ import com.mongodb.DBCursor;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.json.JSONObject;
 import utility.MongoDBHandler;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ public class Speech_TeX {
     public Speech_TeX(MongoDBHandler mongoDBHandler) {
         mdbh = mongoDBHandler;
     }
+
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
 
     /**
      * Builds a string which can be formatted by a TeX compiler.<br>

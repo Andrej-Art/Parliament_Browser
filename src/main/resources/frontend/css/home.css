@@ -1,6 +1,24 @@
 /* Style for LaTeX protocol editor page */
 
-.homepage-description {
+.home-container {
     box-sizing: border-box;
+    padding: 50px 30px;
+}
+
+.home-left {
+    background-color: rosybrown;
+    box-sizing: border-box;
+    float: left;
+    width: 50%;
+}
+
+.home-right {
+    background-color: yellow;
+    box-sizing: border-box;
+    float: right;
+    width: 50%;
+}
+
+#db-status {
     padding: 50px 30px;
 }

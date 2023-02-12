@@ -1,6 +1,5 @@
 package utility;
 
-import data.tex.Speech_TeX;
 import exceptions.EditorFormattingException;
 import exceptions.WrongInputException;
 import freemarker.template.Configuration;
@@ -46,7 +45,6 @@ public class SparkHandler {
      * Sets up the website's paths.
      *
      * @author Eric Lakhter
-     * @see #getIcon
      * @see #getHome
      * @see #getDashboard
      * @see #getChartUpdates
@@ -60,9 +58,9 @@ public class SparkHandler {
      * @see #getLoginSite
      */
     public static void init() throws UIMAException, IOException {
-        epParser = new EditorProtocolParser(new UIMAPerformer());
+        epParser = new EditorProtocolParser();
 
-        staticFiles.externalLocation(frontendPath + "pdfOutput/");
+        staticFiles.externalLocation(frontendPath + "public/");
         cfg.setDirectoryForTemplateLoading(new File(frontendPath));
         cfg.setDefaultEncoding("UTF-8");
         port(4567);
@@ -76,23 +74,8 @@ public class SparkHandler {
         // Test is for testing
         get("/test/", getTest, new FreeMarkerEngine(cfg));
 
-        /*
-         * request.queryParams() is a set of query parameters, needs question mark
-         * example path:
-         * /reden/?id=4&hu=7
-         * =>
-         * request.queryParams(): [id, hu]     (type: Set<String>)
-         * request.queryParams("id"): "4"      (important: potential trailing slash is seen as part of param)
-         * request.queryParams("rrr"): null    (no exceptions)
-         *
-         * ?fraktion=CDU/CSU                   works without issues, even with the slash
-         * ?fraktion=BÜNDNIS 90/DIE GRÜNEN     works without issues, spaces get percent-encoded: " " -> "%20"
-         * CDU/CSU is equivalent to CDU%2FCSU  %2F is the percent-encoded slash
-         */
-
-        get("/favicon.ico/", "image/png", getIcon);
-
         get("/", getHome, new FreeMarkerEngine(cfg));
+        post("/", "application/json", postHome);
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
         get("/update-charts/", getChartUpdates);
@@ -102,7 +85,8 @@ public class SparkHandler {
         get("/reden/speechIDs/", "application/json", getSpeechIDs);
 
         get("/protokolleditor/", getProtokollEditor, new FreeMarkerEngine(cfg));
-        post("/protokolleditor/", "application/json", postProtokollEditor);
+        post("/protokolleditor/insert/", "application/json", postProtokollEditorInsert);
+        post("/protokolleditor/extract/", "application/json", postProtokollEditorExtract);
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         post("/latex/", "application/json", postLaTeX);
@@ -125,18 +109,6 @@ public class SparkHandler {
     /*
      * Routes:
      */
-
-    /**
-     * Website's favicon.
-     *
-     * @author Eric Lakhter
-     */
-    private static final Route getIcon = (Request request, Response response) -> {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(ImageIO.read(new File(frontendPath + "favicon.png")), "png", baos);
-            return baos.toByteArray();
-        }
-    };
 
     /**
      * Test page.
@@ -169,6 +141,20 @@ public class SparkHandler {
         pageContent.put("title", "Homepage");
 
         return new ModelAndView(pageContent, "home.ftl");
+    };
+
+    /**
+     * DB availability check.
+     *
+     * @author Eric Lakhter
+     */
+    private static final Route postHome = (Request request, Response response) -> {
+        try {
+            mongoDBHandler.getDB().getCollection("dummy").drop();
+            return successJSON("Success", "DB is available");
+        } catch(Exception e) {
+            return errorJSON("DB isn't available");
+        }
     };
 
     /**
@@ -208,8 +194,9 @@ public class SparkHandler {
     @Unfinished("Nothing more than a text field so far")
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
-
-        return new ModelAndView(pageContent, "ProtokollEditor.ftl");
+        // something user-rank related
+        pageContent.put("protocolAgendaData", mongoDBHandler.getProtocalAgendaData());
+        return new ModelAndView(pageContent, "protocolEditor.ftl");
     };
 
     /**
@@ -218,11 +205,13 @@ public class SparkHandler {
      * @author Eric Lakhter
      */
     @Unfinished("Need to implement the part which grabs info from the db first before this is considered done")
-    private static final Route postProtokollEditor = (Request request, Response response) -> {
+    private static final Route postProtokollEditorInsert = (Request request, Response response) -> {
         try {
+            System.out.println("postInsert aufgerufen");
+            System.out.println(request.body());
             String editMode = request.queryParams("editMode");
             if (editMode == null)
-                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is null");
+                throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
 
             boolean allowOverwrite = Objects.equals(request.queryParams("overwrite"), "true");
             // Testing
@@ -230,28 +219,59 @@ public class SparkHandler {
             allowOverwrite = false;
 
             String id;
-            String successStatus;
+            String successMessage;
             switch (editMode) {
                 case "protocol":
-                    id = epParser.parseEditorProtocol(request.body(), allowOverwrite);
-                    successStatus = "Protocol \"" + id + "\" successfully inserted";
+                    id = epParser.parseEditorProtocol(new JSONObject(request.body()));
+                    successMessage = "Protocol \"" + id + "\" successfully inserted";
                     break;
                 case "aItem":
                     id = epParser.parseEditorAgendaItem(request.body(), allowOverwrite);
-                    successStatus = "AgendaItem \"" + id + "\"  successfully inserted";
+                    successMessage = "AgendaItem \"" + id + "\"  successfully inserted";
                     break;
                 case "speech":
                     id = epParser.parseEditorSpeech(request.body(), allowOverwrite);
-                    successStatus = "Speech \"" + id + "\"  successfully inserted";
+                    successMessage = "Speech \"" + id + "\"  successfully inserted";
+                    break;
+                case "person":
+                    id = epParser.parseEditorPerson(request.body(), allowOverwrite);
+                    successMessage = "Person \"" + id + "\"  successfully inserted";
                     break;
                 default:
-                    throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\" or \"speech\" but is " + editMode);
+                    throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + editMode);
             }
-            return successJSON(successStatus, "null");
+            return successJSON("Success", successMessage);
         } catch (EditorFormattingException | WrongInputException e) {
             return errorJSON(e.getMessage());
         } catch (Exception e) {
             return errorJSON("General Exception: " + e.getMessage());
+        }
+    };
+
+    /**
+     * Tries to parse a custom protocol/agenda item/speech and to insert it into the DB.
+     *
+     * @author Eric Lakhter
+     */
+    @Unfinished("Need to implement person extractor and to put it on the webpage")
+    private static final Route postProtokollEditorExtract = (Request request, Response response) -> {
+        String col = request.queryParams("col");
+        if (col == null)
+            throw new EditorFormattingException("col must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
+        String id = request.queryParams("id");
+        if (id == null)
+            throw new EditorFormattingException("id is null");
+        switch (col) {
+            case "protocol":
+                return successJSON("Protocol" + id +" successfully loaded!", epParser.getEditorProtocolFromDB(id));
+            case "aItem":
+                return successJSON("Agenda item" + id +" successfully loaded!", epParser.getEditorAgendaFromDB(id));
+            case "speech":
+                return successJSON("Speech" + id +" successfully loaded!", epParser.getEditorSpeechFromDB(id));
+            case "person":
+                return successJSON("Person" + id +" successfully loaded!", epParser.getEditorPersonFromDB(id));
+            default:
+                return errorJSON("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
         }
     };
 
@@ -551,10 +571,10 @@ public class SparkHandler {
     /**
      * Returns a JSON signaling that the request was handled without errors.
      *
-     * @return JSON with successMessage
+     * @return JSON: {@code {status: successStatus, message: successMessage}}
      * @author Eric Lakhter
      */
-    private static JSONObject successJSON(String successStatus, String successMessage) {
+    private static JSONObject successJSON(String successStatus, Object successMessage) {
         if (successStatus == null) successStatus = "null";
         if (successMessage == null) successMessage = "null";
         return new JSONObject().put("status", successStatus).put("message", successMessage);
@@ -563,7 +583,7 @@ public class SparkHandler {
     /**
      * Returns a JSON signaling that an error occurred while handling the request.
      *
-     * @return JSON with errorMessage
+     * @return JSON  {@code {status: "Error", message: errorMessage}}
      * @author Eric Lakhter
      */
     private static JSONObject errorJSON(String errorMessage) {

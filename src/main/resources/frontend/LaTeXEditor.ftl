@@ -35,7 +35,7 @@
 
 <script>
 document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status messages:<br>';
-<#include "js/editor.js">
+<#include "js/LaTeX.js">
 </script>
 
 </body>

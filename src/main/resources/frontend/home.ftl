@@ -13,20 +13,27 @@
 <body>
 
 <#include "parliamentBrowser.ftl">
+<div class="home-container">
+    <div class="home-left">
+        <h1 id="title">Homepage 🔥</h1>
+        <ul>
+            <li><a href="test/">✨ Test-Seite ✨</a></li>
+            <li><a href="#title">Homepage</a></li>
+            <li><a href="loginSite/">Login-Management</a></li>
+            <li><a href="dashboard/">Dashboard</a></li>
+            <li><a href="network/1/">Redner-Kategorien-Netzwerk</a></li>
+            <li><a href="reden/">Reden-Visualisierung</a></li>
+            <li><a href="protokolleditor/">Protokoll-Editor</a></li>
+            <li><a href="latex/">LaTeX-Editor</a></li>
+        </ul>
+    </div>
+    <div class="home-right">
+        <div id="db-status">
 
-<div class="homepage-description">
-    <h1 id="title">Homepage 🔥</h1>
-    <ul>
-        <li><a href="test/">✨ Test-Seite ✨</a></li>
-        <li><a href="#title">Homepage</a></li>
-        <li><a href="loginSite/">Login-Management</a></li>
-        <li><a href="dashboard/">Dashboard</a></li>
-        <li><a href="network/1/">Redner-Kategorien-Netzwerk</a></li>
-        <li><a href="reden/">Reden-Visualisierung</a></li>
-        <li><a href="protokolleditor/">Protokoll-Editor</a></li>
-        <li><a href="latex/">LaTeX-Editor</a></li>
-    </ul>
+        </div>
+    </div>
 </div>
+
 
 <script>
     document.getElementById("parliament-browser-main-navigation-bar").style.display = 'flex';
@@ -35,6 +42,16 @@
         button.style['text-shadow'] = 'none';
         button.style.cursor = 'default';
         button.onclick = '';
+    }
+    getDBStatus();
+    async function getDBStatus () {
+        document.getElementById("db-status").innerHTML = 'Waiting for database response <img src="loadIcon.gif" alt="" style="vertical-align: middle">';
+        let response = await fetch("#", {
+            method: 'POST'
+        });
+        let responseJson = await response.json();
+        document.getElementById("db-status").innerHTML =
+            '<span style="color: ' + (responseJson.status === Error ? "red" : "green")  + '">' + responseJson.message + '</span>';
     }
 </script>
 

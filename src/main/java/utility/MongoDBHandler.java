@@ -43,12 +43,12 @@ import static utility.TimeHelper.dateToLocalDate;
  */
 @Unfinished("Needs a few more web-related methods")
 public class MongoDBHandler {
-    private static final MongoDBHandler mongoDBHandler;
+    private static MongoDBHandler mongoDBHandler;
     static {
         try {
             mongoDBHandler = new MongoDBHandler();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            mongoDBHandler = null;
         }
     }
     private final MongoDatabase db;
@@ -1241,7 +1241,7 @@ public class MongoDBHandler {
             obj.put("namedEntitiesPer", docSpeech.get("namedEntitiesPer"));
             obj.put("namedEntitiesLoc", docSpeech.get("namedEntitiesLoc"));
             obj.put("namedEntitiesOrg", docSpeech.get("namedEntitiesOrg"));
-            obj.put("date", TimeHelper.mongoDateToGermanDate(docSpeech.getDate("date")));
+            obj.put("date", TimeHelper.mongoDateToPrettyGermanDate(docSpeech.getDate("date")));
             obj.put("speaker", docSpeech.get("speaker"));
         }
         MongoIterable<Document> resultComments = db.getCollection("comment").aggregate(pipelineComments)
@@ -1334,7 +1334,7 @@ public class MongoDBHandler {
 
                 objTotal.put("AfDtotalVotes", procBlock.getInteger("totalVotesAfD"));
                 objTotal.put("AfDYes", procBlock.getInteger("AfDYes"));
-                objTotal.put("AfDNo", procBlock.getInteger("AfdNo"));
+                objTotal.put("AfDNo", procBlock.getInteger("AfDNo"));
                 objTotal.put("AfDAbstained", procBlock.getInteger("AfDAbstained"));
                 objTotal.put("AfDNoVotes", procBlock.getInteger("AfDNoVotes"));
 
