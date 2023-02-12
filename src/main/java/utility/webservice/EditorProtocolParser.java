@@ -79,13 +79,16 @@ public class EditorProtocolParser {
         LocalTime end = convertToISOtime(protocolObject.getString("end").trim());
 
         Set<String> sessionLeaders = new HashSet<>(asList(protocolObject.getString("leaders").trim().split(",\\s*")));
-        if (sessionLeaders.isEmpty()) {
+        if (sessionLeaders.isEmpty())
             throw new EditorFormattingException("The session needs at least one leader");
-        }
-        ArrayList<String> agendaIDs = new ArrayList<>(asList(protocolObject.getString("aItems").trim().split(",\\s*")));
-        if (agendaIDs.isEmpty()) {
+
+        String[] agendaNames = protocolObject.getString("aItems").trim().split(",\\s*");
+        if (agendaNames.length == 0)
             throw new EditorFormattingException("The session needs at least one agenda item");
+        for (int i = 0; i < agendaNames.length; i++) {
+            agendaNames[i] = protocolID + "/" + agendaNames[i];
         }
+        ArrayList<String> agendaIDs = new ArrayList<>(asList(agendaNames));
 
         insertIntoTest(new Protocol_Impl(protocolID, date, begin, end, durationBetweenTimesInMinutes(begin, end),
                 electionPeriod, protocolNumber, sessionLeaders, agendaIDs));

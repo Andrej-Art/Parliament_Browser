@@ -36,11 +36,15 @@
 }
 
 .editor-box {
-    height: 80%;
+    float: right;
 }
 
 #input-area {
+    box-sizing: border-box;
     display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 10px;
     overflow: auto;
     height: 90%;
     width: 100%;
@@ -50,14 +54,14 @@
     box-sizing: border-box;
     padding: 10px;
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
 }
 .editor-input {
-    width: 20em;
+    width: 300px;
+    resize: none;
 }
 
 .select-box {
-
+    float: left;
 }

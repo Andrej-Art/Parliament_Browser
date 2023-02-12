@@ -195,6 +195,7 @@ public class SparkHandler {
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         // something user-rank related
+        pageContent.put("protocolAgendaData", mongoDBHandler.getProtocalAgendaData());
         return new ModelAndView(pageContent, "protocolEditor.ftl");
     };
 
@@ -218,28 +219,28 @@ public class SparkHandler {
             allowOverwrite = false;
 
             String id;
-            String successStatus;
+            String successMessage;
             switch (editMode) {
                 case "protocol":
                     id = epParser.parseEditorProtocol(new JSONObject(request.body()));
-                    successStatus = "Protocol \"" + id + "\" successfully inserted";
+                    successMessage = "Protocol \"" + id + "\" successfully inserted";
                     break;
                 case "aItem":
                     id = epParser.parseEditorAgendaItem(request.body(), allowOverwrite);
-                    successStatus = "AgendaItem \"" + id + "\"  successfully inserted";
+                    successMessage = "AgendaItem \"" + id + "\"  successfully inserted";
                     break;
                 case "speech":
                     id = epParser.parseEditorSpeech(request.body(), allowOverwrite);
-                    successStatus = "Speech \"" + id + "\"  successfully inserted";
+                    successMessage = "Speech \"" + id + "\"  successfully inserted";
                     break;
                 case "person":
                     id = epParser.parseEditorPerson(request.body(), allowOverwrite);
-                    successStatus = "Person \"" + id + "\"  successfully inserted";
+                    successMessage = "Person \"" + id + "\"  successfully inserted";
                     break;
                 default:
                     throw new EditorFormattingException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + editMode);
             }
-            return successJSON(successStatus, "null");
+            return successJSON("Success", successMessage);
         } catch (EditorFormattingException | WrongInputException e) {
             return errorJSON(e.getMessage());
         } catch (Exception e) {
@@ -259,16 +260,16 @@ public class SparkHandler {
             throw new EditorFormattingException("col must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
         String id = request.queryParams("id");
         if (id == null)
-            throw new EditorFormattingException("id must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
+            throw new EditorFormattingException("id is null");
         switch (col) {
             case "protocol":
-                return successJSON("Protocol successfully fetched!", epParser.getEditorProtocolFromDB(id));
+                return successJSON("Protocol" + id +" successfully loaded!", epParser.getEditorProtocolFromDB(id));
             case "aItem":
-                return successJSON("Agenda item successfully fetched!", epParser.getEditorAgendaFromDB(id));
+                return successJSON("Agenda item" + id +" successfully loaded!", epParser.getEditorAgendaFromDB(id));
             case "speech":
-                return successJSON("Speech successfully fetched!", epParser.getEditorSpeechFromDB(id));
+                return successJSON("Speech" + id +" successfully loaded!", epParser.getEditorSpeechFromDB(id));
             case "person":
-                return successJSON("Person successfully fetched!", epParser.getEditorPersonFromDB(id));
+                return successJSON("Person" + id +" successfully loaded!", epParser.getEditorPersonFromDB(id));
             default:
                 return errorJSON("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
         }
