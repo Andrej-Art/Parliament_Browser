@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The {@code Protocl_TeX} class.
  *
- * @author Eric Lakhter
+ * @author DavidJordan
  */
 @Testing
 @Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
@@ -20,15 +20,32 @@ public class Protocol_TeX {
     private Document protDoc;
     private MongoDBHandler mdbh;
 
-    public Protocol_TeX(Document protocolDoc, MongoDBHandler mongoDBHandler) {
+    private final String targetDirectory;
+
+    public Protocol_TeX(Document protocolDoc, MongoDBHandler mongoDBHandler, String targetDirectory) {
         this.protDoc = protocolDoc;
         this.mdbh = mongoDBHandler;
+        this.targetDirectory = targetDirectory;
     }
 
+    /**
+     * Method to generate Latex formatted String containing the relevant data.
+     * @param agendaItems
+     * @return
+     * @author DavidJordan
+     */
     public String toTeX(List<Document> agendaItems) {
-
         StringBuilder sb = new StringBuilder();
-        sb.append("\\begin{document} \n\n  \\chapter{Protokoll: " + protDoc.getString("_id") + "}" + "\n\n");
+        sb.append("\n\n\\documentclass{article}\n\n" +
+                "\\usepackage{graphicx}\n\n" +
+                "\\usepackage{hyperref}\n\n" +
+                "\\usepackage{color}\n\n" +
+                "\\usepackage[T1]{fontenc}\n\n" +
+                "\\title{Protokoll: " +
+                protDoc.getString("_id") + "}\n\n" +
+                "\\begin{document}\n\n" +
+                "\\maketitle\n\n" +
+                "\\tableofcontents\n\n");
 
 
         for (Document agDoc : agendaItems) {
@@ -43,10 +60,10 @@ public class Protocol_TeX {
                 }
             }
             AgendaItem_TeX agTEX = new AgendaItem_TeX(agDoc, mdbh);
-            sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" +  agTEX.toTeX(speechDocs));
+            sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" +  agTEX.toTeX(speechDocs, targetDirectory));
         }
 
-        sb.append("\\end{Document}");
+        sb.append("\\end{document}");
 
         return sb.toString();
     }

@@ -6,13 +6,20 @@ import utility.MongoDBHandler;
 import utility.annotations.Testing;
 import utility.annotations.Unfinished;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * The {@code AgendaItem_TeX} class.
  *
- * @author Eric Lakhter
+ * @author DavidJordan
  */
 @Testing
 @Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
@@ -20,17 +27,54 @@ public class AgendaItem_TeX {
 
     private Document aiDoc;
     private MongoDBHandler mdbh;
+
+    /**
+     * Constructor
+     * @param agendaItem
+     * @param mongoDBHandler
+     */
     public AgendaItem_TeX(Document agendaItem, MongoDBHandler mongoDBHandler) {
         this.mdbh = mongoDBHandler;
         this.aiDoc = agendaItem;
     }
 
-    public String toTeX(List<Document> speeches) {
+    /**
+     * Method to generate Latex formatted String containing the relevant data
+     * @param speeches
+     * @param targetDirectory
+     * @return
+     * @author DavidJordan
+     */
+    public String toTeX(List<Document> speeches, String targetDirectory) {
         StringBuilder sb = new StringBuilder();
-        List<Speech_TeX> speechTexs = new ArrayList<>(0);
-        for(Document speech: speeches){
-           Speech_TeX speechTex = new Speech_TeX(mdbh, speech);
-           sb.append("\\subsection{Rede: " + speech.getString("_id") + "}\n\n" + speechTex.toTeX(speech.getString("_id")) + "\n\n");
+        for (Document speech : speeches) {
+
+            Document speaker = mdbh.getDocument("person", speech.getString("speakerID"));
+            Speech_TeX speechTex = new Speech_TeX(mdbh);
+
+            String imageURL = speaker.getList("picture", String.class).get(0);
+            String speechID = speech.getString("_id");
+            String speakerName = speaker.getString("fullName");
+
+
+            String speakerImageName = speakerName.replaceAll("\\s+", "_") + ".jpg";
+
+            // Source:  https://www.baeldung.com/java-download-file
+            // Downloading the image of the speaker and storing it in the current working directory
+            try(InputStream inp = new URL(imageURL).openStream()) {
+                Files.copy(inp, Paths.get(targetDirectory, speakerImageName));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            sb.append("\\subsection{Rede: " + speechID + "  Redner: " + speakerName +"}\n\n"
+                    + "\\begin{figure}[h]\n\n"
+                    + "\\centering\n\n"
+                    + "\\includegraphics[width=0.3\\textwidth]{" + speakerImageName + "}\n\n"
+                    + "\\caption{" + speakerName + "}\n\n"
+                    + "\\end{figure}\n\n");
+            sb.append(speechTex.toTeX(speech.getString("_id")) + "\n\n");
         }
         return sb.toString();
     }

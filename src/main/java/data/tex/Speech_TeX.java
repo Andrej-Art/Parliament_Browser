@@ -1,12 +1,6 @@
 package data.tex;
 
-
-import com.aspose.pdf.TeXLoadOptions;
-import com.groupdocs.conversion.Converter;
-import com.groupdocs.conversion.filetypes.FileType;
-import com.groupdocs.conversion.internal.c.a.ms.core.System.Drawing.imagecodecs.core.fileformats.tiff.TiffCodec;
-import com.groupdocs.conversion.options.convert.ConvertOptions;
-import com.groupdocs.conversion.options.convert.PdfConvertOptions;
+import com.mongodb.DBCursor;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -37,54 +31,89 @@ public class Speech_TeX {
      * TeX command looks like this:<br>
      * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
      * @param speechID the speechID to texify.
-     * @param showNamedEntities whether named entity markers should show up in the text.
-     * @param showSentiment whether sentiment information should show up at the end of each sentence.
-     * @param showComments whether comments should show up.
      * @return String in TeX format.
      * @author Eric Lakhter
      */
     public String toTeX(String speechID) {
-        MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
-        Document speechDoc = speechCursor.tryNext();
-        if (speechDoc == null) return "";
+
+
+        Document speechDoc = mdbh.getDocument("speech", speechID);
+        StringBuilder speechEditorBuilder = new StringBuilder(speechDoc.getString("text"));
 
         MongoCursor<Document> commentCursor = mdbh.getDB().getCollection("comment").find(new Document("speechID", speechID)).iterator();
         Document commentDoc = commentCursor.tryNext();
+        int offSet = 0;
+        int previousPos = 0;
+        int currentPos = 0;
 
-        List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));
-        textArray.add("");
-        Iterator<String> textIter = textArray.iterator();
-        StringBuilder speechTeX = new StringBuilder();
+        String speechEditorText = speechDoc.getString("text");
 
-//        List<MongoSentence> sentences = new ArrayList<>(0);
-//        for (Document doc : (ArrayList<Document>) speechDoc.get("sentences")) {
-//            sentences.add(new MongoSentence(doc.getInteger("startPos"), doc.getInteger("endPos"), doc.getDouble("sentiment")));
-//        }
+        while (commentDoc != null) {
+            currentPos = commentDoc.getInteger("commentPos");
 
-//        int perIndex = 0;
-//        int orgIndex = 0;
-//        int locIndex = 0;
-//        int sentenceIndex = 0;
-        for (int i = 0; textIter.hasNext(); i++) {
-//            if (sentenceIndex < sentences.size() && sentences.get(sentenceIndex).getEndPos() == i) {
-//                speechTeX.append(sentences.get(sentenceIndex).getSentiment());
-//                sentenceIndex++;
-//            }
-            if (commentDoc != null && commentDoc.getInteger("commentPos") == i) {
-                speechTeX.append("\n\n\\textcolor{green}{");
+            if (previousPos > currentPos || speechEditorText.length() < currentPos + offSet) break;
 
-
-                if (!commentDoc.getString("commentatorID").equals("")) {
-//                    mdbh.pictureURL(commentDoc.getString("commentatorID"));
-                }
-                speechTeX.append(commentDoc.getString("text"));
-                speechTeX.append("}\n\n");
-                commentCursor.tryNext();
-            }
-
-            speechTeX.append(textIter.next());
+            String commentText = commentDoc.getString("text");
+            speechEditorBuilder.insert(commentDoc.getInteger("commentPos") + offSet, "\n\n[KOMMENTAR]" + commentText + "\n");
+            previousPos = currentPos;
+            offSet += commentText.length() + 13;
+            commentDoc = commentCursor.tryNext();
         }
-
-        return speechTeX.toString();
+        return speechEditorBuilder.toString();
     }
 }
+
+//        System.out.println(speechEditorBuilder);
+////------------------------------------------------
+//        MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
+//        Document speechDoc = speechCursor.tryNext();
+//        if (speechDoc == null) return "";
+//
+//
+
+//        StringBuilder speechTeX = new StringBuilder();
+
+
+//        String speechText = speechDocument.getString("text");
+//        String speechWithBreaks = speechText.replace(". ", ". \n");
+//        speechTeX.append(speechWithBreaks);
+
+//        Document commentDoc = commentCursor.tryNext();
+//
+//        List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));
+//        textArray.add("");
+//        Iterator<String> textIter = textArray.iterator();
+//
+//
+////        List<MongoSentence> sentences = new ArrayList<>(0);
+////        for (Document doc : (ArrayList<Document>) speechDoc.get("sentences")) {
+////            sentences.add(new MongoSentence(doc.getInteger("startPos"), doc.getInteger("endPos"), doc.getDouble("sentiment")));
+////        }
+//
+////        int perIndex = 0;
+////        int orgIndex = 0;
+////        int locIndex = 0;
+////        int sentenceIndex = 0;
+//        for (int i = 0; textIter.hasNext(); i++) {
+////            if (sentenceIndex < sentences.size() && sentences.get(sentenceIndex).getEndPos() == i) {
+////                speechTeX.append(sentences.get(sentenceIndex).getSentiment());
+////                sentenceIndex++;
+////            }
+//            if (commentDoc != null && commentDoc.getInteger("commentPos") == i) {
+//                speechTeX.append("\n\n\\textcolor{green}{");
+//
+//
+//                if (!commentDoc.getString("commentatorID").equals("")) {
+////                    mdbh.pictureURL(commentDoc.getString("commentatorID"));
+//                }
+//                speechTeX.append(commentDoc.getString("text"));
+//                speechTeX.append("}\n\n");
+//                commentCursor.tryNext();
+//            }
+//
+//            speechTeX.append(textIter.next());
+//        }
+//
+//        return speechTeX.toString();
+//    }
+//}
