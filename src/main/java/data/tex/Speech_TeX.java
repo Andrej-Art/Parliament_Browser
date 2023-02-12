@@ -10,6 +10,7 @@ import utility.MongoDBHandler;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -65,59 +66,136 @@ public class Speech_TeX {
         }
         return speechEditorBuilder.toString();
     }
-}
-
-//        System.out.println(speechEditorBuilder);
-////------------------------------------------------
-//        MongoCursor<Document> speechCursor = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator();
-//        Document speechDoc = speechCursor.tryNext();
-//        if (speechDoc == null) return "";
-//
-//
-
-//        StringBuilder speechTeX = new StringBuilder();
 
 
-//        String speechText = speechDocument.getString("text");
-//        String speechWithBreaks = speechText.replace(". ", ". \n");
-//        speechTeX.append(speechWithBreaks);
+    public String testTex() {
 
-//        Document commentDoc = commentCursor.tryNext();
-//
-//        List<String> textArray = new ArrayList<>(asList(speechDoc.getString("text").split("")));
-//        textArray.add("");
-//        Iterator<String> textIter = textArray.iterator();
-//
-//
-////        List<MongoSentence> sentences = new ArrayList<>(0);
-////        for (Document doc : (ArrayList<Document>) speechDoc.get("sentences")) {
-////            sentences.add(new MongoSentence(doc.getInteger("startPos"), doc.getInteger("endPos"), doc.getDouble("sentiment")));
-////        }
-//
-////        int perIndex = 0;
-////        int orgIndex = 0;
-////        int locIndex = 0;
-////        int sentenceIndex = 0;
-//        for (int i = 0; textIter.hasNext(); i++) {
-////            if (sentenceIndex < sentences.size() && sentences.get(sentenceIndex).getEndPos() == i) {
-////                speechTeX.append(sentences.get(sentenceIndex).getSentiment());
-////                sentenceIndex++;
-////            }
-//            if (commentDoc != null && commentDoc.getInteger("commentPos") == i) {
-//                speechTeX.append("\n\n\\textcolor{green}{");
-//
-//
-//                if (!commentDoc.getString("commentatorID").equals("")) {
-////                    mdbh.pictureURL(commentDoc.getString("commentatorID"));
-//                }
-//                speechTeX.append(commentDoc.getString("text"));
-//                speechTeX.append("}\n\n");
-//                commentCursor.tryNext();
-//            }
-//
-//            speechTeX.append(textIter.next());
+        Bson limit = limit(10);
+        MongoCursor<Document> protocolCursor = mdbh.getDB().getCollection("protocol").find().iterator();
+        Document protocolDoc = protocolCursor.tryNext();
+        if (protocolDoc == null) return "";
+
+        String texDocFinal = "\\documentclass[a4paper,11pt,oneside]{article}\n" +
+                "\\usepackage[ngerman,shorthands=off]{babel}\n" +
+                "\\usepackage[utf8]{inputenc}\n" +
+                "\\usepackage[T1]{fontenc}\n" +
+                "\\usepackage{tikz}\n" +
+                "\\usepackage{enumitem}\n" +
+                "\\usepackage{graphicx}\n" +
+                "\\usepackage{hyperref}\n" +
+                "\\title{\\textrm{Protokoll 1}}\n" +
+                "\\begin{document}\n" +
+                "\\maketitle\n";
+
+        StringBuilder texDocFinalBuilder = new StringBuilder();
+        texDocFinalBuilder.append(texDocFinal);
+//        while (protocolDoc != null) {
+//            texDocFinalBuilder.append("\\section{");
+//            texDocFinalBuilder.append(protocolDoc.getString("_id"));
+//            texDocFinalBuilder.append("}\n\n");
+//            protocolDoc = protocolCursor.tryNext();
 //        }
+//        texDocFinalBuilder.append("\\end{document}");
+
+        System.out.println(texDocFinalBuilder);
+        return (texDocFinalBuilder.toString());
+    }
+
+    /**
+     * converts LaTeX source file to .pdf
+     *
+     * @author Edvin Nise
+     */
+    public void pdfTest() throws IOException, InterruptedException {
+////// Create load options for LaTeX file
+//        TeXLoadOptions options = new TeXLoadOptions();
 //
-//        return speechTeX.toString();
-//    }
-//}
+//// Create Document object to load the LaTeX file
+//        com.aspose.pdf.Document document = new com.aspose.pdf.Document("testPDF3.tex", options);
+//
+//// Save output PDF document
+
+    }
+
+    /**
+     * returns a table with one cell for each NamedEntity
+     *
+     * @param speechID
+     * @return String
+     * @author Edvin Nise
+     */
+    public String nlpTableTex(String speechID) {
+        Document speechDoc = mdbh.getDB().getCollection("speech").find(new Document("_id", speechID)).iterator().tryNext();
+        if (speechDoc == null) return "";
+        StringBuilder sb = new StringBuilder();
+        Double sentiment = speechDoc.getDouble("sentiment");
+        sb.append("\\textbf{Rede Sentimentvalue:} ").append(DECIMAL_FORMAT.format(sentiment)).append("\n");
+        sb.append("\\begin{table}[h!]\n" +
+                "\\centering\n" +
+                "\\begin{tabular}{||c | c | c||}\n" +
+                "\\hline\n" +
+                "PersonEntities & OrgEntities & LocEntities \\\\ [0.5ex]\n" +
+                "\\hline\\hline\n");
+
+        List<Document> perDoc = (List<Document>) speechDoc.get("namedEntitiesPer");
+        List<Document> orgDoc = (List<Document>) speechDoc.get("namedEntitiesOrg");
+        List<Document> locDoc = (List<Document>) speechDoc.get("namedEntitiesLoc");
+
+        sb.append("\\makecell{");
+        for (Document docPer : perDoc) {
+            sb.append(docPer.getString("coveredText")).append(" \\\\\n");
+        }
+        sb.append("} &\n" +
+                "\\makecell{");
+
+        for (Document docOrg : orgDoc) {
+            sb.append(docOrg.getString("coveredText")).append(" \\\\\n");
+        }
+        sb.append("} &\n" +
+                "\\makecell{");
+        for (Document docLoc : locDoc) {
+            sb.append(docLoc.getString("coveredText")).append(" \\\\\n");
+        }
+        sb.append("}\\\\\n" +
+                "\\hline");
+        sb.append("\\end{tabular}\n" +
+                "\\end{table}");
+        System.out.println(sb);
+        return sb.toString();
+    }
+
+    /**
+     * returns a piechart for each party and for the total poll result in latex code
+     * @param date
+     * @return String
+     * @author Edvin Nise
+     */
+    public String pollResults(String date) {
+        Bson match = new Document("$match", new Document("date", date));
+        ArrayList<JSONObject> pollCursor = mdbh.getPollResults(date, date, "", "", "");
+        StringBuilder sb = new StringBuilder();
+        String[] pollFractionsList = {"SPD", "LINKE", "B90", "independent", "FDP", "CxU", "AfD"}; //AfD fehlt
+
+        for (JSONObject json : pollCursor) {
+            for (String s : pollFractionsList) {
+                sb.append("\\begin{tikzpicture}\n" +
+                        "\\pie{");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"Yes,\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"No,\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"Abstained,\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"Votes}\n");
+                sb.append("\\end{tikzpicture}\n");
+            }
+            sb.append("\\begin{tikzpicture}\n" +
+                    "\\pie{");
+            sb.append(DECIMAL_FORMAT.format((json.getDouble("totalYes") / json.getDouble("totalVotes")) * 100)).append("/totalYes,\n");
+            sb.append(DECIMAL_FORMAT.format((json.getDouble("totalNo") / json.getDouble("totalVotes")) * 100)).append("/totalNo,\n");
+            sb.append(DECIMAL_FORMAT.format((json.getDouble("totalAbstained") / json.getDouble("totalVotes")) * 100)).append("/totalAbstained,\n");
+            sb.append(DECIMAL_FORMAT.format((json.getDouble("totalNoVotes") / json.getDouble("totalVotes")) * 100)).append("/totalNoVotes}\n");
+            sb.append("\\end{tikzpicture}\n");
+        }
+
+        System.out.println(sb);
+        return sb.toString();
+    }
+}
