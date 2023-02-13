@@ -51,7 +51,7 @@
         });
         let responseJson = await response.json();
         document.getElementById("db-status").innerHTML =
-            '<span style="color: ' + (responseJson.status === Error ? "red" : "green")  + '">' + responseJson.message + '</span>';
+            '<span style="color: ' + (responseJson.status === Error ? "red" : "green")  + '">' + responseJson.details + '</span>';
     }
 </script>
 

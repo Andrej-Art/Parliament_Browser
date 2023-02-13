@@ -31,6 +31,7 @@ public class TimeHelper {
      * @return LocalDate of this Date
      */
     public static LocalDate dateToLocalDate(Date date) {
+        if (date == null) return null;
         return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate();
     }
 
@@ -41,15 +42,6 @@ public class TimeHelper {
      */
     public static LocalTime dateToLocalTime(Date date) {
         return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalTime();
-    }
-
-    /**
-     * Converts Date objects to a String of format {@code dd.MM.yyyy}.
-     * @param date Date object from the database
-     * @return String with the day of week and date, e.g. "24.07.2017"
-     */
-    public static String mongoDateToGermanDate(Date date) {
-        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_1);
     }
 
     /**

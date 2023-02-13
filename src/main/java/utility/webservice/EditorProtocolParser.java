@@ -1,12 +1,11 @@
 package utility.webservice;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.UpdateOptions;
 import data.Comment;
 import data.Person;
 import data.impl.*;
-import exceptions.EditorFormattingException;
+import exceptions.EditorException;
 import exceptions.WrongInputException;
 import org.apache.uima.UIMAException;
 import org.bson.Document;
@@ -14,7 +13,6 @@ import org.json.JSONObject;
 import utility.MongoDBHandler;
 import utility.UIMAPerformer;
 import utility.annotations.*;
-import utility.uima.ProcessedSpeech;
 
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
@@ -22,6 +20,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.ascending;
 import static java.util.Arrays.asList;
 import static utility.PictureScraper.producePictureUrl;
@@ -55,21 +54,19 @@ public class EditorProtocolParser {
      *
      * @param protocolObject JSON with at least all required protocol data.
      * @return The ID of the freshly inserted protocol.
-     * @throws EditorFormattingException if any part of the text does
+     * @throws EditorException if any part of the text does
      *                                   not fit the standards for editing/creating protocols.
      * @author Eric Lakhter
      */
     @Unfinished("Pretty much finished, but inserts into a test collection")
-    public String parseEditorProtocol(JSONObject protocolObject) throws EditorFormattingException, WrongInputException {
+    public String parseEditorProtocol(JSONObject protocolObject, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!protocolObject.keySet().containsAll(protocolReqs))
-            throw new EditorFormattingException("Data doesn't contain all required information");
+            throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String protocolID = protocolObject.getString("protocolID").trim();
-        if (protocolID.isEmpty())
-            throw new EditorFormattingException("Text area is empty");
 //        if (!protocolObject.getBoolean("allowOverwrite") && mongoDBHandler.checkIfDocumentExists("protocol", id)) // TODO remove testing
-        if (!protocolObject.getBoolean("allowOverwrite") && testVersionExists("protocol", protocolID))
-            throw new EditorFormattingException("This protocol exists already and isn't allowed to be overwritten");
+        if (!allowOverwrite && testVersionExists("protocol", protocolID))
+            throw new EditorException("Das Protokoll mit dieser ID existiert bereits und darf nicht überschrieben werden");
         int[] periodAndProtocol = validateProtocolID(protocolID);
         int electionPeriod = periodAndProtocol[0];
         int protocolNumber = periodAndProtocol[1];
@@ -80,11 +77,11 @@ public class EditorProtocolParser {
 
         Set<String> sessionLeaders = new HashSet<>(asList(protocolObject.getString("leaders").trim().split(",\\s*")));
         if (sessionLeaders.isEmpty())
-            throw new EditorFormattingException("The session needs at least one leader");
+            throw new EditorException("The session needs at least one leader");
 
         String[] agendaNames = protocolObject.getString("aItems").trim().split(",\\s*");
         if (agendaNames.length == 0)
-            throw new EditorFormattingException("The session needs at least one agenda item");
+            throw new EditorException("The session needs at least one agenda item");
         for (int i = 0; i < agendaNames.length; i++) {
             agendaNames[i] = protocolID + "/" + agendaNames[i];
         }
@@ -100,103 +97,83 @@ public class EditorProtocolParser {
 
     /**
      * Parses a String and tries to convert it into a viable {@link AgendaItem_Impl}.
-     * @param rawText The String to be parsed.
+     * @param agendaObject JSON with at least all required agenda data.
      * @param allowOverwrite if true, allows overwriting the agenda item with the same ID in the database.
      * @return The ID of the freshly inserted agenda item.
-     * @throws EditorFormattingException if any part of the text does
+     * @throws EditorException if any part of the text does
      *                                   not fit the standards for editing/creating protocols.
      * @author Eric Lakhter
      */
     @Unfinished("Pretty much finished, but inserts into a test collection")
-    public String parseEditorAgendaItem(String rawText, boolean allowOverwrite) throws EditorFormattingException, WrongInputException {
-        if (rawText == null || rawText.isEmpty())
-            throw new EditorFormattingException("Text area is empty");
-        String[] lines = rawText.split("\n");
-        String protocolID = null;
-        String agendaID = null;
-        String subject = "";
-        ArrayList<String> speechIDs = new ArrayList<>(0);
+    public String parseEditorAgendaItem(JSONObject agendaObject, boolean allowOverwrite) throws EditorException, WrongInputException {
+        if (!agendaObject.keySet().containsAll(agendaReqs))
+            throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
-        Set<String> check = new HashSet<>(2);
-
-        for (String line : lines) {
-            if (line.startsWith("[PROTOKOLL]")) {
-                int[] periodAndProtocol = validateProtocolID(
-                        line.substring(11).trim());
-                protocolID = periodAndProtocol[0] + "/" + periodAndProtocol[1];
-                check.add("[PROTOKOLL]");
-            } else if (line.startsWith("[TOP]")) {
-                agendaID = line.substring(5).trim();
-                check.add("[TOP]");
-            } else if (line.startsWith("[INHALT]")) {
-                subject += "\n" + line.substring(8).trim();
-            } else if (line.startsWith("[REDEIDS]")) {
-                String[] sIDs = line.substring(8).trim().split(",\\s*");
-                speechIDs.addAll(Arrays.asList(sIDs));
-            } else
-                throw new EditorFormattingException("All lines must begin with a proper code when creating agenda items");
-        }
-        for (String agendaReq : agendaReqs) {
-            if (!check.contains(agendaReq))
-                throw new EditorFormattingException("The submitted text is missing a " + agendaReq + " line");
-        }
+        String protocolID = agendaObject.getString("protocolID").trim();
+        validateProtocolID(protocolID);
+        String agendaID = agendaObject.getString("protocolID").trim();
         String fullAgendaID = protocolID + "/" + agendaID;
-        // TODO remove testing
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))
+//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))   // TODO remove testing
         if (!allowOverwrite && testVersionExists("agendaItem", fullAgendaID))
-            throw new EditorFormattingException("This agenda item exists already and isn't allowed to be overwritten");
-        subject = subject.isEmpty()
-                ? agendaID
-                : subject.substring(1); // cut off the leading "\n"
+            throw new EditorException("Der Tagesordnungspunkt mit dieser ID existiert bereits und darf nicht überschrieben werden");
 
-        LocalDate date = dateToLocalDate(mongoDBHandler.getDocument("protocol", protocolID).getDate("date"));
-        // TODO remove testing
-//        mongoDBHandler.insertAgendaItems(Collections.singletonList(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs)));
+        String subject = agendaObject.getString("subject").trim();
+
+        ArrayList<String> speechIDs = new ArrayList<>(asList(agendaObject.getString("speechIDs").trim().split(",\\s*")));
+        String speechPrefix = "ID" + protocolID.split("/")[0];
+        for (String speechID : speechIDs) {
+            if (!speechID.startsWith(speechPrefix))
+                throw new EditorException("Alle Rede-IDs müssen mit dem gewählten Präfix \"" + speechPrefix + "\" beginnen");
+        }
+
+        LocalDate date = dateToLocalDate(mongoDBHandler.getDocumentIfExists("protocol", protocolID).getDate("date"));
+
+//        mongoDBHandler.insertAgendaItems(Collections.singletonList(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs)));   // TODO remove testing
         insertIntoTest(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs));
         return fullAgendaID;
     }
 
     /**
      * Parses a String and tries to convert it into a viable {@link Speech_Impl}.
-     * @param rawText The String to be parsed.
+     * @param speechObject JSON with at least all required speech data.
      * @param allowOverwrite if true, allows overwriting the speech with the same ID in the database.
      * @return The ID of the freshly inserted speech.
-     * @throws EditorFormattingException if any part of the text does
+     * @throws EditorException if any part of the text does
      *                                   not fit the standards for editing/creating protocols.
      * @author Eric Lakhter
      */
-
     @Unfinished("Pretty much finished, but inserts into a test collection")
-    public String parseEditorSpeech(String rawText, boolean allowOverwrite) throws EditorFormattingException, WrongInputException {
-        if (rawText == null || rawText.isEmpty())
-            throw new EditorFormattingException("Text area is empty");
-        String[] lines = rawText.split("\n");
+    public String parseEditorSpeech(JSONObject speechObject, boolean allowOverwrite) throws EditorException, WrongInputException {
+        if (!speechObject.keySet().containsAll(speechReqs))
+            throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
-        if (!lines[0].startsWith("[PROTOKOLL]"))
-            throw new EditorFormattingException("First line must start with \"[PROTOKOLL]\"");
-        int[] periodAndProtocol = validateProtocolID(lines[0].substring(11).trim());
-        String protocolID = periodAndProtocol[0] + "/" + periodAndProtocol[1];
-        LocalDate date = dateToLocalDate(mongoDBHandler.getDocument("protocol", protocolID).getDate("date"));
+        String speechID = speechObject.getString("speechID").trim();
+//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))    // TODO remove testing
+        if (!allowOverwrite && testVersionExists("speech", speechID))
+            throw new EditorException("Die Rede mit dieser ID existiert bereits und darf nicht überschrieben werden");
+        Document relatedAgenda = mongoDBHandler.getDB().getCollection("agendaItem")
+                .aggregate(asList(
+                        lookup("speech", "speechIDs", "_id", "speeches"),
+                        unwind("$speeches"),
+                        match(eq("speeches._id", speechID)))).first();
+        if (relatedAgenda == null)
+            throw new EditorException("Kein Tagesordnungspunkt enthält diese Rede");
+        LocalDate date = dateToLocalDate(relatedAgenda.getDate("date"));
 
-        if (!lines[1].startsWith("[REDEID]"))
-            throw new EditorFormattingException("Second line must start with \"[REDEID]\"");
-        String speechID = lines[1].substring(8).trim();
+        String speakerID = speechObject.getString("speakerID").trim();
+        if (mongoDBHandler.getDocumentIfExists("person", speakerID) == null)
+            throw new EditorException("Der Redner mit ID " + speakerID + " existiert nicht");
 
-        if (!lines[2].startsWith("[REDNERID]"))
-            throw new EditorFormattingException("Third line must start with \"[REDNERID]\"");
-        String speakerID = lines[2].substring(10).trim();
-
-        String text = "";
+        String[] lines = speechObject.getString("text").trim().split("\n");
+        StringBuilder speechText = new StringBuilder();
         List<Comment> comments = new ArrayList<>();
         ArrayList<Person_Impl> personList = mongoDBHandler.getPersons();
 
-        int commentCounter = 0;
-
-        for (int i = 3; i < lines.length; i++) {
-
-            if (lines[i].startsWith("[KOMMENTAR]")) {
+        int commentCounter = 1;
+        for (String line : lines) {
+            if (line.startsWith("[KOMMENTAR]")) {
                 commentCounter++;
-                String commentText = lines[i].substring(11).trim();
+                String commentText = line.substring(11).trim();
                 String commentatorID = "";
                 for (Person person : personList) {
                     String fullName = person.getFullName();
@@ -205,48 +182,51 @@ public class EditorProtocolParser {
                         break;
                     }
                 }
-                comments.add(new Comment_Impl(speechID + "/" + commentCounter, speechID, speakerID, commentatorID, text.length(), text, date, new ArrayList<>()));
+                comments.add(new Comment_Impl(speechID + "/" + commentCounter, speechID, speakerID, commentatorID, speechText.length(), commentText, date, new ArrayList<>()));
             } else {
-                text += " " + lines[i].trim();
+                speechText.append(" ").append(line.trim());
             }
         }
 
-        if (text.isEmpty())
-            throw new EditorFormattingException("The speech's text cannot be empty");
-        // TODO remove testing
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))
-        if (!allowOverwrite && testVersionExists("speech", speechID))
-            throw new EditorFormattingException("This speech exists already and isn't allowed to be overwritten");
+        if (speechText.length() == 0)
+            throw new EditorException("Die Rede enthält keinen Text");
 
-        // TODO remove testing
-//        mongoDBHandler.insertSpeech(uima.processSpeech(new Speech_Impl(protocolID, speakerID, text, date)));
-        insertIntoTest(uima.processSpeech(new Speech_Impl(protocolID, speakerID, text, date)));
-        // TODO remove testing
-//        for (Comment comment : comments) mongoDBHandler.insertComment(comment, uima.getAverageSentiment(uima.getJCas(comment.getText())));
+//        mongoDBHandler.insertSpeech(uima.processSpeech(new Speech_Impl(protocolID, speakerID, text, date)));        // TODO remove testing
+        insertIntoTest(uima.processSpeech(new Speech_Impl(speechID, speakerID, speechText.toString(), date)));
+//        for (Comment comment : comments) mongoDBHandler.insertComment(comment, uima.getAverageSentiment(uima.getJCas(comment.getText())));        // TODO remove testing
         insertIntoTest(comments);
         return speechID;
     }
 
     /**
      *
-     * @param rawText
-     * @param allowOverwrite
+     * @param personObject JSON with at least all required person data.
+     * @param allowOverwrite if true, allows overwriting the person with the same ID in the database.
      * @return
-     * @throws EditorFormattingException
+     * @throws EditorException
      * @author Eric Lakhter
      */
-    public String parseEditorPerson(String rawText, boolean allowOverwrite) throws EditorFormattingException {
-        if (rawText == null || rawText.isEmpty())
-            throw new EditorFormattingException("Text area is empty");
-        String[] lines = rawText.split("\n");
-        String personID = null;
+    public String parseEditorPerson(JSONObject personObject, boolean allowOverwrite) throws EditorException {
 
-        Set<String> check = new HashSet<>(0);
+        if (!personObject.keySet().containsAll(personReqs))
+            throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
-        for (String line : lines) {
+        String personID = personObject.getString("personID");
 
-        }
-//        String[] picture = producePictureUrl();
+        String firstName = personObject.getString("firstName");
+        String lastName = personObject.getString("lastName");
+        String role = personObject.getString("role");
+        String title = personObject.getString("title");
+        String place = personObject.getString("place");
+        String party = personObject.getString("party");
+        String fraction19 = personObject.getString("fraction19");
+        String fraction20 = personObject.getString("fraction20");
+        String gender = personObject.getString("gender");
+        String birthDate = personObject.getString("birthDate");
+        String deathDate = personObject.getString("deathDate");
+        String birthPlace = personObject.getString("birthPlace");
+
+        String[] picture = producePictureUrl(firstName, lastName);
         return personID;
     }
 
@@ -255,17 +235,17 @@ public class EditorProtocolParser {
      *
      * @param id Protocol ID, format: {@code x/y}.
      * @return If successful, returns {@code int[2]} containing the election period and protocol number.
-     * @throws EditorFormattingException if at any point the ID appears to be unviable.
+     * @throws EditorException if at any point the ID appears to be unviable.
      * @author Eric Lakhter
      */
-    private int[] validateProtocolID(String id) throws EditorFormattingException {
+    private int[] validateProtocolID(String id) throws EditorException {
         try {
             String[] periodAndProtocol = id.split("/");
             if (periodAndProtocol.length != 2)
-                throw new EditorFormattingException("Protocol ID can only have 1 '/' character");
+                throw new EditorException("Protokoll-ID muss genau 1 '/' haben");
             return new int[]{Integer.parseInt(periodAndProtocol[0]), Integer.parseInt(periodAndProtocol[1])};
         } catch (NumberFormatException e) {
-            throw new EditorFormattingException("Protocol ID can only contain integers divided by a slash");
+            throw new EditorException("Protokoll-ID kann nur aus zwei ganzen Zahlen getrennt von einem Slash bestehen");
         }
     }
 
@@ -275,30 +255,18 @@ public class EditorProtocolParser {
      * @return
      * @author Eric Lakhter
      */
-    public String getEditorProtocolFromDB(String protocolID) {
-        Document protocolDoc = mongoDBHandler.getDocument("protocol", protocolID);
-        if (protocolDoc == null) return "";
-        StringBuilder protocolEditorText = new StringBuilder();
-        protocolEditorText.append("[PROTOKOLL]").append(protocolDoc.getString("_id"));
-        protocolEditorText.append("\n[DATUM]").append(mongoDateToGermanDate(protocolDoc.getDate("date")));
-        protocolEditorText.append("\n[BEGINN]").append(mongoTimeToLocalTime(protocolDoc.getDate("beginTime")));
-        protocolEditorText.append("\n[ENDE]").append(mongoTimeToLocalTime(protocolDoc.getDate("endTime")));
-        protocolEditorText.append("\n[SITZUNGSLEITER]");
+    public JSONObject getEditorProtocolFromDB(String protocolID) throws EditorException {
+        Document protocolDoc = mongoDBHandler.getDocumentIfExists("protocol", protocolID);
+        if (protocolDoc == null) throw new EditorException("Es existiert kein Protokoll mit ID " + protocolID);
 
-        StringBuilder leaderText = new StringBuilder();
-        for (String speechID : protocolDoc.getList("sessionLeaders", String.class)) {
-            leaderText.append(", ").append(speechID);
-        }
-        protocolEditorText.append(leaderText.substring(2));
-
-        protocolEditorText.append("\n[TOPS]");
-        StringBuilder agendaText = new StringBuilder();
-        for (String speechID : protocolDoc.getList("agendaItems", String.class)) {
-            agendaText.append(", ").append(speechID);
-        }
-        protocolEditorText.append(agendaText.substring(2));
-
-        return protocolEditorText.toString();
+        JSONObject protocol = new JSONObject();
+        protocol.put("protocolID", protocolDoc.getString("_id"));
+        protocol.put("date", dateToLocalDate(protocolDoc.getDate("date")));
+        protocol.put("begin", dateToLocalTime(protocolDoc.getDate("beginTime")));
+        protocol.put("end", dateToLocalTime(protocolDoc.getDate("endTime")));
+        protocol.put("leaders", String.join(", ", protocolDoc.getList("sessionLeaders", String.class)));
+        protocol.put("aItems", String.join(", ", protocolDoc.getList("agendaItems", String.class)));
+        return protocol;
     }
 
     /**
@@ -308,26 +276,18 @@ public class EditorProtocolParser {
      * @author Eric Lakhter
      */
 
-    public String getEditorAgendaFromDB(String agendaID) {
-        Document agendaDoc = mongoDBHandler.getDocument("agendaItem", agendaID);
-        if (agendaDoc == null) return "";
-        StringBuilder agendaEditorText = new StringBuilder();
+    public JSONObject getEditorAgendaFromDB(String agendaID) throws EditorException {
+        Document agendaDoc = mongoDBHandler.getDocumentIfExists("agendaItem", agendaID);
+        if (agendaDoc == null) throw new EditorException("Es existiert kein Tagesordnungspunkt mit ID " + agendaID);
+
+        JSONObject aItem = new JSONObject();
         String[] agendaIDparts = agendaDoc.getString("_id").split("/");
-        agendaEditorText.append("[PROTOKOLL]").append(agendaIDparts[0]).append("/").append(agendaIDparts[1]);
-        agendaEditorText.append("\n[TOP]").append(agendaIDparts[2]);
+        aItem.put("protocolID", agendaIDparts[0] + "/" + agendaIDparts[1]);
+        aItem.put("agendaID", agendaIDparts[2]);
+        aItem.put("subject", agendaDoc.getString("subject"));
+        aItem.put("speechIDs", String.join(", ", agendaDoc.getList("speechIDs", String.class)));
 
-        for (String subject : agendaDoc.getString("subject").split("\n")) {
-            agendaEditorText.append("\n[INHALT]").append(subject);
-        }
-
-        agendaEditorText.append("\n[REDEIDS]");
-        StringBuilder speechIDString = new StringBuilder();
-        for (String speechID : agendaDoc.getList("speechIDs", String.class)) {
-            speechIDString.append(", ").append(speechID);
-        }
-        agendaEditorText.append(speechIDString.substring(2));
-
-        return agendaEditorText.toString();
+        return aItem;
     }
 
     /**
@@ -336,21 +296,24 @@ public class EditorProtocolParser {
      * @return
      * @author Eric Lakhter
      */
-    public String getEditorSpeechFromDB(String speechID) {
-        Document speechDoc = mongoDBHandler.getDocument("speech", speechID);
-        if (speechDoc == null) return "";
+    public JSONObject getEditorSpeechFromDB(String speechID) throws EditorException {
+        Document speechDoc = mongoDBHandler.getDocumentIfExists("speech", speechID);
+        if (speechDoc == null) throw new EditorException("Es existiert keine Rede mit ID " + speechID);
+
+        JSONObject speech = new JSONObject();
+        speech.put("speechID", speechDoc.getString("_id"));
+        speech.put("speakerID", speechDoc.getString("speakerID"));
+
         MongoCursor<Document> commentCursor = mongoDBHandler.getDB().getCollection("comment")
                 .aggregate(Arrays.asList(
                         match(new Document("speechID", speechID)),
                         new Document("$addFields", new Document("commentNum", new Document("$toInt", new Document("$arrayElemAt", asList(new Document("$split", asList("$_id", "/")), 1))))),
                         sort(ascending("commentNum"))
                 )).iterator();
-
         int offSet = 0;
         int previousPos = 0;
-        int currentPos = 0;
+        int currentPos;
         StringBuilder speechEditorText = new StringBuilder(speechDoc.getString("text"));
-
         for (Document commentDoc = commentCursor.tryNext(); commentDoc != null; commentDoc = commentCursor.tryNext()) {
             currentPos = commentDoc.getInteger("commentPos");
             if (previousPos > currentPos || speechEditorText.length() < currentPos + offSet) break;
@@ -360,7 +323,8 @@ public class EditorProtocolParser {
             previousPos = currentPos;
             offSet += commentText.length() + 13; // length of "\n[KOMMENTAR]"
         }
-        return speechEditorText.toString();
+        speech.put("text", speechEditorText.toString().replace("\n ", "\n"));
+        return speech;
     }
 
     /**
@@ -369,25 +333,30 @@ public class EditorProtocolParser {
      * @return
      * @author Eric Lakhter
      */
-    public String getEditorPersonFromDB(String personID) {
-        Document personDoc = mongoDBHandler.getDocument("person", personID);
-        if (personDoc == null) return "";
-        StringBuilder personEditorText = new StringBuilder();
+    public JSONObject getEditorPersonFromDB(String personID) throws EditorException {
+        Document personDoc = mongoDBHandler.getDocumentIfExists("person", personID);
+        if (personDoc == null) throw new EditorException("Es existiert keine Person mit ID " + personID);
 
-        personEditorText.append("[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[VORNAME]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[NACHNAME]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ROLLE]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[TITEL]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[FRAKTION19]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[FRAKTION20]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ORTSZUSATZ]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        return personEditorText.toString();
+        JSONObject person = new JSONObject(personDoc.toJson())
+                .put("personID", personDoc.getString("_id"))
+                .put("birthDate", dateToLocalDate(personDoc.getDate("birthDate")))
+                .put("deathDate", dateToLocalDate(personDoc.getDate("deathDate")));
+        return person;
+//        JSONObject person = new JSONObject();
+//        person.put("personID", personDoc.getString("_id"));
+//        person.put("firstName", personDoc.getString("firstName"));
+//        person.put("lastName", personDoc.getString("lastName"));
+//        person.put("role", personDoc.getString("role"));
+//        person.put("title", personDoc.getString("title"));
+//        person.put("place", personDoc.getString("place"));
+//        person.put("party", personDoc.getString("party"));
+//        person.put("fraction19", personDoc.getString("fraction19"));
+//        person.put("fraction20", personDoc.getString("fraction20"));
+//        person.put("gender", personDoc.getString("gender"));
+//        person.put("birthDate", personDoc.getString("birthDate"));
+//        person.put("deathDate", personDoc.getString("deathDate"));
+//        person.put("birthPlace", personDoc.getString("birthPlace"));
+//        return person;
     }
 
     // FOR TESTING
@@ -464,7 +433,6 @@ public class EditorProtocolParser {
         return mongoDBHandler.getDB()
                 .getCollection("editor_test_" + col)
                 .find(new Document("_id", id))
-                .iterator()
-                .hasNext();
+                .first() != null;
     }
 }

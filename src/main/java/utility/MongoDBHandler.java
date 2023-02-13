@@ -131,6 +131,17 @@ public class MongoDBHandler {
     }
 
     /**
+     * Returns either a document if the ID matches a document in the target collection or {@code null}.
+     * @param col Target collection.
+     * @param id ID to search.
+     * @return Either a document or {@code null}.
+     * @author Eric Lakhter
+     */
+    public Document getDocumentIfExists(String col, String id) {
+        return db.getCollection(col).find(new Document("_id", id)).first();
+    }
+
+    /**
      * Basic Method to create a collection
      *
      * @param col collection name
@@ -1399,11 +1410,12 @@ public class MongoDBHandler {
      *
      * @author Edvin Nise
      */
-    public JSONObject getProtocalAgendaData() {
-        JSONObject pageContent = new JSONObject();
+    public JSONObject getProtocolAgendaPersonData() {
+        JSONObject obj = new JSONObject();
 
         JSONObject protocols = new JSONObject();
         JSONObject agendaItems = new JSONObject();
+        JSONObject people = new JSONObject();
         //Finds all protocols and their agenda items
         db.getCollection("protocol").find()
                 .forEach((Consumer<? super Document>) procBlock -> protocols.put(procBlock.getString("_id"),
@@ -1417,10 +1429,17 @@ public class MongoDBHandler {
                     agendaItem.put("subject", procBlock.get("subject"));
                     agendaItems.put(procBlock.getString("_id"), agendaItem);
                 });
-
-        pageContent.put("protocols", protocols);
-        pageContent.put("agendaItems", agendaItems);
-        return pageContent;
+        db.getCollection("person").find()
+                .forEach((Consumer<? super Document>) procBlock -> {
+                    JSONObject person = new JSONObject();
+                    person.put("fullName", procBlock.getString("fullName"));
+                    person.put("party", procBlock.getString("party"));
+                    people.put(procBlock.getString("_id"), person);
+                });
+        obj.put("protocols", protocols);
+        obj.put("agendaItems", agendaItems);
+        obj.put("people", people);
+        return obj;
     }
 
     /**
