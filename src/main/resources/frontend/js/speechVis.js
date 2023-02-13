@@ -25,10 +25,10 @@ function applyDataToSpeech(
     orgData = [{startPos: 4, endPos: 5}],
     locData = [{startPos: 6, endPos: 7}],
     sentenceData = [{sentiment : 0.0, endPos : 22}],
-    commentData = [{text: "Heiterkeit", commentPos: 22}]
+    commentData = [{commentText: "Heiterkeit", commentPos: 22}]
 ) {
     let speechArray = text.split('');
-    // artificially increase text array length by one so the final sentence doesn't get cut off
+    // artificially increase text array length by one so the sentiment after the final sentence doesn't get cut off
     speechArray.push('');
     let perIndex = 0;
     let orgIndex = 0;

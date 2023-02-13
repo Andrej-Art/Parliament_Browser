@@ -26,7 +26,7 @@
         <button type="button" onclick="setProtocolButtons()" class="speech-vis-sidebar-button">Protokolle anzeigen</button>
     </div>
     <div class="speech-vis-sidebar-button-container">
-        <ul id="button-list" style="margin-left: -10px; margin-top: -10px"></ul>
+        <ul id="button-list"></ul>
     </div>
 </div>
 
@@ -40,8 +40,8 @@
         <div id="speaker-pic"></div>
     </div>
 
-    <div style="text-align: justify">
-        <p id="speech-text"></p>
+    <div id="speech-text">
+
     </div>
 </div>
 

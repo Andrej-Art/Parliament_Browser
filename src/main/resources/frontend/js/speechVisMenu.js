@@ -49,7 +49,7 @@ function setSpeechButtons(agendaID = "1/1/ID") {
 function findSpeechIDs() {
     let text = document.getElementById("text-search").value;
     let req = new XMLHttpRequest();
-    req.open("GET", "/reden/speechIDs/?text=" + text);
+    req.open("GET", "speechIDs/?text=" + text);
     req.responseType = "json";
     req.onload = function () {
         try {
@@ -84,7 +84,7 @@ function findSpeechIDs() {
 function getSpeechData(speechID = "ID") {
     setPageStatus("Auf Antwort von DB warten");
     let req = new XMLHttpRequest();
-    req.open("GET", "/reden/speechVis/?speechID=" + speechID);
+    req.open("GET", "speechVis/?speechID=" + speechID);
     req.responseType = "json";
     req.onload = function () {
         try {
@@ -109,6 +109,7 @@ function getSpeechData(speechID = "ID") {
 function setPageStatus(textMessage = "") {
     document.getElementById("speech-title").innerHTML = '';
     document.getElementById("speech-header").innerHTML = '';
+    document.getElementById("speaker-pic").innerHTML = '';
     document.getElementById("speech-text").innerText = textMessage;
 }
 
