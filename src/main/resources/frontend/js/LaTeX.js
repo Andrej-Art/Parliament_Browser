@@ -6,7 +6,7 @@
 async function parseLaTeX() {
     try {
         let content = document.getElementById("editor-textarea").value;
-        let response = await fetch("#", {
+        let response = await fetch("/latex/pdf/", {
             method: 'POST',
             body: content
         });
@@ -34,4 +34,35 @@ function handleResponse(responseJson = {status : "Successfully did a thing", mes
         statusBox.innerHTML += responseJson.status + '<br>';
         statusBox.scrollTop = statusBox.scrollHeight;
     }
+}
+
+
+function createProtocolButtons() {
+    let finalHTML = '';
+    for (let protID of protIDs) {
+        finalHTML += '<li><button type="button" onclick="getProtocolData(\'' + protID +  '\')" class="pdf-export-protoc-button"> Protokoll ' + protID + '</button>';
+    }
+    document.getElementById("button-list").innerHTML = finalHTML;
+}
+
+
+function getProtocolData(protocID){
+    // let ID = protocID.replace("Protokoll ", "");
+    let req = new XMLHttpRequest();
+    console.log("the prot id is:  " + protocID)
+    req.open("GET", "/latex/protocol/?protocolID=" + protocID);
+    req.responseType = "json";
+    req.onload = function () {
+        try {
+            insertLatexString(req.response);
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    req.send();
+}
+
+function insertLatexString(data = {}){
+    document.getElementById("editor-textarea").innerHTML = data["latexString"];
 }

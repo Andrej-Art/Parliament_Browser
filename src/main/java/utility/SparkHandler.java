@@ -1,5 +1,7 @@
 package utility;
 
+import data.tex.GoodWindowsExec;
+import data.tex.LaTeXHandler;
 import exceptions.EditorFormattingException;
 import exceptions.WrongInputException;
 import freemarker.template.Configuration;
@@ -28,6 +30,7 @@ import static spark.Spark.*;
 @Unfinished("Only some routes are finished")
 public class SparkHandler {
     private final static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+
     private static EditorProtocolParser epParser;
 
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
@@ -39,7 +42,8 @@ public class SparkHandler {
 //        openInDefaultBrowser();
     }
 
-    private SparkHandler() {}
+    private SparkHandler() {
+    }
 
     /**
      * Sets up the website's paths.
@@ -89,7 +93,9 @@ public class SparkHandler {
         post("/protokolleditor/extract/", "application/json", postProtokollEditorExtract);
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
-        post("/latex/", "application/json", postLaTeX);
+        get("/latex/protocol/", "application/json", getLaTeXString);
+        post("/latex/pdf/", "application/json", postLaTeX);
+
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
@@ -152,24 +158,44 @@ public class SparkHandler {
         try {
             mongoDBHandler.getDB().getCollection("dummy").drop();
             return successJSON("Success", "DB is available");
-        } catch(Exception e) {
+        } catch (Exception e) {
             return errorJSON("DB isn't available");
         }
     };
 
     /**
      * LaTeX editing page.
+     *
      * @author
      */
-    @Unfinished("Doesn't do anything yet")
+    @Unfinished("Attempts to get all Protocol data, inclding the IDs which are supposed to be " +
+            "inserted into the button labels")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
+        pageContent.put("protocolData", mongoDBHandler.getProtocalAgendaData());
 
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
+    @Unfinished("Not currently working")
+    private static final Route getLaTeXString = (Request request, Response response) -> {
+        JSONObject data = new JSONObject();
+        String protocolID = request.queryParams("protocolID") != null ? request.queryParams("protocolID") : "";
+        String originalprotocolTex = "";
+        try {
+            LaTeXHandler laTeXHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput");
+            originalprotocolTex = laTeXHandler.createTEX(protocolID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        data.append("latexString", originalprotocolTex);
+        return data;
+    };
+
     /**
      * Tries to return a PDF file.
+     *
      * @author
      */
     @Unfinished("Need to create TeX based on input to compile to a new pdf")
@@ -178,10 +204,16 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-       // String speechTexString = Speech_TeX.toTeX("ID19100100");
+        LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput");
+        String editedLatexString =  request.body();
+
+
+        texHandler.createPDF(editedLatexString);
+        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
+
 
         String successStatus = "PDF successfully generated";
-        String successMessage = "/pdfOutput/Abschluss.pdf";
+        String successMessage = "/pdfOutput/protocol.pdf";
 
         return successJSON(successStatus, successMessage);
     };
@@ -263,13 +295,13 @@ public class SparkHandler {
             throw new EditorFormattingException("id is null");
         switch (col) {
             case "protocol":
-                return successJSON("Protocol" + id +" successfully loaded!", epParser.getEditorProtocolFromDB(id));
+                return successJSON("Protocol" + id + " successfully loaded!", epParser.getEditorProtocolFromDB(id));
             case "aItem":
-                return successJSON("Agenda item" + id +" successfully loaded!", epParser.getEditorAgendaFromDB(id));
+                return successJSON("Agenda item" + id + " successfully loaded!", epParser.getEditorAgendaFromDB(id));
             case "speech":
-                return successJSON("Speech" + id +" successfully loaded!", epParser.getEditorSpeechFromDB(id));
+                return successJSON("Speech" + id + " successfully loaded!", epParser.getEditorSpeechFromDB(id));
             case "person":
-                return successJSON("Person" + id +" successfully loaded!", epParser.getEditorPersonFromDB(id));
+                return successJSON("Person" + id + " successfully loaded!", epParser.getEditorPersonFromDB(id));
             default:
                 return errorJSON("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
         }
@@ -278,29 +310,12 @@ public class SparkHandler {
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-//        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
-//        pageContent.put("pos", posAndCounts);
-//
-//        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
-//        pageContent.put("token", tokenAndCounts);
-//
-//        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
-//        pageContent.put("entities", datesAndNamedEntities);
-//
-//        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
-//        pageContent.put("speechesNumber", speechesCounts);
-//
-//        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
-//        //pageContent.put("sentiments", sentiments);
-//
-        ArrayList<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
-//        pageContent.put("votes", votes);
-
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
 
     /**
      * Route which delivers the data according to the provided query parameters
+     *
      * @author DavidJordan
      */
     private static final Route getChartUpdates = (Request request, Response response) -> {
@@ -551,7 +566,7 @@ public class SparkHandler {
         String newPassword = req.getString("editPassword");
         String newRank = req.getString("editRank");
         JSONObject answer = new JSONObject();
-        if(oldID.equals("Admin1")){
+        if (oldID.equals("Admin1")) {
             newRank = "admin";
             newID = "Admin1";
         }

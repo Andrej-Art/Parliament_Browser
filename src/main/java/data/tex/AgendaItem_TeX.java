@@ -52,7 +52,12 @@ public class AgendaItem_TeX {
             Document speaker = mdbh.getDocument("person", speech.getString("speakerID"));
             Speech_TeX speechTex = new Speech_TeX(mdbh);
 
-            String imageURL = speaker.getList("picture", String.class).get(0);
+            String imageURL = null;
+            try {
+                imageURL = speaker.getList("picture", String.class).get(0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             String speechID = speech.getString("_id");
             String speakerName = speaker.getString("fullName");
 
