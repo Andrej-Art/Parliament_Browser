@@ -2,8 +2,6 @@ package utility;
 
 import data.tex.GoodWindowsExec;
 import data.tex.LaTeXHandler;
-import exceptions.EditorFormattingException;
-import exceptions.WrongInputException;
 import exceptions.EditorException;
 import freemarker.template.Configuration;
 import org.apache.uima.UIMAException;
@@ -172,7 +170,7 @@ public class SparkHandler {
             "inserted into the button labels")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
-        pageContent.put("protocolData", mongoDBHandler.getProtocalAgendaData());
+        pageContent.put("protocolData", mongoDBHandler.getProtocolAgendaPersonData());
 
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
