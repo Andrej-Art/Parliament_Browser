@@ -20,9 +20,10 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static com.mongodb.client.model.Aggregates.*;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Sorts.ascending;
 import static java.util.Arrays.asList;
+import static utility.PictureScraper.producePictureUrl;
 import static utility.TimeHelper.*;
 
 /**
@@ -206,11 +207,26 @@ public class EditorProtocolParser {
      * @author Eric Lakhter
      */
     public String parseEditorPerson(JSONObject personObject, boolean allowOverwrite) throws EditorException {
+
         if (!personObject.keySet().containsAll(personReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
-        String personID = null;
 
-//        String[] picture = producePictureUrl();
+        String personID = personObject.getString("personID");
+
+        String firstName = personObject.getString("firstName");
+        String lastName = personObject.getString("lastName");
+        String role = personObject.getString("role");
+        String title = personObject.getString("title");
+        String place = personObject.getString("place");
+        String party = personObject.getString("party");
+        String fraction19 = personObject.getString("fraction19");
+        String fraction20 = personObject.getString("fraction20");
+        String gender = personObject.getString("gender");
+        String birthDate = personObject.getString("birthDate");
+        String deathDate = personObject.getString("deathDate");
+        String birthPlace = personObject.getString("birthPlace");
+
+        String[] picture = producePictureUrl(firstName, lastName);
         return personID;
     }
 
@@ -320,23 +336,27 @@ public class EditorProtocolParser {
     public JSONObject getEditorPersonFromDB(String personID) throws EditorException {
         Document personDoc = mongoDBHandler.getDocumentIfExists("person", personID);
         if (personDoc == null) throw new EditorException("Es existiert keine Person mit ID " + personID);
-        JSONObject person = new JSONObject();
-        StringBuilder personEditorText = new StringBuilder();
 
-        personEditorText.append("[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[VORNAME]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[NACHNAME]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ROLLE]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[TITEL]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[FRAKTION19]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[FRAKTION20]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ORTSZUSATZ]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
-        personEditorText.append("\n[ID]").append(personDoc.getString("_id"));
+        JSONObject person = new JSONObject(personDoc.toJson())
+                .put("personID", personDoc.getString("_id"))
+                .put("birthDate", dateToLocalDate(personDoc.getDate("birthDate")))
+                .put("deathDate", dateToLocalDate(personDoc.getDate("deathDate")));
         return person;
+//        JSONObject person = new JSONObject();
+//        person.put("personID", personDoc.getString("_id"));
+//        person.put("firstName", personDoc.getString("firstName"));
+//        person.put("lastName", personDoc.getString("lastName"));
+//        person.put("role", personDoc.getString("role"));
+//        person.put("title", personDoc.getString("title"));
+//        person.put("place", personDoc.getString("place"));
+//        person.put("party", personDoc.getString("party"));
+//        person.put("fraction19", personDoc.getString("fraction19"));
+//        person.put("fraction20", personDoc.getString("fraction20"));
+//        person.put("gender", personDoc.getString("gender"));
+//        person.put("birthDate", personDoc.getString("birthDate"));
+//        person.put("deathDate", personDoc.getString("deathDate"));
+//        person.put("birthPlace", personDoc.getString("birthPlace"));
+//        return person;
     }
 
     // FOR TESTING
@@ -413,7 +433,6 @@ public class EditorProtocolParser {
         return mongoDBHandler.getDB()
                 .getCollection("editor_test_" + col)
                 .find(new Document("_id", id))
-                .iterator()
-                .hasNext();
+                .first() != null;
     }
 }

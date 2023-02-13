@@ -31,6 +31,7 @@ public class TimeHelper {
      * @return LocalDate of this Date
      */
     public static LocalDate dateToLocalDate(Date date) {
+        if (date == null) return null;
         return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate();
     }
 

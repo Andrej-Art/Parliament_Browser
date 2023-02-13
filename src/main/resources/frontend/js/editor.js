@@ -218,7 +218,7 @@ function changeLayout() {
 /**
  * Returns the currently displayed editorial data as a JSON.
  * @param editMode The current editing mode.
- * @return A JSON with the currently active data.
+ * @return {object} A JSON with the currently active data.
  * @author Eric Lakhter
  */
 function getCurrentDataAsJSON(editMode = "") {
@@ -284,47 +284,58 @@ function fillWithData(editMode = "", data = {}) {
         case "protocol":
             document.getElementById("input-area").innerHTML = protocolEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Protokollen?";
-            document.getElementById("input1").value = data.protocolID;
-            document.getElementById("input2").value = data.date;
-            document.getElementById("input3").value = data.begin;
-            document.getElementById("input4").value = data.end;
-            document.getElementById("input5").value = data.leaders;
-            document.getElementById("input6").value = data.aItems;
+            document.getElementById("input1").value = checkForUndefined(data.protocolID);
+            document.getElementById("input2").value = checkForUndefined(data.date);
+            document.getElementById("input3").value = checkForUndefined(data.begin);
+            document.getElementById("input4").value = checkForUndefined(data.end);
+            document.getElementById("input5").value = checkForUndefined(data.leaders);
+            document.getElementById("input6").value = checkForUndefined(data.aItems);
             break;
         case "aItem":
             document.getElementById("input-area").innerHTML = agendaEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Tagesordnungspunkten?";
-            document.getElementById("input1").value = data.protocolID;
-            document.getElementById("input2").value = data.agendaID;
-            document.getElementById("input3").value = data.subject;
-            document.getElementById("input4").value = data.speechIDs;
+            document.getElementById("input1").value = checkForUndefined(data.protocolID);
+            document.getElementById("input2").value = checkForUndefined(data.agendaID);
+            document.getElementById("input3").value = checkForUndefined(data.subject);
+            document.getElementById("input4").value = checkForUndefined(data.speechIDs);
             break;
         case "speech":
             document.getElementById("input-area").innerHTML = speechEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Reden?";
-            document.getElementById("input1").value = data.speechID;
-            document.getElementById("input2").value = data.speakerID;
-            document.getElementById("input3").value = data.text;
+            document.getElementById("input1").value = checkForUndefined(data.speechID);
+            document.getElementById("input2").value = checkForUndefined(data.speakerID);
+            document.getElementById("input3").value = checkForUndefined(data.text);
             break;
         case "person":
             document.getElementById("input-area").innerHTML = personEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Personen?";
-            document.getElementById("input1").value = data.personID;
-            document.getElementById("input2").value = data.firstName;
-            document.getElementById("input3").value = data.lastName;
-            document.getElementById("input4").value = data.role;
-            document.getElementById("input5").value = data.title;
-            document.getElementById("input6").value = data.place;
-            document.getElementById("input7").value = data.party;
-            document.getElementById("input8").value = data.fraction19;
-            document.getElementById("input9").value = data.fraction20;
-            document.getElementById("input10").value = data.gender;
-            document.getElementById("input11").value = data.birthDate;
-            document.getElementById("input12").value = data.deathDate;
-            document.getElementById("input13").value = data.birthPlace;
+            document.getElementById("input1").value = checkForUndefined(data.personID);
+            document.getElementById("input2").value = checkForUndefined(data.firstName);
+            document.getElementById("input3").value = checkForUndefined(data.lastName);
+            document.getElementById("input4").value = checkForUndefined(data.role);
+            document.getElementById("input5").value = checkForUndefined(data.title);
+            document.getElementById("input6").value = checkForUndefined(data.place);
+            document.getElementById("input7").value = checkForUndefined(data.party);
+            document.getElementById("input8").value = checkForUndefined(data.fraction19);
+            document.getElementById("input9").value = checkForUndefined(data.fraction20);
+            document.getElementById("input10").value = checkForUndefined(data.gender);
+            document.getElementById("input11").value = checkForUndefined(data.birthDate);
+            document.getElementById("input12").value = checkForUndefined(data.deathDate);
+            document.getElementById("input13").value = checkForUndefined(data.birthPlace);
             break;
         default: break;
     }
+}
+
+/**
+ * Makes sure that data doesn't get displayed as "undefined".
+ * @param data Data to check.
+ * @return {string} Either the original data or an empty string.
+ */
+function checkForUndefined(data ="") {
+    return data !== undefined
+        ? data
+        : "";
 }
 
 /**
