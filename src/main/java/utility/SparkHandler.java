@@ -1,5 +1,7 @@
 package utility;
 
+import data.tex.GoodWindowsExec;
+import data.tex.LaTeXHandler;
 import exceptions.EditorException;
 import freemarker.template.Configuration;
 import org.apache.uima.UIMAException;
@@ -11,6 +13,7 @@ import utility.annotations.*;
 import utility.webservice.EditorProtocolParser;
 import utility.webservice.User;
 
+import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -88,7 +91,9 @@ public class SparkHandler {
         post("/protokolleditor/extract/", "application/json", postProtokollEditorExtract);
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
-        post("/latex/", "application/json", postLaTeX);
+        get("/latex/protocol/", "application/json", getLaTeXString);
+        post("/latex/pdf/", "application/json", postLaTeX);
+
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
@@ -159,19 +164,35 @@ public class SparkHandler {
 
     /**
      * LaTeX editing page.
-     *
      * @author
      */
-    @Unfinished("Doesn't do anything yet")
+    @Unfinished("Attempts to get all Protocol data, inclding the IDs which are supposed to be " +
+            "inserted into the button labels")
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
+        pageContent.put("protocolData", mongoDBHandler.getProtocolAgendaPersonData());
 
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
+    @Unfinished("Not currently working")
+    private static final Route getLaTeXString = (Request request, Response response) -> {
+        JSONObject data = new JSONObject();
+        String protocolID = request.queryParams("protocolID") != null ? request.queryParams("protocolID") : "";
+        String originalprotocolTex = "";
+        try {
+            LaTeXHandler laTeXHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput");
+            originalprotocolTex = laTeXHandler.createTEX(protocolID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        data.append("latexString", originalprotocolTex);
+        return data;
+    };
+
     /**
      * Tries to return a PDF file.
-     *
      * @author
      */
     @Unfinished("Need to create TeX based on input to compile to a new pdf")
@@ -180,12 +201,18 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        // String speechTexString = Speech_TeX.toTeX("ID19100100");
+        LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput");
+        String editedLatexString =  request.body();
+
+
+        texHandler.createPDF(editedLatexString);
+        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
+
 
         String successStatus = "PDF successfully generated";
-        String successDetails = "/pdfOutput/Abschluss.pdf";
+        String successMessage = "/pdfOutput/protocol.pdf";
 
-        return successJSON(successStatus, successDetails);
+        return successJSON(successStatus, successMessage);
     };
 
     /**
@@ -303,7 +330,6 @@ public class SparkHandler {
 
     /**
      * Route which delivers the data according to the provided query parameters
-     *
      * @author DavidJordan
      */
     private static final Route getChartUpdates = (Request request, Response response) -> {
