@@ -2,6 +2,10 @@ package data.tex;
 
 import java.util.*;
 import java.io.*;
+
+/**
+ * @author https://www.infoworld.com/article/2071275/when-runtime-exec---won-t.html?page=2
+ */
 class StreamGobbler extends Thread
 {
     InputStream is;

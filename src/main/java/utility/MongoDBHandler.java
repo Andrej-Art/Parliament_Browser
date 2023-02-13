@@ -1012,10 +1012,10 @@ public class MongoDBHandler {
         Bson lookupSpeaker = lookup("person", "speakerID", "_id", "SpeakerPerson");
         Bson unwindCommentator = unwind("$CommentatorPerson");
         Bson unwindSpeaker = unwind("$SpeakerPerson");
-        Bson limit = limit(100);
+        Bson limit = limit(10000);
 
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(match, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(limit, match, lookupCommentator, lookupSpeaker, unwindCommentator, unwindSpeaker));
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
@@ -1114,7 +1114,7 @@ public class MongoDBHandler {
      * @author Edvin Nise
      */
     @Testing
-    public JSONObject matchSpeakerToDDC() {
+    public JSONObject matchSpeakerToDDC(String dateFilterOne, String dateFilterTwo) {
 
         Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
@@ -1122,14 +1122,17 @@ public class MongoDBHandler {
         Bson group = new Document("$group", new Document("_id", "$speakerData.fullName")
                 .append("DDCKategorien", new Document("$push", "$mainTopic"))
                 .append("fraction", new Document("$first", "$speakerData.party")));
-        Bson limit = limit(50);
+        Bson limit = limit(5000);
 
-        List<Bson> pipeline = new ArrayList<>(Arrays.asList(lookup, unwind, group));
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(limit,lookup, unwind, group));
         JSONObject obj = new JSONObject();
         ArrayList<JSONObject> objNodes = new ArrayList<>();
         ArrayList<JSONObject> objLinks = new ArrayList<>();
 
-        HashSet<JSONObject> allNamesUnique = new HashSet<>();
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+
         HashSet<String> allDDCUnique = new HashSet<>();
         db.getCollection("speech").aggregate(pipeline)
                 .allowDiskUse(false)
@@ -1186,10 +1189,82 @@ public class MongoDBHandler {
             objNodeDDC.put("group", 8);
             objNodes.add(objNodeDDC);
         }
-        System.out.println(objLinks);
+
         obj.put("nodes", objNodes);
         obj.put("links", objLinks);
+        return obj;
+    }
+    public JSONObject speechSentTopicData(String dateFilterOne, String dateFilterTwo) throws ParseException {
+        Bson limit = limit(1000);
+        Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
+        Bson unwind = unwind("$speakerData");
+        List<Bson> pipeline = new ArrayList<>(Arrays.asList(limit, lookup, unwind));
 
+        if (!dateFilterOne.isEmpty()) {
+            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+        }
+
+        JSONObject obj = new JSONObject();
+        HashSet<String> nodesUniqueSet = new HashSet<>();
+        HashSet<String> ddcUniqueSet = new HashSet<>();
+        HashSet<String> uniqueLinks = new HashSet<>(); //perhaps unnnecessary
+        ArrayList<org.json.simple.JSONObject> allNodesList = new ArrayList<>();
+        ArrayList<org.json.simple.JSONObject> allLinksList = new ArrayList<>();
+        db.getCollection("speech").aggregate(pipeline)
+                .allowDiskUse(false)
+                .forEach((Consumer<? super Document>) procBlock ->
+                        {
+                    Document doc = (Document) procBlock.get("speakerData");
+                    JSONObject objNode = new JSONObject();
+                    objNode.put("name", procBlock.getString("_id"));
+                    switch (doc.getString("party")) {
+                        case "CDU":
+                        case "CSU":
+                            objNode.put("group", 1);
+                            break;
+                        case "SPD":
+                            objNode.put("group", 2);
+                            break;
+                        case "FDP":
+                            objNode.put("group", 3);
+                            break;
+                        case "BÜNDNIS 90/DIE GRÜNEN":
+                            objNode.put("group", 4);
+                            break;
+                        case "DIE LINKE.":
+                            objNode.put("group", 5);
+                            break;
+                        case "AfD":
+                            objNode.put("group", 6);
+                            break;
+                        default:
+                            objNode.put("group", 7);
+                    }
+                    nodesUniqueSet.add(objNode.toString());
+                    JSONObject objDDC = new JSONObject();
+                    objDDC.put("name", procBlock.getString("mainTopic"));
+                    objDDC.put("group", 8);
+                    nodesUniqueSet.add(objDDC.toString());
+
+                    JSONObject objLink = new JSONObject();
+                    objLink.put("source", procBlock.getString("_id"));
+                    objLink.put("target", procBlock.getString("mainTopic"));
+                    objLink.put("sentiment", procBlock.getDouble("sentiment"));
+                    uniqueLinks.add(objLink.toString());
+                }
+                );
+        JSONParser parser = new JSONParser();
+        for (String s : nodesUniqueSet) {
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+            allNodesList.add(json);
+        }
+        for (String s : uniqueLinks) {
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(s);
+            allLinksList.add(json);
+        }
+        obj.put("nodes",allNodesList);
+        obj.put("links", allLinksList);
+        System.out.println(obj);
         return obj;
     }
 

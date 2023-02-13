@@ -1,4 +1,4 @@
-function speechNetwork(graph){
+function speechTopicNetwork(graph) {
     const width = "1920";
     const height = "1080";
 
@@ -20,7 +20,7 @@ function speechNetwork(graph){
 //         {"source": "Andrej", "target": "Eric", "sentiment": 0}]
 // };
 
-    let svg = d3.select("#networkGraph")
+    let svg = d3.select("#speechTopicNetworkGraph")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -34,13 +34,13 @@ function speechNetwork(graph){
             return d.name;
         }))
         .force('charge', d3.forceManyBody()
-            .strength(-20000)
+            .strength(-2000)
             .theta(0.5)
-            .distanceMax(500))
+            .distanceMax(250))
         .force('collision', d3.forceCollide().radius(function (d) {
             return d.radius
         }))
-        .force("center", d3.forceCenter(document.getElementById("networkGraph").clientWidth / 2, document.getElementById("networkGraph").clientHeight / 2));
+        .force("center", d3.forceCenter(document.getElementById("speechTopicNetworkGraph").clientWidth / 2, document.getElementById("speechTopicNetworkGraph").clientHeight / 2));
 
     link = svg.append("g")
         .selectAll("line")
@@ -48,7 +48,17 @@ function speechNetwork(graph){
         .enter().append("line")
 
 
-    link.style("stroke", "#aaa");
+    link.style("stroke", function (d) {
+        switch (true) {
+            case d.sentiment < 0:
+                return "#e60f0f"
+            case d.sentiment === 0:
+                return "#7b7676";
+            case d.sentiment > 0:
+                return "#33df21"
+
+        }
+    });
 
 
     node = svg.append("g")
@@ -142,10 +152,14 @@ function speechNetwork(graph){
 
     simulation.force("link")
         .links(graph.links);
+
+
 }
-function updateSpeechNetwork() {
+
+function updateSpeechTopicNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
-    let url = "/network/speech/?von=" + startDate + "&bis=" + endDate;
-    window.location.href = url;
+    let url = "/network/edivio/?von=" + startDate + "&bis=" + endDate;
+    window.open(url);
+
 }

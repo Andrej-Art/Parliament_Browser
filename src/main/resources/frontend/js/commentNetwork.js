@@ -154,20 +154,11 @@ function commentNetwork(graph) {
 
 }
 
-function updateNetwork() {
+function updateCommentNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
     let url = "/network/comment/?von=" + startDate + "&bis=" + endDate;
     window.open(url);
-    // let request = new XMLHttpRequest();
-    // request.open("GET", "/network/comment/?von=" + startDate + "&bis=" + endDate, true);
-    // request.responseType = "json";
-    // request.onload = function () {
-    //
-    //     console.log(newData)
-    //     // Create and insert new charts
-    //
-    // }
-    // request.send();
+
 }
 

@@ -37,7 +37,8 @@ public class SparkHandler {
 //        openInDefaultBrowser();
     }
 
-    private SparkHandler() {}
+    private SparkHandler() {
+    }
 
     /**
      * Sets up the website's paths.
@@ -91,6 +92,7 @@ public class SparkHandler {
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
+        get("/network/edivio/", getSpeechTopicNetwork, new FreeMarkerEngine(cfg));
 
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
@@ -150,13 +152,14 @@ public class SparkHandler {
         try {
             mongoDBHandler.getDB().getCollection("dummy").drop();
             return successJSON("Success", "Datenbank ist online und verfügbar!");
-        } catch(Exception e) {
+        } catch (Exception e) {
             return errorJSON("Datenbankverbindung ist zurzeit nicht verfügbar.");
         }
     };
 
     /**
      * LaTeX editing page.
+     *
      * @author
      */
     @Unfinished("Doesn't do anything yet")
@@ -168,6 +171,7 @@ public class SparkHandler {
 
     /**
      * Tries to return a PDF file.
+     *
      * @author
      */
     @Unfinished("Need to create TeX based on input to compile to a new pdf")
@@ -176,7 +180,7 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-       // String speechTexString = Speech_TeX.toTeX("ID19100100");
+        // String speechTexString = Speech_TeX.toTeX("ID19100100");
 
         String successStatus = "PDF successfully generated";
         String successDetails = "/pdfOutput/Abschluss.pdf";
@@ -299,6 +303,7 @@ public class SparkHandler {
 
     /**
      * Route which delivers the data according to the provided query parameters
+     *
      * @author DavidJordan
      */
     private static final Route getChartUpdates = (Request request, Response response) -> {
@@ -369,8 +374,10 @@ public class SparkHandler {
 
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
+        String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
 
-        JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
+        JSONObject networkData = mongoDBHandler.matchSpeakerToDDC(von, bis);
 
         pageContent.put("redeNetworkData", networkData);
 
@@ -386,6 +393,18 @@ public class SparkHandler {
         pageContent.put("commentNetworkData", networkData);
 
         return new ModelAndView(pageContent, "commentNetwork.ftl");
+    };
+
+    private static final TemplateViewRoute getSpeechTopicNetwork = (Request request, Response response) -> {
+        String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
+        Map<String, Object> pageContent = new HashMap<>();
+
+        JSONObject networkData = mongoDBHandler.speechSentTopicData(von, bis);
+
+        pageContent.put("speechTopicNetworkData", networkData);
+
+        return new ModelAndView(pageContent, "speechTopic.ftl");
     };
 
     /**
@@ -549,7 +568,7 @@ public class SparkHandler {
         String newPassword = req.getString("editPassword");
         String newRank = req.getString("editRank");
         JSONObject answer = new JSONObject();
-        if(oldID.equals("Admin1")){
+        if (oldID.equals("Admin1")) {
             newRank = "admin";
             newID = "Admin1";
         }

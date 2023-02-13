@@ -7,8 +7,8 @@
 </head>
 
 
-<body>
-<div id="networkGraph">
+<body onload="speechNetwork(data)">
+<div id="networkGraph" >
     <div id = "flexbox" class="flex-container">
         <#--    <legend>Fractionfilter</legend>-->
 
@@ -42,10 +42,18 @@
             <input type="checkbox" id="parteilos" name="Parteilos" checked onclick="partyCheckbox('parteilos')">
             <label style="color: gray" for="parteilos">Parteilos</label>
         </div>
+        <div class="calenderfield">
+            <label for="von">von:</label>
+            <input type="date" id="von" name="von">
+            <label for="bis">bis:</label>
+            <input type="date" id="bis" name="bis">
+            <input type="submit"  value="Anzeigen" id="submitBtn" onclick="updateSpeechNetwork()">
+
+        </div>
     </div>
 </div>
 <script>
-    let graph = ${redeNetworkData}
+    let data = ${redeNetworkData}
     <#include "js/redeNetwork.js">
     <#include "js/networkFunctions.js">
 </script>
