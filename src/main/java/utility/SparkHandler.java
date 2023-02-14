@@ -608,6 +608,9 @@ public class SparkHandler {
 
     /**
      * Returns a JSON with a "status" and a "details" attribute.
+     * <p>The status attribute should be "Error" if an error occurred, or a success message instead.<br>
+     * The details attribute is the content the page handles, e.g. an error message
+     * or a String to be inserted somewhere or another JSON.
      *
      * @return JSON: {@code {status: status, details: details}}
      * @author Eric Lakhter
