@@ -1,9 +1,9 @@
 <!-- Parliament Browser navigation bar -->
 
-<div style="position: absolute;">
+<div id="parliament-browser-main-navigation-bar-hide">
     <button class="nav-button" onclick="showStatusBar()"><i class='fa fa-angle-double-down'></i></button>
 </div>
-<div id="parliament-browser-main-navigation-bar">
+<div id="parliament-browser-main-navigation-bar-show">
     <button class="nav-button" onclick="hideStatusBar()"><i class='fa fa-angle-double-up'></i></button>
     <a href="/">Homepage</a>
     <a href="/dashboard/">Dashboard</a>
@@ -19,7 +19,7 @@
  * @author Eric Lakhter
  */
 function showStatusBar() {
-    document.getElementById("parliament-browser-main-navigation-bar").style.display = 'flex';
+    document.getElementById("parliament-browser-main-navigation-bar-show").style.display = 'flex';
 }
 
 /**
@@ -27,7 +27,7 @@ function showStatusBar() {
  * @author Eric Lakhter
  */
 function hideStatusBar() {
-    document.getElementById("parliament-browser-main-navigation-bar").style.display = 'none';
+    document.getElementById("parliament-browser-main-navigation-bar-show").style.display = 'none';
 }
 </script>
 

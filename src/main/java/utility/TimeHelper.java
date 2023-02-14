@@ -21,8 +21,6 @@ public class TimeHelper {
     private static final DateTimeFormatter DATE_FORMAT_3 = DateTimeFormatter.ofPattern("EE, dd.MM.yyyy", Locale.GERMANY);
     private static final DateTimeFormatter CLOCK_FORMAT = DateTimeFormatter.ofPattern("H:mm", Locale.GERMANY);
 
-
-     // Private to restrict other classes from instantiating a TimeHelper.
     private TimeHelper(){}
 
     /**
@@ -37,11 +35,12 @@ public class TimeHelper {
 
     /**
      * Converts a Java {@code Date} object to an equivalent LocalTime.
-     * @param date Date object from the database
+     * @param time Date object from the database
      * @return LocalTime of this Date
      */
-    public static LocalTime dateToLocalTime(Date date) {
-        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalTime();
+    public static LocalTime dateToLocalTime(Date time) {
+        if (time == null) return null;
+        return time.toInstant().atZone(ZoneOffset.of("Z")).toLocalTime();
     }
 
     /**
@@ -50,16 +49,8 @@ public class TimeHelper {
      * @return String with the day of week and date, e.g. "Di, 24.07.2017"
      */
     public static String mongoDateToPrettyGermanDate(Date date) {
+        if (date == null) return null;
         return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalDate().format(DATE_FORMAT_3);
-    }
-
-    /**
-     * Converts Date objects to a String of format {@code EE, dd.MM.yyyy}.
-     * @param date Date object from the database
-     * @return String with the day of week and date, e.g. "Di, 24.07.2017"
-     */
-    public static String mongoTimeToLocalTime(Date date) {
-        return date.toInstant().atZone(ZoneOffset.of("Z")).toLocalTime().format(CLOCK_FORMAT);
     }
 
     /**

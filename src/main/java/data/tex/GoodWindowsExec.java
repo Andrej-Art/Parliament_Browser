@@ -1,5 +1,9 @@
 package data.tex;
 
+/**
+ *@author https://www.infoworld.com/article/2071275/when-runtime-exec---won-t.html?page=2
+ * @modified by Edvin Nise
+ */
 public class GoodWindowsExec
 {
     public static void main(String args[])
@@ -24,6 +28,10 @@ public class GoodWindowsExec
             {
                 cmd[0] = "command.com" ;
                 cmd[1] = "/C" ;
+                cmd[2] = args[0];
+            } else if ( osName.contains("mac os")) {
+                cmd[0] = "/bin/bash";
+                cmd[1] = "-c";
                 cmd[2] = args[0];
             }
 

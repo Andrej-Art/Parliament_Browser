@@ -62,7 +62,6 @@
 /* protocol editing area container */
 .editor-box {
     box-sizing: border-box;
-    padding: 50px 10px 0 10px;
     overflow: auto;
     float: left;
     height: 75%;
@@ -71,6 +70,7 @@
 
 #input-area {
     box-sizing: border-box;
+    padding: 40px 10px 0 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -82,11 +82,21 @@
 .input-row {
     box-sizing: border-box;
     padding: 10px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    /*display: flex;*/
+    /*justify-content: flex-end;*/
+    /*gap: 10px;*/
 }
+
+.editor-label {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 0 10px;
+    text-align: right;
+    width: 30%;
+}
+
 .editor-input {
-    width: 300px;
+    box-sizing: border-box;
     resize: none;
+    width: 70%;
 }

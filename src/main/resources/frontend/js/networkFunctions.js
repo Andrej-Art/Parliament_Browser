@@ -14,7 +14,6 @@ function partyCheckbox(party) {
     }).style("visibility", visibility);
 }
 
-
 function posSentimentCheckbox() {
     let checkbox = document.getElementById('pos');
     let visibility = checkbox.checked ? "visible" : "hidden";

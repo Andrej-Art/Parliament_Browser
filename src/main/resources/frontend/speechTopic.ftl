@@ -3,14 +3,13 @@
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <style><#include "css/network.css"></style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
 </head>
 
 
-<body onload="commentNetwork(data)">
+<body onload="speechTopicNetwork(data)">
 
-<div id="commentNetworkGraph">
+<div id="speechTopicNetworkGraph">
     <div id="flexbox" class="flex-container">
         <#--    <legend>Fractionfilter</legend>-->
 
@@ -56,19 +55,19 @@
             <input type="checkbox" id="neu" name="neu" checked onclick="neuSentimentCheckbox()">
             <label style="color: gray" for="neu">NEU</label>
         </div>
+        <div class="calenderfield">
+            <label for="von">von:</label>
+            <input type="date" id="von" name="von">
+            <label for="bis">bis:</label>
+            <input type="date" id="bis" name="bis">
+            <input type="submit"  value="Anzeigen" id="submitBtn" onclick="updateSpeechTopicNetwork()">
+        </div>
     </div>
-    <div class="calenderfield">
-        <label for="von">von:</label>
-        <input type="date" id="von" name="von">
-        <label for="bis">bis:</label>
-        <input type="date" id="bis" name="bis">
-        <input type="submit"  value="Anzeigen" id="submitBtn" onclick="updateCommentNetwork()">
 
-    </div>
 </div>
 <script>
-    let data = ${commentNetworkData};
-    <#include "js/commentNetwork.js">
+    let data = ${speechTopicNetworkData};
+    <#include "js/speechTopicNetwork.js">
     <#include "js/networkFunctions.js">
 
 </script>

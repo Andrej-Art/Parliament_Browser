@@ -11,35 +11,35 @@ let cachedPerson =   {personID: "", firstName: "", lastName: "", role: "", title
     party: "", fraction19: "", fraction20: "", gender: "", birthDate: "", deathDate: "", birthPlace: ""};
 
 const protocolEditHTML =
-    '<div class="input-row"><label for="input1">Protokoll-ID</label><input id="input1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1"></div>' +
-    '<div class="input-row"><label for="input2">Datum</label><input id="input2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" type="date"></div>' +
-    '<div class="input-row"><label for="input3">Beginn</label><input id="input3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" type="time"></div>' +
-    '<div class="input-row"><label for="input4">Ende</label><input id="input4" tabindex="4" onkeydown="advanceOnEnter(this)" class="editor-input" type="time"></div>' +
-    '<div class="input-row"><label for="input5">Sitzungsleiter</label><input id="input5" tabindex="5" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Präsident Max Mustermann, Vizepräsident Dr. Bob Baumeister"></div>' +
-    '<div class="input-row"><label for="input6">Tagesordnungspunkte</label><input id="input6" tabindex="6" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Tagesordnungspunkt 1, Zusatzpunkt 1"></div>';
+    '<div class="input-row"><label class="editor-label" for="input1">Protokoll-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input2">Datum*</label><input id="input2" class="editor-input" tabindex="2" onkeydown="advanceOnEnter(this)" type="date"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input3">Beginn*</label><input id="input3" class="editor-input" tabindex="3" onkeydown="advanceOnEnter(this)" type="time"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input4">Ende*</label><input id="input4" class="editor-input" tabindex="4" onkeydown="advanceOnEnter(this)" type="time"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input5">Sitzungsleiter*</label><input id="input5" class="editor-input" tabindex="5" onkeydown="advanceOnEnter(this)" placeholder="Präsident Max Mustermann, Vizepräsident Dr. Bob Baumeister"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input6">Tagesordnungspunkte*</label><input id="input6" class="editor-input" tabindex="6" onkeydown="advanceOnEnter(this)" placeholder="Tagesordnungspunkt 1, Zusatzpunkt 1"></div>';
 const agendaEditHTML =
-    '<div class="input-row"><label for="input1">Protokoll-ID</label><input id="input1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1"></div>' +
-    '<div class="input-row"><label for="input2">Titel</label><input id="input2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Tagesordnungspunkt 1"></div>' +
-    '<div class="input-row"><label for="input3">Reden-IDs</label><input id="input3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="ID100100, ID100200"></div>' +
-    '<div class="input-row"><label for="input4">Themen</label><textarea id="input4" tabindex="4" class="editor-input" placeholder="Reden über:\n-Wichtige Themen" rows="5"></textarea>';
+    '<div class="input-row"><label class="editor-label" for="input1">Protokoll-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input2">Titel*</label><input id="input2" class="editor-input" tabindex="2" onkeydown="advanceOnEnter(this)" placeholder="Tagesordnungspunkt 1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input3">Reden-IDs*</label><input id="input3" class="editor-input" tabindex="3" onkeydown="advanceOnEnter(this)" placeholder="ID100100, ID100200"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input4">Themen</label><textarea id="input4" class="editor-input" tabindex="4" placeholder="Reden über:\n-Wichtige Themen" rows="5"></textarea>';
 const speechEditHTML =
-    '<div class="input-row"><label for="input1">Rede-ID</label><input id="input1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1"></div>' +
-    '<div class="input-row"><label for="input2">Redner-ID</label><input id="input2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1"></div>' +
-    '<div class="input-row"><label for="input3">Text</label><textarea id="input3" tabindex="3" class="editor-input" placeholder="Es war einmal...\n[KOMMENTAR]Heiterkeit" rows="10"></textarea></div>';
+    '<div class="input-row"><label class="editor-label" for="input1">Rede-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input2">Redner-ID*</label><input id="input2" class="editor-input" tabindex="2" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input3">Text*</label><textarea id="input3" class="editor-input" tabindex="3" placeholder="Es war einmal...\n[KOMMENTAR]Heiterkeit" rows="10"></textarea></div>';
 const personEditHTML =
-    '<div class="input-row"><label for="input1">Person-ID</label><input id="input1" tabindex="1" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="123456"></div>' +
-    '<div class="input-row"><label for="input2">Vorname</label><input id="input2" tabindex="2" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Max"></div>' +
-    '<div class="input-row"><label for="input3">Nachname</label><input id="input3" tabindex="3" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Mustermann"></div>' +
-    '<div class="input-row"><label for="input4">Rolle</label><input id="input4" tabindex="4" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Präsident"></div>' +
-    '<div class="input-row"><label for="input5">Titel</label><input id="input5" tabindex="5" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Dr."></div>' +
-    '<div class="input-row"><label for="input6">Ortszusatz</label><input id="input6" tabindex="6" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="1/1"></div>' +
-    '<div class="input-row"><label for="input7">Partei</label><input id="input7" tabindex="7" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="SPD"></div>' +
-    '<div class="input-row"><label for="input8">Fraktion WP 19</label><input id="input8" tabindex="8" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="SPD"></div>' +
-    '<div class="input-row"><label for="input9">Fraktion WP 20</label><input id="input9" tabindex="9" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="SPD"></div>' +
-    '<div class="input-row"><label for="input10">Geschlecht</label><input id="input10" tabindex="10" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="männlich"></div>' +
-    '<div class="input-row"><label for="input11">Geburtsdatum</label><input id="input11" tabindex="11" onkeydown="advanceOnEnter(this)" class="editor-input" type="date"></div>' +
-    '<div class="input-row"><label for="input12">Sterbedatum</label><input id="input12" tabindex="12" onkeydown="advanceOnEnter(this)" class="editor-input" type="date"></div>' +
-    '<div class="input-row"><label for="input13">Geburtsort</label><input id="input13" tabindex="13" onkeydown="advanceOnEnter(this)" class="editor-input" placeholder="Berlin"></div>';
+    '<div class="input-row"><label class="editor-label" for="input1">Person-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="123456"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input2">Vorname*</label><input id="input2" class="editor-input" tabindex="2" onkeydown="advanceOnEnter(this)" placeholder="Max"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input3">Nachname*</label><input id="input3" class="editor-input" tabindex="3" onkeydown="advanceOnEnter(this)" placeholder="Mustermann"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input4">Rolle</label><input id="input4" class="editor-input" tabindex="4" onkeydown="advanceOnEnter(this)" placeholder="Präsident"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input5">Titel</label><input id="input5" class="editor-input" tabindex="5" onkeydown="advanceOnEnter(this)" placeholder="Dr."></div>' +
+    '<div class="input-row"><label class="editor-label" for="input6">Ortszusatz</label><input id="input6" class="editor-input" tabindex="6" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input7">Partei*</label><input id="input7" class="editor-input" tabindex="7" onkeydown="advanceOnEnter(this)" placeholder="SPD"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input8">Fraktion WP 19**</label><input id="input8" class="editor-input" tabindex="8" onkeydown="advanceOnEnter(this)" placeholder="SPD"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input9">Fraktion WP 20**</label><input id="input9" class="editor-input" tabindex="9" onkeydown="advanceOnEnter(this)" placeholder="SPD"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input10">Geschlecht</label><input id="input10" class="editor-input" tabindex="10" onkeydown="advanceOnEnter(this)" placeholder="männlich"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input11">Geburtsdatum</label><input id="input11" class="editor-input" tabindex="11" onkeydown="advanceOnEnter(this)" type="date"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input12">Sterbedatum</label><input id="input12" class="editor-input" tabindex="12" onkeydown="advanceOnEnter(this)" type="date"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input13">Geburtsort</label><input id="input13" class="editor-input" tabindex="13" onkeydown="advanceOnEnter(this)" placeholder="Berlin"></div>';
 
 
 
