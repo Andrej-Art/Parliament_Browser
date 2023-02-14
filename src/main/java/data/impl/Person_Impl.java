@@ -22,7 +22,7 @@ public class Person_Impl implements Person {
 
     //Class Variables
     private String _id, firstName, lastName, fullName, role, title, fraction19, fraction20, party, place, gender,  birthDate, deathDate, birthPlace;
-    private ArrayList<String> picture;
+    private List<String> picture = new ArrayList<>();
 
     /**
      * Default Constructor.
@@ -45,7 +45,6 @@ public class Person_Impl implements Person {
         this.birthDate = birthDate;
         this.deathDate = deathDate;
         this.birthPlace = birthPlace;
-        this.picture = new ArrayList<>();
         Collections.addAll(picture, pictureArray);
     }
 
@@ -72,7 +71,7 @@ public class Person_Impl implements Person {
         this.birthDate = document.getString("birthDate");
         this.deathDate = document.getString("deathDate");
         this.birthPlace = document.getString("birthPlace");
-        this.picture = (ArrayList<String>) document.get("picture");
+        this.picture = document.getList("picture", String.class);
     }
 
     @Override
@@ -81,7 +80,7 @@ public class Person_Impl implements Person {
     }
 
     @Override
-    public ArrayList<String> getPicture() {
+    public List<String> getPicture() {
         return this.picture;
     }
 
@@ -115,6 +114,7 @@ public class Person_Impl implements Person {
         return this.fraction19;
     }
 
+    @Override
     public String getFraction20() {
         return this.fraction20;
     }
@@ -158,8 +158,9 @@ public class Person_Impl implements Person {
     public Document getPersonDoc() {
         personDoc = new Document()
                 .append("_id", _id)
-                .append("firstname",firstName)
-                .append("lastname",lastName)
+                .append("firstName",firstName)
+                .append("lastName",lastName)
+                .append("fullName",fullName)
                 .append("role",role)
                 .append("title",title)
                 .append("fraction19", fraction19)

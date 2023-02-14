@@ -27,8 +27,8 @@ import static utility.PictureScraper.producePictureUrl;
 import static utility.TimeHelper.*;
 
 /**
- * The {@code EditorProtocolParser} class is used to parse the protocols, agenda items and
- * speeches edited and written in the web application.
+ * The {@code EditorProtocolParser} class is used to parse the protocols, agenda items, speeches
+ * and people edited and written in the web application.
  * @author Eric Lakhter
  */
 public class EditorProtocolParser {
@@ -126,7 +126,7 @@ public class EditorProtocolParser {
                 throw new EditorException("Alle Rede-IDs müssen mit dem gewählten Präfix \"" + speechPrefix + "\" beginnen");
         }
 
-        LocalDate date = dateToLocalDate(mongoDBHandler.getDocumentIfExists("protocol", protocolID).getDate("date"));
+        LocalDate date = dateToLocalDate(mongoDBHandler.getDocumentOrNull("protocol", protocolID).getDate("date"));
 
 //        mongoDBHandler.insertAgendaItems(Collections.singletonList(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs)));   // TODO remove testing
         insertIntoTest(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs));
@@ -148,7 +148,7 @@ public class EditorProtocolParser {
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String speechID = speechObject.getString("speechID").trim();
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))    // TODO remove testing
+//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("speech", speechID))    // TODO remove testing
         if (!allowOverwrite && testVersionExists("speech", speechID))
             throw new EditorException("Die Rede mit dieser ID existiert bereits und darf nicht überschrieben werden");
         Document relatedAgenda = mongoDBHandler.getDB().getCollection("agendaItem")
@@ -161,7 +161,7 @@ public class EditorProtocolParser {
         LocalDate date = dateToLocalDate(relatedAgenda.getDate("date"));
 
         String speakerID = speechObject.getString("speakerID").trim();
-        if (mongoDBHandler.getDocumentIfExists("person", speakerID) == null)
+        if (mongoDBHandler.getDocumentOrNull("person", speakerID) == null)
             throw new EditorException("Der Redner mit ID " + speakerID + " existiert nicht");
 
         String[] lines = speechObject.getString("text").trim().split("\n");
@@ -206,27 +206,42 @@ public class EditorProtocolParser {
      * @throws EditorException
      * @author Eric Lakhter
      */
-    public String parseEditorPerson(JSONObject personObject, boolean allowOverwrite) throws EditorException {
+    public String parseEditorPerson(JSONObject personObject, boolean allowOverwrite) throws EditorException, WrongInputException {
 
         if (!personObject.keySet().containsAll(personReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String personID = personObject.getString("personID");
+//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("person", personID))    // TODO remove testing
+        if (!allowOverwrite && testVersionExists("person", personID))
+            throw new EditorException("Die Person mit dieser ID existiert bereits und darf nicht überschrieben werden");
 
         String firstName = personObject.getString("firstName");
         String lastName = personObject.getString("lastName");
+        if (firstName.isEmpty() || lastName.isEmpty())
+            throw new EditorException("Eine Person brauch teinen Vor- und Nachnamen");
+
         String role = personObject.getString("role");
         String title = personObject.getString("title");
         String place = personObject.getString("place");
+
         String party = personObject.getString("party");
         String fraction19 = personObject.getString("fraction19");
         String fraction20 = personObject.getString("fraction20");
+        if (party.isEmpty() || (fraction19.isEmpty() && fraction20.isEmpty()))
+            throw new EditorException("Es müssen eine Partei sowie mindestens eins der Fraktionsfelder ausgefüllt werden");
+
         String gender = personObject.getString("gender");
         String birthDate = personObject.getString("birthDate");
         String deathDate = personObject.getString("deathDate");
         String birthPlace = personObject.getString("birthPlace");
 
         String[] picture = producePictureUrl(firstName, lastName);
+
+//        mongoDBHandler.insertPerson(new Person_Impl(personID, firstName, lastName, role, title, place,
+//                fraction19, fraction20, party, picture, gender, birthDate, deathDate, birthPlace));        // TODO remove testing
+        insertIntoTest(new Person_Impl(personID, firstName, lastName, role, title, place,
+                fraction19, fraction20, party, picture, gender, birthDate, deathDate, birthPlace));
         return personID;
     }
 
@@ -256,7 +271,7 @@ public class EditorProtocolParser {
      * @author Eric Lakhter
      */
     public JSONObject getEditorProtocolFromDB(String protocolID) throws EditorException {
-        Document protocolDoc = mongoDBHandler.getDocumentIfExists("protocol", protocolID);
+        Document protocolDoc = mongoDBHandler.getDocumentOrNull("protocol", protocolID);
         if (protocolDoc == null) throw new EditorException("Es existiert kein Protokoll mit ID " + protocolID);
 
         JSONObject protocol = new JSONObject();
@@ -277,7 +292,7 @@ public class EditorProtocolParser {
      */
 
     public JSONObject getEditorAgendaFromDB(String agendaID) throws EditorException {
-        Document agendaDoc = mongoDBHandler.getDocumentIfExists("agendaItem", agendaID);
+        Document agendaDoc = mongoDBHandler.getDocumentOrNull("agendaItem", agendaID);
         if (agendaDoc == null) throw new EditorException("Es existiert kein Tagesordnungspunkt mit ID " + agendaID);
 
         JSONObject aItem = new JSONObject();
@@ -297,7 +312,7 @@ public class EditorProtocolParser {
      * @author Eric Lakhter
      */
     public JSONObject getEditorSpeechFromDB(String speechID) throws EditorException {
-        Document speechDoc = mongoDBHandler.getDocumentIfExists("speech", speechID);
+        Document speechDoc = mongoDBHandler.getDocumentOrNull("speech", speechID);
         if (speechDoc == null) throw new EditorException("Es existiert keine Rede mit ID " + speechID);
 
         JSONObject speech = new JSONObject();
@@ -334,29 +349,13 @@ public class EditorProtocolParser {
      * @author Eric Lakhter
      */
     public JSONObject getEditorPersonFromDB(String personID) throws EditorException {
-        Document personDoc = mongoDBHandler.getDocumentIfExists("person", personID);
+        Document personDoc = mongoDBHandler.getDocumentOrNull("person", personID);
         if (personDoc == null) throw new EditorException("Es existiert keine Person mit ID " + personID);
 
-        JSONObject person = new JSONObject(personDoc.toJson())
+        return new JSONObject(personDoc.toJson())
                 .put("personID", personDoc.getString("_id"))
                 .put("birthDate", dateToLocalDate(personDoc.getDate("birthDate")))
                 .put("deathDate", dateToLocalDate(personDoc.getDate("deathDate")));
-        return person;
-//        JSONObject person = new JSONObject();
-//        person.put("personID", personDoc.getString("_id"));
-//        person.put("firstName", personDoc.getString("firstName"));
-//        person.put("lastName", personDoc.getString("lastName"));
-//        person.put("role", personDoc.getString("role"));
-//        person.put("title", personDoc.getString("title"));
-//        person.put("place", personDoc.getString("place"));
-//        person.put("party", personDoc.getString("party"));
-//        person.put("fraction19", personDoc.getString("fraction19"));
-//        person.put("fraction20", personDoc.getString("fraction20"));
-//        person.put("gender", personDoc.getString("gender"));
-//        person.put("birthDate", personDoc.getString("birthDate"));
-//        person.put("deathDate", personDoc.getString("deathDate"));
-//        person.put("birthPlace", personDoc.getString("birthPlace"));
-//        return person;
     }
 
     // FOR TESTING
@@ -426,6 +425,8 @@ public class EditorProtocolParser {
 //
 //        else if (insertObject instanceof Person_Impl) {
 //            Person_Impl person = (Person_Impl) insertObject;
+//            mongoDBHandler.getDB().getCollection("editor_test_person")
+//                    .updateOne(new Document("_id", person.getID()), person.getPersonDoc(), uo);
 //        }
     }
     @Testing
