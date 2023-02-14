@@ -22,8 +22,13 @@ import static spark.Spark.*;
 
 
 /**
- * Starts the localhost server for the protocol visualisation.
+ * Starts the localhost server for the protocol visualisation.<br>
+ * Contains all Routes and their definitions.
  *
+ * @author Eric Lakhter
+ * @author Eric Lakhter
+ * @author Eric Lakhter
+ * @author Eric Lakhter
  * @author Eric Lakhter
  */
 @Testing
@@ -56,6 +61,7 @@ public class SparkHandler {
      * @see #getLaTeX
      * @see #getSpeechNetwork
      * @see #getCommentNetwork
+     * @see #getSpeechTopicNetwork
      * @see #getLoginSite
      */
     public static void init() throws UIMAException, IOException {
@@ -92,7 +98,6 @@ public class SparkHandler {
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         get("/latex/protocol/", "application/json", getLaTeXString);
         post("/latex/pdf/", "application/json", postLaTeX);
-
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
@@ -139,7 +144,7 @@ public class SparkHandler {
     private static final TemplateViewRoute getHome = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        pageContent.put("title", "Homepage");
+        pageContent.put("isHomepage", true);
 
         return new ModelAndView(pageContent, "home.ftl");
     };

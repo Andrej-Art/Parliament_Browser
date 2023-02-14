@@ -52,9 +52,8 @@ function setProtocolEditorButtons() {
     let finalHTML = '';
     for (let protocolID of protocolKeys) {
         finalHTML +=
-            '<li><button onclick="setAgendaEditorButtons(\'' + protocolID + '\')" ' +
-            'class="speech-vis-sidebar-button"> Protokoll ' + protocolID + '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'protocol\', \'' + protocolID + '\')">Lade dieses Protokoll</button>';
+            '<li><button onclick="setAgendaEditorButtons(\'' + protocolID + '\')"> Protokoll ' + protocolID + '</button>' +
+            '<button onclick="pasteDataIntoEditor(\'protocol\', \'' + protocolID + '\')" style="float: right">Lade dieses Protokoll</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -68,9 +67,8 @@ function setAgendaEditorButtons(protocolID = "1/1") {
     let finalHTML = '';
     for (let agendaID of protocols[protocolID]) {
         finalHTML +=
-            '<li><button type="button" onclick="setSpeechEditorButtons(\'' + agendaID + '\')" ' +
-            'class="speech-vis-sidebar-button agenda-button">' + agendaID.split("/")[2]+ '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'aItem\', \'' + agendaID + '\')">Lade diesen Tagesordnungspunkt</button>';
+            '<li><button type="button" onclick="setSpeechEditorButtons(\'' + agendaID + '\')">' + agendaID.split("/")[2]+ '</button>' +
+            '<button onclick="pasteDataIntoEditor(\'aItem\', \'' + agendaID + '\')" style="float: right">Lade diesen TOP</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -84,8 +82,8 @@ function setSpeechEditorButtons(agendaID = "1/1/ID") {
     let finalHTML = '';
     for (let speechID of agendaItems[agendaID]["speechIDs"]) {
         finalHTML +=
-            '<li><button type="button" class="speech-vis-sidebar-button">' + speechID + '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'speech\', \'' + speechID + '\')">Lade diese Rede</button>';
+            '<li><button type="button">' + speechID + '</button>' +
+            '<button onclick="pasteDataIntoEditor(\'speech\', \'' + speechID + '\')" style="float: right">Lade diese Rede</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -98,8 +96,10 @@ function setPersonEditorButtons() {
     let finalHTML = '';
     for (let personID of personIDs) {
         finalHTML +=
-            '<li><button type="button" class="speech-vis-sidebar-button">' + people[personID]["fullName"] + ', ' + people[personID]["party"] + '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'person\', \'' + personID + '\')">Lade diese Person</button>';
+            '<li><button type="button" style="display: flex; width: 100%" ' +
+            'onclick="pasteDataIntoEditor(\'person\', \'' + personID + '\')">' +
+            '<span style="text-align: left">' + people[personID]["fullName"] + ',<br> ' + people[personID]["party"] + '</span>' +
+            '<span style="margin-left: auto">Lade diese Person</span></button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
