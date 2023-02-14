@@ -53,6 +53,7 @@ public class MongoDBHandler {
     }
     private final MongoDatabase db;
     private final InsertManyOptions imo = new InsertManyOptions().ordered(false);
+    private final UpdateOptions uo = new UpdateOptions().upsert(true);
     private final Gson gson = new Gson();
 
     /**
@@ -137,7 +138,7 @@ public class MongoDBHandler {
      * @return Either a document or {@code null}.
      * @author Eric Lakhter
      */
-    public Document getDocumentIfExists(String col, String id) {
+    public Document getDocumentOrNull(String col, String id) {
         return db.getCollection(col).find(new Document("_id", id)).first();
     }
 
@@ -1504,6 +1505,7 @@ public class MongoDBHandler {
                     agendaItem.put("subject", procBlock.get("subject"));
                     agendaItems.put(procBlock.getString("_id"), agendaItem);
                 });
+        //Finds all people, their full names and their party
         db.getCollection("person").find()
                 .forEach((Consumer<? super Document>) procBlock -> {
                     JSONObject person = new JSONObject();
