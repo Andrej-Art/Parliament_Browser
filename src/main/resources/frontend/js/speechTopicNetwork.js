@@ -49,12 +49,12 @@ function speechTopicNetwork(graph) {
         .selectAll("circle")
         .data(graph.nodes)
         .enter().append("circle")
-        //I made the article/source nodes larger than the entity nodes
+        //makes topic nodes larger than speech nodes
         .attr("r", function (d) {
             return d.group === 8 ? 25 : 5
         })
 
-
+    //changes colour of node based on party
     node
         .style("fill", function (d) {
             switch (d.group) {
@@ -142,7 +142,7 @@ function speechTopicNetwork(graph) {
 function updateSpeechTopicNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
-    let url = "/network/edivio/?von=" + startDate + "&bis=" + endDate;
+    let url = "/network/topic/?von=" + startDate + "&bis=" + endDate;
     window.location.href = url;
 
 }
