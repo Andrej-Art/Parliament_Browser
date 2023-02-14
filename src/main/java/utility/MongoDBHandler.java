@@ -778,8 +778,12 @@ public class MongoDBHandler {
      * @param dateFilterTwo
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne, String dateFilterTwo, String fractionFilter,
-                                                           String partyFilter, String personFilter, Integer limiter) {
+    public ArrayList<JSONObject> getSpeechesBySpeakerCount(String dateFilterOne,
+                                                           String dateFilterTwo,
+                                                           String fractionFilter,
+                                                           String partyFilter,
+                                                           String personFilter,
+                                                           Integer limiter) {
         Bson group = new Document("$group", new Document("_id", "$speakerID").append("speechesCount", new Document("$sum", 1)));
         Bson lookup = lookup("person", "_id", "_id", "speakerData");
         Bson unwind = unwind("$speakerData");
@@ -857,27 +861,44 @@ public class MongoDBHandler {
 
     /**
      * returns all Named Entities with their respective count
-     *
+     * @param dateFilterOne
+     * @param dateFilterTwo
+     * @param fractionFilter
+     * @param partyFilter
+     * @param personFilter
      * @author Edvin Nise
      */
-    public JSONObject getNamedEntityCount(String dateFilterOne, String dateFilterTwo, String fractionFilter, String partyFilter, String personFilter) {
+    public JSONObject getNamedEntityCount(String dateFilterOne,
+                                          String dateFilterTwo,
+                                          String fractionFilter,
+                                          String partyFilter,
+                                          String personFilter) {
+
+        //groups the documents by date and all array sizes for each named entity
         Bson group = group(new Document("_id", "$date"),
                 sum("namedEntityPerson", new Document("$size", "$namedEntitiesPer")),
                 sum("namedEntityLocation", new Document("$size", "$namedEntitiesLoc")),
                 sum("namedEntityOrg", new Document("$size", "$namedEntitiesOrg")));
+
         Bson sort = sort(descending("namedEntityPerson"));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(group, sort));
+
+        //final JSON where all extracted data will end up
         JSONObject obj = new JSONObject();
 
+        //adds date filter to the front of the pipeline
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
+        //adds fraction filter to the front of the pipeline
         if (!fractionFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
+        //adds person filter to the front of the pipeline
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
         }
+        //adds party filter to the front of the pipeline
         if (!partyFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
@@ -885,7 +906,9 @@ public class MongoDBHandler {
         db.getCollection("speech").aggregate(pipeline).allowDiskUse(false)
                 .forEach((Consumer<? super Document>) procBlock ->
                 {
+                    //gets date from _id since the group pipeline stage creates nested JSON with date as id
                     Document doc = (Document) procBlock.get("_id");
+                    //JSON for each named entity
                     JSONObject objEnt = new JSONObject();
                     objEnt.put("personEntity", procBlock.getInteger("namedEntityPerson"));
                     objEnt.put("locationEntity", procBlock.getInteger("namedEntityLocation"));
@@ -898,28 +921,41 @@ public class MongoDBHandler {
 
     /**
      * returns the count for all Parts of Speech
-     *
+     * @param dateFilterOne
+     * @param dateFilterTwo
+     * @param fractionFilter
+     * @param partyFilter
+     * @param personFilter
      * @author Edvin Nise
      */
     @Unfinished("waiting for final structure of collection")
-    public ArrayList<JSONObject> getPOSCount(String dateFilterOne, String dateFilterTwo,
-                                             String fractionFilter, String partyFilter, String personFilter) {
+    public ArrayList<JSONObject> getPOSCount(String dateFilterOne,
+                                             String dateFilterTwo,
+                                             String fractionFilter,
+                                             String partyFilter,
+                                             String personFilter) {
+
         Bson unwind = unwind("$tokens");
         Bson project = project(new Document("OnlyPOS", "$tokens.coarsePOS"));
         Bson group = group(new Document("_id", "$OnlyPOS"), sum("CountOfPOS", 1));
         Bson sort = sort(descending("CountOfPOS"));
         ArrayList<JSONObject> objList = new ArrayList<>();
+
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, project, group, sort));
 
+        //adds date filter to the front of the pipeline
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }
+        //adds fraction filter to the front of the pipeline
         if (!fractionFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
         }
+        //adds person filter to the front of the pipeline
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
         }
+        //adds party filter to the front of the pipeline
         if (!partyFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
         }
@@ -938,7 +974,6 @@ public class MongoDBHandler {
 
     /**
      * return the percentage for each sentiment option
-     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @param fractionFilter
@@ -952,7 +987,8 @@ public class MongoDBHandler {
                                        String fractionFilter,
                                        String personFilter,
                                        String partyFilter) {
-        //match for comment sentiment filters
+
+        //match for comment sentiment filters since not all comments have a commentator
         Bson match = new Document("$match", new Document("$and", Arrays.asList(
                 new Document("commentatorID", new Document("$ne", "N/A")),
                 new Document("speakerID", new Document("$ne", "")))));
@@ -975,6 +1011,7 @@ public class MongoDBHandler {
 
         List<Bson> pipelineSpeech = new ArrayList<>(Arrays.asList(group, addFields));
         List<Bson> pipelineComment = new ArrayList<>(Arrays.asList(group, addFields));
+
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipelineComment, dateFilterOne, dateFilterTwo);
             applyDateFiltersToAggregation(pipelineSpeech, dateFilterOne, dateFilterTwo);
@@ -1013,7 +1050,8 @@ public class MongoDBHandler {
 
     /**
      * returns who commented on which speaker
-     *
+     * @param dateFilterOne
+     * @param dateFilterTwo
      * @return
      * @author Edvin Nise
      */
