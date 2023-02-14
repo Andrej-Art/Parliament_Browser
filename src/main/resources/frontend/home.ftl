@@ -13,46 +13,69 @@
 <body>
 
 <#include "parliamentBrowser.ftl">
+
 <div class="home-container">
-    <div class="home-left">
-        <h1 id="title">Homepage 🔥</h1>
-        <ul>
-            <li><a href="test/">✨ Test-Seite ✨</a></li>
-            <li><a href="#title">Homepage</a></li>
-            <li><a href="loginSite/">Login-Management</a></li>
-            <li><a href="dashboard/">Dashboard</a></li>
-            <li><a href="network/1/">Redner-Kategorien-Netzwerk</a></li>
-            <li><a href="reden/">Reden-Visualisierung</a></li>
-            <li><a href="protokolleditor/">Protokoll-Editor</a></li>
-            <li><a href="latex/">LaTeX-Editor</a></li>
-        </ul>
-    </div>
-    <div class="home-right">
+    <div class="home-db-status">
         <div id="db-status">
 
         </div>
+        <div>
+            <ul><li><a href="test/">✨ Test-Seite ✨</a></li></ul>
+        </div>
+    </div>
+
+    <div class="home-left">
+        <h1 style="font-size: 3em">Parliament Browser</h1>
+
+        Beschreibung
+
+        <h1><a href="dashboard/">Dashboard</a></h1>
+
+        Beschreibung
+
+        <h1><a href="network/comment/">Redner/Kommentatoren-Netzwerk</a></h1>
+
+        Beschreibung
+
+        <h1><a href="network/speech/">Redner/Themen-Netzwerk</a></h1>
+
+        Beschreibung
+
+        <h1><a href="network/edivio/">Redner/Sentiment/Themen-Netzwerk</a></h1>
+
+        Beschreibung
+
+        <h1><a href="reden/">Reden-Visualisierung</a></h1>
+
+        Beschreibung
+
+        <h1><a href="protokolleditor/">Protokoll-Editor</a></h1>
+
+        Beschreibung
+
+        <h1><a href="latex/">LaTeX-Editor</a></h1>
+
+        Beschreibung
+
+        <h1><a href="loginSite/">Login-Management</a></h1>
+
+        Beschreibung
+
     </div>
 </div>
 
-
 <script>
-    document.getElementById("parliament-browser-main-navigation-bar-show").style.display = 'flex';
-    for (let button of document.getElementsByClassName("nav-button")) {
-        button.style.color = '#bbb';
-        button.style['text-shadow'] = 'none';
-        button.style.cursor = 'default';
-        button.onclick = '';
-    }
-    getDBStatus();
-    async function getDBStatus () {
-        document.getElementById("db-status").innerHTML = 'Waiting for database response <img src="loadIcon.gif" alt="" style="vertical-align: middle">';
-        let response = await fetch("#", {
-            method: 'POST'
-        });
-        let responseJson = await response.json();
-        document.getElementById("db-status").innerHTML =
-            '<span style="color: ' + (responseJson.status === Error ? "red" : "green")  + '">' + responseJson.details + '</span>';
-    }
+document.getElementById("parliament-browser-main-navigation-bar-show").style.display = 'flex';
+getDBStatus();
+async function getDBStatus () {
+    document.getElementById("db-status").innerHTML = 'Auf Antwort von der DB warten... <img src="/loadIcon.gif" alt="" style="vertical-align: middle">';
+    let response = await fetch("#", {
+        method: 'POST'
+    });
+    let responseJson = await response.json();
+    document.getElementById("db-status").innerHTML =
+        '<span style="color: ' + (responseJson.status === "Error" ? "red" : "green")  + '">' + responseJson.details + '</span>';
+}
 </script>
 
 </body>

@@ -26,13 +26,13 @@
 
         </div>
     </div>
-    <div class="button-box" style="background-color: aquamarine"> Editor:<br>
+    <div class="button-box" style="background-color: aquamarine">Editor-Modus:<br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="protocol" checked="checked">Protokoll</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="speech">Rede</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="person">Person</label><br>
         <input type="checkbox" id="overwrite-checkbox"><label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden IDs?</label><br>
-        <label><button tabindex="-1" onclick="parseDataFromEditor()">Generate</button></label><br>
+        <label><button tabindex="-1" onclick="parseDataFromEditor()">In die DB einfügen</button></label><br>
         <div id="explanation">
 
         </div>
