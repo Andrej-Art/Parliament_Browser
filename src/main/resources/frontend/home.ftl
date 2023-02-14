@@ -21,7 +21,9 @@
             <li><a href="#title">Homepage</a></li>
             <li><a href="loginSite/">Login-Management</a></li>
             <li><a href="dashboard/">Dashboard</a></li>
-            <li><a href="network/1/">Redner-Kategorien-Netzwerk</a></li>
+            <li><a href="network/speech/">Redner-Kategorien-Netzwerk</a></li>
+            <li><a href="network/comment/">Comment-Speaker-Netzwerk</a></li>
+            <li><a href="network/topic/">Rede-Topic-Netzwerk</a></li>
             <li><a href="reden/">Reden-Visualisierung</a></li>
             <li><a href="protokolleditor/">Protokoll-Editor</a></li>
             <li><a href="latex/">LaTeX-Editor</a></li>

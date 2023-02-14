@@ -2,12 +2,17 @@
 <head>
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <style><#include "css/network.css"></style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        <#include "css/network.css">
+        <#include "css/parliamentBrowser.css">
+    </style>
 
 </head>
 
 
 <body onload="speechTopicNetwork(data)">
+<#include "parliamentBrowser.ftl">
 
 <div id="speechTopicNetworkGraph">
     <div id="flexbox" class="flex-container">

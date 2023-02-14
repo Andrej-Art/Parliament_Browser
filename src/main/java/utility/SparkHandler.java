@@ -96,7 +96,7 @@ public class SparkHandler {
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
-        get("/network/edivio/", getSpeechTopicNetwork, new FreeMarkerEngine(cfg));
+        get("/network/topic/", getSpeechTopicNetwork, new FreeMarkerEngine(cfg));
 
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
@@ -391,6 +391,7 @@ public class SparkHandler {
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
         return mongoDBHandler.findSpeech(text);
     };
+//    GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory C:\\Users\\edvin\\IdeaProjects\\Übung5\\src\\main\\resources\\frontend\\public\\pdfOutput testPDF3.tex"});
 
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -424,7 +425,7 @@ public class SparkHandler {
 
         pageContent.put("speechTopicNetworkData", networkData);
 
-        return new ModelAndView(pageContent, "speechTopic.ftl");
+        return new ModelAndView(pageContent, "speechTopicNetwork.ftl");
     };
 
     /**

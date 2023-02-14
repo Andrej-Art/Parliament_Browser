@@ -160,6 +160,6 @@ function updateSpeechTopicNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
     let url = "/network/edivio/?von=" + startDate + "&bis=" + endDate;
-    window.open(url);
+    window.location.href = url;
 
 }

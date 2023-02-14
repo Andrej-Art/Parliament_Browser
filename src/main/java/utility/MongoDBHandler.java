@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -55,6 +56,7 @@ public class MongoDBHandler {
     private final InsertManyOptions imo = new InsertManyOptions().ordered(false);
     private final UpdateOptions uo = new UpdateOptions().upsert(true);
     private final Gson gson = new Gson();
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
 
     /**
      * Connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
@@ -564,8 +566,12 @@ public class MongoDBHandler {
      * @author Eric Lakhter
      * @modified DavidJordan
      */
-    public void applyPersonFractionFiltersToAggregation(List<Bson> pipeline, String fractionFilter, String personFilter,
-                                                        String partyFilter, String... neededField) {//String personFilter : person Filter  parameter i temporarily took out
+    public void applyPersonFractionFiltersToAggregation(
+            List<Bson> pipeline,
+            String fractionFilter,
+            String personFilter,
+            String partyFilter,
+            String... neededField) {
         Document projectDoc = new Document("speechID", 1).append("speakerID", 1);
         // Setting each of the needed fields to be included in the results
         for (String field : neededField) {
@@ -946,6 +952,10 @@ public class MongoDBHandler {
                                        String fractionFilter,
                                        String personFilter,
                                        String partyFilter) {
+        //match for comment sentiment filters
+        Bson match = new Document("$match", new Document("$and", Arrays.asList(
+                new Document("commentatorID", new Document("$ne", "N/A")),
+                new Document("speakerID", new Document("$ne", "")))));
 
         Bson group = new Document("$group", new Document("_id", null)
                 .append("count", new Document("$sum", 1))
@@ -972,26 +982,30 @@ public class MongoDBHandler {
         if (!fractionFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipelineComment, fractionFilter, "", "");
             applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
+            pipelineComment.add(0, match);
         }
         if (!personFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipelineComment, "", personFilter, "");
-            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, "", personFilter, "");
+            pipelineComment.add(0, match);
         }
         if (!partyFilter.isEmpty()) {
             applyPersonFractionFiltersToAggregation(pipelineComment, "", "", partyFilter);
-            applyPersonFractionFiltersToAggregation(pipelineSpeech, fractionFilter, "", "");
+            applyPersonFractionFiltersToAggregation(pipelineSpeech, "", "", partyFilter);
+            pipelineComment.add(0, match);
         }
         JSONObject obj = new JSONObject();
         db.getCollection("speech").aggregate(pipelineSpeech).forEach((Consumer<? super Document>) procBlock ->
         {
-            obj.put("speechPos", procBlock.getDouble("posPercent") * 100);
-            obj.put("speechNeg", procBlock.getDouble("negPercent") * 100);
-            obj.put("speechNeu", procBlock.getDouble("neuPercent") * 100);
+            obj.put("speechPos", DECIMAL_FORMAT.format(procBlock.getDouble("posPercent")* 100));
+            obj.put("speechNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
+            obj.put("speechNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
         });
         db.getCollection("comment").aggregate(pipelineComment).forEach((Consumer<? super Document>) procBlock -> {
-            obj.put("commentPos", procBlock.getDouble("posPercent") * 100);
-            obj.put("commentNeg", procBlock.getDouble("negPercent") * 100);
-            obj.put("commentNeu", procBlock.getDouble("neuPercent") * 100);
+
+            obj.put("commentPos", DECIMAL_FORMAT.format(procBlock.getDouble("posPercent")* 100));
+            obj.put("commentNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
+            obj.put("commentNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
                 });
         System.out.println(obj);
         return obj;

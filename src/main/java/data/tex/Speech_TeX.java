@@ -1,6 +1,7 @@
 package data.tex;
 
 import com.mongodb.DBCursor;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -24,7 +25,12 @@ import static java.util.Arrays.asList;
  * @author Eric Lakhter
  */
 public class Speech_TeX {
+    public static void main(String[] args) {
+
+    }
+
     private static MongoDBHandler mdbh;
+
     public Speech_TeX(MongoDBHandler mongoDBHandler) {
         mdbh = mongoDBHandler;
     }
@@ -35,6 +41,7 @@ public class Speech_TeX {
      * Builds a string which can be formatted by a TeX compiler.<br>
      * TeX command looks like this:<br>
      * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
+     *
      * @param speechID the speechID to texify.
      * @return String in TeX format.
      * @author Eric Lakhter
@@ -75,7 +82,7 @@ public class Speech_TeX {
         Document protocolDoc = protocolCursor.tryNext();
         if (protocolDoc == null) return "";
 
-        String texDocFinal = "\\documentclass[a4paper,11pt,oneside]{article}\n" +
+        String texDocFinal = "\\documentclass[a4paper,11pt,twocolumn]{scrartcl}\n" +
                 "\\usepackage[ngerman,shorthands=off]{babel}\n" +
                 "\\usepackage[utf8]{inputenc}\n" +
                 "\\usepackage[T1]{fontenc}\n" +
@@ -83,19 +90,16 @@ public class Speech_TeX {
                 "\\usepackage{enumitem}\n" +
                 "\\usepackage{graphicx}\n" +
                 "\\usepackage{hyperref}\n" +
-                "\\title{\\textrm{Protokoll 1}}\n" +
+                "\\usepackage{subfig}\n" +
+                "\\usepackage[capitalize]{cleveref}\n" +
+                "\\usepackage{makecell}\n" +
+                "\\usepackage{pgf-pie}\n" +
                 "\\begin{document}\n" +
                 "\\maketitle\n";
 
         StringBuilder texDocFinalBuilder = new StringBuilder();
         texDocFinalBuilder.append(texDocFinal);
-//        while (protocolDoc != null) {
-//            texDocFinalBuilder.append("\\section{");
-//            texDocFinalBuilder.append(protocolDoc.getString("_id"));
-//            texDocFinalBuilder.append("}\n\n");
-//            protocolDoc = protocolCursor.tryNext();
-//        }
-//        texDocFinalBuilder.append("\\end{document}");
+
 
         System.out.println(texDocFinalBuilder);
         return (texDocFinalBuilder.toString());
@@ -166,6 +170,7 @@ public class Speech_TeX {
 
     /**
      * returns a piechart for each party and for the total poll result in latex code
+     *
      * @param date
      * @return String
      * @author Edvin Nise
@@ -180,10 +185,10 @@ public class Speech_TeX {
             for (String s : pollFractionsList) {
                 sb.append("\\begin{tikzpicture}\n" +
                         "\\pie{");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"Yes,\n");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"No,\n");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"Abstained,\n");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s +"Votes}\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Yes,\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "No,\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Abstained,\n");
+                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Votes}\n");
                 sb.append("\\end{tikzpicture}\n");
             }
             sb.append("\\begin{tikzpicture}\n" +
@@ -195,6 +200,18 @@ public class Speech_TeX {
             sb.append("\\end{tikzpicture}\n");
         }
 
+        System.out.println(sb);
+        return sb.toString();
+    }
+
+    public String agendaItems(String protocol) {
+        Document protocolDoc =  mdbh.getDB().getCollection("protocol").find(new Document("_id", protocol)).iterator().tryNext();
+        StringBuilder sb = new StringBuilder();
+        sb.append("\\tableofcontents\n");
+        ArrayList<String> agendaItemsList = (ArrayList<String>) protocolDoc.get("agendaItems");
+        for (String s : agendaItemsList) {
+            sb.append("\\section{" + s + "}\n");
+        }
         System.out.println(sb);
         return sb.toString();
     }
