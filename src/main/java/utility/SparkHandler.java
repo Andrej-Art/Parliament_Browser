@@ -20,20 +20,6 @@ import java.util.function.Consumer;
 import static spark.Spark.*;
 
 
-import io.github.manusant.ss.SparkSwagger;
-import io.github.manusant.ss.annotation.Content;
-import io.github.manusant.ss.demo.model.BackupRequest;
-import io.github.manusant.ss.demo.model.Network;
-import io.github.manusant.ss.model.ContentType;
-import io.github.manusant.ss.rest.Endpoint;
-import io.github.manusant.ss.route.Route;
-import io.github.manusant.ss.route.TypedRoute;
-import lombok.extern.slf4j.Slf4j;
-import static io.github.manusant.ss.descriptor.EndpointDescriptor.endpointPath;
-import static io.github.manusant.ss.descriptor.MethodDescriptor.path;
-import static io.github.manusant.ss.rest.RestResponse.badRequest;
-import static io.github.manusant.ss.rest.RestResponse.ok;
-
 
 /**
  * Starts the localhost server for the protocol visualisation.
@@ -115,9 +101,6 @@ public class SparkHandler {
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
         post("/post/applicationDataRegister/", postRegister);
-        post("/post/applicationDataAdminCheck/", postCheckAdmin);
-        post("/post/applicationDataManagerCheck/", postCheckManager);
-        post("/post/applicationDataUserCheck/", postCheckUser);
         post("/post/applicationDataLogoutUser/", postLogout);
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
@@ -452,12 +435,12 @@ public class SparkHandler {
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
-        if (mongoDBHandler.checkUser(cookie) || mongoDBHandler.checkManager(cookie)) {
+        if (mongoDBHandler.checkIfUser(cookie) || mongoDBHandler.checkIfManager(cookie)) {
             pageContent.put("loginStatus", true);
         } else {
             pageContent.put("loginStatus", false);
         }
-        if (mongoDBHandler.checkAdmin(cookie)) {
+        if (mongoDBHandler.checkIfAdmin(cookie)) {
             pageContent.put("adminStatus", true);
             pageContent.put("loginStatus", true);
             ArrayList<User> userList = new ArrayList<>(0);
@@ -494,8 +477,8 @@ public class SparkHandler {
         JSONObject req = new JSONObject(request.body());
         String deleteUser = req.getString("deleteUser");
         String cookie = req.getString("cookie");
-        System.out.println(mongoDBHandler.checkAdmin(cookie));
-        if (mongoDBHandler.checkAdmin(cookie) && !deleteUser.equals("Admin1")) {
+        System.out.println(mongoDBHandler.checkIfAdmin(cookie));
+        if (mongoDBHandler.checkIfAdmin(cookie) && !deleteUser.equals("Admin1")) {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
             return uDeletionSuccess;
         }
@@ -514,45 +497,6 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie, returns whether a user ist registered
-     *
-     * @author Julian Ocker
-     */
-    private static final Route postCheckUser = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkUser(cookie));
-        return answer;
-    };
-
-    /**
-     * accepts cookie returns whether a User is a Manager
-     *
-     * @author Julian Ocker
-     */
-    private static final Route postCheckManager = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkManager(cookie));
-        return answer;
-    };
-
-    /**
-     * accepts cookie returns whether a User is an Admin
-     *
-     * @author Julian Ocker
-     */
-    private static final Route postCheckAdmin = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkAdmin(cookie));
-        return answer;
-    };
-
-    /**
      * accepts cookie name password rank
      *
      * @returns
@@ -567,7 +511,7 @@ public class SparkHandler {
         boolean registrationSuccess = false;
 
         if (mongoDBHandler.checkIfAvailable(name)) {
-            registrationSuccess = mongoDBHandler.registrate(name, password, rank);
+            registrationSuccess = mongoDBHandler.register(name, password, rank);
         }
         return new JSONObject().put("registration", registrationSuccess);
     };
@@ -609,7 +553,7 @@ public class SparkHandler {
             newRank = "admin";
             newID = "Admin1";
         }
-        if (mongoDBHandler.checkAdmin(req.getString("cookie"))) {
+        if (mongoDBHandler.checkIfAdmin(req.getString("cookie"))) {
             if (mongoDBHandler.editUser(oldID, newID, newPassword, newRank)) {
                 answer.put("EditSuccess", true);
             }

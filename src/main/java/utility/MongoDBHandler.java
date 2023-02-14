@@ -1624,7 +1624,10 @@ public class MongoDBHandler {
      * @return
      * @author Julian Ocker
      */
-    public Boolean registrate(String name, String password, String rank) {
+    public Boolean register(String name, String password, String rank) {
+        if (password.equals("da39a3ee5e6b4b0d3255bfef95601890afd80709")){
+            return false;
+        }
         try {
             String salt = generateSalt();
             db.getCollection("user").insertOne(
@@ -1647,7 +1650,7 @@ public class MongoDBHandler {
      * @return
      * @author Julian Ocker
      */
-    public boolean checkAdmin(String cookie) {
+    public boolean checkIfAdmin(String cookie) {
         String cookieRank = "";
         try {
             cookieRank = getTag("cookies", "_id", cookie, "rank");
@@ -1663,7 +1666,7 @@ public class MongoDBHandler {
      * @return
      * @author Julian Ocker
      */
-    public boolean checkManager(String cookie) {
+    public boolean checkIfManager(String cookie) {
         String cookieRank = "";
         try {
             cookieRank = getTag("cookies", "_id", cookie, "rank");
@@ -1679,7 +1682,7 @@ public class MongoDBHandler {
      * @return
      * @author Julian Ocker
      */
-    public boolean checkUser(String cookie) {
+    public boolean checkIfUser(String cookie) {
         String cookieRank = "";
         try {
             cookieRank = getTag("cookies", "_id", cookie, "rank");
@@ -1715,6 +1718,9 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public boolean changePassword(String cookie, String newPassword, String oldPassword) {
+        if(oldPassword.equals("da39a3ee5e6b4b0d3255bfef95601890afd80709")){
+            return false;
+        }
         String username = getTag("cookies", "_id", cookie, "user");
         String rank = getTag("cookies", "_id", cookie, "rank");
         if (checkUserAndPassword(username, oldPassword)) {
@@ -1793,6 +1799,9 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public Boolean deleteUser(String name) {
+        if (!db.getCollection("user").find(new Document("_id", name)).iterator().hasNext()){
+            return false;
+        }
         try {
             db.getCollection("user").deleteOne(new Document("_id", name));
             return true;
@@ -1812,6 +1821,9 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public Boolean editUser(String oldID, String newID, String newPassword, String newRank) throws NoSuchAlgorithmException {
+        if(newPassword.equals("da39a3ee5e6b4b0d3255bfef95601890afd80709")){
+            newPassword = "";
+        }
         if (db.getCollection("user").find(new Document("_id", oldID)).iterator().hasNext()
                 && !checkIfDocumentExists("User", newID)) {
             Document editUser = db.getCollection("user").find(new Document("_id", oldID)).iterator().next();

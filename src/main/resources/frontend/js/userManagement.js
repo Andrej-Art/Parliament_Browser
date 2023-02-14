@@ -12,8 +12,12 @@ async function register() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({name: name, pw: password, rank: rank})
     });
-    console.log(response);
     window.location.reload();
+
+    let registerSuccess = await response.json();
+    if (registerSuccess.registration===false){
+        window.alert("Die Registrierung des Users ist fehlgeschlangen");
+    }
 }
 
 async function deleteUser() {
@@ -25,6 +29,11 @@ async function deleteUser() {
     });
     console.log(response);
     window.location.reload();
+
+    let deleteSuccess = await response.json();
+    if (deleteSuccess.deletionSuccess===false){
+        window.alert("Die Löschung des Users ist fehlgeshlangen");
+    }
 }
 
 async function editUserAccess() {
@@ -44,6 +53,11 @@ async function editUserAccess() {
     });
     console.log(response);
     window.location.reload();
+
+    let editSuccess = await response.json();
+    if (editSuccess.EditSuccess===false){
+        window.alert("Die Editierung des Users ist fehlgeshlangen");
+    }
 }
 
 

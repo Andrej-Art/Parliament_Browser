@@ -39,10 +39,14 @@ async function changePw() {
                 cookie: document.cookie.split(";")[0].split("=")[1]
             })
         });
-        console.log(response);
         logout(document.cookie);
         document.cookie = "key=" + "; path=/";
         window.location.reload();
+
+        let changeSuccess = await response.json();
+        if (changeSuccess.changeSuccess===false){
+            window.alert("Die Änderung des Passwortes ist fehlgeshlangen");
+        }
     }
 }
 
