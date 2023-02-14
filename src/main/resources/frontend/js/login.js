@@ -2,7 +2,7 @@
 
 async function login() {
     let username = document.getElementById("Username").value;
-    let pw =  sha1(document.getElementById("Pw").value);
+    let pw = sha1(document.getElementById("Pw").value);
     console.log(pw);
     let response = await fetch("/post/applicationDataLogin/", {
         method: "POST",

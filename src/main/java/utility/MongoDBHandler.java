@@ -1666,7 +1666,7 @@ public class MongoDBHandler {
     public boolean checkManager(String cookie) {
         String cookieRank = "";
         try {
-            cookieRank = getTag("cookies", "cookie", cookie, "rank");
+            cookieRank = getTag("cookies", "_id", cookie, "rank");
         } catch (Exception ignored) {
         }
         return cookieRank.equals("manager");
@@ -1682,7 +1682,7 @@ public class MongoDBHandler {
     public boolean checkUser(String cookie) {
         String cookieRank = "";
         try {
-            cookieRank = getTag("cookies", "cookie", cookie, "rank");
+            cookieRank = getTag("cookies", "_id", cookie, "rank");
         } catch (Exception ignored) {
         }
         return cookieRank.equals("user");
