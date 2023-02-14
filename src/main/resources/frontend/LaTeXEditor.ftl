@@ -16,12 +16,15 @@
 <div class="pdf-export-sidebar">
     <h1 style="padding: 50px 20px 0 20px">Selection</h1>
     <div class="pdf-export-button-container">
-        <button type="button" onclick="createProtocolButtons()" class="pdf-export-protocol-button">Show Protocols</button>
+        <button type="button" onclick="createProtocolButtons()" class="pdf-export-protocol-button">Show Protocols
+        </button>
     </div>
     <div class="pdf-export-button-container">
         <ul id="button-list" style="margin-left: -10px; margin-top: -10px"></ul>
     </div>
 </div>
+
+<div id="status-message-box"></div>
 
 <div class="editor-container editor-container-textarea">
     <div class="editor-box">

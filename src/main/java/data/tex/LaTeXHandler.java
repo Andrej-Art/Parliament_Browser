@@ -89,8 +89,8 @@ public class LaTeXHandler {
 
             // Using the user's local installation of LateX, we run a command 'pdflatex' to generate
             // the .pdf file compiling the latex code contained in the .tex file
-//
-//            String command = "pdflatex -synctex=1 -file-line-error -recorder -output-directory=" + downloadDirectory +"  " +  pathToTexFile;
+
+//            String command = "pdflatex -synctex=1 -interaction=nonstopmode -output-directory=" + downloadDirectory  + pathToTexFile;
 //            Process process = Runtime.getRuntime().exec(command);
 //
 //

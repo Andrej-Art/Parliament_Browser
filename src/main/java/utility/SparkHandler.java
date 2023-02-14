@@ -92,7 +92,7 @@ public class SparkHandler {
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         get("/latex/protocol/", "application/json", getLaTeXString);
-        post("/latex/pdf/", "application/json", postLaTeX);
+        post("/latex/", "application/json", postLaTeX);
 
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
@@ -175,7 +175,7 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
-    @Unfinished("Not currently working")
+    @Unfinished("Works, but not finished")
     private static final Route getLaTeXString = (Request request, Response response) -> {
         JSONObject data = new JSONObject();
         String protocolID = request.queryParams("protocolID") != null ? request.queryParams("protocolID") : "";
@@ -207,13 +207,16 @@ public class SparkHandler {
 
 
         texHandler.createPDF(editedLatexString);
-        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
+        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory=src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
 
 
         String successStatus = "PDF successfully generated";
         String successMessage = "/pdfOutput/protocol.pdf";
+        JSONObject pdfURL = new JSONObject();
+        pdfURL.put("status", successStatus);
+        pdfURL.put("message", successMessage);
 
-        return successJSON(successStatus, successMessage);
+        return pdfURL;
     };
 
     /**
