@@ -13,7 +13,6 @@ import utility.annotations.*;
 import utility.webservice.EditorProtocolParser;
 import utility.webservice.User;
 
-import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -30,9 +29,7 @@ import static spark.Spark.*;
 public class SparkHandler {
     private final static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
     private static EditorProtocolParser epParser;
-
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
-    // the added string redirects to the /resources/ directory
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException, UIMAException {
@@ -130,8 +127,8 @@ public class SparkHandler {
         pageContent.put("obj", obj);
         pageContent.put("objList", objList);
 
-        String dbInfo = "admin";
-        pageContent.put("userRank", dbInfo);
+        String userRank = "admin";
+        pageContent.put("userRank", userRank);
         return new ModelAndView(pageContent, "test.ftl");
     };
 
@@ -155,10 +152,10 @@ public class SparkHandler {
      */
     private static final Route postHome = (Request request, Response response) -> {
         try {
-            mongoDBHandler.getDB().getCollection("dummy").drop();
-            return successJSON("Success", "Datenbank ist online und verfügbar!");
+            mongoDBHandler.getDocumentOrNull("protocol", "19/1");
+            return responseJSON("Success", "Datenbank ist online und verfügbar!");
         } catch (Exception e) {
-            return errorJSON("Datenbankverbindung ist zurzeit nicht verfügbar.");
+            return responseJSON("Error", "Datenbankverbindung ist zurzeit nicht verfügbar.");
         }
     };
 
@@ -209,10 +206,10 @@ public class SparkHandler {
         GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
 
 
-        String successStatus = "PDF successfully generated";
-        String successMessage = "/pdfOutput/protocol.pdf";
+        String status = "PDF successfully generated";
+        String details = "/pdfOutput/protocol.pdf";
 
-        return successJSON(successStatus, successMessage);
+        return responseJSON(status, details);
     };
 
     /**
@@ -241,9 +238,7 @@ public class SparkHandler {
                 throw new EditorException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
 
             boolean allowOverwrite = Objects.equals(request.queryParams("overwrite"), "true");
-            // Testing
             System.out.println("allowOverwrite is: " + allowOverwrite);
-            allowOverwrite = false;
 
             String id;
             String successStatus;
@@ -267,9 +262,9 @@ public class SparkHandler {
                 default:
                     throw new EditorException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + editMode);
             }
-            return successJSON(successStatus, "null");
+            return responseJSON(successStatus, "null");
         } catch (Exception e) {
-            return errorJSON(e.getMessage());
+            return responseJSON("Error", e.getMessage());
         }
     };
 
@@ -289,18 +284,18 @@ public class SparkHandler {
                 throw new EditorException("id is null");
             switch (col) {
                 case "protocol":
-                    return successJSON("Protokoll " + id + " erfolgreich geladen", epParser.getEditorProtocolFromDB(id));
+                    return responseJSON("Protokoll " + id + " erfolgreich geladen", epParser.getEditorProtocolFromDB(id));
                 case "aItem":
-                    return successJSON("Tagesordnungspunkt " + id + " erfolgreich geladen", epParser.getEditorAgendaFromDB(id));
+                    return responseJSON("Tagesordnungspunkt " + id + " erfolgreich geladen", epParser.getEditorAgendaFromDB(id));
                 case "speech":
-                    return successJSON("Rede " + id + " erfolgreich geladen", epParser.getEditorSpeechFromDB(id));
+                    return responseJSON("Rede " + id + " erfolgreich geladen", epParser.getEditorSpeechFromDB(id));
                 case "person":
-                    return successJSON("Person " + id + " erfolgreich geladen", epParser.getEditorPersonFromDB(id));
+                    return responseJSON("Person " + id + " erfolgreich geladen", epParser.getEditorPersonFromDB(id));
                 default:
                     throw new EditorException("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
             }
         } catch (Exception e) {
-            return errorJSON(e.getMessage());
+            return responseJSON("Error", e.getMessage());
         }
     };
 
@@ -612,26 +607,15 @@ public class SparkHandler {
      */
 
     /**
-     * Returns a JSON signaling that the request was handled without errors.
+     * Returns a JSON with a "status" and a "details" attribute.
      *
-     * @return JSON: {@code {status: successStatus, details: successDetails}}
+     * @return JSON: {@code {status: status, details: details}}
      * @author Eric Lakhter
      */
-    private static JSONObject successJSON(String successStatus, Object successDetails) {
-        if (successStatus == null) successStatus = "null";
-        if (successDetails == null) successDetails = "null";
-        return new JSONObject().put("status", successStatus).put("details", successDetails);
-    }
-
-    /**
-     * Returns a JSON signaling that an error occurred while handling the request.
-     *
-     * @return JSON: {@code {status: "Error", details: errorDetails}}
-     * @author Eric Lakhter
-     */
-    private static JSONObject errorJSON(String errorDetails) {
-        if (errorDetails == null) errorDetails = "null";
-        return new JSONObject().put("status", "Error").put("details", errorDetails);
+    private static JSONObject responseJSON(String status, Object details) {
+        if (status == null) status = "null";
+        if (details == null) details = "null";
+        return new JSONObject().put("status", status).put("details", details);
     }
 
     /**
