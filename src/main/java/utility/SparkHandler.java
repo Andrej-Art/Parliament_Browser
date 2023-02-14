@@ -26,10 +26,10 @@ import static spark.Spark.*;
  * Contains all Routes and their definitions.
  *
  * @author Eric Lakhter
- * @author Eric Lakhter
- * @author Eric Lakhter
- * @author Eric Lakhter
- * @author Eric Lakhter
+ * @author Edvin Nise
+ * @author Julian Ocker
+ * @author Andrej Artuschenko
+ * @author DavidJordan
  */
 @Testing
 @Unfinished("Only some routes are finished")
@@ -51,6 +51,10 @@ public class SparkHandler {
      * Sets up the website's paths.
      *
      * @author Eric Lakhter
+     * @author Edvin Nise
+     * @author Julian Ocker
+     * @author Andrej Artuschenko
+     * @author DavidJordan
      * @see #getHome
      * @see #getDashboard
      * @see #getChartUpdates

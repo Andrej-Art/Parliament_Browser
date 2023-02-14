@@ -16,7 +16,7 @@
     <a href="/dashboard/">Dashboard</a>
     <a href="/network/comment/">Redner/Kommentatoren-Netzwerk</a>
     <a href="/network/speech/">Redner/Themen-Netzwerk</a>
-    <a href="/network/edivio/">Redner/Sentiment/Themen-Netzwerk</a>
+    <a href="/network/topic/">Redner/Sentiment/Themen-Netzwerk</a>
     <a href="/reden/">Reden-Visualisierung</a>
     <a href="/protokolleditor/">Protokoll-Editor</a>
     <a href="/latex/">PDF-Export</a>
