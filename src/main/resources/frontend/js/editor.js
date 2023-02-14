@@ -41,7 +41,28 @@ const personEditHTML =
     '<div class="input-row"><label class="editor-label" for="input12">Sterbedatum</label><input id="input12" class="editor-input" tabindex="12" onkeydown="advanceOnEnter(this)" type="date"></div>' +
     '<div class="input-row"><label class="editor-label" for="input13">Geburtsort</label><input id="input13" class="editor-input" tabindex="13" onkeydown="advanceOnEnter(this)" placeholder="Berlin"></div>';
 
-
+const protocolExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.' +
+    '<ul>' +
+    '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+    '</ul>';
+const agendaExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.' +
+    '<ul>' +
+    '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+    '</ul>';
+const speechExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.' +
+    '<ul>' +
+    '<li>Rede-IDs haben das Format "ID&lt;Wahlperiode&gt;&lt;Zahl&gt;"</li>' +
+    '</ul>';
+const personExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    '<ul>' +
+    '<li>Personen-IDs sind einfach nur Zahlen: "&lt;Zahl&gt;"</li></li>' +
+    '</ul>';
 
 
 /**
@@ -283,12 +304,8 @@ function fillWithData(editMode = "", data = {}) {
     switch (editMode) {
         case "protocol":
             document.getElementById("input-area").innerHTML = protocolEditHTML;
+            document.getElementById("explanation").innerHTML = protocolExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Protokollen?";
-            document.getElementById("explanation").innerHTML =
-                'Pflichtfelder sind mit einem * markiert.' +
-                '<ul>' +
-                '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
-                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.date);
             document.getElementById("input3").value = checkForUndefined(data.begin);
@@ -298,39 +315,25 @@ function fillWithData(editMode = "", data = {}) {
             break;
         case "aItem":
             document.getElementById("input-area").innerHTML = agendaEditHTML;
+            document.getElementById("explanation").innerHTML = agendaExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Tagesordnungspunkten?";
-            document.getElementById("explanation").innerHTML =
-                'Pflichtfelder sind mit einem * markiert.<br>' +
-                'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.' +
-                '<ul>' +
-                '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
-                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.agendaID);
-            document.getElementById("input3").value = checkForUndefined(data.subject);
-            document.getElementById("input4").value = checkForUndefined(data.speechIDs);
+            document.getElementById("input3").value = checkForUndefined(data.speechIDs);
+            document.getElementById("input4").value = checkForUndefined(data.subject);
             break;
         case "speech":
             document.getElementById("input-area").innerHTML = speechEditHTML;
+            document.getElementById("explanation").innerHTML = speechExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Reden?";
-            document.getElementById("explanation").innerHTML =
-                'Pflichtfelder sind mit einem * markiert.<br>' +
-                'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.' +
-                '<ul>' +
-                '<li>Rede-IDs haben das Format "ID&lt;Wahlperiode&gt;&lt;Zahl&gt;"</li>' +
-                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.speechID);
             document.getElementById("input2").value = checkForUndefined(data.speakerID);
             document.getElementById("input3").value = checkForUndefined(data.text);
             break;
         case "person":
             document.getElementById("input-area").innerHTML = personEditHTML;
+            document.getElementById("explanation").innerHTML = personExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Personen?";
-            document.getElementById("explanation").innerHTML =
-                'Pflichtfelder sind mit einem * markiert.<br>' +
-                '<ul>' +
-                '<li>Personen-IDs sind einfach nur Zahlen: "&lt;Zahl&gt;"</li></li>' +
-                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.personID);
             document.getElementById("input2").value = checkForUndefined(data.firstName);
             document.getElementById("input3").value = checkForUndefined(data.lastName);
