@@ -284,6 +284,11 @@ function fillWithData(editMode = "", data = {}) {
         case "protocol":
             document.getElementById("input-area").innerHTML = protocolEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Protokollen?";
+            document.getElementById("explanation").innerHTML =
+                'Pflichtfelder sind mit einem * markiert.' +
+                '<ul>' +
+                '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.date);
             document.getElementById("input3").value = checkForUndefined(data.begin);
@@ -294,6 +299,12 @@ function fillWithData(editMode = "", data = {}) {
         case "aItem":
             document.getElementById("input-area").innerHTML = agendaEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Tagesordnungspunkten?";
+            document.getElementById("explanation").innerHTML =
+                'Pflichtfelder sind mit einem * markiert.<br>' +
+                'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.' +
+                '<ul>' +
+                '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.agendaID);
             document.getElementById("input3").value = checkForUndefined(data.subject);
@@ -302,6 +313,12 @@ function fillWithData(editMode = "", data = {}) {
         case "speech":
             document.getElementById("input-area").innerHTML = speechEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Reden?";
+            document.getElementById("explanation").innerHTML =
+                'Pflichtfelder sind mit einem * markiert.<br>' +
+                'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.' +
+                '<ul>' +
+                '<li>Rede-IDs haben das Format "ID&lt;Wahlperiode&gt;&lt;Zahl&gt;"</li>' +
+                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.speechID);
             document.getElementById("input2").value = checkForUndefined(data.speakerID);
             document.getElementById("input3").value = checkForUndefined(data.text);
@@ -309,6 +326,11 @@ function fillWithData(editMode = "", data = {}) {
         case "person":
             document.getElementById("input-area").innerHTML = personEditHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Personen?";
+            document.getElementById("explanation").innerHTML =
+                'Pflichtfelder sind mit einem * markiert.<br>' +
+                '<ul>' +
+                '<li>Personen-IDs sind einfach nur Zahlen: "&lt;Zahl&gt;"</li></li>' +
+                '</ul>';
             document.getElementById("input1").value = checkForUndefined(data.personID);
             document.getElementById("input2").value = checkForUndefined(data.firstName);
             document.getElementById("input3").value = checkForUndefined(data.lastName);
