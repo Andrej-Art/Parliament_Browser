@@ -241,13 +241,12 @@ public class SparkHandler {
     @Unfinished("Nothing more than a text field so far")
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
-        // something user-rank related
 
         String cookie = request.cookie("key");
 
-        includeEditorPermissions(pageContent, cookie);
-
+        pageContent.put("permissions", getEditorPermissions(cookie));
         pageContent.put("protocolAgendaPersonData", mongoDBHandler.getProtocolAgendaPersonData());
+
         return new ModelAndView(pageContent, "protocolEditor.ftl");
     };
 
@@ -683,26 +682,28 @@ public class SparkHandler {
 
     /**
      * Puts all editor-related permissions into the given map based on given user rank.
-     * @param pageContent The {@code Map} to put permission info in.
      * @param cookie Rank of the user requesting permissions.
+     * @return JSON with permissions
      * @author Eric Lakhter
      */
-    private static void includeEditorPermissions(Map<String, Object> pageContent, String cookie) {
-        pageContent.put("addProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addProtocols"));
-        pageContent.put("deleteProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteProtocols"));
-        pageContent.put("editProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editProtocols"));
+    private static JSONObject getEditorPermissions(String cookie) {
+        JSONObject permissions = new JSONObject();
+        permissions.put("addProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addProtocols"));
+        permissions.put("deleteProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteProtocols"));
+        permissions.put("editProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editProtocols"));
 
-        pageContent.put("addAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addAgendaItems"));
-        pageContent.put("deleteAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteAgendaItems"));
-        pageContent.put("editAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editAgendaItems"));
+        permissions.put("addAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addAgendaItems"));
+        permissions.put("deleteAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteAgendaItems"));
+        permissions.put("editAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editAgendaItems"));
 
-        pageContent.put("addSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addSpeeches"));
-        pageContent.put("deleteSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteSpeeches"));
-        pageContent.put("editSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editSpeeches"));
+        permissions.put("addSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addSpeeches"));
+        permissions.put("deleteSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteSpeeches"));
+        permissions.put("editSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editSpeeches"));
 
-        pageContent.put("addPersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addPersons"));
-        pageContent.put("deletePersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deletePersons"));
-        pageContent.put("editPersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editPersons"));
+        permissions.put("addPersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addPersons"));
+        permissions.put("deletePersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deletePersons"));
+        permissions.put("editPersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editPersons"));
+        return permissions;
     }
 
     /**
