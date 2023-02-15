@@ -209,7 +209,6 @@ public class SparkHandler {
      *
      * @author DavidJordan
      */
-    @Unfinished("Need to create TeX based on input to compile to a new pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
         System.out.println("POST postLaTeX aufgerufen");
 
