@@ -23,8 +23,8 @@ const agendaEditHTML =
     '<div class="input-row"><label class="editor-label" for="input3">Reden-IDs*</label><input id="input3" class="editor-input" tabindex="3" onkeydown="advanceOnEnter(this)" placeholder="ID100100, ID100200"></div>' +
     '<div class="input-row"><label class="editor-label" for="input4">Themen</label><textarea id="input4" class="editor-input" tabindex="4" placeholder="Reden über:\n-Wichtige Themen" rows="5"></textarea>';
 const speechEditHTML =
-    '<div class="input-row"><label class="editor-label" for="input1">Rede-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
-    '<div class="input-row"><label class="editor-label" for="input2">Redner-ID*</label><input id="input2" class="editor-input" tabindex="2" onkeydown="advanceOnEnter(this)" placeholder="1/1"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input1">Rede-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="ID19100100"></div>' +
+    '<div class="input-row"><label class="editor-label" for="input2">Redner-ID*</label><input id="input2" class="editor-input" tabindex="2" onkeydown="advanceOnEnter(this)" placeholder="123456"></div>' +
     '<div class="input-row"><label class="editor-label" for="input3">Text*</label><textarea id="input3" class="editor-input" tabindex="3" placeholder="Es war einmal...\n[KOMMENTAR]Heiterkeit" rows="10"></textarea></div>';
 const personEditHTML =
     '<div class="input-row"><label class="editor-label" for="input1">Person-ID*</label><input id="input1" class="editor-input" tabindex="1" onkeydown="advanceOnEnter(this)" placeholder="123456"></div>' +
@@ -64,6 +64,22 @@ const personExplanationHTML =
     '<li>Personen-IDs sind einfach nur Zahlen: "&lt;Zahl&gt;"</li></li>' +
     '</ul>';
 
+const protocolCheckboxHTML =
+    '<input type="checkbox" id="overwrite-checkbox">' +
+    '<label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden Protokollen?</label>';
+const agendaCheckboxHTML =
+    '<input type="checkbox" id="overwrite-checkbox">' +
+    '<label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden Tagesordnungspunkten?</label>';
+const speechCheckboxHTML =
+    '<input type="checkbox" id="overwrite-checkbox">' +
+    '<label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden Reden?</label>';
+const personCheckboxHTML =
+    '<input type="checkbox" id="overwrite-checkbox">' +
+    '<label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden Personen?</label>';
+const submitButtonHTML = '<label><button tabIndex="-1" onClick="parseDataFromEditor()" style="margin: 10px 0">In die DB einfügen</button></label>';
+
+let permissions = {addAgendaItems: false, addPersons: false, addProtocols: false, addSpeeches: false, deleteAgendaItems: false,
+    deletePersons: false, deleteProtocols: false, deleteSpeeches: false, editAgendaItems: false, editPersons: false, editProtocols: false, editSpeeches: false}
 
 /**
  * Replaces the "button-list" list with all protocols and buttons to load them.
@@ -295,7 +311,8 @@ function getCurrentDataAsJSON(editMode = "") {
 }
 
 /**
- * Fills the editor with either cached data or fresh data from the DB.
+ * Fills the editor with either cached data or fresh data from the DB.<br>
+ * Furthermore shows or hides features depending on user permissions.
  * @param editMode Current editor layout.
  * @param data JSON with data to fill the editor with.
  * @author Eric Lakhter
@@ -305,7 +322,9 @@ function fillWithData(editMode = "", data = {}) {
         case "protocol":
             document.getElementById("input-area").innerHTML = protocolEditHTML;
             document.getElementById("explanation").innerHTML = protocolExplanationHTML;
-            document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Protokollen?";
+            document.getElementById("checkbox-container").innerHTML = permissions.editProtocols ? protocolCheckboxHTML : '<br>';
+            document.getElementById("submit-container").innerHTML =
+                (permissions.addProtocols || permissions.deleteProtocols || permissions.editProtocols) ? submitButtonHTML : '<br>';
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.date);
             document.getElementById("input3").value = checkForUndefined(data.begin);
@@ -316,8 +335,10 @@ function fillWithData(editMode = "", data = {}) {
         case "aItem":
             document.getElementById("input-area").innerHTML = agendaEditHTML;
             document.getElementById("explanation").innerHTML = agendaExplanationHTML;
-            document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Tagesordnungspunkten?";
-            document.getElementById("input1").value = checkForUndefined(data.protocolID);
+            document.getElementById("checkbox-container").innerHTML = permissions.editAgendaItems ? agendaCheckboxHTML : '<br>';
+            document.getElementById("submit-container").innerHTML =
+                (permissions.addAgendaItems || permissions.deleteAgendaItems || permissions.editAgendaItems) ? submitButtonHTML : '<br>';
+            document.getElementById("input1").value = checkForUndefined(data.protocolID)
             document.getElementById("input2").value = checkForUndefined(data.agendaID);
             document.getElementById("input3").value = checkForUndefined(data.speechIDs);
             document.getElementById("input4").value = checkForUndefined(data.subject);
@@ -325,7 +346,9 @@ function fillWithData(editMode = "", data = {}) {
         case "speech":
             document.getElementById("input-area").innerHTML = speechEditHTML;
             document.getElementById("explanation").innerHTML = speechExplanationHTML;
-            document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Reden?";
+            document.getElementById("checkbox-container").innerHTML = permissions.editSpeeches ? speechCheckboxHTML : '<br>';
+            document.getElementById("submit-container").innerHTML =
+                (permissions.addSpeeches || permissions.deleteSpeeches || permissions.editSpeeches) ? submitButtonHTML : '<br>';
             document.getElementById("input1").value = checkForUndefined(data.speechID);
             document.getElementById("input2").value = checkForUndefined(data.speakerID);
             document.getElementById("input3").value = checkForUndefined(data.text);
@@ -333,7 +356,9 @@ function fillWithData(editMode = "", data = {}) {
         case "person":
             document.getElementById("input-area").innerHTML = personEditHTML;
             document.getElementById("explanation").innerHTML = personExplanationHTML;
-            document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Personen?";
+            document.getElementById("checkbox-container").innerHTML = permissions.editPersons ? personCheckboxHTML : '<br>';
+            document.getElementById("submit-container").innerHTML =
+                (permissions.addPersons || permissions.deletePersons || permissions.editPersons) ? submitButtonHTML : '<br>';
             document.getElementById("input1").value = checkForUndefined(data.personID);
             document.getElementById("input2").value = checkForUndefined(data.firstName);
             document.getElementById("input3").value = checkForUndefined(data.lastName);

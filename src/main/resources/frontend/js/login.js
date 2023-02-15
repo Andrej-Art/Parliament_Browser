@@ -45,7 +45,7 @@ async function changePw() {
 
         let changeSuccess = await response.json();
         if (changeSuccess.changeSuccess===false){
-            window.alert("Die Änderung des Passwortes ist fehlgeshlangen");
+            window.alert("Die Änderung des Passwortes ist fehlgeschlangen");
         }
     }
 }

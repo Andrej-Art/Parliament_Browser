@@ -1664,28 +1664,17 @@ public class MongoDBHandler {
     public Boolean checkIfCookieIsAllowedAFeature(String cookie, String feature) {
         String rank = getRankOfCookie(cookie);
         String featureRank = getRankOfFeature(feature);
-        if (featureRank.equals("everyone")) {
-            return true;
-        } else if (featureRank.equals("user")) {
-            if (rank.equals("everyone")) {
-                return false;
-            } else {
+        switch (featureRank) {
+            case "everyone":
                 return true;
-            }
-        } else if (featureRank.equals("manager")) {
-            if (rank.equals("everyone") || rank.equals("user")) {
+            case "user":
+                return !rank.equals("everyone");
+            case "manager":
+                return !rank.equals("everyone") && !rank.equals("user");
+            case "admin":
+                return rank.equals("admin");
+            default:
                 return false;
-            } else {
-                return true;
-            }
-        } else if (featureRank.equals("admin")) {
-            if (rank.equals("everyone") || rank.equals("user") || rank.equals("manager")) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
         }
     }
 
@@ -1892,11 +1881,12 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public void createFeatureCollection() {
+        db.getCollection("features").drop();
         db.getCollection("features").insertOne(new Document("_id", "editFeatures").append("rank", "admin"));
         db.getCollection("features").insertOne(new Document("_id", "editSpeeches").append("rank", "user"));
         db.getCollection("features").insertOne(new Document("_id", "editProtocols").append("rank", "user"));
         db.getCollection("features").insertOne(new Document("_id", "editAgendaItems").append("rank", "user"));
-        db.getCollection("features").insertOne(new Document("_id", "editPerson").append("rank", "manager"));
+        db.getCollection("features").insertOne(new Document("_id", "editPersons").append("rank", "manager"));
         db.getCollection("features").insertOne(new Document("_id", "addSpeeches").append("rank", "manager"));
         db.getCollection("features").insertOne(new Document("_id", "addProtocols").append("rank", "manager"));
         db.getCollection("features").insertOne(new Document("_id", "addAgendaItems").append("rank", "manager"));
@@ -1930,11 +1920,32 @@ public class MongoDBHandler {
      */
     public String getRankOfCookie(String cookie) {
         String rank = "";
-        if (cookie.equals("")) {
+        if (cookie == null || cookie.equals("")) {
             rank = "everyone";
         } else {
             rank = getTag("cookies", "_id", cookie, "rank");
         }
         return rank;
+    }
+
+    /**
+     * This allows the User to edit the Features to a certain degree.
+     *
+     * @param featureToEdit
+     * @param editRank
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean editFeature(String featureToEdit, String editRank) {
+        if (! (editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody")) ) {
+            return false;
+        }
+        if (checkIfDocumentExists("features", featureToEdit)){
+            db.getCollection("features").deleteOne(new Document("_id", featureToEdit));
+            db.getCollection("features").insertOne(new Document("_id", featureToEdit).append("rank", editRank));
+            return true;
+        } else {
+            return false;
+        }
     }
 }

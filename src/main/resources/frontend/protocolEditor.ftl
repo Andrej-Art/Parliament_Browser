@@ -31,8 +31,12 @@
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="speech">Rede</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="person">Person</label><br>
-        <input type="checkbox" id="overwrite-checkbox"><label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden IDs?</label><br>
-        <label><button tabindex="-1" onclick="parseDataFromEditor()" style="margin: 10px 0">In die DB einfügen</button></label><br>
+        <div id="checkbox-container">
+
+        </div>
+        <div id="submit-container">
+
+        </div>
         <div id="explanation">
 
         </div>
@@ -46,6 +50,7 @@
 
 <#include "js/editor.js">
 
+permissions = ${permissions};
 let protocolAgendaPersonData = ${protocolAgendaPersonData};
 let protocols = protocolAgendaPersonData["protocols"];
 let protocolKeys = Object.keys(protocols);
