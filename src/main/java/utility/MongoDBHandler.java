@@ -1671,34 +1671,31 @@ public class MongoDBHandler {
      * @return
      */
     public Boolean checkIfCookieIsAllowedAFeature(String cookie, String feature) {
-        String rank = "";
-        if (cookie.equals("")) {
-            rank = "everyone";
-        } else {
-            rank = getTag("cookies", "_id", cookie, "rank");
-        }
+        String rank = getRankOfCookie(cookie);
         String featureRank = getRankOfFeature(feature);
         if (featureRank.equals("everyone")) {
             return true;
         } else if (featureRank.equals("user")) {
-            if (rank.equals("everyone")){
+            if (rank.equals("everyone")) {
                 return false;
             } else {
                 return true;
             }
         } else if (featureRank.equals("manager")) {
-            if (rank.equals("everyone") || rank.equals("user")){
+            if (rank.equals("everyone") || rank.equals("user")) {
                 return false;
             } else {
                 return true;
             }
         } else if (featureRank.equals("admin")) {
-            if (rank.equals("everyone") || rank.equals("user") || rank.equals("manager")){
+            if (rank.equals("everyone") || rank.equals("user") || rank.equals("manager")) {
                 return false;
             } else {
                 return true;
             }
-        } else { return false;}
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -1920,5 +1917,30 @@ public class MongoDBHandler {
         db.getCollection("features").insertOne(new Document("_id", "deleteUsers").append("rank", "admin"));
     }
 
+    /**
+     * This method Checks whether a person is logged in.
+     *
+     * @param cookie
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean checkIfCookieExists(String cookie) {
+        return db.getCollection("cookies").find(new Document("_id", cookie)).iterator().hasNext();
+    }
 
+    /**
+     * This Method returns the rank of the User.
+     *
+     * @param cookie
+     * @return
+     */
+    public String getRankOfCookie(String cookie) {
+        String rank = "";
+        if (cookie.equals("")) {
+            rank = "everyone";
+        } else {
+            rank = getTag("cookies", "_id", cookie, "rank");
+        }
+        return rank;
+    }
 }

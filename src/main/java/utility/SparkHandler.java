@@ -445,21 +445,24 @@ public class SparkHandler {
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
-        if (mongoDBHandler.checkIfUser(cookie) || mongoDBHandler.checkIfManager(cookie)) {
+        if (mongoDBHandler.checkIfCookieExists(cookie)) {
             pageContent.put("loginStatus", true);
+            if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie,"editUsers")) {
+                pageContent.put("adminStatus", true);
+                pageContent.put("loginStatus", true);
+                ArrayList<User> userList = new ArrayList<>(0);
+                mongoDBHandler.getDB().getCollection("user").find().forEach(
+                        (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
+                pageContent.put("userList", userList);
+            } else {
+                pageContent.put("editUserRight", false);
+            }
+            pageContent.put("addUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
+            pageContent.put("deleteUserRight",mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         } else {
             pageContent.put("loginStatus", false);
         }
-        if (mongoDBHandler.checkIfAdmin(cookie)) {
-            pageContent.put("adminStatus", true);
-            pageContent.put("loginStatus", true);
-            ArrayList<User> userList = new ArrayList<>(0);
-            mongoDBHandler.getDB().getCollection("user").find().forEach(
-                    (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
-            pageContent.put("userList", userList);
-        } else {
-            pageContent.put("adminStatus", false);
-        }
+
         return new ModelAndView(pageContent, "login.ftl");
     };
 
@@ -487,8 +490,8 @@ public class SparkHandler {
         JSONObject req = new JSONObject(request.body());
         String deleteUser = req.getString("deleteUser");
         String cookie = req.getString("cookie");
-        System.out.println(mongoDBHandler.checkIfAdmin(cookie));
-        if (mongoDBHandler.checkIfAdmin(cookie) && !deleteUser.equals("Admin1")) {
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers")) {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
             return uDeletionSuccess;
         }
