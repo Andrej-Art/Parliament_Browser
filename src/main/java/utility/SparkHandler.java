@@ -566,9 +566,10 @@ public class SparkHandler {
             newRank = "admin";
             newID = "Admin1";
         }
-        if (mongoDBHandler.checkIfAdmin(req.getString("cookie"))) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("cookie"), "editUsers")) {
             if (mongoDBHandler.editUser(oldID, newID, newPassword, newRank)) {
                 answer.put("EditSuccess", true);
+                return answer;
             }
         }
         answer.put("EditSuccess", false);
