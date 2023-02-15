@@ -1896,7 +1896,7 @@ public class MongoDBHandler {
         db.getCollection("features").insertOne(new Document("_id", "editSpeeches").append("rank", "user"));
         db.getCollection("features").insertOne(new Document("_id", "editProtocols").append("rank", "user"));
         db.getCollection("features").insertOne(new Document("_id", "editAgendaItems").append("rank", "user"));
-        db.getCollection("features").insertOne(new Document("_id", "editPerson").append("rank", "manager"));
+        db.getCollection("features").insertOne(new Document("_id", "editPersons").append("rank", "manager"));
         db.getCollection("features").insertOne(new Document("_id", "addSpeeches").append("rank", "manager"));
         db.getCollection("features").insertOne(new Document("_id", "addProtocols").append("rank", "manager"));
         db.getCollection("features").insertOne(new Document("_id", "addAgendaItems").append("rank", "manager"));
@@ -1930,7 +1930,7 @@ public class MongoDBHandler {
      */
     public String getRankOfCookie(String cookie) {
         String rank = "";
-        if (cookie.equals("")) {
+        if (cookie == null || cookie.equals("")) {
             rank = "everyone";
         } else {
             rank = getTag("cookies", "_id", cookie, "rank");
