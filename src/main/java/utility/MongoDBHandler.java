@@ -8,6 +8,7 @@ import data.*;
 import data.impl.AgendaItem_Impl;
 import data.impl.Person_Impl;
 import exceptions.WrongInputException;
+import org.apache.uima.cas.Feature;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
@@ -1478,7 +1479,7 @@ public class MongoDBHandler {
 
                     objTotal.put(s + "totalVotes", procBlock.getInteger("totalVotes" + s));
                     objTotal.put(s + "Yes", procBlock.getInteger(s + "Yes"));
-                    objTotal.put(s + "No", procBlock.getInteger(s +"No"));
+                    objTotal.put(s + "No", procBlock.getInteger(s + "No"));
                     objTotal.put(s + "Abstained", procBlock.getInteger(s + "Abstained"));
                     objTotal.put(s + "NoVotes", procBlock.getInteger(s + "NoVotes"));
                 }
@@ -1653,51 +1654,61 @@ public class MongoDBHandler {
     }
 
     /**
-     * This method checks whether a user is an Admin and returns true if that is the case.
+     * This method gets the Rank of an User by Cookies.
      *
      * @param cookie
      * @return
-     * @author Julian Ocker
      */
-    public boolean checkIfAdmin(String cookie) {
-        String cookieRank = "";
-        try {
-            cookieRank = getTag("cookies", "_id", cookie, "rank");
-        } catch (Exception ignored) {
-        }
-        return (cookieRank.equals("admin"));
+    public String getUserRank(String cookie) {
+        return getTag("cookies", "_id", cookie, "rank");
     }
 
     /**
-     * This method checks whether a user is an Manager and returns true if that is the case.
+     * This method gets the Rank of an User by Cookie.
      *
      * @param cookie
+     * @param feature
      * @return
-     * @author Julian Ocker
      */
-    public boolean checkIfManager(String cookie) {
-        String cookieRank = "";
-        try {
-            cookieRank = getTag("cookies", "_id", cookie, "rank");
-        } catch (Exception ignored) {
+    public Boolean checkIfCookieIsAllowedAFeature(String cookie, String feature) {
+        String rank = "";
+        if (cookie.equals("")) {
+            rank = "everyone";
+        } else {
+            rank = getTag("cookies", "_id", cookie, "rank");
         }
-        return cookieRank.equals("manager");
+        String featureRank = getRankOfFeature(feature);
+        if (featureRank.equals("everyone")) {
+            return true;
+        } else if (featureRank.equals("user")) {
+            if (rank.equals("everyone")){
+                return false;
+            } else {
+                return true;
+            }
+        } else if (featureRank.equals("manager")) {
+            if (rank.equals("everyone") || rank.equals("user")){
+                return false;
+            } else {
+                return true;
+            }
+        } else if (featureRank.equals("admin")) {
+            if (rank.equals("everyone") || rank.equals("user") || rank.equals("manager")){
+                return false;
+            } else {
+                return true;
+            }
+        } else { return false;}
     }
 
     /**
-     * This method checks whether a user is an User and returns true if that is the case.
+     * This method gets the Rank of an User by Cookies.
      *
-     * @param cookie
+     * @param feature
      * @return
-     * @author Julian Ocker
      */
-    public boolean checkIfUser(String cookie) {
-        String cookieRank = "";
-        try {
-            cookieRank = getTag("cookies", "_id", cookie, "rank");
-        } catch (Exception ignored) {
-        }
-        return cookieRank.equals("user");
+    public String getRankOfFeature(String feature) {
+        return getTag("features", "_id", feature, "rank");
     }
 
     /**
@@ -1890,22 +1901,24 @@ public class MongoDBHandler {
      *
      * @author Julian Ocker
      */
-    public void createFeatureCollection(){
-        db.getCollection("features").insertOne(new Document("_id","editFeatures").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","editSpeeches").append("rank","user"));
-        db.getCollection("features").insertOne(new Document("_id","editProtocols").append("rank","user"));
-        db.getCollection("features").insertOne(new Document("_id","editAgendaItems").append("rank","user"));
-        db.getCollection("features").insertOne(new Document("_id","editPerson").append("rank","manager"));
-        db.getCollection("features").insertOne(new Document("_id","addSpeeches").append("rank","manager"));
-        db.getCollection("features").insertOne(new Document("_id","addProtocols").append("rank","manager"));
-        db.getCollection("features").insertOne(new Document("_id","addAgendaItems").append("rank","manager"));
-        db.getCollection("features").insertOne(new Document("_id","addPersons").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","deleteSpeeches").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","deleteProtocols").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","deleteAgendaItems").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","deletePersons").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","editUsers").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","addUsers").append("rank","admin"));
-        db.getCollection("features").insertOne(new Document("_id","deleteUsers").append("rank","admin"));
+    public void createFeatureCollection() {
+        db.getCollection("features").insertOne(new Document("_id", "editFeatures").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "editSpeeches").append("rank", "user"));
+        db.getCollection("features").insertOne(new Document("_id", "editProtocols").append("rank", "user"));
+        db.getCollection("features").insertOne(new Document("_id", "editAgendaItems").append("rank", "user"));
+        db.getCollection("features").insertOne(new Document("_id", "editPerson").append("rank", "manager"));
+        db.getCollection("features").insertOne(new Document("_id", "addSpeeches").append("rank", "manager"));
+        db.getCollection("features").insertOne(new Document("_id", "addProtocols").append("rank", "manager"));
+        db.getCollection("features").insertOne(new Document("_id", "addAgendaItems").append("rank", "manager"));
+        db.getCollection("features").insertOne(new Document("_id", "addPersons").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "deleteSpeeches").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "deleteProtocols").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "deleteAgendaItems").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "deletePersons").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "editUsers").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "addUsers").append("rank", "admin"));
+        db.getCollection("features").insertOne(new Document("_id", "deleteUsers").append("rank", "admin"));
     }
+
+
 }
