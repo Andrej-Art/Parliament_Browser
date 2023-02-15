@@ -1,5 +1,6 @@
 package utility.webservice;
 
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.UpdateOptions;
 import data.Comment;
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 import utility.MongoDBHandler;
 import utility.UIMAPerformer;
 import utility.annotations.*;
+import utility.uima.ProcessedSpeech;
 
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
@@ -38,7 +40,6 @@ public class EditorProtocolParser {
     private final List<String> protocolReqs = asList("protocolID", "date", "begin", "end", "leaders", "aItems");
     private final List<String> agendaReqs = asList("protocolID", "agendaID", "subject", "speechIDs");
     private final List<String> speechReqs = asList("speechID", "speakerID", "text");
-
     private final List<String> personReqs = asList("personID", "firstName", "lastName", "role", "title", "place",
             "fraction19", "fraction20", "party", "gender", "birthDate", "deathDate", "birthPlace");
 
@@ -50,23 +51,25 @@ public class EditorProtocolParser {
     }
 
     /**
-     * Parses String data from a JSON and tries to convert it into a viable {@link Protocol_Impl}.
+     * Parses data from a JSON and tries to convert it into a viable {@link Protocol_Impl}.
      *
      * @param protocolObject JSON with at least all required protocol data.
+     * @param cookie User cookie to check permissions for.
+     * @param allowOverwrite if true, allows overwriting the agenda item with the same ID in the database.
      * @return The ID of the freshly inserted protocol.
-     * @throws EditorException if any part of the text does
-     *                                   not fit the standards for editing/creating protocols.
+     * @throws EditorException if any part of the text does not fit the rules for editing/creating protocols.
      * @author Eric Lakhter
      */
     @Unfinished("Pretty much finished, but inserts into a test collection")
-    public String parseEditorProtocol(JSONObject protocolObject, boolean allowOverwrite) throws EditorException, WrongInputException {
+    public String parseEditorProtocol(JSONObject protocolObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!protocolObject.keySet().containsAll(protocolReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String protocolID = protocolObject.getString("protocolID").trim();
-//        if (!protocolObject.getBoolean("allowOverwrite") && mongoDBHandler.checkIfDocumentExists("protocol", id)) // TODO remove testing
-        if (!allowOverwrite && testVersionExists("protocol", protocolID))
-            throw new EditorException("Das Protokoll mit dieser ID existiert bereits und darf nicht überschrieben werden");
+
+//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("protocol", id)) // TODO remove testing
+        checkPermission("protocol", "Protocols", protocolID, cookie, allowOverwrite);
+
         int[] periodAndProtocol = validateProtocolID(protocolID);
         int electionPeriod = periodAndProtocol[0];
         int protocolNumber = periodAndProtocol[1];
@@ -96,16 +99,16 @@ public class EditorProtocolParser {
     }
 
     /**
-     * Parses a String and tries to convert it into a viable {@link AgendaItem_Impl}.
+     * Parses data from a JSON and tries to convert it into a viable {@link AgendaItem_Impl}.
      * @param agendaObject JSON with at least all required agenda data.
+     * @param cookie User cookie to check permissions for.
      * @param allowOverwrite if true, allows overwriting the agenda item with the same ID in the database.
      * @return The ID of the freshly inserted agenda item.
-     * @throws EditorException if any part of the text does
-     *                                   not fit the standards for editing/creating protocols.
+     * @throws EditorException if any part of the text does not fit the rules for editing/creating agenda items.
      * @author Eric Lakhter
      */
     @Unfinished("Pretty much finished, but inserts into a test collection")
-    public String parseEditorAgendaItem(JSONObject agendaObject, boolean allowOverwrite) throws EditorException, WrongInputException {
+    public String parseEditorAgendaItem(JSONObject agendaObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!agendaObject.keySet().containsAll(agendaReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
@@ -114,8 +117,7 @@ public class EditorProtocolParser {
         String agendaID = agendaObject.getString("protocolID").trim();
         String fullAgendaID = protocolID + "/" + agendaID;
 //        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))   // TODO remove testing
-        if (!allowOverwrite && testVersionExists("agendaItem", fullAgendaID))
-            throw new EditorException("Der Tagesordnungspunkt mit dieser ID existiert bereits und darf nicht überschrieben werden");
+        checkPermission("agendaItem", "AgendaItems", fullAgendaID, cookie, allowOverwrite);
 
         String subject = agendaObject.getString("subject").trim();
 
@@ -134,23 +136,23 @@ public class EditorProtocolParser {
     }
 
     /**
-     * Parses a String and tries to convert it into a viable {@link Speech_Impl}.
+     * Parses data from a JSON and tries to convert it into a viable {@link Speech_Impl}.
      * @param speechObject JSON with at least all required speech data.
+     * @param cookie User cookie to check permissions for.
      * @param allowOverwrite if true, allows overwriting the speech with the same ID in the database.
      * @return The ID of the freshly inserted speech.
-     * @throws EditorException if any part of the text does
-     *                                   not fit the standards for editing/creating protocols.
+     * @throws EditorException if any part of the text does not fit the rules for editing/creating speeches.
      * @author Eric Lakhter
      */
     @Unfinished("Pretty much finished, but inserts into a test collection")
-    public String parseEditorSpeech(JSONObject speechObject, boolean allowOverwrite) throws EditorException, WrongInputException {
+    public String parseEditorSpeech(JSONObject speechObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!speechObject.keySet().containsAll(speechReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String speechID = speechObject.getString("speechID").trim();
 //        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("speech", speechID))    // TODO remove testing
-        if (!allowOverwrite && testVersionExists("speech", speechID))
-            throw new EditorException("Die Rede mit dieser ID existiert bereits und darf nicht überschrieben werden");
+        checkPermission("speech", "Speeches", speechID, cookie, allowOverwrite);
+
         Document relatedAgenda = mongoDBHandler.getDB().getCollection("agendaItem")
                 .aggregate(asList(
                         lookup("speech", "speechIDs", "_id", "speeches"),
@@ -171,6 +173,10 @@ public class EditorProtocolParser {
 
         int commentCounter = 1;
         for (String line : lines) {
+            line = line.trim();
+
+            if (line.isEmpty()) continue;
+
             if (line.startsWith("[KOMMENTAR]")) {
                 commentCounter++;
                 String commentText = line.substring(11).trim();
@@ -184,7 +190,7 @@ public class EditorProtocolParser {
                 }
                 comments.add(new Comment_Impl(speechID + "/" + commentCounter, speechID, speakerID, commentatorID, speechText.length(), commentText, date, new ArrayList<>()));
             } else {
-                speechText.append(" ").append(line.trim());
+                speechText.append(" ").append(line);
             }
         }
 
@@ -194,27 +200,27 @@ public class EditorProtocolParser {
 //        mongoDBHandler.insertSpeech(uima.processSpeech(new Speech_Impl(protocolID, speakerID, text, date)));        // TODO remove testing
         insertIntoTest(uima.processSpeech(new Speech_Impl(speechID, speakerID, speechText.toString(), date)));
 //        for (Comment comment : comments) mongoDBHandler.insertComment(comment, uima.getAverageSentiment(uima.getJCas(comment.getText())));        // TODO remove testing
-        insertIntoTest(comments);
+        for (Comment comment : comments) insertIntoTest(comment);
         return speechID;
     }
 
     /**
-     *
+     * Parses data from a JSON and tries to convert it into a viable {@link Person_Impl}.
      * @param personObject JSON with at least all required person data.
+     * @param cookie User cookie to check permissions for.
      * @param allowOverwrite if true, allows overwriting the person with the same ID in the database.
-     * @return
-     * @throws EditorException
+     * @return ID of the inserted person.
+     * @throws EditorException if any part of the text does not fit the rules for editing/creating speeches.
      * @author Eric Lakhter
      */
-    public String parseEditorPerson(JSONObject personObject, boolean allowOverwrite) throws EditorException, WrongInputException {
+    public String parseEditorPerson(JSONObject personObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
 
         if (!personObject.keySet().containsAll(personReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String personID = personObject.getString("personID");
 //        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("person", personID))    // TODO remove testing
-        if (!allowOverwrite && testVersionExists("person", personID))
-            throw new EditorException("Die Person mit dieser ID existiert bereits und darf nicht überschrieben werden");
+        checkPermission("person", "Persons", personID, cookie, allowOverwrite);
 
         String firstName = personObject.getString("firstName");
         String lastName = personObject.getString("lastName");
@@ -265,9 +271,9 @@ public class EditorProtocolParser {
     }
 
     /**
-     *
-     * @param protocolID
-     * @return
+     * Returns a JSON containing all relevant protocol data.
+     * @param protocolID ID of the protocol to fetch data for.
+     * @return JSON with protocol data.
      * @author Eric Lakhter
      */
     public JSONObject getEditorProtocolFromDB(String protocolID) throws EditorException {
@@ -285,9 +291,9 @@ public class EditorProtocolParser {
     }
 
     /**
-     *
-     * @param agendaID
-     * @return
+     * Returns a JSON containing all relevant agenda item data.
+     * @param agendaID ID of the agenda item to fetch data for.
+     * @return JSON with agenda item data.
      * @author Eric Lakhter
      */
 
@@ -306,9 +312,9 @@ public class EditorProtocolParser {
     }
 
     /**
-     *
-     * @param speechID
-     * @return
+     * Returns a JSON containing all relevant speech data.
+     * @param speechID ID of the speech to fetch data for.
+     * @return JSON with speech data.
      * @author Eric Lakhter
      */
     public JSONObject getEditorSpeechFromDB(String speechID) throws EditorException {
@@ -343,9 +349,9 @@ public class EditorProtocolParser {
     }
 
     /**
-     *
-     * @param personID
-     * @return
+     * Returns a JSON containing all relevant person data.
+     * @param personID ID of the person to fetch data for.
+     * @return JSON with protocol data.
      * @author Eric Lakhter
      */
     public JSONObject getEditorPersonFromDB(String personID) throws EditorException {
@@ -383,6 +389,69 @@ public class EditorProtocolParser {
             }
         }
         return person;
+    }
+
+    /**
+     * Deletes an entry in the db based on {@code deleteMode} and {@code id}.
+     * @param col The selected button on the webpage.
+     * @param id ID which is supposed to be deleted.
+     * @throws EditorException If the entry with the given ID doesn't exist.
+     */
+    public void deleteViaEditor(String col, String id) throws EditorException {
+        if (mongoDBHandler.checkIfDocumentExists(col, id)) mongoDBHandler.deleteDocument(col, id);
+        else {
+            switch (col) {
+                case "protocol":
+                    throw new EditorException("Es existiert kein Protokoll mit der ID " + id);
+                case "agendaItem":
+                    throw new EditorException("Es existiert kein Tagesordnungspunkt mit der ID " + id);
+                case "speech":
+                    throw new EditorException("Es existiert keine Rede mit der ID " + id);
+                case "person":
+                    throw new EditorException("Es existiert keine Person mit der ID " + id);
+            }
+        }
+    }
+
+    /**
+     * Checks if a user has the rights to perform their intended action.
+     * @param permissionFor Collection name the user wants to modify.
+     * @param permissionSuffix Suffix for the permission name for this collection.
+     * @param id ID to check.
+     * @param cookie User cookie.
+     * @param allowOverwrite Whether the overwrite checkbox is checked.
+     * @throws EditorException If the user doesn't have the rights to perform their action.
+     */
+    public void checkPermission(String permissionFor, String permissionSuffix, String id, String cookie, boolean allowOverwrite) throws EditorException {
+        boolean idExists = testVersionExists(permissionFor, id);
+        boolean canAdd = mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "add" + permissionSuffix);
+        boolean canEdit = mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "edit" + permissionSuffix);
+        switch (permissionFor) {
+            case "protocol":
+                if (idExists && (!allowOverwrite || !canEdit))
+                    throw new EditorException("Das Protokoll mit dieser ID darf nicht überschrieben werden");
+                if (!idExists && !canAdd)
+                    throw new EditorException("Dieser User hat nicht die Erlaubnis neue Protokolle zu erstellen");
+                break;
+            case "agendaItem":
+                if (idExists && (!allowOverwrite || !canEdit))
+                    throw new EditorException("Der Tagesordnungspunkt mit dieser ID darf nicht überschrieben werden");
+                if (!idExists && !canAdd)
+                    throw new EditorException("Dieser User hat nicht die Erlaubnis neue Tagesordnungspunkte zu erstellen");
+                break;
+            case "speech":
+                if (idExists && (!allowOverwrite || !canEdit))
+                    throw new EditorException("Die Rede mit dieser ID darf nicht überschrieben werden");
+                if (!idExists && !canAdd)
+                    throw new EditorException("Dieser User hat nicht die Erlaubnis neue Reden zu erstellen");
+                break;
+            case "person":
+                if (idExists && (!allowOverwrite || !canEdit))
+                    throw new EditorException("Die Person mit dieser ID darf nicht überschrieben werden");
+                if (!idExists && !canAdd)
+                    throw new EditorException("Dieser User hat nicht die Erlaubnis neue Personen zu erstellen");
+                break;
+        }
     }
 
     // FOR TESTING
@@ -434,20 +503,19 @@ public class EditorProtocolParser {
 //            } catch (MongoException | IllegalArgumentException ignored) {}
 //        }
 //
-//        else if (insertObject instanceof List) {
-//            List<Comment> comments = (List<Comment>) insertObject;
-//            for (Comment comment : comments) {
-//                double sentiment = uima.getAverageSentiment(uima.getJCas(comment.getText()));
-//                mongoDBHandler.getDB().getCollection("editor_test_comment")
-//                        .updateOne(new Document("_id", comment.getID()), new Document("_id", comment.getID())
-//                                .append("speechID", comment.getSpeechID())
-//                                .append("speakerID", comment.getSpeakerID())
-//                                .append("commentatorID", comment.getCommentatorID())
-//                                .append("commentPos", comment.getCommentPosition())
-//                                .append("text", comment.getText())
-//                                .append("date", comment.getDate())
-//                                .append("sentiment", sentiment), uo);
-//            }
+//        else if (insertObject instanceof Comment) {
+//            Comment comment = (Comment) insertObject;
+//            double sentiment = uima.getAverageSentiment(uima.getJCas(comment.getText()));
+//            mongoDBHandler.getDB().getCollection("editor_test_comment")
+//                    .updateOne(new Document("_id", comment.getID()), new Document("_id", comment.getID())
+//                            .append("speechID", comment.getSpeechID())
+//                            .append("speakerID", comment.getSpeakerID())
+//                            .append("commentatorID", comment.getCommentatorID())
+//                            .append("commentPos", comment.getCommentPosition())
+//                            .append("text", comment.getText())
+//                            .append("date", comment.getDate())
+//                            .append("sentiment", sentiment), uo);
+//
 //        }
 //
 //        else if (insertObject instanceof Person_Impl) {
@@ -458,9 +526,6 @@ public class EditorProtocolParser {
     }
     @Testing
     private boolean testVersionExists(String col, String id) {
-        return mongoDBHandler.getDB()
-                .getCollection("editor_test_" + col)
-                .find(new Document("_id", id))
-                .first() != null;
+        return mongoDBHandler.checkIfDocumentExists("editor_test_" + col, id);
     }
 }
