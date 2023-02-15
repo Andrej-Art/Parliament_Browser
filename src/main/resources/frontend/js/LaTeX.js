@@ -2,6 +2,7 @@
 /**
  * Tries to generate a pdf based on user input.
  * @author Eric Lakhter
+ * @author DavidJordan
  */
 async function parseLaTeX() {
     document.getElementById('status-message-box').innerHTML = "Attempting to convert Latex String to .pdf file";
@@ -54,8 +55,10 @@ function getProtocolData(protocID){
     // $('#status-message-box').text('Waiting for response from DB ...');
      document.getElementById('status-message-box').innerHTML = "Waiting for DB response...";
     let req = new XMLHttpRequest();
+    let timestamp = new Date().getTime();
     console.log("the prot id is:  " + protocID)
-    req.open("GET", "/latex/protocol/?protocolID=" + protocID);
+    req.open("GET", "/latex/protocol/?protocolID=" + protocID + "&timestamp=" + timestamp);
+    req.setRequestHeader('cache-control', 'no-cache');
     req.responseType = "json";
     req.onload = function () {
         try {

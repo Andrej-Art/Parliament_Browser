@@ -19,6 +19,8 @@
         <button type="button" onclick="createProtocolButtons()" class="pdf-export-protocol-button">Show Protocols
         </button>
     </div>
+    <div></div>
+    <br><br>
     <div class="pdf-export-button-container">
         <ul id="button-list" style="margin-left: -10px; margin-top: -10px"></ul>
     </div>
@@ -28,7 +30,7 @@
 
 <div class="editor-container editor-container-textarea">
     <div class="editor-box">
-        <form onsubmit="parseLaTeX(); return false;" style="height: 50%">
+        <form onsubmit="parseLaTeX(); return false;" style="height: 90%">
             <label> Editor
                 <button type="submit">Generate</button>
                 <br><br>
@@ -36,9 +38,9 @@
             </label>
         </form>
     </div>
-    <div class="status-box">
-        <div id="status-message-box"></div>
-    </div>
+</div>
+<div class="status-box">
+    <div id="status-message-box"></div>
 </div>
 
 <div class="editor-container editor-container-preview">
@@ -52,6 +54,15 @@
     let protocolData = ${protocolData};
     let protocols = protocolData["protocols"];
     let protIDs = Object.keys(protocols);
+    protIDs.sort((a, b) => {
+        let keyA = a.split("/");
+        let keyB = b.split("/");
+        if (keyA[0] === keyB[0]) {
+            return parseInt(keyA[1]) - parseInt(keyB[1]);
+        } else {
+            return parseInt(keyA[0]) - parseInt(keyB[0]);
+        }
+    });
 
     document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status messages:<br>';
     <#include "js/LaTeX.js">

@@ -164,7 +164,7 @@ public class SparkHandler {
     /**
      * LaTeX editing page.
      *
-     * @author
+     * @author DavidJordan
      */
     @Unfinished("Attempts to get all Protocol data, inclding the IDs which are supposed to be " +
             "inserted into the button labels")
@@ -175,6 +175,10 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
+    /**
+     * Delivers the required String in LaTeX format to the frontend.
+     * @author DavidJordan
+     */
     @Unfinished("Works, but not finished")
     private static final Route getLaTeXString = (Request request, Response response) -> {
         JSONObject data = new JSONObject();
@@ -192,9 +196,9 @@ public class SparkHandler {
     };
 
     /**
-     * Tries to return a PDF file.
+     * Route that returns a .pdf file from the Latex String
      *
-     * @author
+     * @author DavidJordan
      */
     @Unfinished("Need to create TeX based on input to compile to a new pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
@@ -202,8 +206,9 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput");
+        LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput/");
         String editedLatexString =  request.body();
+
 
 
         texHandler.createPDF(editedLatexString);
@@ -405,9 +410,9 @@ public class SparkHandler {
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
+      //  JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
 
-        pageContent.put("redeNetworkData", networkData);
+      //  pageContent.put("redeNetworkData", networkData);
 
         return new ModelAndView(pageContent, "speechNetwork.ftl");
     };

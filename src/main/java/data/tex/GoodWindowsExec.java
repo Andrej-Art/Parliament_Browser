@@ -18,7 +18,7 @@ public class GoodWindowsExec
         {
             String osName = System.getProperty("os.name" );
             String[] cmd = new String[3];
-            if( osName.equals( "Windows 10" ) )
+            if( osName.equals( "Windows 10" ) || osName.equals( "Windows 11"))
             {
                 cmd[0] = "cmd.exe" ;
                 cmd[1] = "/C" ;
