@@ -447,23 +447,27 @@ public class SparkHandler {
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
+        if (cookie == null){ cookie = ""; }
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editUsers"));
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         if (mongoDBHandler.checkIfCookieExists(cookie)) {
             pageContent.put("loginStatus", true);
-            if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editUsers")) {
-                pageContent.put("adminStatus", true);
-                pageContent.put("loginStatus", true);
-                ArrayList<User> userList = new ArrayList<>(0);
-                mongoDBHandler.getDB().getCollection("user").find().forEach(
-                        (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
-                pageContent.put("userList", userList);
-            } else {
-                pageContent.put("editUserRight", false);
-            }
-            pageContent.put("addUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
-            pageContent.put("deleteUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         } else {
             pageContent.put("loginStatus", false);
         }
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editUsers")) {
+            pageContent.put("editUserRight", true);
+            pageContent.put("loginStatus", true);
+            ArrayList<User> userList = new ArrayList<>(0);
+            mongoDBHandler.getDB().getCollection("user").find().forEach(
+                    (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
+            pageContent.put("userList", userList);
+        } else {
+            pageContent.put("editUserRight", false);
+        }
+        pageContent.put("addUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
+        pageContent.put("deleteUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
 
         return new ModelAndView(pageContent, "login.ftl");
     };
@@ -513,7 +517,7 @@ public class SparkHandler {
 
     /**
      * accepts cookie name password rank.
-     * 
+     *
      * @author Julian Ocker
      */
     private static final Route postRegister = (request, response) -> {

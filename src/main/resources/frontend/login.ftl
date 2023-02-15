@@ -4,11 +4,15 @@
 <html>
 <head>
     <!-- source: https://iq.opengenus.org/sha1-algorithm/ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js">
-
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js"></script>
+    <style>
+        <#include "css/parliamentBrowser.css">
+    </style>
 </head>
-
+<br>
+<br>
+<#include "parliamentBrowser.ftl">
+<br>
 <#if loginStatus==false >
     <h3>Login</h3>
     <div>
@@ -67,9 +71,10 @@
             </div>
         </form>
     </div>
-</#if>
 
-<#if addUsersRight==true>
+</#if>
+<#if addUserRight==true>
+
     <br>
     <br>
     <h3>Registriere einen neuen User</h3>
@@ -109,8 +114,8 @@
     <br>
     <br>
 
-    </#if>
-    <#if deleteUsersRight==true>
+</#if>
+<#if deleteUserRight==true>
 
     <h3>User löschen</h3>
     <div>
@@ -129,10 +134,10 @@
     <br>
     <br>
 
-    </#if>
-    <#if editUsersRight==true>
+</#if>
+<#if editUserRight==true>
 
-<h3>Editiere einen neuen User</h3>
+    <h3>Editiere einen neuen User</h3>
     <div>
         <form onsubmit="editUserAccess(); return false;">
             <div>
@@ -160,7 +165,7 @@
             <div>
                 Rang
                 <br>
-                <select selected="" id="ChangeRank" >
+                <select selected="" id="ChangeRank">
                     <option value="">
                         (nicht ändern)
                     </option>
@@ -187,8 +192,8 @@
 <script>
     <#include "js/login.js">
 </script>
-    <script>
-        <#include "js/userManagement.js">
-    </script>
+<script>
+    <#include "js/userManagement.js">
+</script>
 
 </html>
