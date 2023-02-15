@@ -114,7 +114,7 @@ public class SparkHandler {
         post("/post/applicationDataPwChange/", postChangePassword);
         post("/post/applicationDataEditUser/", postEditUser);
 
-        get("/featureManagement/",getFeatureManagement);
+        get("/featureManagement/", getFeatureManagement, new FreeMarkerEngine(cfg));
         post("/post/applicationDataEditFeatures/", postEditFeatures);
     }
 
@@ -589,7 +589,7 @@ public class SparkHandler {
         return answer;
     };
 
-    private static final Route getFeatureManagement = (Request request, Response response) -> {
+    private static final TemplateViewRoute getFeatureManagement = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
         if (cookie == null){ cookie = ""; }
@@ -598,7 +598,6 @@ public class SparkHandler {
                 (Consumer<? super Document>) procBlock -> featureList.add(procBlock.getString("_id")));
         pageContent.put("featureList", featureList);
         pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
-        pageContent.put("deleteUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         return new ModelAndView(pageContent, "feature.ftl");
     };
 
@@ -612,7 +611,7 @@ public class SparkHandler {
         String featureToEdit = req.getString("featureToEdit");
         String editRank = req.getString("editRank");
         JSONObject answer = new JSONObject();
-        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "editUsers")) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "editFeatures")) {
             if (mongoDBHandler.editFeature(featureToEdit,editRank)) {
                 answer.put("EditSuccess", true);
                 return answer;

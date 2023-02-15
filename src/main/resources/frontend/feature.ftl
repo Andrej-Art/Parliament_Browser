@@ -16,7 +16,7 @@
     <div>
         <form onsubmit="editFeature(); return false;">
             <div>
-                Rang ab dem das Feature verfügbar sein soll.
+                Feature das editiert werden soll
                 <br>
                 <select id="featureToChange">
                     <#list featureList as feature>
