@@ -13,12 +13,12 @@ import utility.annotations.*;
 import utility.webservice.EditorProtocolParser;
 import utility.webservice.User;
 
+import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 
 import static spark.Spark.*;
-
 
 /**
  * Starts the localhost server for the protocol visualisation.<br>
@@ -100,7 +100,7 @@ public class SparkHandler {
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         get("/latex/protocol/", "application/json", getLaTeXString);
-        post("/latex/pdf/", "application/json", postLaTeX);
+        post("/latex/", "application/json", postLaTeX);
 
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
@@ -172,7 +172,7 @@ public class SparkHandler {
     /**
      * LaTeX editing page.
      *
-     * @author
+     * @author DavidJordan
      */
     @Unfinished("Attempts to get all Protocol data, inclding the IDs which are supposed to be " +
             "inserted into the button labels")
@@ -183,7 +183,11 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
 
-    @Unfinished("Not currently working")
+    /**
+     * Delivers the required String in LaTeX format to the frontend.
+     * @author DavidJordan
+     */
+    @Unfinished("Works, but not finished")
     private static final Route getLaTeXString = (Request request, Response response) -> {
         JSONObject data = new JSONObject();
         String protocolID = request.queryParams("protocolID") != null ? request.queryParams("protocolID") : "";
@@ -200,9 +204,9 @@ public class SparkHandler {
     };
 
     /**
-     * Tries to return a PDF file.
+     * Route that returns a .pdf file from the Latex String
      *
-     * @author
+     * @author DavidJordan
      */
     @Unfinished("Need to create TeX based on input to compile to a new pdf")
     private static final Route postLaTeX = (Request request, Response response) -> {
@@ -210,18 +214,22 @@ public class SparkHandler {
 
         System.out.println(request.body()); // this will be the LaTeX text field
 
-        LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput");
-        String editedLatexString = request.body();
+        LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput/");
+        String editedLatexString =  request.body();
+
 
 
         texHandler.createPDF(editedLatexString);
-        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
+        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory=src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
 
 
-        String status = "PDF successfully generated";
-        String details = "/pdfOutput/protocol.pdf";
+        String successStatus = "PDF successfully generated";
+        String successMessage = "/pdfOutput/protocol.pdf";
+        JSONObject pdfURL = new JSONObject();
+        pdfURL.put("status", successStatus);
+        pdfURL.put("message", successMessage);
 
-        return responseJSON(status, details);
+        return pdfURL;
     };
 
     /**
@@ -337,7 +345,6 @@ public class SparkHandler {
 
     /**
      * Route which delivers the data according to the provided query parameters
-     *
      * @author DavidJordan
      */
     private static final Route getChartUpdates = (Request request, Response response) -> {

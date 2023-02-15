@@ -2,17 +2,20 @@
 /**
  * Tries to generate a pdf based on user input.
  * @author Eric Lakhter
+ * @author DavidJordan
  */
 async function parseLaTeX() {
+    document.getElementById('status-message-box').innerHTML = "Attempting to convert Latex String to .pdf file";
     try {
         let content = document.getElementById("editor-textarea").value;
-        let response = await fetch("/latex/pdf/", {
+        let response = await fetch("#", {
             method: 'POST',
             body: content
         });
         let responseJson = await response.json();
-        handleResponse(responseJson);
-        document.getElementById("editor-preview").src = responseJson.message;
+        //handleResponse(responseJson);
+        document.getElementById("editor-preview").src = responseJson["message"];
+        document.getElementById('status-message-box').innerHTML = "Successful compilation. .pdf ready for download.";
     } catch (e) {
         console.error(e);
     }
@@ -43,18 +46,24 @@ function createProtocolButtons() {
         finalHTML += '<li><button type="button" onclick="getProtocolData(\'' + protID +  '\')" class="pdf-export-protoc-button"> Protokoll ' + protID + '</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
+
 }
 
 
 function getProtocolData(protocID){
     // let ID = protocID.replace("Protokoll ", "");
+    // $('#status-message-box').text('Waiting for response from DB ...');
+     document.getElementById('status-message-box').innerHTML = "Waiting for DB response...";
     let req = new XMLHttpRequest();
+    let timestamp = new Date().getTime();
     console.log("the prot id is:  " + protocID)
-    req.open("GET", "/latex/protocol/?protocolID=" + protocID);
+    req.open("GET", "/latex/protocol/?protocolID=" + protocID + "&timestamp=" + timestamp);
+    req.setRequestHeader('cache-control', 'no-cache');
     req.responseType = "json";
     req.onload = function () {
         try {
             insertLatexString(req.response);
+            document.getElementById('status-message-box').innerHTML = "DB has delivered String to Textarea.";
         }
         catch (e) {
             console.error(e);

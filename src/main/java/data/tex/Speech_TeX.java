@@ -25,9 +25,7 @@ import static java.util.Arrays.asList;
  * @author Eric Lakhter
  */
 public class Speech_TeX {
-    public static void main(String[] args) {
 
-    }
 
     private static MongoDBHandler mdbh;
 

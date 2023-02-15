@@ -18,15 +18,19 @@
 
 .editor-box {
     box-sizing: border-box;
-    height: 80%;
-    width: 90%;
+    height: 100%;
+    width: 100%;
 }
 
 #editor-textarea {
     overflow: auto;
     resize: none;
-    height: 90%;
+    height: 100%;
     width: 100%;
+}
+
+#editor-container editor-container-textarea{
+    height: 60%;
 }
 
 .status-box {
@@ -48,8 +52,19 @@
     font-family: monospace;
     overflow: auto;
     resize: none;
-    height: 100%;
+    height: 60%;
     width: 100%;
+}
+.pdf-export-button-container{
+    background-color: darkgray;
+}
+
+.pdf-export-sidebar{
+    background-color: darkgray;
+}
+
+.pdf-export-protocol-button{
+    background-color: darkgrey;
 }
 
 .editor-container-preview {
@@ -64,4 +79,8 @@
     margin: 5%;
     height: 90%;
     width: 90%;
+}
+
+#editor-container editor-container-preview{
+height: 60%;
 }

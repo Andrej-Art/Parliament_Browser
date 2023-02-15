@@ -6,6 +6,7 @@ import utility.annotations.Testing;
 import utility.annotations.Unfinished;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import static spark.Spark.staticFiles;
 
 /**
  * Class to manage al TEX related classes and generate the pdf from the tex file.
+ * @author DavidJordan
  */
 @Testing
 @Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods. Does not generate a pdf from the latex yet.")
@@ -21,7 +23,6 @@ public class LaTeXHandler {
     private String targetDir;
 
     private MongoDBHandler mdbh;
-
 
     public LaTeXHandler(MongoDBHandler mongoDBHandler, String targetDirectory) throws IOException {
         this.mdbh = mongoDBHandler;
@@ -65,6 +66,7 @@ public class LaTeXHandler {
      * @param latexString
      * @throws IOException
      * @throws InterruptedException
+     * @author DavidJordan
      */
     @Testing
     @Unfinished("Produces pdf now, has to be bound into the frontend now.")
@@ -83,14 +85,37 @@ public class LaTeXHandler {
             String pathToTexFile = downloadDirectory + "\\protocol.tex";
             File file = new File(pathToTexFile);
             // Writing the String in Latex format to a .tex file
+//            FileOutputStream fileOutputStream = new FileOutputStream(file);
+//            fileOutputStream.write(latexString.getBytes());
+//            fileOutputStream.close();
+            latexString = latexString.replaceAll("\u202F", " ");
+            latexString = latexString.replaceAll("\u02BC", "");
+            latexString = latexString.replaceAll("&", "");
+
+//            FileOutputStream fileOutputStream = new FileOutputStream(file);
+//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
+//            outputStreamWriter.write(latexString);
+//            outputStreamWriter.close();
+//            fileOutputStream.close();
+
+            // Replace all occurrences of the problematic character with an ASCII equivalent character
+
+
+//            FileOutputStream fileOutputStream = new FileOutputStream(file);
+//            fileOutputStream.write(latexString.getBytes());
+//            fileOutputStream.close();
+
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(latexString.getBytes());
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
+            String modifiedLatexString = latexString.replace("#", "\\#");
+            outputStreamWriter.write(modifiedLatexString);
+            outputStreamWriter.close();
             fileOutputStream.close();
 
             // Using the user's local installation of LateX, we run a command 'pdflatex' to generate
             // the .pdf file compiling the latex code contained in the .tex file
-//
-//            String command = "pdflatex -synctex=1 -file-line-error -recorder -output-directory=" + downloadDirectory +"  " +  pathToTexFile;
+
+//            String command = "pdflatex -synctex=1 -interaction=nonstopmode -output-directory=" + downloadDirectory  + pathToTexFile;
 //            Process process = Runtime.getRuntime().exec(command);
 //
 //

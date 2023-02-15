@@ -40,6 +40,7 @@ public class Protocol_TeX {
                 "\\usepackage{graphicx}\n\n" +
                 "\\usepackage{hyperref}\n\n" +
                 "\\usepackage{color}\n\n" +
+                "\\usepackage[utf8]{inputenc}\n\n" +
                 "\\usepackage[T1]{fontenc}\n\n" +
                 "\\title{Protokoll: " +
                 protDoc.getString("_id") + "}\n\n" +
