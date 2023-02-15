@@ -97,6 +97,7 @@ public class SparkHandler {
         get("/protokolleditor/", getProtokollEditor, new FreeMarkerEngine(cfg));
         post("/protokolleditor/insert/", "application/json", postProtokollEditorInsert);
         post("/protokolleditor/extract/", "application/json", postProtokollEditorExtract);
+        post("/protokolleditor/delete/", "application/json", postProtokollEditorDelete);
 
         get("/latex/", getLaTeX, new FreeMarkerEngine(cfg));
         get("/latex/protocol/", "application/json", getLaTeXString);
@@ -241,12 +242,17 @@ public class SparkHandler {
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         // something user-rank related
+
+        String cookie = request.cookie("key");
+
+        includeEditorPermissions(pageContent, cookie);
+
         pageContent.put("protocolAgendaPersonData", mongoDBHandler.getProtocolAgendaPersonData());
         return new ModelAndView(pageContent, "protocolEditor.ftl");
     };
 
     /**
-     * Tries to parse a custom protocol/agenda item/speech and to insert it into the DB.
+     * Tries to parse a custom protocol/agenda item/speech/person and to insert it into the DB.
      *
      * @author Eric Lakhter
      */
@@ -258,42 +264,34 @@ public class SparkHandler {
                 throw new EditorException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
 
             boolean allowOverwrite = Objects.equals(request.queryParams("overwrite"), "true");
-            System.out.println("allowOverwrite is: " + allowOverwrite);
 
             String id;
-            String successStatus;
             switch (editMode) {
                 case "protocol":
-                    id = epParser.parseEditorProtocol(new JSONObject(request.body()), allowOverwrite);
-                    successStatus = "Protokoll \"" + id + "\" erfolgreich in die Datenbank eingefügt";
-                    break;
+                    id = epParser.parseEditorProtocol(new JSONObject(request.body()), request.cookie("key"), allowOverwrite);
+                    return responseJSON("Protokoll \"" + id + "\" erfolgreich in die Datenbank eingefügt", "null");
                 case "aItem":
-                    id = epParser.parseEditorAgendaItem(new JSONObject(request.body()), allowOverwrite);
-                    successStatus = "Tagesordnungspunkt \"" + id + "\"  erfolgreich in die Datenbank eingefügt";
-                    break;
+                    id = epParser.parseEditorAgendaItem(new JSONObject(request.body()), request.cookie("key"), allowOverwrite);
+                    return responseJSON("Tagesordnungspunkt \"" + id + "\"  erfolgreich in die Datenbank eingefügt", "null");
                 case "speech":
-                    id = epParser.parseEditorSpeech(new JSONObject(request.body()), allowOverwrite);
-                    successStatus = "Rede \"" + id + "\"  erfolgreich in die Datenbank eingefügt";
-                    break;
+                    id = epParser.parseEditorSpeech(new JSONObject(request.body()), request.cookie("key"), allowOverwrite);
+                    return responseJSON("Rede \"" + id + "\"  erfolgreich in die Datenbank eingefügt", "null");
                 case "person":
-                    id = epParser.parseEditorPerson(new JSONObject(request.body()), allowOverwrite);
-                    successStatus = "Person \"" + id + "\"  erfolgreich in die Datenbank eingefügt";
-                    break;
+                    id = epParser.parseEditorPerson(new JSONObject(request.body()), request.cookie("key"), allowOverwrite);
+                    return responseJSON("Person \"" + id + "\"  erfolgreich in die Datenbank eingefügt", "null");
                 default:
                     throw new EditorException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + editMode);
             }
-            return responseJSON(successStatus, "null");
         } catch (Exception e) {
             return responseJSON("Error", e.getMessage());
         }
     };
 
     /**
-     * Tries to parse a custom protocol/agenda item/speech and to insert it into the DB.
+     * Gets information for a protocol/agenda item/speech/person and sends it to the page.
      *
      * @author Eric Lakhter
      */
-    @Unfinished("Need to implement person extractor and to put it on the webpage")
     private static final Route postProtokollEditorExtract = (Request request, Response response) -> {
         try {
             String col = request.queryParams("col");
@@ -304,13 +302,55 @@ public class SparkHandler {
                 throw new EditorException("id is null");
             switch (col) {
                 case "protocol":
-                    return responseJSON("Protokoll " + id + " erfolgreich geladen", epParser.getEditorProtocolFromDB(id));
+                    return responseJSON("Protokoll \"" + id + "\" erfolgreich geladen", epParser.getEditorProtocolFromDB(id));
                 case "aItem":
-                    return responseJSON("Tagesordnungspunkt " + id + " erfolgreich geladen", epParser.getEditorAgendaFromDB(id));
+                    return responseJSON("Tagesordnungspunkt \"" + id + "\" erfolgreich geladen", epParser.getEditorAgendaFromDB(id));
                 case "speech":
-                    return responseJSON("Rede " + id + " erfolgreich geladen", epParser.getEditorSpeechFromDB(id));
+                    return responseJSON("Rede \"" + id + "\" erfolgreich geladen", epParser.getEditorSpeechFromDB(id));
                 case "person":
-                    return responseJSON("Person " + id + " erfolgreich geladen", epParser.getEditorPersonFromDB(id));
+                    return responseJSON("Person \"" + id + "\" erfolgreich geladen", epParser.getEditorPersonFromDB(id));
+                default:
+                    throw new EditorException("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
+            }
+        } catch (Exception e) {
+            return responseJSON("Error", e.getMessage());
+        }
+    };
+
+    /**
+     * Deletes a protocol/agenda item/speech/person from the database if the user has permission to do so.
+     * @author Eric Lakhter
+     */
+    private static final Route postProtokollEditorDelete = (Request request, Response response) -> {
+        try {
+            String col = request.queryParams("col");
+            if (col == null)
+                throw new EditorException("col must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
+            String id = request.queryParams("id");
+            if (id == null)
+                throw new EditorException("id is null");
+            String cookie = request.cookie("key");
+            switch (col) {
+                case "protocol":
+                    if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteProtocols")) {
+                        epParser.deleteViaEditor(col, id);
+                        return responseJSON("Protokoll \"" + id + "\" erfolgreich gelöscht", "null");
+                    } else throw new EditorException("Dieser Nutzer hat nicht das Recht Protokolle zu löschen");
+                case "aItem":
+                    if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteAgendaItems")) {
+                        epParser.deleteViaEditor("agendaItem", id);
+                        return responseJSON("Tagesordnungspunkt \"" + id + "\" erfolgreich gelöscht", "null");
+                    } else throw new EditorException("Dieser Nutzer hat nicht das Recht Tagesordnungspunkte zu löschen");
+                case "speech":
+                    if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteSpeeches")) {
+                        epParser.deleteViaEditor(col, id);
+                        return responseJSON("Rede \"" + id + "\" erfolgreich gelöscht", "null");
+                    } else throw new EditorException("Dieser Nutzer hat nicht das Recht Reden zu löschen");
+                case "person":
+                    if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deletePersons")) {
+                        epParser.deleteViaEditor(col, id);
+                        return responseJSON("Person \"" + id + "\" erfolgreich gelöscht", "null");
+                    } else throw new EditorException("Dieser Nutzer hat nicht das Recht Personen zu löschen");
                 default:
                     throw new EditorException("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
             }
@@ -639,6 +679,30 @@ public class SparkHandler {
         if (status == null) status = "null";
         if (details == null) details = "null";
         return new JSONObject().put("status", status).put("details", details);
+    }
+
+    /**
+     * Puts all editor-related permissions into the given map based on given user rank.
+     * @param pageContent The {@code Map} to put permission info in.
+     * @param cookie Rank of the user requesting permissions.
+     * @author Eric Lakhter
+     */
+    private static void includeEditorPermissions(Map<String, Object> pageContent, String cookie) {
+        pageContent.put("addProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addProtocols"));
+        pageContent.put("deleteProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteProtocols"));
+        pageContent.put("editProtocols", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editProtocols"));
+
+        pageContent.put("addAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addAgendaItems"));
+        pageContent.put("deleteAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteAgendaItems"));
+        pageContent.put("editAgendaItems", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editAgendaItems"));
+
+        pageContent.put("addSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addSpeeches"));
+        pageContent.put("deleteSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteSpeeches"));
+        pageContent.put("editSpeeches", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editSpeeches"));
+
+        pageContent.put("addPersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addPersons"));
+        pageContent.put("deletePersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deletePersons"));
+        pageContent.put("editPersons", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editPersons"));
     }
 
     /**
