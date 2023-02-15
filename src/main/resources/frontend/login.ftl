@@ -10,7 +10,6 @@
     </style>
 </head>
 <br>
-<br>
 <#include "parliamentBrowser.ftl">
 <br>
 <#if loginStatus==false >

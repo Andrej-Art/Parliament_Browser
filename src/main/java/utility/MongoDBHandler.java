@@ -1937,4 +1937,25 @@ public class MongoDBHandler {
         }
         return rank;
     }
+
+    /**
+     * This allows the User to edit the Features to a certain degree.
+     *
+     * @param featureToEdit
+     * @param editRank
+     * @return
+     * @author Julian Ocker
+     */
+    public boolean editFeature(String featureToEdit, String editRank) {
+        if (!(editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody"))){
+            return false;
+        }
+        if (checkIfDocumentExists("features", featureToEdit)){
+            db.getCollection("features").deleteOne(new Document("_id", featureToEdit));
+            db.getCollection("features").insertOne(new Document("_id", featureToEdit).append("rank", editRank));
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

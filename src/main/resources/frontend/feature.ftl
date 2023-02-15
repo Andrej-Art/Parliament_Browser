@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<html>
+<head>
+    <!-- source: https://iq.opengenus.org/sha1-algorithm/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha1/0.6.0/sha1.min.js"></script>
+    <style>
+        <#include "css/parliamentBrowser.css">
+    </style>
+</head>
+<br>
+<#include "parliamentBrowser.ftl">
+<br>
+<#if editFeatureRight==true>
+    <h3>Editieren der Features</h3>
+    <div>
+        <form onsubmit="editFeature(); return false;">
+            <div>
+                Rang ab dem das Feature verfügbar sein soll.
+                <br>
+                <select id="featureToChange">
+                    <#list featureList as feature>
+                        <option value=${feature}>
+                            ${feature}
+                        </option>
+                    </#list>
+                </select>
+            </div>
+            <br>
+            <div>
+                Rang ab dem das Feature verfügbar sein soll.
+                <br>
+                <select selected="" id="changeRank">
+                    <option value="">
+                        (nicht ändern)
+                    </option>
+                    <option value="everyone">
+                        Admin
+                    </option>
+                    <option value="user">
+                        User
+                    </option>
+                    <option value="manager">
+                        Manager
+                    </option>
+                    <option value="admin">
+                        Admin
+                    </option>
+                    <option value="nobody">
+                        Admin
+                    </option>
+                </select>
+            </div>
+            <div>
+                <br>
+                <button type="submit">Editieren</button>
+            </div>
+        </form>
+    </div>
+</#if>
+</html>

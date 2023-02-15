@@ -113,6 +113,9 @@ public class SparkHandler {
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
         post("/post/applicationDataEditUser/", postEditUser);
+
+        get("/featureManagement/",getFeatureManagement);
+        post("/post/applicationDataEditFeatures/", postEditFeatures);
     }
 
     /*
@@ -448,9 +451,6 @@ public class SparkHandler {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
         if (cookie == null){ cookie = ""; }
-        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
-        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editUsers"));
-        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         if (mongoDBHandler.checkIfCookieExists(cookie)) {
             pageContent.put("loginStatus", true);
         } else {
@@ -481,7 +481,7 @@ public class SparkHandler {
         JSONObject req = new JSONObject(request.body());
         String oldPassword = req.getString("oldPw");
         String newPassword = req.getString("newPw");
-        String cookie = req.getString("cookie");
+        String cookie = req.getString("key");
         Boolean success = mongoDBHandler.changePassword(cookie, newPassword, oldPassword);
         mongoDBHandler.logout(cookie);
         return new JSONObject().put("pwChangeSuccess", success);
@@ -495,7 +495,7 @@ public class SparkHandler {
     private static final Route postDeleteUser = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String deleteUser = req.getString("deleteUser");
-        String cookie = req.getString("cookie");
+        String cookie = req.getString("key");
         System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers")) {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
@@ -527,7 +527,7 @@ public class SparkHandler {
         String password = req.getString("pw");
         String rank = req.getString("rank");
         boolean registrationSuccess = false;
-        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("cookie"), "addUsers")) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "addUsers")) {
             if (mongoDBHandler.checkIfAvailable(name)) {
                 registrationSuccess = mongoDBHandler.register(name, password, rank);
             }
@@ -572,7 +572,7 @@ public class SparkHandler {
             newRank = "admin";
             newID = "Admin1";
         }
-        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("cookie"), "editUsers")) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "editUsers")) {
             if (mongoDBHandler.editUser(oldID, newID, newPassword, newRank)) {
                 answer.put("EditSuccess", true);
                 return answer;
@@ -581,6 +581,40 @@ public class SparkHandler {
         answer.put("EditSuccess", false);
         return answer;
     };
+
+    private static final Route getFeatureManagement = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>(0);
+        String cookie = request.cookie("key");
+        if (cookie == null){ cookie = ""; }
+        ArrayList<String> featureList = new ArrayList<>(0);
+        mongoDBHandler.getDB().getCollection("features").find().forEach(
+                (Consumer<? super Document>) procBlock -> featureList.add(procBlock.getString("_id")));
+        pageContent.put("featureList", featureList);
+        pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
+        pageContent.put("deleteUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
+        return new ModelAndView(pageContent, "feature.ftl");
+    };
+
+    /**
+     * accepts oldID newID newPassword new Rank, returns if Success
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postEditFeatures = (Request request, Response response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String featureToEdit = req.getString("featureToEdit");
+        String editRank = req.getString("editRank");
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "editUsers")) {
+            if (mongoDBHandler.editFeature(featureToEdit,editRank)) {
+                answer.put("EditSuccess", true);
+                return answer;
+            }
+        }
+        answer.put("EditSuccess", false);
+        return answer;
+    };
+
 
     /*
      * MISC:
