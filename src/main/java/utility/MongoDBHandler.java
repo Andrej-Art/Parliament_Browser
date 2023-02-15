@@ -1864,8 +1864,6 @@ public class MongoDBHandler {
         return salt;
     }
 
-    ;
-
     /**
      * Hashes again with a salt
      *
@@ -1887,4 +1885,27 @@ public class MongoDBHandler {
         return saltedPassword;
     }
 
+    /**
+     * This function creates the Collection that contains the features and who is allowed to use them.
+     *
+     * @author Julian Ocker
+     */
+    public void createFeatureCollection(){
+        db.getCollection("features").insertOne(new Document("_id","editFeatures").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","editSpeeches").append("rank","user"));
+        db.getCollection("features").insertOne(new Document("_id","editProtocols").append("rank","user"));
+        db.getCollection("features").insertOne(new Document("_id","editAgendaItems").append("rank","user"));
+        db.getCollection("features").insertOne(new Document("_id","editPerson").append("rank","manager"));
+        db.getCollection("features").insertOne(new Document("_id","addSpeeches").append("rank","manager"));
+        db.getCollection("features").insertOne(new Document("_id","addProtocols").append("rank","manager"));
+        db.getCollection("features").insertOne(new Document("_id","addAgendaItems").append("rank","manager"));
+        db.getCollection("features").insertOne(new Document("_id","addPersons").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","deleteSpeeches").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","deleteProtocols").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","deleteAgendaItems").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","deletePersons").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","editUsers").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","addUsers").append("rank","admin"));
+        db.getCollection("features").insertOne(new Document("_id","deleteUsers").append("rank","admin"));
+    }
 }
