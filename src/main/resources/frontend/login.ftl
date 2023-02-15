@@ -69,7 +69,7 @@
     </div>
 </#if>
 
-<#if adminStatus==true>
+<#if addUsersRight==true>
     <br>
     <br>
     <h3>Registriere einen neuen User</h3>
@@ -108,6 +108,10 @@
     </div>
     <br>
     <br>
+
+    </#if>
+    <#if deleteUsersRight==true>
+
     <h3>User löschen</h3>
     <div>
         <form onsubmit="deleteUser(); return false;">
@@ -124,7 +128,11 @@
     </div>
     <br>
     <br>
-    <h3>Editiere einen neuen User</h3>
+
+    </#if>
+    <#if editUsersRight==true>
+
+<h3>Editiere einen neuen User</h3>
     <div>
         <form onsubmit="editUserAccess(); return false;">
             <div>
@@ -179,9 +187,8 @@
 <script>
     <#include "js/login.js">
 </script>
-<#if adminStatus==true>
     <script>
         <#include "js/userManagement.js">
     </script>
-</#if>
+
 </html>

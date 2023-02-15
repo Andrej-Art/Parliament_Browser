@@ -1837,6 +1837,7 @@ public class MongoDBHandler {
                 && !checkIfDocumentExists("User", newID)) {
             Document editUser = db.getCollection("user").find(new Document("_id", oldID)).iterator().next();
             db.getCollection("user").deleteOne(new Document("_id", oldID));
+            if (newRank.equals("user") || newRank.equals("manager") || newRank.equals("admin")) {} else {newRank = "";}
             if (!newID.isEmpty()) {
                 editUser.put("_id", newID);
             }
@@ -1921,7 +1922,7 @@ public class MongoDBHandler {
     }
 
     /**
-     * This Method returns the rank of the User.
+     * This method returns the rank of the User.
      *
      * @param cookie
      * @return
