@@ -35,7 +35,7 @@
                         (nicht ändern)
                     </option>
                     <option value="everyone">
-                        Admin
+                        Jeder
                     </option>
                     <option value="user">
                         User
@@ -47,7 +47,7 @@
                         Admin
                     </option>
                     <option value="nobody">
-                        Admin
+                        Niemand
                     </option>
                 </select>
             </div>
