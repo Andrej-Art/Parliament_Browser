@@ -24,7 +24,6 @@ public class LaTeXHandler {
 
     private MongoDBHandler mdbh;
 
-
     public LaTeXHandler(MongoDBHandler mongoDBHandler, String targetDirectory) throws IOException {
         this.mdbh = mongoDBHandler;
         this.targetDir = targetDirectory;
