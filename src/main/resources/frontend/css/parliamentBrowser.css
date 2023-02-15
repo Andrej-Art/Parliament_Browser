@@ -8,9 +8,9 @@ body {
     cursor: pointer;
     height: 50px;
     width: 50px;
-    background-color: inherit;
+    background-color: transparent;
     border: none;
-    font-size: 35px;
+    font-size: 40px;
     text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
 }
 

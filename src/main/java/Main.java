@@ -67,7 +67,7 @@ public class Main {
                     break;
 
                 case "4":
-                    System.out.println("NLP analysis is performed...");
+                    MongoDBHandler.getHandler().createFeatureCollection();
                     break;
 
                 case "5":

@@ -351,11 +351,38 @@ public class EditorProtocolParser {
     public JSONObject getEditorPersonFromDB(String personID) throws EditorException {
         Document personDoc = mongoDBHandler.getDocumentOrNull("person", personID);
         if (personDoc == null) throw new EditorException("Es existiert keine Person mit ID " + personID);
+        JSONObject person = new JSONObject(personDoc.toJson()).put("personID", personDoc.getString("_id"));
 
-        return new JSONObject(personDoc.toJson())
-                .put("personID", personDoc.getString("_id"))
-                .put("birthDate", dateToLocalDate(personDoc.getDate("birthDate")))
-                .put("deathDate", dateToLocalDate(personDoc.getDate("deathDate")));
+        Object birthDate = personDoc.get("birthDate");
+        if (birthDate == null) {
+            person.put("birthDate", "");
+        } else if (birthDate instanceof Date) {
+            person.put("birthDate", dateToLocalDate((Date) birthDate));
+        } else {
+            String birthString = ((String) birthDate);
+            if (birthString.isEmpty()) {
+                person.put("birthDate", "");
+            } else {
+                String[] wrongDate = birthString.split("\\.");
+                person.put("birthDate", wrongDate[2] + "-" + wrongDate[1] + "-" + wrongDate[0]);
+            }
+        }
+
+        Object deathDate = personDoc.get("deathDate");
+        if (deathDate == null) {
+            person.put("deathDate", "");
+        } else if (deathDate instanceof Date) {
+            person.put("deathDate", dateToLocalDate((Date) deathDate));
+        } else {
+            String deathString = ((String) deathDate);
+            if (deathString.isEmpty()) {
+                person.put("deathDate", "");
+            } else {
+                String[] wrongDate = deathString.split("\\.");
+                person.put("deathDate", wrongDate[2] + "-" + wrongDate[1] + "-" + wrongDate[0]);
+            }
+        }
+        return person;
     }
 
     // FOR TESTING

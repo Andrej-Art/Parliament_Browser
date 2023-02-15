@@ -158,7 +158,7 @@ function updateCommentNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;
     let url = "/network/comment/?von=" + startDate + "&bis=" + endDate;
-    window.open(url);
+    window.location.href = url;
 
 }
 

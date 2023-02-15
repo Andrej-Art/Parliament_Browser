@@ -2,13 +2,18 @@
 <head>
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <style><#include "css/network.css"></style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        <#include "css/network.css">
+        <#include "css/parliamentBrowser.css">
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
 </head>
 
 
 <body onload="commentNetwork(data)">
+<#include "parliamentBrowser.ftl">
 
 <div id="commentNetworkGraph">
     <div id="flexbox" class="flex-container">
@@ -56,15 +61,16 @@
             <input type="checkbox" id="neu" name="neu" checked onclick="neuSentimentCheckbox()">
             <label style="color: gray" for="neu">NEU</label>
         </div>
-    </div>
-    <div class="calenderfield">
-        <label for="von">von:</label>
-        <input type="date" id="von" name="von">
-        <label for="bis">bis:</label>
-        <input type="date" id="bis" name="bis">
-        <input type="submit"  value="Anzeigen" id="submitBtn" onclick="updateCommentNetwork()">
+        <div class="calenderfield">
+            <label for="von">von:</label>
+            <input type="date" id="von" name="von">
+            <label for="bis">bis:</label>
+            <input type="date" id="bis" name="bis">
+            <input type="submit" value="Anzeigen" id="submitBtn" onclick="updateCommentNetwork()">
 
+        </div>
     </div>
+
 </div>
 <script>
     let data = ${commentNetworkData};

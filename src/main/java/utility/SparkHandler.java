@@ -21,9 +21,14 @@ import java.util.function.Consumer;
 import static spark.Spark.*;
 
 /**
- * Starts the localhost server for the protocol visualisation.
+ * Starts the localhost server for the protocol visualisation.<br>
+ * Contains all Routes and their definitions.
  *
  * @author Eric Lakhter
+ * @author Edvin Nise
+ * @author Julian Ocker
+ * @author Andrej Artuschenko
+ * @author DavidJordan
  */
 @Testing
 @Unfinished("Only some routes are finished")
@@ -47,6 +52,10 @@ public class SparkHandler {
      * Sets up the website's paths.
      *
      * @author Eric Lakhter
+     * @author Edvin Nise
+     * @author Julian Ocker
+     * @author Andrej Artuschenko
+     * @author DavidJordan
      * @see #getHome
      * @see #getDashboard
      * @see #getChartUpdates
@@ -57,6 +66,7 @@ public class SparkHandler {
      * @see #getLaTeX
      * @see #getSpeechNetwork
      * @see #getCommentNetwork
+     * @see #getSpeechTopicNetwork
      * @see #getLoginSite
      */
     public static void init() throws UIMAException, IOException {
@@ -94,16 +104,13 @@ public class SparkHandler {
         get("/latex/protocol/", "application/json", getLaTeXString);
         post("/latex/", "application/json", postLaTeX);
 
-
         get("/network/speech/", getSpeechNetwork, new FreeMarkerEngine(cfg));
         get("/network/comment/", getCommentNetwork, new FreeMarkerEngine(cfg));
+        get("/network/topic/", getSpeechTopicNetwork, new FreeMarkerEngine(cfg));
 
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
         post("/post/applicationDataRegister/", postRegister);
-        post("/post/applicationDataAdminCheck/", postCheckAdmin);
-        post("/post/applicationDataManagerCheck/", postCheckManager);
-        post("/post/applicationDataUserCheck/", postCheckUser);
         post("/post/applicationDataLogoutUser/", postLogout);
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
@@ -129,8 +136,8 @@ public class SparkHandler {
         pageContent.put("obj", obj);
         pageContent.put("objList", objList);
 
-        String dbInfo = "admin";
-        pageContent.put("userRank", dbInfo);
+        String userRank = "admin";
+        pageContent.put("userRank", userRank);
         return new ModelAndView(pageContent, "test.ftl");
     };
 
@@ -142,7 +149,7 @@ public class SparkHandler {
     private static final TemplateViewRoute getHome = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        pageContent.put("title", "Homepage");
+        pageContent.put("isHomepage", true);
 
         return new ModelAndView(pageContent, "home.ftl");
     };
@@ -154,10 +161,10 @@ public class SparkHandler {
      */
     private static final Route postHome = (Request request, Response response) -> {
         try {
-            mongoDBHandler.getDB().getCollection("dummy").drop();
-            return successJSON("Success", "Datenbank ist online und verfügbar!");
-        } catch(Exception e) {
-            return errorJSON("Datenbankverbindung ist zurzeit nicht verfügbar.");
+            mongoDBHandler.getDocumentOrNull("protocol", "19/1");
+            return responseJSON("Success", "Datenbank ist online und verfügbar!");
+        } catch (Exception e) {
+            return responseJSON("Error", "Datenbankverbindung ist zurzeit nicht verfügbar.");
         }
     };
 
@@ -250,9 +257,7 @@ public class SparkHandler {
                 throw new EditorException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is null");
 
             boolean allowOverwrite = Objects.equals(request.queryParams("overwrite"), "true");
-            // Testing
             System.out.println("allowOverwrite is: " + allowOverwrite);
-            allowOverwrite = false;
 
             String id;
             String successStatus;
@@ -276,9 +281,9 @@ public class SparkHandler {
                 default:
                     throw new EditorException("editMode must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + editMode);
             }
-            return successJSON(successStatus, "null");
+            return responseJSON(successStatus, "null");
         } catch (Exception e) {
-            return errorJSON(e.getMessage());
+            return responseJSON("Error", e.getMessage());
         }
     };
 
@@ -298,18 +303,18 @@ public class SparkHandler {
                 throw new EditorException("id is null");
             switch (col) {
                 case "protocol":
-                    return successJSON("Protokoll " + id + " erfolgreich geladen", epParser.getEditorProtocolFromDB(id));
+                    return responseJSON("Protokoll " + id + " erfolgreich geladen", epParser.getEditorProtocolFromDB(id));
                 case "aItem":
-                    return successJSON("Tagesordnungspunkt " + id + " erfolgreich geladen", epParser.getEditorAgendaFromDB(id));
+                    return responseJSON("Tagesordnungspunkt " + id + " erfolgreich geladen", epParser.getEditorAgendaFromDB(id));
                 case "speech":
-                    return successJSON("Rede " + id + " erfolgreich geladen", epParser.getEditorSpeechFromDB(id));
+                    return responseJSON("Rede " + id + " erfolgreich geladen", epParser.getEditorSpeechFromDB(id));
                 case "person":
-                    return successJSON("Person " + id + " erfolgreich geladen", epParser.getEditorPersonFromDB(id));
+                    return responseJSON("Person " + id + " erfolgreich geladen", epParser.getEditorPersonFromDB(id));
                 default:
                     throw new EditorException("Collection must be either \"protocol\", \"aItem\", \"speech\" or \"person\" but is " + col);
             }
         } catch (Exception e) {
-            return errorJSON(e.getMessage());
+            return responseJSON("Error", e.getMessage());
         }
     };
 
@@ -409,10 +414,12 @@ public class SparkHandler {
 
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
+        String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
 
-      //  JSONObject networkData = mongoDBHandler.matchSpeakerToDDC();
+        JSONObject networkData = mongoDBHandler.matchSpeakerToDDC(von, bis);
 
-      //  pageContent.put("redeNetworkData", networkData);
+        pageContent.put("redeNetworkData", networkData);
 
         return new ModelAndView(pageContent, "speechNetwork.ftl");
     };
@@ -428,6 +435,18 @@ public class SparkHandler {
         return new ModelAndView(pageContent, "commentNetwork.ftl");
     };
 
+    private static final TemplateViewRoute getSpeechTopicNetwork = (Request request, Response response) -> {
+        String von = request.queryParams("von") != null ? request.queryParams("von") : "";
+        String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
+        Map<String, Object> pageContent = new HashMap<>();
+
+        JSONObject networkData = mongoDBHandler.speechSentTopicData(von, bis);
+
+        pageContent.put("speechTopicNetworkData", networkData);
+
+        return new ModelAndView(pageContent, "speechTopicNetwork.ftl");
+    };
+
     /**
      * This returns the login page.
      *
@@ -436,21 +455,24 @@ public class SparkHandler {
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
-        if (mongoDBHandler.checkUser(cookie) || mongoDBHandler.checkManager(cookie)) {
+        if (mongoDBHandler.checkIfCookieExists(cookie)) {
             pageContent.put("loginStatus", true);
+            if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie,"editUsers")) {
+                pageContent.put("adminStatus", true);
+                pageContent.put("loginStatus", true);
+                ArrayList<User> userList = new ArrayList<>(0);
+                mongoDBHandler.getDB().getCollection("user").find().forEach(
+                        (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
+                pageContent.put("userList", userList);
+            } else {
+                pageContent.put("editUserRight", false);
+            }
+            pageContent.put("addUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
+            pageContent.put("deleteUserRight",mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         } else {
             pageContent.put("loginStatus", false);
         }
-        if (mongoDBHandler.checkAdmin(cookie)) {
-            pageContent.put("adminStatus", true);
-            pageContent.put("loginStatus", true);
-            ArrayList<User> userList = new ArrayList<>(0);
-            mongoDBHandler.getDB().getCollection("user").find().forEach(
-                    (Consumer<? super Document>) procBlock -> userList.add(new User(procBlock)));
-            pageContent.put("userList", userList);
-        } else {
-            pageContent.put("adminStatus", false);
-        }
+
         return new ModelAndView(pageContent, "login.ftl");
     };
 
@@ -478,8 +500,8 @@ public class SparkHandler {
         JSONObject req = new JSONObject(request.body());
         String deleteUser = req.getString("deleteUser");
         String cookie = req.getString("cookie");
-        System.out.println(mongoDBHandler.checkAdmin(cookie));
-        if (mongoDBHandler.checkAdmin(cookie) && !deleteUser.equals("Admin1")) {
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers")) {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
             return uDeletionSuccess;
         }
@@ -498,45 +520,6 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie, returns whether a user ist registered
-     *
-     * @author Julian Ocker
-     */
-    private static final Route postCheckUser = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkUser(cookie));
-        return answer;
-    };
-
-    /**
-     * accepts cookie returns whether a User is a Manager
-     *
-     * @author Julian Ocker
-     */
-    private static final Route postCheckManager = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkManager(cookie));
-        return answer;
-    };
-
-    /**
-     * accepts cookie returns whether a User is an Admin
-     *
-     * @author Julian Ocker
-     */
-    private static final Route postCheckAdmin = (request, response) -> {
-        JSONObject req = new JSONObject(request.body());
-        String cookie = req.getString("cookie");
-        JSONObject answer = new JSONObject();
-        answer.put("answer", mongoDBHandler.checkAdmin(cookie));
-        return answer;
-    };
-
-    /**
      * accepts cookie name password rank
      *
      * @returns
@@ -551,7 +534,7 @@ public class SparkHandler {
         boolean registrationSuccess = false;
 
         if (mongoDBHandler.checkIfAvailable(name)) {
-            registrationSuccess = mongoDBHandler.registrate(name, password, rank);
+            registrationSuccess = mongoDBHandler.register(name, password, rank);
         }
         return new JSONObject().put("registration", registrationSuccess);
     };
@@ -589,13 +572,14 @@ public class SparkHandler {
         String newPassword = req.getString("editPassword");
         String newRank = req.getString("editRank");
         JSONObject answer = new JSONObject();
-        if(oldID.equals("Admin1")){
+        if (oldID.equals("Admin1")) {
             newRank = "admin";
             newID = "Admin1";
         }
-        if (mongoDBHandler.checkAdmin(req.getString("cookie"))) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("cookie"), "editUsers")) {
             if (mongoDBHandler.editUser(oldID, newID, newPassword, newRank)) {
                 answer.put("EditSuccess", true);
+                return answer;
             }
         }
         answer.put("EditSuccess", false);
@@ -607,26 +591,18 @@ public class SparkHandler {
      */
 
     /**
-     * Returns a JSON signaling that the request was handled without errors.
+     * Returns a JSON with a "status" and a "details" attribute.
+     * <p>The status attribute should be "Error" if an error occurred, or a success message instead.<br>
+     * The details attribute is the content the page handles, e.g. an error message
+     * or a String to be inserted somewhere or another JSON.
      *
-     * @return JSON: {@code {status: successStatus, details: successDetails}}
+     * @return JSON: {@code {status: status, details: details}}
      * @author Eric Lakhter
      */
-    private static JSONObject successJSON(String successStatus, Object successDetails) {
-        if (successStatus == null) successStatus = "null";
-        if (successDetails == null) successDetails = "null";
-        return new JSONObject().put("status", successStatus).put("details", successDetails);
-    }
-
-    /**
-     * Returns a JSON signaling that an error occurred while handling the request.
-     *
-     * @return JSON: {@code {status: "Error", details: errorDetails}}
-     * @author Eric Lakhter
-     */
-    private static JSONObject errorJSON(String errorDetails) {
-        if (errorDetails == null) errorDetails = "null";
-        return new JSONObject().put("status", "Error").put("details", errorDetails);
+    private static JSONObject responseJSON(String status, Object details) {
+        if (status == null) status = "null";
+        if (details == null) details = "null";
+        return new JSONObject().put("status", status).put("details", details);
     }
 
     /**

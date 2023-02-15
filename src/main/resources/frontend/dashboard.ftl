@@ -8,7 +8,7 @@
     <#-- Include d3.js for graphs -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
-    <#-- Include ajax -->
+    <#-- Include fontawesome -->
     <link rel="stylesheet" href=
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 

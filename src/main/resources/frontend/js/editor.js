@@ -41,7 +41,28 @@ const personEditHTML =
     '<div class="input-row"><label class="editor-label" for="input12">Sterbedatum</label><input id="input12" class="editor-input" tabindex="12" onkeydown="advanceOnEnter(this)" type="date"></div>' +
     '<div class="input-row"><label class="editor-label" for="input13">Geburtsort</label><input id="input13" class="editor-input" tabindex="13" onkeydown="advanceOnEnter(this)" placeholder="Berlin"></div>';
 
-
+const protocolExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.' +
+    '<ul>' +
+    '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+    '</ul>';
+const agendaExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.' +
+    '<ul>' +
+    '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+    '</ul>';
+const speechExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.' +
+    '<ul>' +
+    '<li>Rede-IDs haben das Format "ID&lt;Wahlperiode&gt;&lt;Zahl&gt;"</li>' +
+    '</ul>';
+const personExplanationHTML =
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    '<ul>' +
+    '<li>Personen-IDs sind einfach nur Zahlen: "&lt;Zahl&gt;"</li></li>' +
+    '</ul>';
 
 
 /**
@@ -52,9 +73,8 @@ function setProtocolEditorButtons() {
     let finalHTML = '';
     for (let protocolID of protocolKeys) {
         finalHTML +=
-            '<li><button onclick="setAgendaEditorButtons(\'' + protocolID + '\')" ' +
-            'class="speech-vis-sidebar-button"> Protokoll ' + protocolID + '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'protocol\', \'' + protocolID + '\')">Lade dieses Protokoll</button>';
+            '<li><button onclick="setAgendaEditorButtons(\'' + protocolID + '\')"> Protokoll ' + protocolID + '</button>' +
+            '<button onclick="pasteDataIntoEditor(\'protocol\', \'' + protocolID + '\')" style="float: right">Lade dieses Protokoll</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -68,9 +88,8 @@ function setAgendaEditorButtons(protocolID = "1/1") {
     let finalHTML = '';
     for (let agendaID of protocols[protocolID]) {
         finalHTML +=
-            '<li><button type="button" onclick="setSpeechEditorButtons(\'' + agendaID + '\')" ' +
-            'class="speech-vis-sidebar-button agenda-button">' + agendaID.split("/")[2]+ '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'aItem\', \'' + agendaID + '\')">Lade diesen Tagesordnungspunkt</button>';
+            '<li><button type="button" onclick="setSpeechEditorButtons(\'' + agendaID + '\')">' + agendaID.split("/")[2]+ '</button>' +
+            '<button onclick="pasteDataIntoEditor(\'aItem\', \'' + agendaID + '\')" style="float: right">Lade diesen TOP</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -84,8 +103,8 @@ function setSpeechEditorButtons(agendaID = "1/1/ID") {
     let finalHTML = '';
     for (let speechID of agendaItems[agendaID]["speechIDs"]) {
         finalHTML +=
-            '<li><button type="button" class="speech-vis-sidebar-button">' + speechID + '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'speech\', \'' + speechID + '\')">Lade diese Rede</button>';
+            '<li><button type="button">' + speechID + '</button>' +
+            '<button onclick="pasteDataIntoEditor(\'speech\', \'' + speechID + '\')" style="float: right">Lade diese Rede</button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -98,8 +117,10 @@ function setPersonEditorButtons() {
     let finalHTML = '';
     for (let personID of personIDs) {
         finalHTML +=
-            '<li><button type="button" class="speech-vis-sidebar-button">' + people[personID]["fullName"] + ', ' + people[personID]["party"] + '</button><br>' +
-            '<button onclick="pasteDataIntoEditor(\'person\', \'' + personID + '\')">Lade diese Person</button>';
+            '<li><button type="button" style="display: flex; width: 100%" ' +
+            'onclick="pasteDataIntoEditor(\'person\', \'' + personID + '\')">' +
+            '<span style="text-align: left">' + people[personID]["fullName"] + ',<br> ' + people[personID]["party"] + '</span>' +
+            '<span style="margin-left: auto">Lade diese Person</span></button>';
     }
     document.getElementById("button-list").innerHTML = finalHTML;
 }
@@ -283,6 +304,7 @@ function fillWithData(editMode = "", data = {}) {
     switch (editMode) {
         case "protocol":
             document.getElementById("input-area").innerHTML = protocolEditHTML;
+            document.getElementById("explanation").innerHTML = protocolExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Protokollen?";
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.date);
@@ -293,14 +315,16 @@ function fillWithData(editMode = "", data = {}) {
             break;
         case "aItem":
             document.getElementById("input-area").innerHTML = agendaEditHTML;
+            document.getElementById("explanation").innerHTML = agendaExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Tagesordnungspunkten?";
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.agendaID);
-            document.getElementById("input3").value = checkForUndefined(data.subject);
-            document.getElementById("input4").value = checkForUndefined(data.speechIDs);
+            document.getElementById("input3").value = checkForUndefined(data.speechIDs);
+            document.getElementById("input4").value = checkForUndefined(data.subject);
             break;
         case "speech":
             document.getElementById("input-area").innerHTML = speechEditHTML;
+            document.getElementById("explanation").innerHTML = speechExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Reden?";
             document.getElementById("input1").value = checkForUndefined(data.speechID);
             document.getElementById("input2").value = checkForUndefined(data.speakerID);
@@ -308,6 +332,7 @@ function fillWithData(editMode = "", data = {}) {
             break;
         case "person":
             document.getElementById("input-area").innerHTML = personEditHTML;
+            document.getElementById("explanation").innerHTML = personExplanationHTML;
             document.getElementById("overwrite-label").innerText = "Erlaube das Überschreiben von bereits existierenden Personen?";
             document.getElementById("input1").value = checkForUndefined(data.personID);
             document.getElementById("input2").value = checkForUndefined(data.firstName);

@@ -58,7 +58,7 @@ public class LaTeXHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        System.out.println(stringBuilder);
         return stringBuilder.toString();
     }
 

@@ -82,7 +82,7 @@ function findSpeechIDs() {
  * @author Eric Lakhter
  */
 function getSpeechData(speechID = "ID") {
-    setPageStatus("Auf Antwort von DB warten");
+    setPageStatus('Auf Antwort von DB warten <img src="/loadIcon.gif" alt="" style="vertical-align: middle">');
     let req = new XMLHttpRequest();
     req.open("GET", "speechVis/?speechID=" + speechID);
     req.responseType = "json";
@@ -90,7 +90,7 @@ function getSpeechData(speechID = "ID") {
         try {
             // happens if speechID doesn't correspond to an existing speech
             if (req.response["speaker"] === undefined) {
-                setPageStatus("Die Rede mit dieser ID ist leer.");
+                setPageStatus("Die Rede mit dieser ID ist leer bzw. existiert nicht.");
             } else {
                 setPageSpeechVis(req.response);
             }
@@ -110,7 +110,7 @@ function setPageStatus(textMessage = "") {
     document.getElementById("speech-title").innerHTML = '';
     document.getElementById("speech-header").innerHTML = '';
     document.getElementById("speaker-pic").innerHTML = '';
-    document.getElementById("speech-text").innerText = textMessage;
+    document.getElementById("speech-text").innerHTML = textMessage;
 }
 
 /**
