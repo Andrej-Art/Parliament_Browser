@@ -1654,21 +1654,12 @@ public class MongoDBHandler {
     }
 
     /**
-     * This method gets the Rank of an User by Cookies.
-     *
-     * @param cookie
-     * @return
-     */
-    public String getUserRank(String cookie) {
-        return getTag("cookies", "_id", cookie, "rank");
-    }
-
-    /**
      * This method gets the Rank of an User by Cookie.
      *
      * @param cookie
      * @param feature
      * @return
+     * @author Julian Ocker
      */
     public Boolean checkIfCookieIsAllowedAFeature(String cookie, String feature) {
         String rank = getRankOfCookie(cookie);
@@ -1703,6 +1694,7 @@ public class MongoDBHandler {
      *
      * @param feature
      * @return
+     * @author Julian Ocker
      */
     public String getRankOfFeature(String feature) {
         return getTag("features", "_id", feature, "rank");
@@ -1933,6 +1925,7 @@ public class MongoDBHandler {
      *
      * @param cookie
      * @return
+     * @author Julian Ocker
      */
     public String getRankOfCookie(String cookie) {
         String rank = "";
