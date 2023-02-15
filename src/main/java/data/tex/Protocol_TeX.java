@@ -3,9 +3,11 @@ package data.tex;
 import org.bson.Document;
 import org.json.JSONObject;
 import utility.MongoDBHandler;
+import utility.TimeHelper;
 import utility.annotations.Testing;
 import utility.annotations.Unfinished;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import java.util.List;
 @Testing
 @Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
 public class Protocol_TeX {
+
     private Document protDoc;
     private MongoDBHandler mdbh;
 
@@ -30,18 +33,26 @@ public class Protocol_TeX {
 
     /**
      * Method to generate Latex formatted String containing the relevant data.
+     *
      * @param agendaItems
      * @return
      * @author DavidJordan
      */
     public String toTeX(List<Document> agendaItems) {
+
         StringBuilder sb = new StringBuilder();
-        sb.append("\n\n\\documentclass{article}\n\n" +
+        sb.append("\\documentclass[a4paper,11pt]{article}\n" +
+                "\\usepackage[ngerman,shorthands=off]{babel}\n" +
                 "\\usepackage{graphicx}\n\n" +
                 "\\usepackage{hyperref}\n\n" +
                 "\\usepackage{color}\n\n" +
                 "\\usepackage[utf8]{inputenc}\n\n" +
                 "\\usepackage[T1]{fontenc}\n\n" +
+                "\\usepackage{pgf-pie}\n" +
+                "\\usepackage{tikz}\n" +
+                "\\usepackage[capitalize]{cleveref}\n" +
+                "\\usepackage{enumitem}\n" +
+                "\\usepackage{makecell}\n" +
                 "\\title{Protokoll: " +
                 protDoc.getString("_id") + "}\n\n" +
                 "\\begin{document}\n\n" +
@@ -51,19 +62,20 @@ public class Protocol_TeX {
 
         for (Document agDoc : agendaItems) {
             List<String> speechIDs = null;
-            if (agDoc.getList("speechIDs", String.class) != null){
+            if (agDoc.getList("speechIDs", String.class) != null) {
                 speechIDs = new ArrayList<>((agDoc.getList("speechIDs", String.class)));
             }
             List<Document> speechDocs = new ArrayList<>(0);
-            if(speechIDs != null) {
+            if (speechIDs != null) {
                 for (String speechID : speechIDs) {
                     speechDocs.add(mdbh.getDocument("speech", speechID));
                 }
             }
             AgendaItem_TeX agTEX = new AgendaItem_TeX(agDoc, mdbh);
-            sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" +  agTEX.toTeX(speechDocs, targetDirectory));
+            sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" + agTEX.toTeX(speechDocs, targetDirectory));
         }
-
+        Speech_TeX spTEX = new Speech_TeX(mdbh);
+        sb.append(spTEX.pollResults(String.valueOf(TimeHelper.dateToLocalDate(protDoc.getDate("date")))));
         sb.append("\\end{document}");
 
         return sb.toString();

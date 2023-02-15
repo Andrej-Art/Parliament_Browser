@@ -1,19 +1,16 @@
 package data.tex;
 
 import org.bson.Document;
-import org.json.JSONObject;
 import utility.MongoDBHandler;
 import utility.annotations.Testing;
 import utility.annotations.Unfinished;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +27,7 @@ public class AgendaItem_TeX {
 
     /**
      * Constructor
+     *
      * @param agendaItem
      * @param mongoDBHandler
      */
@@ -40,6 +38,7 @@ public class AgendaItem_TeX {
 
     /**
      * Method to generate Latex formatted String containing the relevant data
+     *
      * @param speeches
      * @param targetDirectory
      * @return
@@ -61,29 +60,32 @@ public class AgendaItem_TeX {
                 }
                 String speechID = speech.getString("_id");
                 String speakerName = speaker.getString("fullName");
+                String fileUrlName = imageURL.substring(41);
 
 
                 String speakerImageName = speakerName.replaceAll("\\s+", "_") + ".jpg";
 
                 if (imageURL != null) {
-                // Source:  https://www.baeldung.com/java-download-file
-                // Downloading the image of the speaker and storing it in the current working directory
-                try(InputStream inp = new URL(imageURL).openStream()) {
-                    Files.copy(inp, Paths.get(targetDirectory, speakerImageName));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                    // Source:  https://www.baeldung.com/java-download-file
+//                    // Downloading the image of the speaker and storing it in the current working directory
+                    try (InputStream inp = new URL(imageURL).openStream()) {
+                        if (!new File(targetDirectory + "/" + speakerImageName).exists()) {
+                            Files.copy(inp, Paths.get(targetDirectory, speakerImageName));
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
 
-
-                    sb.append("\\subsection{Rede: " + speechID + "  Redner: " + speakerName +"}\n\n"
+                    sb.append("\\subsection{Rede: " + speechID + "  Redner: " + speakerName + "}\n\n"
                             + "\\begin{figure}[ht]\n\n"
                             + "\\centering\n\n"
                             + "\\includegraphics[width=0.3\\textwidth]{" + speakerImageName + "}\n\n"
                             + "\\caption{" + speakerName + "}\n\n"
                             + "\\end{figure}\n\n");
                 }
-                sb.append(speechTex.toTeX(speech.getString("_id")) + "\n\n");
+                sb.append(speechTex.speechToTex(speech.getString("_id")) + "\n\n");
+                sb.append(speechTex.nlpTableTex(speech.getString("_id")) + "\n\n");
             }
         }
         return sb.toString();

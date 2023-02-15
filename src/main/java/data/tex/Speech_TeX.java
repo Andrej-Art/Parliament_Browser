@@ -1,23 +1,16 @@
 package data.tex;
 
-import com.mongodb.DBCursor;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
 import utility.MongoDBHandler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.mongodb.client.model.Aggregates.limit;
-import static java.util.Arrays.asList;
 
 /**
  * The {@code Speech_TeX} class.
@@ -44,7 +37,7 @@ public class Speech_TeX {
      * @return String in TeX format.
      * @author Eric Lakhter
      */
-    public String toTeX(String speechID) {
+    public String speechToTex(String speechID) {
 
 
         Document speechDoc = mdbh.getDocument("speech", speechID);
@@ -103,21 +96,6 @@ public class Speech_TeX {
         return (texDocFinalBuilder.toString());
     }
 
-    /**
-     * converts LaTeX source file to .pdf
-     *
-     * @author Edvin Nise
-     */
-    public void pdfTest() throws IOException, InterruptedException {
-////// Create load options for LaTeX file
-//        TeXLoadOptions options = new TeXLoadOptions();
-//
-//// Create Document object to load the LaTeX file
-//        com.aspose.pdf.Document document = new com.aspose.pdf.Document("testPDF3.tex", options);
-//
-//// Save output PDF document
-
-    }
 
     /**
      * returns a table with one cell for each NamedEntity
@@ -131,12 +109,13 @@ public class Speech_TeX {
         if (speechDoc == null) return "";
         StringBuilder sb = new StringBuilder();
         Double sentiment = speechDoc.getDouble("sentiment");
-        sb.append("\\textbf{Rede Sentimentvalue:} ").append(DECIMAL_FORMAT.format(sentiment)).append("\n");
-        sb.append("\\begin{table}[h!]\n" +
+        sb.append("\\textbf{Sentimentvalue : " + speechDoc.getDouble("sentiment") + "}\n" +
+                "\\vspace*{1cm}\n");
+        sb.append("\n\\begin{table}[ht]\n" +
                 "\\centering\n" +
                 "\\begin{tabular}{||c | c | c||}\n" +
                 "\\hline\n" +
-                "PersonEntities & OrgEntities & LocEntities \\\\ [0.5ex]\n" +
+                "PersonEntities & OrgEntities & LocEntities \\\\ \n\n" +
                 "\\hline\\hline\n");
 
         List<Document> perDoc = (List<Document>) speechDoc.get("namedEntitiesPer");
@@ -159,9 +138,10 @@ public class Speech_TeX {
             sb.append(docLoc.getString("coveredText")).append(" \\\\\n");
         }
         sb.append("}\\\\\n" +
-                "\\hline");
+                "\\hline\n");
         sb.append("\\end{tabular}\n" +
-                "\\end{table}");
+                "\\end{table}\n");
+        sb.append("\\clearpage\n");
         System.out.println(sb);
         return sb.toString();
     }
@@ -177,25 +157,69 @@ public class Speech_TeX {
         Bson match = new Document("$match", new Document("date", date));
         ArrayList<JSONObject> pollCursor = mdbh.getPollResults(date, date, "", "", "");
         StringBuilder sb = new StringBuilder();
-        String[] pollFractionsList = {"SPD", "LINKE", "B90", "independent", "FDP", "CxU", "AfD"}; //AfD fehlt
+        String[] pollFractionsList = {"SPD", "LINKE", "B90", "FDP", "CxU", "AfD", "independent"};
+
 
         for (JSONObject json : pollCursor) {
+            Integer i = 0;
+            sb.append("\n\\begin{figure}[ht]\n" +
+                    "\\centering\n" +
+                    "\\caption{Abstimmung zu: " + json.getString("topic") + "}\n\n");
+
             for (String s : pollFractionsList) {
-                sb.append("\\begin{tikzpicture}\n" +
-                        "\\pie{");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Yes,\n");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "No,\n");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Abstained,\n");
-                sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Votes}\n");
-                sb.append("\\end{tikzpicture}\n");
+                switch (i % 3) {
+                    case 0:
+                        if (i == 6) {
+                            sb.append("\\begin{tikzpicture}\n" +
+                                    "\\centering\n" +
+                                    "\\pie[scale=0.45]%\n{");
+                            sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Yes,\n");
+                            sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "No,\n");
+                            sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Abstained,\n");
+                            sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Votes}\n");
+                            break;
+                        }
+                        sb.append("\\begin{tikzpicture}\n" +
+                                "\\pie[scale=0.45]%\n{");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Yes,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "No,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Abstained,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Votes}\n");
+                        break;
+
+
+                    case 1:
+                        sb.append("\\pie[xshift=5cm, scale=0.45]%\n{");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Yes,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "No,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Abstained,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Votes}\n");
+                        break;
+
+
+                    case 2:
+                        sb.append("\\pie[xshift=10cm, scale=0.45]%\n{");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Yes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Yes,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "No") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "No,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "Abstained") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Abstained,\n");
+                        sb.append(DECIMAL_FORMAT.format((json.getDouble(s + "NoVotes") / json.getDouble(s + "totalVotes")) * 100)).append("/" + s + "Votes}\n");
+                        sb.append("\\end{tikzpicture}\n\n").append("\\vspace*{1cm}\n");
+                        break;
+
+                }
+
+                i++;
             }
-            sb.append("\\begin{tikzpicture}\n" +
-                    "\\pie{");
+
+                   sb.append("\\pie[xshift=5cm, scale=0.45]%\n{");
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalYes") / json.getDouble("totalVotes")) * 100)).append("/totalYes,\n");
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalNo") / json.getDouble("totalVotes")) * 100)).append("/totalNo,\n");
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalAbstained") / json.getDouble("totalVotes")) * 100)).append("/totalAbstained,\n");
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalNoVotes") / json.getDouble("totalVotes")) * 100)).append("/totalNoVotes}\n");
             sb.append("\\end{tikzpicture}\n");
+            sb.append("\\end{figure}\n");
+
+
         }
 
         System.out.println(sb);
@@ -203,7 +227,7 @@ public class Speech_TeX {
     }
 
     public String agendaItems(String protocol) {
-        Document protocolDoc =  mdbh.getDB().getCollection("protocol").find(new Document("_id", protocol)).iterator().tryNext();
+        Document protocolDoc = mdbh.getDB().getCollection("protocol").find(new Document("_id", protocol)).iterator().tryNext();
         StringBuilder sb = new StringBuilder();
         sb.append("\\tableofcontents\n");
         ArrayList<String> agendaItemsList = (ArrayList<String>) protocolDoc.get("agendaItems");
