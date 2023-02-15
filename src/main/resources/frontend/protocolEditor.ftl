@@ -37,6 +37,9 @@
         <div id="submit-container">
 
         </div>
+        <div id="delete-container">
+
+        </div>
         <div id="explanation">
 
         </div>
@@ -69,7 +72,9 @@ let personIDs = Object.keys(people);
 personIDs.sort((a, b) => parseInt(a) - parseInt(b));
 
 document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status-Benachrichtigungen:<br>' +
-    '<span style="color: blue">Achtung! Die DB ist noch nicht wirklich angeschlossen, daher keine Sorgen darum machen dass der Editor behauptet Dinge wurden eingefügt!</span><br>';
+    '<span style="color: blue">Achtung! Die ECHTE DB ist noch nicht wirklich angeschlossen, Daten werden zwar aus den echten ' +
+    'Collections geladen, aber Einfügen und Löschen wird in Testcollections gemacht.<br>' +
+    'Daher keine Sorgen machen dass der Editor behauptet Dinge wurden eingefügt!</span><br>';
 document.querySelector('input[value="protocol"]').checked = true;
 fillWithData(oldEditMode, cachedProtocol);
 setProtocolEditorButtons();

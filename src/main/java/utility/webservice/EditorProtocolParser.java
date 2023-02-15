@@ -35,7 +35,6 @@ import static utility.TimeHelper.*;
  */
 public class EditorProtocolParser {
     private final MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
-    private final UpdateOptions uo = new UpdateOptions().upsert(true);
     private final UIMAPerformer uima = new UIMAPerformer();
     private final List<String> protocolReqs = asList("protocolID", "date", "begin", "end", "leaders", "aItems");
     private final List<String> agendaReqs = asList("protocolID", "agendaID", "subject", "speechIDs");
@@ -114,7 +113,7 @@ public class EditorProtocolParser {
 
         String protocolID = agendaObject.getString("protocolID").trim();
         validateProtocolID(protocolID);
-        String agendaID = agendaObject.getString("protocolID").trim();
+        String agendaID = agendaObject.getString("agendaID").trim();
         String fullAgendaID = protocolID + "/" + agendaID;
 //        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))   // TODO remove testing
         checkPermission("agendaItem", "AgendaItems", fullAgendaID, cookie, allowOverwrite);
@@ -398,7 +397,9 @@ public class EditorProtocolParser {
      * @throws EditorException If the entry with the given ID doesn't exist.
      */
     public void deleteViaEditor(String col, String id) throws EditorException {
-        if (mongoDBHandler.checkIfDocumentExists(col, id)) mongoDBHandler.deleteDocument(col, id);
+        System.out.println("Deleting something");
+//        if (mongoDBHandler.checkIfDocumentExists(col, id)) mongoDBHandler.deleteDocument(col, id);
+        if (testVersionExists(col, id)) mongoDBHandler.deleteDocument("editor_test_" + col, id);
         else {
             switch (col) {
                 case "protocol":
@@ -458,71 +459,75 @@ public class EditorProtocolParser {
 
     @Testing
     private void insertIntoTest(Object insertObject) {
-//        if (insertObject instanceof Protocol_Impl) {
-//            Protocol_Impl protocol = (Protocol_Impl) insertObject;
-//            mongoDBHandler.getDB().getCollection("editor_test_protocol")
-//                    .updateOne(new Document("_id", protocol.getID()), new Document("_id", protocol.getID())
-//                            .append("beginTime", protocol.getBeginTime())
-//                            .append("endTime", protocol.getEndTime())
-//                            .append("date", protocol.getDate())
-//                            .append("duration", protocol.getDuration())
-//                            .append("electionPeriod", protocol.getElectionPeriod())
-//                            .append("protocolNumber", protocol.getProtocolNumber())
-//                            .append("sessionLeaders", protocol.getSessionLeaders())
-//                            .append("agendaItems", protocol.getAgendaItemIDs()), uo);
-//        }
-//
-//        else if (insertObject instanceof AgendaItem_Impl) {
-//            AgendaItem_Impl aItem = (AgendaItem_Impl) insertObject;
-//            mongoDBHandler.getDB().getCollection("editor_test_agendaItem")
-//                    .updateOne(new Document("_id", aItem.getID()), new Document(new Document("_id", aItem.getID())
-//                            .append("date", aItem.getDate())
-//                            .append("subject", aItem.getSubject())
-//                            .append("speechIDs", aItem.getSpeechIDs())), uo);
-//        }
-//
-//        else if (insertObject instanceof ProcessedSpeech) {
-//            ProcessedSpeech processedSpeech = (ProcessedSpeech) insertObject;
-//            try {
-//                mongoDBHandler.getDB()
-//                        .getCollection("editor_test_speech")
-//                        .updateOne(new Document("_id", processedSpeech.getID()),
-//                                Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()), uo);
-//            } catch (MongoException | IllegalArgumentException ignored) {}
-//            try {
-//                mongoDBHandler.getDB()
-//                        .getCollection("editor_test_speech_cas")
-//                        .updateOne(new Document("_id", processedSpeech.getID()),
-//                                new Document("_id", processedSpeech.getID()).append("fullCas", processedSpeech.getFullCas()), uo);
-//            } catch (MongoException | IllegalArgumentException ignored) {}
-//            try {
-//                mongoDBHandler.getDB()
-//                        .getCollection("editor_test_speech_tokens")
-//                        .updateOne(new Document("_id", processedSpeech.getID()),
-//                                Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()), uo);
-//            } catch (MongoException | IllegalArgumentException ignored) {}
-//        }
-//
-//        else if (insertObject instanceof Comment) {
-//            Comment comment = (Comment) insertObject;
-//            double sentiment = uima.getAverageSentiment(uima.getJCas(comment.getText()));
-//            mongoDBHandler.getDB().getCollection("editor_test_comment")
-//                    .updateOne(new Document("_id", comment.getID()), new Document("_id", comment.getID())
-//                            .append("speechID", comment.getSpeechID())
-//                            .append("speakerID", comment.getSpeakerID())
-//                            .append("commentatorID", comment.getCommentatorID())
-//                            .append("commentPos", comment.getCommentPosition())
-//                            .append("text", comment.getText())
-//                            .append("date", comment.getDate())
-//                            .append("sentiment", sentiment), uo);
-//
-//        }
-//
-//        else if (insertObject instanceof Person_Impl) {
-//            Person_Impl person = (Person_Impl) insertObject;
-//            mongoDBHandler.getDB().getCollection("editor_test_person")
-//                    .updateOne(new Document("_id", person.getID()), person.getPersonDoc(), uo);
-//        }
+        if (insertObject instanceof Protocol_Impl) {
+            Protocol_Impl protocol = (Protocol_Impl) insertObject;
+            mongoDBHandler.deleteDocument("editor_test_protocol", protocol.getID());
+            mongoDBHandler.getDB().getCollection("editor_test_protocol")
+                    .insertOne(new Document("_id", protocol.getID())
+                            .append("beginTime", protocol.getBeginTime())
+                            .append("endTime", protocol.getEndTime())
+                            .append("date", protocol.getDate())
+                            .append("duration", protocol.getDuration())
+                            .append("electionPeriod", protocol.getElectionPeriod())
+                            .append("protocolNumber", protocol.getProtocolNumber())
+                            .append("sessionLeaders", protocol.getSessionLeaders())
+                            .append("agendaItems", protocol.getAgendaItemIDs()));
+        }
+
+        else if (insertObject instanceof AgendaItem_Impl) {
+            AgendaItem_Impl aItem = (AgendaItem_Impl) insertObject;
+            mongoDBHandler.deleteDocument("editor_test_agendaItem", aItem.getID());
+            mongoDBHandler.getDB().getCollection("editor_test_agendaItem")
+                    .insertOne(new Document("_id", aItem.getID())
+                            .append("date", aItem.getDate())
+                            .append("subject", aItem.getSubject())
+                            .append("speechIDs", aItem.getSpeechIDs()));
+        }
+
+        else if (insertObject instanceof ProcessedSpeech) {
+            ProcessedSpeech processedSpeech = (ProcessedSpeech) insertObject;
+            try {
+                mongoDBHandler.deleteDocument("editor_test_speech", processedSpeech.getID());
+                mongoDBHandler.getDB()
+                        .getCollection("editor_test_speech")
+                        .insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
+            } catch (MongoException | IllegalArgumentException ignored) {}
+            try {
+                mongoDBHandler.deleteDocument("editor_test_speech_cas", processedSpeech.getID());
+                mongoDBHandler.getDB()
+                        .getCollection("editor_test_speech_cas")
+                        .insertOne(new Document("_id", processedSpeech.getID()).append("fullCas", processedSpeech.getFullCas()));
+            } catch (MongoException | IllegalArgumentException ignored) {}
+            try {
+                mongoDBHandler.deleteDocument("editor_test_speech_tokens", processedSpeech.getID());
+                mongoDBHandler.getDB()
+                        .getCollection("editor_test_speech_tokens")
+                        .insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
+            } catch (MongoException | IllegalArgumentException ignored) {}
+        }
+
+        else if (insertObject instanceof Comment) {
+            Comment comment = (Comment) insertObject;
+            double sentiment = uima.getAverageSentiment(uima.getJCas(comment.getText()));
+            mongoDBHandler.deleteDocument("editor_test_comment", comment.getID());
+            mongoDBHandler.getDB().getCollection("editor_test_comment")
+                    .insertOne(new Document("_id", comment.getID())
+                            .append("speechID", comment.getSpeechID())
+                            .append("speakerID", comment.getSpeakerID())
+                            .append("commentatorID", comment.getCommentatorID())
+                            .append("commentPos", comment.getCommentPosition())
+                            .append("text", comment.getText())
+                            .append("date", comment.getDate())
+                            .append("sentiment", sentiment));
+
+        }
+
+        else if (insertObject instanceof Person_Impl) {
+            Person_Impl person = (Person_Impl) insertObject;
+            mongoDBHandler.deleteDocument("editor_test_person", person.getID());
+            mongoDBHandler.getDB().getCollection("editor_test_person")
+                    .insertOne(person.getPersonDoc());
+        }
     }
     @Testing
     private boolean testVersionExists(String col, String id) {

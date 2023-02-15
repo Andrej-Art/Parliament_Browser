@@ -8,7 +8,6 @@ import data.*;
 import data.impl.AgendaItem_Impl;
 import data.impl.Person_Impl;
 import exceptions.WrongInputException;
-import org.apache.uima.cas.Feature;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
@@ -57,7 +56,6 @@ public class MongoDBHandler {
 
     private final MongoDatabase db;
     private final InsertManyOptions imo = new InsertManyOptions().ordered(false);
-    private final UpdateOptions uo = new UpdateOptions().upsert(true);
     private final Gson gson = new Gson();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
 
@@ -175,7 +173,7 @@ public class MongoDBHandler {
         if (checkIfDocumentExists(col, id)) {
             db.getCollection(col).deleteOne(Filters.eq("_id", id));
         } else {
-            System.out.println(" Document  with _id:" + " id was not found in collection: " + col);
+            System.out.println("Document with _id: \"" + "\" was not found in collection: " + col);
         }
     }
 
@@ -1826,7 +1824,10 @@ public class MongoDBHandler {
                 && !checkIfDocumentExists("User", newID)) {
             Document editUser = db.getCollection("user").find(new Document("_id", oldID)).iterator().next();
             db.getCollection("user").deleteOne(new Document("_id", oldID));
-            if (newRank.equals("user") || newRank.equals("manager") || newRank.equals("admin")) {} else {newRank = "";}
+            if (newRank.equals("user") || newRank.equals("manager") || newRank.equals("admin")) {
+            } else {
+                newRank = "";
+            }
             if (!newID.isEmpty()) {
                 editUser.put("_id", newID);
             }
@@ -1937,10 +1938,10 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public boolean editFeature(String featureToEdit, String editRank) {
-        if (! (editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody")) ) {
+        if (!(editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody"))) {
             return false;
         }
-        if (checkIfDocumentExists("features", featureToEdit)){
+        if (checkIfDocumentExists("features", featureToEdit)) {
             db.getCollection("features").deleteOne(new Document("_id", featureToEdit));
             db.getCollection("features").insertOne(new Document("_id", featureToEdit).append("rank", editRank));
             return true;

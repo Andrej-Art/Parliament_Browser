@@ -45,23 +45,30 @@ const protocolExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.' +
     '<ul>' +
     '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+    '<li>Sitzungsleiter sind voneinander mit einem Komma getrennt</li>' +
+    '<li>Tagesordnungspunkte sind voneinander mit einem Komma getrennt</li>' +
     '</ul>';
 const agendaExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.<br>' +
     'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.' +
     '<ul>' +
     '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
+    '<li>Reden-IDs sind voneinander mit einem Komma getrennt</li>' +
+    '<li>Themen werden mit einem Zeilenumbruch voneinander getrennt</li>' +
     '</ul>';
 const speechExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.<br>' +
     'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.' +
     '<ul>' +
     '<li>Rede-IDs haben das Format "ID&lt;Wahlperiode&gt;&lt;Zahl&gt;"</li>' +
+    '<li>RednerIDs sind einfach Zahlen: "&lt;Zahl&gt;"</li>' +
+    '<li>Das Einfügen von Reden dauert einige Sekunden, weil diese erst NLP-analysiert werden müssen</li>' +
     '</ul>';
 const personExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.<br>' +
     '<ul>' +
-    '<li>Personen-IDs sind einfach nur Zahlen: "&lt;Zahl&gt;"</li></li>' +
+    '<li>Personen-IDs sind einfach Zahlen: "&lt;Zahl&gt;"</li></li>' +
+    '<li>Mindestens eins der Fraktionsfelder muss gefüllt sein</li></li>' +
     '</ul>';
 
 const protocolCheckboxHTML =
@@ -76,7 +83,9 @@ const speechCheckboxHTML =
 const personCheckboxHTML =
     '<input type="checkbox" id="overwrite-checkbox">' +
     '<label id="overwrite-label" for="overwrite-checkbox">Erlaube das Überschreiben von bereits existierenden Personen?</label>';
+
 const submitButtonHTML = '<label><button tabIndex="-1" onClick="parseDataFromEditor()" style="margin: 10px 0">In die DB einfügen</button></label>';
+const deleteButtonHTML = '<label><button tabIndex="-1" onClick="deleteFromDatabase()" style="margin: 10px 0">Aus der DB löschen</button></label>';
 
 let permissions = {addAgendaItems: false, addPersons: false, addProtocols: false, addSpeeches: false, deleteAgendaItems: false,
     deletePersons: false, deleteProtocols: false, deleteSpeeches: false, editAgendaItems: false, editPersons: false, editProtocols: false, editSpeeches: false}
@@ -178,6 +187,28 @@ async function pasteDataIntoEditor(col = "", id = "") {
         document.querySelector('input[value=' + col + ']').checked = true;
         changeLayout();
         fillWithData(col, responseJson.details);
+        displaySuccess(responseJson.status);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function deleteFromDatabase() {
+    try {
+        let col = document.querySelector('input[name="edit-mode"]:checked').value;
+        let id;
+        if (col === "aItem") {
+            id = document.getElementById("input1").value + "/" + document.getElementById("input2").value;
+        } else {
+            id = document.getElementById("input1").value;
+        }
+        console.log(id);
+        let response = await fetch("delete/?col=" + col + "&id=" + id, {method: 'POST'});
+        let responseJson = await response.json();
+        if (responseJson.status === "Error") {
+            displayError(responseJson.details);
+            return;
+        }
         displaySuccess(responseJson.status);
     } catch (e) {
         console.error(e);
@@ -321,10 +352,10 @@ function fillWithData(editMode = "", data = {}) {
     switch (editMode) {
         case "protocol":
             document.getElementById("input-area").innerHTML = protocolEditHTML;
-            document.getElementById("explanation").innerHTML = protocolExplanationHTML;
             document.getElementById("checkbox-container").innerHTML = permissions.editProtocols ? protocolCheckboxHTML : '<br>';
-            document.getElementById("submit-container").innerHTML =
-                (permissions.addProtocols || permissions.deleteProtocols || permissions.editProtocols) ? submitButtonHTML : '<br>';
+            document.getElementById("submit-container").innerHTML = (permissions.addProtocols || permissions.editProtocols) ? submitButtonHTML : '<br>';
+            document.getElementById("delete-container").innerHTML = permissions.deleteProtocols ? deleteButtonHTML : '<br>';
+            document.getElementById("explanation").innerHTML = protocolExplanationHTML;
             document.getElementById("input1").value = checkForUndefined(data.protocolID);
             document.getElementById("input2").value = checkForUndefined(data.date);
             document.getElementById("input3").value = checkForUndefined(data.begin);
@@ -334,10 +365,10 @@ function fillWithData(editMode = "", data = {}) {
             break;
         case "aItem":
             document.getElementById("input-area").innerHTML = agendaEditHTML;
-            document.getElementById("explanation").innerHTML = agendaExplanationHTML;
             document.getElementById("checkbox-container").innerHTML = permissions.editAgendaItems ? agendaCheckboxHTML : '<br>';
-            document.getElementById("submit-container").innerHTML =
-                (permissions.addAgendaItems || permissions.deleteAgendaItems || permissions.editAgendaItems) ? submitButtonHTML : '<br>';
+            document.getElementById("submit-container").innerHTML = (permissions.addAgendaItems || permissions.editAgendaItems) ? submitButtonHTML : '<br>';
+            document.getElementById("delete-container").innerHTML = permissions.deleteAgendaItems ? deleteButtonHTML : '<br>';
+            document.getElementById("explanation").innerHTML = agendaExplanationHTML;
             document.getElementById("input1").value = checkForUndefined(data.protocolID)
             document.getElementById("input2").value = checkForUndefined(data.agendaID);
             document.getElementById("input3").value = checkForUndefined(data.speechIDs);
@@ -345,20 +376,20 @@ function fillWithData(editMode = "", data = {}) {
             break;
         case "speech":
             document.getElementById("input-area").innerHTML = speechEditHTML;
-            document.getElementById("explanation").innerHTML = speechExplanationHTML;
             document.getElementById("checkbox-container").innerHTML = permissions.editSpeeches ? speechCheckboxHTML : '<br>';
-            document.getElementById("submit-container").innerHTML =
-                (permissions.addSpeeches || permissions.deleteSpeeches || permissions.editSpeeches) ? submitButtonHTML : '<br>';
+            document.getElementById("submit-container").innerHTML = (permissions.addSpeeches || permissions.editSpeeches) ? submitButtonHTML : '<br>';
+            document.getElementById("delete-container").innerHTML = permissions.deleteSpeeches ? deleteButtonHTML : '<br>';
+            document.getElementById("explanation").innerHTML = speechExplanationHTML;
             document.getElementById("input1").value = checkForUndefined(data.speechID);
             document.getElementById("input2").value = checkForUndefined(data.speakerID);
             document.getElementById("input3").value = checkForUndefined(data.text);
             break;
         case "person":
             document.getElementById("input-area").innerHTML = personEditHTML;
-            document.getElementById("explanation").innerHTML = personExplanationHTML;
             document.getElementById("checkbox-container").innerHTML = permissions.editPersons ? personCheckboxHTML : '<br>';
-            document.getElementById("submit-container").innerHTML =
-                (permissions.addPersons || permissions.deletePersons || permissions.editPersons) ? submitButtonHTML : '<br>';
+            document.getElementById("submit-container").innerHTML = (permissions.addPersons || permissions.editPersons) ? submitButtonHTML : '<br>';
+            document.getElementById("delete-container").innerHTML = permissions.deletePersons ? deleteButtonHTML : '<br>';
+            document.getElementById("explanation").innerHTML = personExplanationHTML;
             document.getElementById("input1").value = checkForUndefined(data.personID);
             document.getElementById("input2").value = checkForUndefined(data.firstName);
             document.getElementById("input3").value = checkForUndefined(data.lastName);
