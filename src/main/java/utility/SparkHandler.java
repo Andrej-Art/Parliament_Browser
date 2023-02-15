@@ -35,9 +35,7 @@ import static spark.Spark.*;
 public class SparkHandler {
     private final static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
     private static EditorProtocolParser epParser;
-
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
-    // the added string redirects to the /resources/ directory
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException, UIMAException {
@@ -411,6 +409,7 @@ public class SparkHandler {
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
         return mongoDBHandler.findSpeech(text);
     };
+//    GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory C:\\Users\\edvin\\IdeaProjects\\Übung5\\src\\main\\resources\\frontend\\public\\pdfOutput testPDF3.tex"});
 
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
@@ -457,7 +456,7 @@ public class SparkHandler {
         String cookie = request.cookie("key");
         if (mongoDBHandler.checkIfCookieExists(cookie)) {
             pageContent.put("loginStatus", true);
-            if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie,"editUsers")) {
+            if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editUsers")) {
                 pageContent.put("adminStatus", true);
                 pageContent.put("loginStatus", true);
                 ArrayList<User> userList = new ArrayList<>(0);
@@ -468,7 +467,7 @@ public class SparkHandler {
                 pageContent.put("editUserRight", false);
             }
             pageContent.put("addUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "addUsers"));
-            pageContent.put("deleteUserRight",mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
+            pageContent.put("deleteUserRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         } else {
             pageContent.put("loginStatus", false);
         }
@@ -520,9 +519,8 @@ public class SparkHandler {
     };
 
     /**
-     * accepts cookie name password rank
+     * accepts cookie name password rank.
      *
-     * @returns
      * @author Julian Ocker
      */
     private static final Route postRegister = (request, response) -> {
@@ -532,15 +530,16 @@ public class SparkHandler {
         String password = req.getString("pw");
         String rank = req.getString("rank");
         boolean registrationSuccess = false;
-
-        if (mongoDBHandler.checkIfAvailable(name)) {
-            registrationSuccess = mongoDBHandler.register(name, password, rank);
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("cookie"), "addUsers")) {
+            if (mongoDBHandler.checkIfAvailable(name)) {
+                registrationSuccess = mongoDBHandler.register(name, password, rank);
+            }
         }
         return new JSONObject().put("registration", registrationSuccess);
     };
 
     /**
-     * accepts name and pw returns cookie
+     * accepts name and pw returns cookie.
      *
      * @author Julian Ocker
      */
