@@ -1947,7 +1947,8 @@ public class MongoDBHandler {
      * @author Julian Ocker
      */
     public boolean editFeature(String featureToEdit, String editRank) {
-        if (!(editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody"))){
+        System.out.println("LOOOOOOOOOOOOOOOOOOOOOOOOL");
+        if (! (editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody")) ) {
             return false;
         }
         if (checkIfDocumentExists("features", featureToEdit)){

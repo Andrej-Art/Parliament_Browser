@@ -58,4 +58,8 @@
         </form>
     </div>
 </#if>
+
+<script>
+    <#include "js/feature.js">
+</script>
 </html>

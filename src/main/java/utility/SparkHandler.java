@@ -488,7 +488,7 @@ public class SparkHandler {
         JSONObject req = new JSONObject(request.body());
         String oldPassword = req.getString("oldPw");
         String newPassword = req.getString("newPw");
-        String cookie = req.getString("key");
+        String cookie = request.cookie("key");
         Boolean success = mongoDBHandler.changePassword(cookie, newPassword, oldPassword);
         mongoDBHandler.logout(cookie);
         return new JSONObject().put("pwChangeSuccess", success);
@@ -502,7 +502,7 @@ public class SparkHandler {
     private static final Route postDeleteUser = (request, response) -> {
         JSONObject req = new JSONObject(request.body());
         String deleteUser = req.getString("deleteUser");
-        String cookie = req.getString("key");
+        String cookie = request.cookie("key");
         System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers"));
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteUsers")) {
             JSONObject uDeletionSuccess = new JSONObject().put("deletionSuccess", mongoDBHandler.deleteUser(deleteUser));
@@ -534,7 +534,7 @@ public class SparkHandler {
         String password = req.getString("pw");
         String rank = req.getString("rank");
         boolean registrationSuccess = false;
-        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "addUsers")) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "addUsers")) {
             if (mongoDBHandler.checkIfAvailable(name)) {
                 registrationSuccess = mongoDBHandler.register(name, password, rank);
             }
@@ -579,7 +579,7 @@ public class SparkHandler {
             newRank = "admin";
             newID = "Admin1";
         }
-        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "editUsers")) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "editUsers")) {
             if (mongoDBHandler.editUser(oldID, newID, newPassword, newRank)) {
                 answer.put("EditSuccess", true);
                 return answer;
@@ -611,6 +611,7 @@ public class SparkHandler {
         String featureToEdit = req.getString("featureToEdit");
         String editRank = req.getString("editRank");
         JSONObject answer = new JSONObject();
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "editFeatures"));
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(req.getString("key"), "editFeatures")) {
             if (mongoDBHandler.editFeature(featureToEdit,editRank)) {
                 answer.put("EditSuccess", true);
