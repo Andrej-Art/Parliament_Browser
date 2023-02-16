@@ -13,7 +13,6 @@ import org.bson.conversions.Bson;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
 import javax.xml.bind.DatatypeConverter;
@@ -39,10 +38,10 @@ import static utility.TimeHelper.dateToLocalDate;
  * When instanced, the {@code MongoDBHandler} connects to the MongoDB specified in {@code PRG_WiSe22_Group_9_4.txt}.
  * All methods which manipulate or query data in the database are found here.
  *
+ * @author Edvin Nise
  * @author Eric Lakhter
  * @author DavidJordan
  */
-@Unfinished("Needs a few more web-related methods")
 public class MongoDBHandler {
     private static MongoDBHandler mongoDBHandler;
 
@@ -87,12 +86,11 @@ public class MongoDBHandler {
     }
 
     /**
-     * This method enables other classes to access the database for testing.
+     * This method enables other classes to access the database.
      *
      * @return The connected database.
      * @author Eric Lakhter
      */
-    @Testing
     public MongoDatabase getDB() {
         return db;
     }
@@ -931,7 +929,6 @@ public class MongoDBHandler {
      * @param personFilter
      * @author Edvin Nise
      */
-
     public ArrayList<JSONObject> getPOSCount(String dateFilterOne,
                                              String dateFilterTwo,
                                              String fractionFilter,
@@ -1058,7 +1055,6 @@ public class MongoDBHandler {
      * @return
      * @author Edvin Nise
      */
-
     public JSONObject commentatorToSpeaker(String dateFilterOne, String dateFilterTwo) throws ParseException {
 
         Bson match = new Document("$match", new Document("$and", Arrays.asList(
@@ -1331,7 +1327,6 @@ public class MongoDBHandler {
      * @param textFilter
      * @author Edvin Nise
      */
-
     public JSONObject findSpeech(String textFilter) {
         Bson match = match(new Document("$text", new Document("$search", textFilter)));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match));
@@ -1412,7 +1407,6 @@ public class MongoDBHandler {
      * @param fractionFilter
      * @author Edvin Nise
      */
-
     public ArrayList<JSONObject> getPollResults(String dateFilterOne,
                                                 String dateFilterTwo,
                                                 String fractionFilter,

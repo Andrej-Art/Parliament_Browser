@@ -4,7 +4,6 @@
 .home-container {
     box-sizing: border-box;
     padding: 50px 30px;
-    background-color: rosybrown;
     width: 100%;
 }
 
@@ -14,7 +13,9 @@
 
 #db-status {
     background-color: yellow;
+    border-radius: 30px;
     box-sizing: border-box;
+    margin-top: 30px;
     float: right;
     width: 40%;
 

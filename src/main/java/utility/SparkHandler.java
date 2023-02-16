@@ -29,8 +29,6 @@ import static spark.Spark.*;
  * @author Andrej Artuschenko
  * @author DavidJordan
  */
-@Testing
-@Unfinished("Only some routes are finished")
 public class SparkHandler {
     private final static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
     private static EditorProtocolParser epParser;
@@ -120,7 +118,9 @@ public class SparkHandler {
         post("/post/applicationDataEditFeatures/", postEditFeatures);
     }
 
-
+    /*
+     * Routes:
+     */
 
     /**
      * Homepage.
@@ -213,7 +213,6 @@ public class SparkHandler {
      *
      * @author Eric Lakhter
      */
-    @Unfinished("Nothing more than a text field so far")
     private static final TemplateViewRoute getProtokollEditor = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
@@ -230,7 +229,6 @@ public class SparkHandler {
      *
      * @author Eric Lakhter
      */
-    @Unfinished("Need to implement the part which grabs info from the db first before this is considered done")
     private static final Route postProtokollEditorInsert = (Request request, Response response) -> {
         try {
             String editMode = request.queryParams("editMode");
@@ -720,5 +718,4 @@ public class SparkHandler {
             rt.exec("xdg-open " + url);
         }
     }
-
 }

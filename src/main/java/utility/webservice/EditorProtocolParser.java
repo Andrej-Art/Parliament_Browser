@@ -12,7 +12,6 @@ import org.bson.Document;
 import org.json.JSONObject;
 import utility.MongoDBHandler;
 import utility.UIMAPerformer;
-import utility.annotations.*;
 import utility.uima.ProcessedSpeech;
 
 import java.io.FileNotFoundException;
@@ -58,14 +57,11 @@ public class EditorProtocolParser {
      * @throws EditorException if any part of the text does not fit the rules for editing/creating protocols.
      * @author Eric Lakhter
      */
-    @Unfinished("Pretty much finished, but inserts into a test collection")
     public String parseEditorProtocol(JSONObject protocolObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!protocolObject.keySet().containsAll(protocolReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String protocolID = protocolObject.getString("protocolID").trim();
-
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("protocol", id)) // TODO remove testing
         checkPermission("protocol", "Protocols", protocolID, cookie, allowOverwrite);
 
         int[] periodAndProtocol = validateProtocolID(protocolID);
@@ -88,11 +84,8 @@ public class EditorProtocolParser {
         }
         ArrayList<String> agendaIDs = new ArrayList<>(asList(agendaNames));
 
-        insertIntoTest(new Protocol_Impl(protocolID, date, begin, end, durationBetweenTimesInMinutes(begin, end),
+        insertIntoDB(new Protocol_Impl(protocolID, date, begin, end, durationBetweenTimesInMinutes(begin, end),
                 electionPeriod, protocolNumber, sessionLeaders, agendaIDs));
-
-//        mongoDBHandler.insertProtocol(new Protocol_Impl(id, date, begin, end, durationBetweenTimesInMinutes(begin, end), // TODO remove testing
-//                electionPeriod, protocolNumber, sessionLeaders, agendaIDs));
         return protocolID;
     }
 
@@ -105,7 +98,6 @@ public class EditorProtocolParser {
      * @throws EditorException if any part of the text does not fit the rules for editing/creating agenda items.
      * @author Eric Lakhter
      */
-    @Unfinished("Pretty much finished, but inserts into a test collection")
     public String parseEditorAgendaItem(JSONObject agendaObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!agendaObject.keySet().containsAll(agendaReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
@@ -114,7 +106,6 @@ public class EditorProtocolParser {
         validateProtocolID(protocolID);
         String agendaID = agendaObject.getString("agendaID").trim();
         String fullAgendaID = protocolID + "/" + agendaID;
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("agendaItem", fullAgendaID))   // TODO remove testing
         checkPermission("agendaItem", "AgendaItems", fullAgendaID, cookie, allowOverwrite);
 
         String subject = agendaObject.getString("subject").trim();
@@ -128,8 +119,7 @@ public class EditorProtocolParser {
 
         LocalDate date = dateToLocalDate(mongoDBHandler.getDocumentOrNull("protocol", protocolID).getDate("date"));
 
-//        mongoDBHandler.insertAgendaItems(Collections.singletonList(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs)));   // TODO remove testing
-        insertIntoTest(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs));
+        insertIntoDB(new AgendaItem_Impl(fullAgendaID, date, subject, speechIDs));
         return fullAgendaID;
     }
 
@@ -142,13 +132,11 @@ public class EditorProtocolParser {
      * @throws EditorException if any part of the text does not fit the rules for editing/creating speeches.
      * @author Eric Lakhter
      */
-    @Unfinished("Pretty much finished, but inserts into a test collection")
     public String parseEditorSpeech(JSONObject speechObject, String cookie, boolean allowOverwrite) throws EditorException, WrongInputException {
         if (!speechObject.keySet().containsAll(speechReqs))
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String speechID = speechObject.getString("speechID").trim();
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("speech", speechID))    // TODO remove testing
         checkPermission("speech", "Speeches", speechID, cookie, allowOverwrite);
 
         Document relatedAgenda = mongoDBHandler.getDB().getCollection("agendaItem")
@@ -195,10 +183,8 @@ public class EditorProtocolParser {
         if (speechText.length() == 0)
             throw new EditorException("Die Rede enthält keinen Text");
 
-//        mongoDBHandler.insertSpeech(uima.processSpeech(new Speech_Impl(protocolID, speakerID, text, date)));        // TODO remove testing
-        insertIntoTest(uima.processSpeech(new Speech_Impl(speechID, speakerID, speechText.toString(), date)));
-//        for (Comment comment : comments) mongoDBHandler.insertComment(comment, uima.getAverageSentiment(uima.getJCas(comment.getText())));        // TODO remove testing
-        for (Comment comment : comments) insertIntoTest(comment);
+        insertIntoDB(uima.processSpeech(new Speech_Impl(speechID, speakerID, speechText.toString(), date)));
+        for (Comment comment : comments) insertIntoDB(comment);
         return speechID;
     }
 
@@ -217,7 +203,6 @@ public class EditorProtocolParser {
             throw new EditorException("Es wurden nicht alle notwendigen Informationen übergeben");
 
         String personID = personObject.getString("personID");
-//        if (!allowOverwrite && mongoDBHandler.checkIfDocumentExists("person", personID))    // TODO remove testing
         checkPermission("person", "Persons", personID, cookie, allowOverwrite);
 
         String firstName = personObject.getString("firstName");
@@ -242,9 +227,7 @@ public class EditorProtocolParser {
 
         String[] picture = producePictureUrl(firstName, lastName);
 
-//        mongoDBHandler.insertPerson(new Person_Impl(personID, firstName, lastName, role, title, place,
-//                fraction19, fraction20, party, picture, gender, birthDate, deathDate, birthPlace));        // TODO remove testing
-        insertIntoTest(new Person_Impl(personID, firstName, lastName, role, title, place,
+        insertIntoDB(new Person_Impl(personID, firstName, lastName, role, title, place,
                 fraction19, fraction20, party, picture, gender, birthDate, deathDate, birthPlace));
         return personID;
     }
@@ -323,6 +306,7 @@ public class EditorProtocolParser {
         speech.put("speechID", speechDoc.getString("_id"));
         speech.put("speakerID", speechDoc.getString("speakerID"));
 
+        // Gets a cursor over all comments for a speech sorted by their ID
         MongoCursor<Document> commentCursor = mongoDBHandler.getDB().getCollection("comment")
                 .aggregate(Arrays.asList(
                         match(new Document("speechID", speechID)),
@@ -397,8 +381,7 @@ public class EditorProtocolParser {
      */
     public void deleteViaEditor(String col, String id) throws EditorException {
         System.out.println("Deleting something");
-//        if (mongoDBHandler.checkIfDocumentExists(col, id)) mongoDBHandler.deleteDocument(col, id);
-        if (testVersionExists(col, id)) mongoDBHandler.deleteDocument("editor_test_" + col, id);
+        if (mongoDBHandler.checkIfDocumentExists(col, id)) mongoDBHandler.deleteDocument(col, id);
         else {
             switch (col) {
                 case "protocol":
@@ -423,7 +406,7 @@ public class EditorProtocolParser {
      * @throws EditorException If the user doesn't have the rights to perform their action.
      */
     public void checkPermission(String permissionFor, String permissionSuffix, String id, String cookie, boolean allowOverwrite) throws EditorException {
-        boolean idExists = testVersionExists(permissionFor, id);
+        boolean idExists = mongoDBHandler.checkIfDocumentExists(permissionFor, id);
         boolean canAdd = mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "add" + permissionSuffix);
         boolean canEdit = mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "edit" + permissionSuffix);
         switch (permissionFor) {
@@ -454,14 +437,15 @@ public class EditorProtocolParser {
         }
     }
 
-    // FOR TESTING
-
-    @Testing
-    private void insertIntoTest(Object insertObject) {
+    /**
+     * Inserts one of the edited objects into the database.
+     * @param insertObject Object to be inserted into the DB.
+     */
+    private void insertIntoDB(Object insertObject) {
         if (insertObject instanceof Protocol_Impl) {
             Protocol_Impl protocol = (Protocol_Impl) insertObject;
-            mongoDBHandler.deleteDocument("editor_test_protocol", protocol.getID());
-            mongoDBHandler.getDB().getCollection("editor_test_protocol")
+            mongoDBHandler.deleteDocument("protocol", protocol.getID());
+            mongoDBHandler.getDB().getCollection("protocol")
                     .insertOne(new Document("_id", protocol.getID())
                             .append("beginTime", protocol.getBeginTime())
                             .append("endTime", protocol.getEndTime())
@@ -475,8 +459,8 @@ public class EditorProtocolParser {
 
         else if (insertObject instanceof AgendaItem_Impl) {
             AgendaItem_Impl aItem = (AgendaItem_Impl) insertObject;
-            mongoDBHandler.deleteDocument("editor_test_agendaItem", aItem.getID());
-            mongoDBHandler.getDB().getCollection("editor_test_agendaItem")
+            mongoDBHandler.deleteDocument("agendaItem", aItem.getID());
+            mongoDBHandler.getDB().getCollection("agendaItem")
                     .insertOne(new Document("_id", aItem.getID())
                             .append("date", aItem.getDate())
                             .append("subject", aItem.getSubject())
@@ -486,21 +470,21 @@ public class EditorProtocolParser {
         else if (insertObject instanceof ProcessedSpeech) {
             ProcessedSpeech processedSpeech = (ProcessedSpeech) insertObject;
             try {
-                mongoDBHandler.deleteDocument("editor_test_speech", processedSpeech.getID());
+                mongoDBHandler.deleteDocument("speech", processedSpeech.getID());
                 mongoDBHandler.getDB()
-                        .getCollection("editor_test_speech")
+                        .getCollection("speech")
                         .insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
             } catch (MongoException | IllegalArgumentException ignored) {}
             try {
-                mongoDBHandler.deleteDocument("editor_test_speech_cas", processedSpeech.getID());
+                mongoDBHandler.deleteDocument("speech_cas", processedSpeech.getID());
                 mongoDBHandler.getDB()
-                        .getCollection("editor_test_speech_cas")
+                        .getCollection("speech_cas")
                         .insertOne(new Document("_id", processedSpeech.getID()).append("fullCas", processedSpeech.getFullCas()));
             } catch (MongoException | IllegalArgumentException ignored) {}
             try {
-                mongoDBHandler.deleteDocument("editor_test_speech_tokens", processedSpeech.getID());
+                mongoDBHandler.deleteDocument("speech_tokens", processedSpeech.getID());
                 mongoDBHandler.getDB()
-                        .getCollection("editor_test_speech_tokens")
+                        .getCollection("speech_tokens")
                         .insertOne(Document.parse(processedSpeech.toSpeechJson()).append("date", processedSpeech.getDate()));
             } catch (MongoException | IllegalArgumentException ignored) {}
         }
@@ -508,8 +492,8 @@ public class EditorProtocolParser {
         else if (insertObject instanceof Comment) {
             Comment comment = (Comment) insertObject;
             double sentiment = uima.getAverageSentiment(uima.getJCas(comment.getText()));
-            mongoDBHandler.deleteDocument("editor_test_comment", comment.getID());
-            mongoDBHandler.getDB().getCollection("editor_test_comment")
+            mongoDBHandler.deleteDocument("comment", comment.getID());
+            mongoDBHandler.getDB().getCollection("comment")
                     .insertOne(new Document("_id", comment.getID())
                             .append("speechID", comment.getSpeechID())
                             .append("speakerID", comment.getSpeakerID())
@@ -523,13 +507,9 @@ public class EditorProtocolParser {
 
         else if (insertObject instanceof Person_Impl) {
             Person_Impl person = (Person_Impl) insertObject;
-            mongoDBHandler.deleteDocument("editor_test_person", person.getID());
-            mongoDBHandler.getDB().getCollection("editor_test_person")
+            mongoDBHandler.deleteDocument("person", person.getID());
+            mongoDBHandler.getDB().getCollection("person")
                     .insertOne(person.getPersonDoc());
         }
-    }
-    @Testing
-    private boolean testVersionExists(String col, String id) {
-        return mongoDBHandler.checkIfDocumentExists("editor_test_" + col, id);
     }
 }
