@@ -12,8 +12,20 @@ function drawSpiderChart(data, target) {
     let speechSentiment = {Positiv: data.speechPos, Neutral: data.speechNeu, Negativ: data.speechNeg};
     let commentSentiment = {Positiv: data.commentPos, Neutral: data.commentNeu, Negativ: data.commentNeg};
 
-   data2.push(speechSentiment);
-   data2.push(commentSentiment);
+    //parse string data into Floats
+    function parseSentimentValues(sentimentObj){
+        const parsedObj=[];
+        for (let [key, value] of Object.entries(sentimentObj)) {
+            parsedObj[key] = parseFloat(value.replace(',', '.'));
+        }
+        return parsedObj;
+    }
+
+    const parsedSpeechSentiment = parseSentimentValues(speechSentiment);
+    const parsedCommentSentiment = parseSentimentValues(commentSentiment);
+
+    data2.push(parsedSpeechSentiment);
+    data2.push(parsedCommentSentiment);
 
 
 
@@ -121,4 +133,3 @@ function drawSpiderChart(data, target) {
                 .attr("opacity", 0.5)
         );
 }
-
