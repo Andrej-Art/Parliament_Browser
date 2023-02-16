@@ -931,7 +931,7 @@ public class MongoDBHandler {
      * @param personFilter
      * @author Edvin Nise
      */
-    @Unfinished("waiting for final structure of collection")
+
     public ArrayList<JSONObject> getPOSCount(String dateFilterOne,
                                              String dateFilterTwo,
                                              String fractionFilter,
@@ -1058,7 +1058,7 @@ public class MongoDBHandler {
      * @return
      * @author Edvin Nise
      */
-    @Unfinished("waiting for correct structure of collection")
+
     public JSONObject commentatorToSpeaker(String dateFilterOne, String dateFilterTwo) throws ParseException {
 
         Bson match = new Document("$match", new Document("$and", Arrays.asList(
@@ -1168,7 +1168,6 @@ public class MongoDBHandler {
      * @return JSONObject
      * @author Edvin Nise
      */
-    @Testing
     public JSONObject matchSpeakerToDDC(String dateFilterOne, String dateFilterTwo) {
 
         Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
@@ -1246,6 +1245,14 @@ public class MongoDBHandler {
         return obj;
     }
 
+    /**
+     * returns the percentage for each sentiment option for both speeches and comments based on given filters
+     * @param dateFilterOne
+     * @param dateFilterTwo
+     * @return JSONObject
+     * @throws ParseException
+     * @author Edvin Nise
+     */
     public JSONObject speechSentTopicData(String dateFilterOne, String dateFilterTwo) throws ParseException {
         Bson limit = limit(1000);
         Bson lookup = lookup("person", "speakerID", "_id", "speakerData");
@@ -1324,7 +1331,7 @@ public class MongoDBHandler {
      * @param textFilter
      * @author Edvin Nise
      */
-    @Unfinished("Need to know what data we will need for the visualisation")
+
     public JSONObject findSpeech(String textFilter) {
         Bson match = match(new Document("$text", new Document("$search", textFilter)));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(match));
@@ -1405,7 +1412,7 @@ public class MongoDBHandler {
      * @param fractionFilter
      * @author Edvin Nise
      */
-    @Unfinished("Dont know where we save this data")
+
     public ArrayList<JSONObject> getPollResults(String dateFilterOne,
                                                 String dateFilterTwo,
                                                 String fractionFilter,

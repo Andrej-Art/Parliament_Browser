@@ -148,7 +148,7 @@ public class LaTeXHandler {
      * @author Edvin Nise
      */
     public String pollResults(String date) {
-        Bson match = new Document("$match", new Document("date", date));
+
         ArrayList<JSONObject> pollCursor = mdbh.getPollResults(date, date, "", "", "");
         StringBuilder sb = new StringBuilder();
         String[] pollFractionsList = {"SPD", "LINKE", "B90", "FDP", "CxU", "AfD", "independent"};
@@ -204,7 +204,6 @@ public class LaTeXHandler {
 
                 i++;
             }
-
             sb.append("\\pie[xshift=5cm, scale=0.45]%\n{");
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalYes") / json.getDouble("totalVotes")) * 100)).append("/totalYes,\n");
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalNo") / json.getDouble("totalVotes")) * 100)).append("/totalNo,\n");
@@ -212,11 +211,7 @@ public class LaTeXHandler {
             sb.append(DECIMAL_FORMAT.format((json.getDouble("totalNoVotes") / json.getDouble("totalVotes")) * 100)).append("/totalNoVotes}\n");
             sb.append("\\end{tikzpicture}\n");
             sb.append("\\end{figure}\n");
-
-
         }
-
-        System.out.println(sb);
         return sb.toString();
     }
 
@@ -266,7 +261,6 @@ public class LaTeXHandler {
         sb.append("\\end{tabular}\n" +
                 "\\end{table}\n");
         sb.append("\\clearpage\n");
-        System.out.println(sb);
         return sb.toString();
     }
 
