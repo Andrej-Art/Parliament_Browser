@@ -21,6 +21,7 @@
     <a href="/protokolleditor/">Protokoll-Editor</a>
     <a href="/latex/">PDF-Export</a>
     <a href="/loginSite/">Login-Management</a>
+    <a hreg="/featureManagement/">Feature Management</a>
 </div>
 <script>
 /**
