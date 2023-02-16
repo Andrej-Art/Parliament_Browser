@@ -1,13 +1,12 @@
 package data.tex;
 
 import org.bson.Document;
-import org.json.JSONObject;
 import utility.MongoDBHandler;
 import utility.TimeHelper;
 import utility.annotations.Testing;
 import utility.annotations.Unfinished;
 
-import java.time.LocalDate;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +37,8 @@ public class Protocol_TeX {
      * @return
      * @author DavidJordan
      */
-    public String toTeX(List<Document> agendaItems) {
+    public String insertAgendaitemsToProtocol(List<Document> agendaItems) throws IOException {
+        LaTeXHandler laTeXHandler = new LaTeXHandler(mdbh, "");
 
         StringBuilder sb = new StringBuilder();
         sb.append("\\documentclass[a4paper,11pt]{article}\n" +
@@ -72,10 +72,10 @@ public class Protocol_TeX {
                 }
             }
             AgendaItem_TeX agTEX = new AgendaItem_TeX(agDoc, mdbh);
-            sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" + agTEX.toTeX(speechDocs, targetDirectory));
+            sb.append("\\section{" + agDoc.getString("_id") + "} \n\n" + agTEX.insertSpeechToAgendaitem(speechDocs, targetDirectory));
         }
-        Speech_TeX spTEX = new Speech_TeX(mdbh);
-        sb.append(spTEX.pollResults(String.valueOf(TimeHelper.dateToLocalDate(protDoc.getDate("date")))));
+
+        sb.append(laTeXHandler.pollResults(String.valueOf(TimeHelper.dateToLocalDate(protDoc.getDate("date")))));
         sb.append("\\end{document}");
 
         return sb.toString();

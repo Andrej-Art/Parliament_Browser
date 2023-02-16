@@ -4,7 +4,7 @@ package data.tex;
  *@author https://www.infoworld.com/article/2071275/when-runtime-exec---won-t.html?page=2
  * @modified by Edvin Nise
  */
-public class GoodWindowsExec
+public class CommandLineExec
 {
     public static void main(String args[])
     {

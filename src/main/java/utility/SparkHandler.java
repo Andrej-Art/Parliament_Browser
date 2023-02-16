@@ -1,6 +1,6 @@
 package utility;
 
-import data.tex.GoodWindowsExec;
+import data.tex.CommandLineExec;
 import data.tex.LaTeXHandler;
 import exceptions.EditorException;
 import freemarker.template.Configuration;
@@ -13,7 +13,6 @@ import utility.annotations.*;
 import utility.webservice.EditorProtocolParser;
 import utility.webservice.User;
 
-import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -202,7 +201,7 @@ public class SparkHandler {
 
 
         texHandler.createPDF(editedLatexString);
-        GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory=src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
+        CommandLineExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory=src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
 
 
         String successStatus = "PDF successfully generated";

@@ -44,13 +44,14 @@ public class AgendaItem_TeX {
      * @return
      * @author DavidJordan
      */
-    public String toTeX(List<Document> speeches, String targetDirectory) {
+    public String insertSpeechToAgendaitem(List<Document> speeches, String targetDirectory) throws IOException {
         StringBuilder sb = new StringBuilder();
         for (Document speech : speeches) {
 
             if (mdbh.getDocument("person", speech.getString("speakerID")) != null) {
                 Document speaker = mdbh.getDocument("person", speech.getString("speakerID"));
                 Speech_TeX speechTex = new Speech_TeX(mdbh);
+                LaTeXHandler laTeXHandler = new LaTeXHandler(mdbh,"");
 
                 String imageURL = null;
                 try {
@@ -86,7 +87,7 @@ public class AgendaItem_TeX {
                                 + "\\end{figure}\n\n");
                     }
                     sb.append(speechTex.speechToTex(speech.getString("_id")) + "\n\n");
-                    sb.append(speechTex.nlpTableTex(speech.getString("_id")) + "\n\n");
+                    sb.append(laTeXHandler.nlpTableTex(speech.getString("_id")) + "\n\n");
                 }
             }
         }
