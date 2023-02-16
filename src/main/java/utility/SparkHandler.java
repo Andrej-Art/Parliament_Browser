@@ -35,7 +35,9 @@ import static spark.Spark.*;
 public class SparkHandler {
     private final static MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
     private static EditorProtocolParser epParser;
+
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
+    // the added string redirects to the /resources/ directory
     private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException, UIMAException {
@@ -88,6 +90,9 @@ public class SparkHandler {
         post("/", "application/json", postHome);
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
+       // get("/update-charts/", getChartUpdates);
+
+        get("/testAndrej/", getTestAndrej, new FreeMarkerEngine(cfg));
         get("/update-charts/", getChartUpdates);
 
         get("/reden/", getReden, new FreeMarkerEngine(cfg));
@@ -110,6 +115,9 @@ public class SparkHandler {
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
         post("/post/applicationDataRegister/", postRegister);
+       // post("/post/applicationDataAdminCheck/", postCheckAdmin);
+        //post("/post/applicationDataManagerCheck/", postCheckManager);
+        //post("/post/applicationDataUserCheck/", postCheckUser);
         post("/post/applicationDataLogoutUser/", postLogout);
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
@@ -379,6 +387,30 @@ public class SparkHandler {
 //        pageContent.put("votes", votes);
 
         return new ModelAndView(pageContent, "dashboard.ftl");
+    };
+
+    private static final TemplateViewRoute getTestAndrej = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+
+//        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
+//        pageContent.put("pos", posAndCounts);
+//
+//        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
+//        pageContent.put("token", tokenAndCounts);
+//
+//        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
+//        pageContent.put("entities", datesAndNamedEntities);
+//
+//        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
+//        pageContent.put("speechesNumber", speechesCounts);
+//
+//        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
+//        //pageContent.put("sentiments", sentiments);
+//
+        ArrayList<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
+//        pageContent.put("votes", votes);
+
+        return new ModelAndView(pageContent, "testAndrej.ftl");
     };
 
     /**

@@ -135,8 +135,8 @@ data.sort(function (b, a) {
         })
         .on("mousemove", function (){
             tooltip
-                .style('top', d3.event.pageY - 10 + 'px')
-                .style('left', d3.event.pageX + 10 + 'px');
+                .style('top', d3.event.pageY - 100 + 'px')
+                .style('left', d3.event.pageX + 100 + 'px');
         })
         .on("mouseout", function (){
             tooltip.html(``).style('visibility', 'hidden');
