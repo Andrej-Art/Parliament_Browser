@@ -91,6 +91,8 @@ public class LaTeXHandler {
             latexString = latexString.replaceAll("\u202F", " ");
             latexString = latexString.replaceAll("\u02BC", "");
             latexString = latexString.replaceAll("&", "");
+            latexString = latexString.replaceAll("\u2002", "");
+            latexString = latexString.replaceAll("\u2003", "");
 
 //            FileOutputStream fileOutputStream = new FileOutputStream(file);
 //            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
@@ -138,7 +140,4 @@ public class LaTeXHandler {
     }
 
 
-    public void createTexFile(String texString){
-
-    }
 }

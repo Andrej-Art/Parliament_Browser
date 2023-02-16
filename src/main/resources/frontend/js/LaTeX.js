@@ -18,6 +18,7 @@ async function parseLaTeX() {
         document.getElementById('status-message-box').innerHTML = "Successful compilation. .pdf ready for download.";
     } catch (e) {
         console.error(e);
+        document.getElementById('status-message-box').innerHTML = "Error. The String could not be compiled."
     }
 }
 
@@ -39,7 +40,10 @@ function handleResponse(responseJson = {status : "Successfully did a thing", mes
     }
 }
 
-
+/**
+ * Function that creates the protocol buttons from which the User can choose.
+ * @author DavidJordan
+ */
 function createProtocolButtons() {
     let finalHTML = '';
     for (let protID of protIDs) {
@@ -49,10 +53,13 @@ function createProtocolButtons() {
 
 }
 
-
+/**
+ * Function which delivers the LaTeX formatted String with all Diagrams and Images inserted to the Editor field
+ * @param protocID
+ * @author DavidJordan
+ */
 function getProtocolData(protocID){
-    // let ID = protocID.replace("Protokoll ", "");
-    // $('#status-message-box').text('Waiting for response from DB ...');
+
      document.getElementById('status-message-box').innerHTML = "Waiting for DB response...";
     let req = new XMLHttpRequest();
     let timestamp = new Date().getTime();
@@ -67,11 +74,22 @@ function getProtocolData(protocID){
         }
         catch (e) {
             console.error(e);
+            document.getElementById('status-message-box').innerHTML = "Error. String of LaTeX formatted Protocol could not be delivered."
         }
     }
     req.send();
 }
 
+/**
+ * Function that inserts the latexString into the textarea field.
+ * @param data The query response data
+ * @author DavidJordan
+ */
 function insertLatexString(data = {}){
-    document.getElementById("editor-textarea").innerHTML = data["latexString"];
+    if(data["latexString"] === {}) {
+        document.getElementById('status-message-box').innerHTML = "There was an error processing this speech. String not delivered. "
+    }
+    else {
+        document.getElementById("editor-textarea").innerHTML = data["latexString"];
+    }
 }

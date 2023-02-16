@@ -60,32 +60,34 @@ public class AgendaItem_TeX {
                 }
                 String speechID = speech.getString("_id");
                 String speakerName = speaker.getString("fullName");
-                String fileUrlName = imageURL.substring(41);
+                //String fileUrlName = imageURL.substring(41);
 
 
-                String speakerImageName = speakerName.replaceAll("\\s+", "_") + ".jpg";
+                if (speakerName != null) {
+                    String speakerImageName = speakerName.replaceAll("\\s+", "_") + ".jpg";
 
-                if (imageURL != null) {
-//                    // Source:  https://www.baeldung.com/java-download-file
-//                    // Downloading the image of the speaker and storing it in the current working directory
-                    try (InputStream inp = new URL(imageURL).openStream()) {
-                        if (!new File(targetDirectory + "/" + speakerImageName).exists()) {
-                            Files.copy(inp, Paths.get(targetDirectory, speakerImageName));
+                    if (imageURL != null) {
+    //                    // Source:  https://www.baeldung.com/java-download-file
+    //                    // Downloading the image of the speaker and storing it in the current working directory
+                        try (InputStream inp = new URL(imageURL).openStream()) {
+                            if (!new File(targetDirectory + "/" + speakerImageName).exists()) {
+                                Files.copy(inp, Paths.get(targetDirectory, speakerImageName));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+
+                        sb.append("\\subsection{Rede: " + speechID + "  Redner: " + speakerName + "}\n\n"
+                                + "\\begin{figure}[ht]\n\n"
+                                + "\\centering\n\n"
+                                + "\\includegraphics[width=0.3\\textwidth]{" + speakerImageName + "}\n\n"
+                                + "\\caption{" + speakerName + "}\n\n"
+                                + "\\end{figure}\n\n");
                     }
-
-
-                    sb.append("\\subsection{Rede: " + speechID + "  Redner: " + speakerName + "}\n\n"
-                            + "\\begin{figure}[ht]\n\n"
-                            + "\\centering\n\n"
-                            + "\\includegraphics[width=0.3\\textwidth]{" + speakerImageName + "}\n\n"
-                            + "\\caption{" + speakerName + "}\n\n"
-                            + "\\end{figure}\n\n");
+                    sb.append(speechTex.speechToTex(speech.getString("_id")) + "\n\n");
+                    sb.append(speechTex.nlpTableTex(speech.getString("_id")) + "\n\n");
                 }
-                sb.append(speechTex.speechToTex(speech.getString("_id")) + "\n\n");
-                sb.append(speechTex.nlpTableTex(speech.getString("_id")) + "\n\n");
             }
         }
         return sb.toString();

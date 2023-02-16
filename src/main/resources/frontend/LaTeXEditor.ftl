@@ -54,6 +54,7 @@
     let protocolData = ${protocolData};
     let protocols = protocolData["protocols"];
     let protIDs = Object.keys(protocols);
+
     protIDs.sort((a, b) => {
         let keyA = a.split("/");
         let keyB = b.split("/");
