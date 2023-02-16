@@ -49,15 +49,15 @@
             <label style="color: gray" for="parteilos">Parteilos</label>
         </div>
         <div class="box">
-            <input type="checkbox" id="pos" name="pos" checked onclick="posSentimentCheckbox()">
+            <input type="checkbox" id="pos" name="pos" checked onclick="sentimentCheckbox(this)">
             <label style="color: green" for="pos">POS</label>
         </div>
         <div class="box">
-            <input type="checkbox" id="neg" name="neg" checked onclick="negSentimentCheckbox()">
+            <input type="checkbox" id="neg" name="neg" checked onclick="sentimentCheckbox(this)">
             <label style="color: red" for="neg">NEG</label>
         </div>
         <div class="box">
-            <input type="checkbox" id="neu" name="neu" checked onclick="neuSentimentCheckbox()">
+            <input type="checkbox" id="neu" name="neu" checked onclick="sentimentCheckbox(this)">
             <label style="color: gray" for="neu">NEU</label>
         </div>
         <div class="calenderfield">

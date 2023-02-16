@@ -1,3 +1,8 @@
+/**
+ * creates the force directed graph with speeches and topics as nodes and the sentimentvalue as the link color
+ * @param graph
+ * @author Edvin Nise
+ */
 function speechTopicNetwork(graph) {
     const width = "1920";
     const height = "1080";
@@ -136,9 +141,12 @@ function speechTopicNetwork(graph) {
     simulation.force("link")
         .links(graph.links);
 
-
 }
 
+/**
+ * updates network and opens it by reloading the page
+ * @author Edvin Nise
+ */
 function updateSpeechTopicNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;

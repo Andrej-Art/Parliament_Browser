@@ -1,24 +1,12 @@
+/**
+ * creates force directed graph with speaker and topics as nodes and their realtion to each other as the links
+ * @param graph
+ * @author Edvin Nise
+ */
 function speechNetwork(graph){
     const width = "1920";
     const height = "1080";
 
-
-// let graph = {
-//     nodes: [{"name": "Eric", "group": 1},
-//         {"name": "David", "group": 2},
-//         {"name": "Edvin", "group": 2},
-//         {"name": "Julian", "group": 2},
-//         {"name": "Andrej", "group": 3}],
-//     // {"name": "Informatik", "group": 8},
-//     // {"name": "Mathe", "group": 8},
-//     // {"name": "Physik", "group": 8}],
-//     links: [{"source": "Eric", "target": "Julian", "sentiment": 1},
-//         {"source": "Edvin", "target": "Eric", "sentiment": 0.5},
-//         {"source": "Edvin", "target": "Andrej", "sentiment": -0.1},
-//         {"source": "David", "target": "Andrej", "sentiment": 0},
-//         {"source": "Eric", "target": "Edvin", "sentiment": -0.2},
-//         {"source": "Andrej", "target": "Eric", "sentiment": 0}]
-// };
 
     let svg = d3.select("#networkGraph")
         .append("svg")
@@ -143,6 +131,10 @@ function speechNetwork(graph){
     simulation.force("link")
         .links(graph.links);
 }
+/**
+ * updates network and opens it by reloading the page
+ * @author Edvin Nise
+ */
 function updateSpeechNetwork() {
     const startDate = document.getElementById("von").value;
     const endDate = document.getElementById("bis").value;

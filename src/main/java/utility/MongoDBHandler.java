@@ -776,7 +776,6 @@ public class MongoDBHandler {
 
     /**
      * returns all Speakers with their speeches count.
-     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @author Edvin Nise
@@ -818,23 +817,26 @@ public class MongoDBHandler {
                     obj.put("picture", doc.get("picture"));
                     objList.add(obj);
                 });
-        System.out.println(objList);
         return objList;
     }
 
 
     /**
      * returns count of all Tokens
-     *
      * @param limit
      * @author Edvin Nise
      */
-    public ArrayList<JSONObject> getTokenCount(int limit, String dateFilterOne, String dateFilterTwo, String fractionFilter, String partyFilter, String personFilter) {
+    public ArrayList<JSONObject> getTokenCount(int limit,
+                                               String dateFilterOne,
+                                               String dateFilterTwo,
+                                               String fractionFilter,
+                                               String partyFilter,
+                                               String personFilter) {
         Bson unwind = unwind("$tokens");
         Bson group = group("$tokens.lemmaValue", sum("count", 1));
         Bson sort = sort(descending("count"));
         Bson rankMode = limit(limit);
-//        Bson rankMode = match(gte("count", limit));
+
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(unwind, group, sort, rankMode));
 
         if (!dateFilterOne.isEmpty()) {
@@ -858,13 +860,11 @@ public class MongoDBHandler {
             obj.put(doc.getString("_id"), doc.getInteger("count"));
             objList.add(obj);
         }
-        System.out.println(objList);
         return objList;
     }
 
     /**
      * returns all Named Entities with their respective count
-     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @param fractionFilter
@@ -919,13 +919,11 @@ public class MongoDBHandler {
                     objEnt.put("orgEntity", procBlock.getInteger("namedEntityOrg"));
                     obj.put("" + (dateToLocalDate((Date) doc.get("_id"))), objEnt);
                 });
-        System.out.println(obj);
         return obj;
     }
 
     /**
      * returns the count for all Parts of Speech
-     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @param fractionFilter
@@ -973,7 +971,6 @@ public class MongoDBHandler {
                     obj.put(doc.getString("_id"), procBlock.getInteger("CountOfPOS"));
                     objList.add(obj);
                 });
-        System.out.println(objList);
         return objList;
     }
 
@@ -1050,7 +1047,6 @@ public class MongoDBHandler {
             obj.put("commentNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
             obj.put("commentNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
         });
-        System.out.println(obj);
         return obj;
     }
 
@@ -1162,13 +1158,11 @@ public class MongoDBHandler {
         }
         obj.put("nodes", objNodes);
         obj.put("links", objLinks);
-        System.out.println(obj);
         return obj;
     }
 
     /**
      * returns speaker with corresponding topics
-     *
      * @param dateFilterTwo
      * @param dateFilterOne
      * @return JSONObject
@@ -1321,7 +1315,6 @@ public class MongoDBHandler {
         }
         obj.put("nodes", allNodesList);
         obj.put("links", allLinksList);
-        System.out.println(obj);
         return obj;
     }
 
@@ -1350,7 +1343,6 @@ public class MongoDBHandler {
 
     /**
      * returns all required Data for visualisation of a speech
-     *
      * @param redeID
      * @author Edvin Nise
      */
@@ -1406,7 +1398,6 @@ public class MongoDBHandler {
 
     /**
      * returns all poll results from all named fractions
-     *
      * @param dateFilterOne
      * @param dateFilterTwo
      * @param personFilter
@@ -1485,13 +1476,11 @@ public class MongoDBHandler {
 
             objList.add(objTotal);
         });
-        System.out.println(objList);
         return objList;
     }
 
     /**
      * returns JSON Object for traversing through agendaitems to find speeches bound to them
-     *
      * @author Edvin Nise
      */
     public JSONObject getProtocolAgendaPersonData() {
@@ -1529,7 +1518,6 @@ public class MongoDBHandler {
 
     /**
      * create a text index for a collection by indexing a specific field
-     *
      * @param col
      * @param field
      * @author Edvin Nise
@@ -1541,7 +1529,6 @@ public class MongoDBHandler {
 
     /**
      * drops the text index of a given collection
-     *
      * @param col
      * @param field
      * @author Edvin Nise
