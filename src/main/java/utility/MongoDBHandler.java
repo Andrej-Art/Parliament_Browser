@@ -1941,6 +1941,9 @@ public class MongoDBHandler {
         if (!(editRank.equals("everyone") || editRank.equals("user") || editRank.equals("manager") || editRank.equals("admin") || editRank.equals("nobody"))) {
             return false;
         }
+        if (featureToEdit.equals("editFeatures") && editRank.equals("nobody")){
+            editRank = "admin";
+        }
         if (checkIfDocumentExists("features", featureToEdit)) {
             db.getCollection("features").deleteOne(new Document("_id", featureToEdit));
             db.getCollection("features").insertOne(new Document("_id", featureToEdit).append("rank", editRank));
