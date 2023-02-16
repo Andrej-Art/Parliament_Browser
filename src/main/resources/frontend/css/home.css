@@ -8,18 +8,16 @@
     width: 100%;
 }
 
-.home-db-status {
-    background-color: yellow;
-    box-sizing: border-box;
-    float: right;
-    width: 40%;
-}
-
 .home-left {
 
 }
 
 #db-status {
+    background-color: yellow;
+    box-sizing: border-box;
+    float: right;
+    width: 40%;
+
     display: flex;
     align-items: center;
     padding-left: 20px;

@@ -15,13 +15,8 @@
 <#include "parliamentBrowser.ftl">
 
 <div class="home-container">
-    <div class="home-db-status">
-        <div id="db-status">
+    <div id="db-status">
 
-        </div>
-        <div>
-            <ul><li><a href="test/">✨ Test-Seite ✨</a></li></ul>
-        </div>
     </div>
 
     <div class="home-left">
