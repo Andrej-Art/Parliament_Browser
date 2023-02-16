@@ -355,6 +355,7 @@ function createLineChart(data, target) {
 /**
  * Function to update the charts with data filtered by the user entry on the website.
  * @author DavidJordan
+ * @author Andrej Artuschenko
  */
 function updateCharts() {
     // The date filters from the calendar fields
@@ -376,34 +377,69 @@ function updateCharts() {
         // if successful
         if (ajaxChartData.readyState === XMLHttpRequest.DONE && ajaxChartData.status === 200) {
 
+            // Add the new chart to the div element of the acrual panel and card
+            /*
+            var chartDivIdArray = ["pos"+(panelCount +1), "tokenLine"+(panelCount +1), "spider"+(panelCount +1), "entitiesMulti"+(panelCount +1), "my_dataviz"+(panelCount +1), "pie"+(panelCount + 1)];
+            for(var i=0; i< chartDivIdArray.length; i++) {
+                let chart1Container = document.getElementById(chartDivIdArray[i]);
+
+             */
+
+
             // Clears all the old charts out of the div elements
             var chartDivIdArray = ["pos", "tokenLine", "spider", "entitiesMulti", "my_dataviz", "pie"];
             for(var i=0; i< chartDivIdArray.length; i++) {
                 let chart1Container = document.getElementById(chartDivIdArray[i]);
+                //das muss für das neue Panel ganz entfernt werden, da charts nicht mehr gelöscht werden an der gleichen stelle,
+                // sondern neue Panels erstellt werden
+                /*
                 while (chart1Container.firstChild) {
                     chart1Container.removeChild(chart1Container.firstChild);
                 }
+
+                 */
             }
 
-
             let data = ajaxChartData.response
-            let data2 = ajaxChartData.response
 
             let entityData = data["entities"];
             let posdata = data["pos"];
             let tokenData = data["token"];
-            let speechData = data2["speechesNumber"];
+            let speechData = data["speechesNumber"];
             let sentimentData = data["sentiment"];
             let voteData = data["votes"];
 
 
+            MultiLineEntities(entityData, "#entitiesMulti"+(panelCount));
+            createLineChart(tokenData,"#tokenLine"+(panelCount));
+            createBarChart(posdata, "#pos"+(panelCount));
+            drawSpiderChart(sentimentData,"#spider"+(panelCount));
+            drawStackedBarChart(voteData,"#pie"+(panelCount));
+            speakerbarchart(speechData,"#my_dataviz"+(panelCount));
+
+
+
+
+
+
             // Create and insert new charts
-            MultiLineEntities(entityData, '#entitiesMulti');
-            createLineChart(tokenData, '#tokenLine');
-            createBarChart(posdata, '#pos');
-            drawSpiderChart(sentimentData, "#spider");
-            //drawStackedBarChart(voteData,'#pie');
-            speakerbarchart(speechData,"#my_dataviz");
+
+            /*
+
+
+
+           MultiLineEntities(entityData, document.querySelector("#entitiesMulti"));
+            createLineChart(tokenData, document.querySelector("#tokenLine"));
+            createBarChart(posdata, document.querySelector("#pos"));
+            drawSpiderChart(sentimentData, document.querySelector("#spider"));
+            drawStackedBarChart(voteData,document.querySelector("#pie"));
+            speakerbarchart(speechData,document.querySelector("#my_dataviz"));
+
+             */
+
+
+
+
 
         } else {
             console.log("Error: " + ajaxChartData.status);

@@ -17,6 +17,7 @@ function drawSpiderChart(data, target) {
 
 
 
+
     let width = 600;
     let height = 600;
     const svg = d3.select(target).append("svg")

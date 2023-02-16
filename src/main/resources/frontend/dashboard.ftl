@@ -64,7 +64,6 @@
 
 <div class="main">
 
-
     <h1>Dashboard</h1>
 
     <div id="status-message-box"></div>
@@ -126,6 +125,17 @@
         // updateCharts();
     });
 
+    const btn = document.getElementById('personButt');
+
+    console.log(btn);
+
+    if (btn) {
+        // Not called
+        btn.addEventListener('click', () => {
+            alert('You clicked the button');
+        });
+    }
+
     // Event Listener for the calendar field to trigger the updateCharts function
     document.getElementById("submitBtn").addEventListener("click", updateCharts);
 
@@ -137,7 +147,6 @@
     <#include "js/chart_functions.js">
     <#include  "js/barSpeaker.js">
     <#include "js/pollStackBar.js">
-
 
 </script>
 
