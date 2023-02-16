@@ -61,7 +61,7 @@ public class AgendaItem_TeX {
                 }
                 String speechID = speech.getString("_id");
                 String speakerName = speaker.getString("fullName");
-                //String fileUrlName = imageURL.substring(41);
+
 
 
                 if (speakerName != null) {
@@ -77,7 +77,7 @@ public class AgendaItem_TeX {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
+                        // Adding the Speaker data and the image insert code
 
                         sb.append("\\subsection{Rede: " + speechID + "  Redner: " + speakerName + "}\n\n"
                                 + "\\begin{figure}[ht]\n\n"
@@ -86,6 +86,7 @@ public class AgendaItem_TeX {
                                 + "\\caption{" + speakerName + "}\n\n"
                                 + "\\end{figure}\n\n");
                     }
+                    // Adding the speech text and the nlp table
                     sb.append(speechTex.speechToTex(speech.getString("_id")) + "\n\n");
                     sb.append(laTeXHandler.nlpTableTex(speech.getString("_id")) + "\n\n");
                 }

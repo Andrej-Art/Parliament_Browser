@@ -120,9 +120,7 @@ public class SparkHandler {
         post("/post/applicationDataEditFeatures/", postEditFeatures);
     }
 
-    /*
-     * Routes:
-     */
+
 
     /**
      * Homepage.
@@ -156,8 +154,7 @@ public class SparkHandler {
      *
      * @author DavidJordan
      */
-    @Unfinished("Attempts to get all Protocol data, inclding the IDs which are supposed to be " +
-            "inserted into the button labels")
+
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         pageContent.put("protocolData", mongoDBHandler.getProtocolAgendaPersonData());
@@ -169,7 +166,6 @@ public class SparkHandler {
      * Delivers the required String in LaTeX format to the frontend.
      * @author DavidJordan
      */
-    @Unfinished("Works, but not finished")
     private static final Route getLaTeXString = (Request request, Response response) -> {
         JSONObject data = new JSONObject();
         String protocolID = request.queryParams("protocolID") != null ? request.queryParams("protocolID") : "";
@@ -198,8 +194,7 @@ public class SparkHandler {
         LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput/");
         String editedLatexString =  request.body();
 
-
-
+        // Comand Line that runs the pdflatex command on
         texHandler.createPDF(editedLatexString);
         CommandLineExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory=src\\main\\resources\\frontend\\public\\pdfOutput protocol.tex"});
 
@@ -341,23 +336,8 @@ public class SparkHandler {
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-//        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
-//        pageContent.put("pos", posAndCounts);
-//
-//        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
-//        pageContent.put("token", tokenAndCounts);
-//
-//        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
-//        pageContent.put("entities", datesAndNamedEntities);
-//
-//        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
-//        pageContent.put("speechesNumber", speechesCounts);
-//
-//        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
-//        //pageContent.put("sentiments", sentiments);
-//
         ArrayList<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
-//        pageContent.put("votes", votes);
+
 
         return new ModelAndView(pageContent, "dashboard.ftl");
     };
@@ -455,7 +435,6 @@ public class SparkHandler {
         String text = request.queryParams("text") != null ? request.queryParams("text") : "";
         return mongoDBHandler.findSpeech(text);
     };
-//    GoodWindowsExec.main(new String[]{"pdflatex.exe -shell-escape  -output-directory C:\\Users\\edvin\\IdeaProjects\\Übung5\\src\\main\\resources\\frontend\\public\\pdfOutput testPDF3.tex"});
 
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
