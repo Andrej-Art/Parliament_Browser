@@ -42,7 +42,8 @@ const personEditHTML =
     '<div class="input-row"><label class="editor-label" for="input13">Geburtsort</label><input id="input13" class="editor-input" tabindex="13" onkeydown="advanceOnEnter(this)" placeholder="Berlin"></div>';
 
 const protocolExplanationHTML =
-    'Pflichtfelder sind mit einem * markiert.' +
+    'Pflichtfelder sind mit einem * markiert.<br>' +
+    'Zum Löschen wird die ID im Protokoll-ID Feld genommen.' +
     '<ul>' +
     '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
     '<li>Sitzungsleiter sind voneinander mit einem Komma getrennt</li>' +
@@ -50,7 +51,8 @@ const protocolExplanationHTML =
     '</ul>';
 const agendaExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.<br>' +
-    'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.' +
+    'Tagesordnungspunkte können nur eingefügt werden, falls ein Protokoll mit diesem Tagesordnungspunkt definiert wurde.<br>' +
+    'Zum Löschen werden die IDs aus dem Protokoll-ID- und dem Tagesordnungspunkt-ID Feld kombiniert.' +
     '<ul>' +
     '<li>Protokoll-IDs haben das Format "&lt;Wahlperiode&gt;/&lt;Zahl&gt;"</li>' +
     '<li>Reden-IDs sind voneinander mit einem Komma getrennt</li>' +
@@ -58,7 +60,8 @@ const agendaExplanationHTML =
     '</ul>';
 const speechExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.<br>' +
-    'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.' +
+    'Reden können nur eingefügt werden, falls irgendein Tagesordnungspunkt diese Rede-ID enthält.<br>' +
+    'Zum Löschen wird die ID im Rede-ID Feld genommen.' +
     '<ul>' +
     '<li>Rede-IDs haben das Format "ID&lt;Wahlperiode&gt;&lt;Zahl&gt;"</li>' +
     '<li>RednerIDs sind einfach Zahlen: "&lt;Zahl&gt;"</li>' +
@@ -66,6 +69,7 @@ const speechExplanationHTML =
     '</ul>';
 const personExplanationHTML =
     'Pflichtfelder sind mit einem * markiert.<br>' +
+    'Zum Löschen wird die ID im Person-ID Feld genommen.' +
     '<ul>' +
     '<li>Personen-IDs sind einfach Zahlen: "&lt;Zahl&gt;"</li></li>' +
     '<li>Mindestens eins der Fraktionsfelder muss gefüllt sein</li></li>' +
