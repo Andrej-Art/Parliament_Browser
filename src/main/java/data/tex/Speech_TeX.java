@@ -14,7 +14,8 @@ import static com.mongodb.client.model.Aggregates.limit;
 
 /**
  * The {@code Speech_TeX} class.
- *
+ * @author DavidJordan
+ * @author Edvin Nise
  * @author Eric Lakhter
  */
 public class Speech_TeX {
@@ -22,6 +23,10 @@ public class Speech_TeX {
 
     private static MongoDBHandler mdbh;
 
+    /**
+     * Constructor
+     * @param mongoDBHandler
+     */
     public Speech_TeX(MongoDBHandler mongoDBHandler) {
         mdbh = mongoDBHandler;
     }
@@ -31,11 +36,12 @@ public class Speech_TeX {
     /**
      * Builds a string which can be formatted by a TeX compiler.<br>
      * TeX command looks like this:<br>
-     * {@code \speech[showNamedEntities=true,showSentiment=true,showComments=true]}
      *
      * @param speechID the speechID to texify.
      * @return String in TeX format.
      * @author Eric Lakhter
+     * @author DavidJordan
+     * @author Edvin Nise
      */
     public String speechToTex(String speechID) {
 

@@ -15,8 +15,7 @@ import java.util.List;
  *
  * @author DavidJordan
  */
-@Testing
-@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
+
 public class Protocol_TeX {
 
     private Document protDoc;

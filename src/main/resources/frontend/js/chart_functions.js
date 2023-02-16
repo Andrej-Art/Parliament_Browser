@@ -6,8 +6,8 @@
  * // Sources: https://observablehq.com/@d3/multi-line-chart
  * // Sources: https://d3-graph-gallery.com/graph/line_several_group.html
  * // This function, like the other d3.js chart-functions I contributed to, was pieced together from
- * // various foreign code examples. My own original contribution was solely! in adapting the code
- * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
+ * // various foreign code examples. My own original contribution was in adapting the code
+ * // to fit our unique dataset and adding comments.
  */
 function MultiLineEntities(data, target){
 
@@ -163,8 +163,8 @@ function MultiLineEntities(data, target){
  * // Sources: https://observablehq.com/@d3/bar-chart?collection=@d3/charts
  * // Sources: https://d3-graph-gallery.com/barplot.html
  * // This function like the other d3.js chart-functions I contributed to was pieced together from
- * // various foreign code examples. My own original contribution was solely! in adapting the code
- * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
+ * // various foreign code examples. My own original contribution was in adapting the code
+ * // to fit our unique dataset and adding comments.
  */
 function createBarChart(data, target) {
     // Setting the margins to the same dimensions as all other charts
@@ -252,7 +252,7 @@ function createBarChart(data, target) {
  * // Sources: https://d3-graph-gallery.com/graph/line_basic.html
  * // This function like the other d3.js chart-functions I contributed to was pieced together from
  * // various foreign code examples. My own original contribution was only in adapting the code
- * // to fit our unique dataset and adding the comments. Beyond that I claim no authorship.
+ * // to fit our unique dataset and adding comments.
  */
 function createLineChart(data, target) {
     // Setting the margins and dimensions, adjust margins to allow for large numbers
@@ -301,7 +301,7 @@ function createLineChart(data, target) {
             .y(function(d) { return y(d.value); }));
 
 
-    // More
+    // More axis parameters
     svg.append("g")
         .attr("transform", "translate(0," + height + ")");
     svg.append("g")
@@ -416,9 +416,6 @@ function updateCharts() {
             drawSpiderChart(sentimentData,"#spider"+(panelCount));
             drawStackedBarChart(voteData,"#pie"+(panelCount));
             speakerbarchart(speechData,"#my_dataviz"+(panelCount));
-
-
-
 
 
 

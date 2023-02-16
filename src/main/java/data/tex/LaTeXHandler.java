@@ -17,8 +17,7 @@ import java.util.List;
  * Class to manage al TEX related classes and generate the pdf from the tex file.
  * @author DavidJordan
  */
-@Testing
-@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods. Does not generate a pdf from the latex yet.")
+
 public class LaTeXHandler {
 
     private String targetDir;
@@ -26,6 +25,12 @@ public class LaTeXHandler {
     private MongoDBHandler mdbh;
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
 
+    /**
+     * Constructor
+     * @param mongoDBHandler
+     * @param targetDirectory
+     * @throws IOException
+     */
     public LaTeXHandler(MongoDBHandler mongoDBHandler, String targetDirectory) throws IOException {
         this.mdbh = mongoDBHandler;
         this.targetDir = targetDirectory;
@@ -82,33 +87,19 @@ public class LaTeXHandler {
             if (!checkDir.exists()) {
                 new File(downloadDirectory).mkdir();
             }
-//            staticFiles.externalLocation(downloadDirectory);
-//            //Create .tex file from given String
+
+
             String pathToTexFile = downloadDirectory + "\\protocol.tex";
             File file = new File(pathToTexFile);
-            // Writing the String in Latex format to a .tex file
-//            FileOutputStream fileOutputStream = new FileOutputStream(file);
-//            fileOutputStream.write(latexString.getBytes());
-//            fileOutputStream.close();
+
+            // Replacing various problematic Unicode chars that stopped the .pdf compilation
             latexString = latexString.replaceAll("\u202F", " ");
             latexString = latexString.replaceAll("\u02BC", "");
             latexString = latexString.replaceAll("&", "");
             latexString = latexString.replaceAll("\u2002", "");
             latexString = latexString.replaceAll("\u2003", "");
 
-//            FileOutputStream fileOutputStream = new FileOutputStream(file);
-//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
-//            outputStreamWriter.write(latexString);
-//            outputStreamWriter.close();
-//            fileOutputStream.close();
-
-            // Replace all occurrences of the problematic character with an ASCII equivalent character
-
-
-//            FileOutputStream fileOutputStream = new FileOutputStream(file);
-//            fileOutputStream.write(latexString.getBytes());
-//            fileOutputStream.close();
-
+            // Writing the .tex file into the target directory where the command line pdflatex command will compile it to pdf
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
             String modifiedLatexString = latexString.replace("#", "\\#");
@@ -119,22 +110,6 @@ public class LaTeXHandler {
             // Using the user's local installation of LateX, we run a command 'pdflatex' to generate
             // the .pdf file compiling the latex code contained in the .tex file
 
-//            String command = "pdflatex -synctex=1 -interaction=nonstopmode -output-directory=" + downloadDirectory  + pathToTexFile;
-//            Process process = Runtime.getRuntime().exec(command);
-//
-//
-//            InputStreamReader isr = new InputStreamReader(process.getInputStream());
-//            BufferedReader br = new BufferedReader(isr);
-//            String line;
-//            while ((line = br.readLine()) != null) {
-//                System.out.println(line);
-//            }
-//
-//            isr = new InputStreamReader(process.getErrorStream());
-//            br = new BufferedReader(isr);
-//            while ((line = br.readLine()) != null) {
-//                System.err.println(line);
-//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
