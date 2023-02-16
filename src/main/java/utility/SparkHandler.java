@@ -112,9 +112,6 @@ public class SparkHandler {
         get("/loginSite/", getLoginSite, new FreeMarkerEngine(cfg));
         post("/post/applicationDataLogin/", postLogin);
         post("/post/applicationDataRegister/", postRegister);
-       // post("/post/applicationDataAdminCheck/", postCheckAdmin);
-        //post("/post/applicationDataManagerCheck/", postCheckManager);
-        //post("/post/applicationDataUserCheck/", postCheckUser);
         post("/post/applicationDataLogoutUser/", postLogout);
         post("/post/applicationDataDeleteUser/", postDeleteUser);
         post("/post/applicationDataPwChange/", postChangePassword);
