@@ -181,14 +181,15 @@
         }
 
         .card-container {
-            display: grid;
+            display: flex;
             background-color: lightgray;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            /*grid-template-columns: repeat(2, 1fr);*/
+            /*grid-template-rows: repeat(3, 1fr);*/
             gap: 20px;
             padding: 10px 20px;
             margin: 10px;
             border-radius: 5px;
+            flex-direction: column;
         }
 
         .card-container.graph-container {
@@ -207,7 +208,11 @@
             background-color: blue;
         }
 
-
+        .Legend-item {
+            position: relative;
+            bottom: 150px;
+            margin-top: auto;
+        }
 
 
     </style>
@@ -328,23 +333,23 @@
         leftContainer.innerHTML =
             "<div class='card-container graph-container'>" +
             "<h5>POS als vertikaler Bar Chart</h5>" +
-            "<svg class='graph'>" +
+            // "<svg class='graph'>" +
             "<div id="+'pos'+(panelCount)+ "></div>" +
-            "</svg>" +
+            // "</svg>" +
             "</div>" +
 
             "<div class='card-container graph-container'>" +
             "<h5>Token als Line Chart</h5>" +
-            "<svg class = 'graph'>" +
+            // "<svg class = 'graph'>" +
             "<div id ="+ 'tokenLine'+(panelCount)+"></div>" +
-            "</svg>" +
+            // "</svg>" +
             "</div>" +
 
             "<div class='card-container graph-container'>" +
             "<h5>Sentiment als Radar Chart</h5>" +
-            "<svg class = 'graph'>" +
+            // "<svg class = 'graph'>" +
             "<div id ="+ 'spider'+(panelCount)+"></div>" +
-            "</svg>" +
+            // "</svg>" +
             "<div class='Legend-item'>" +
             "<span class='Legend-colorBox' + style='background-color: darkorange';>" + "</span>" +
             "<span class='Legend-label'>"+"Reden" + "</span>" +
@@ -361,23 +366,23 @@
 
             "<div class='card-container graph-container'>" +
             "<h5>Redner als Bar Chart</h5>" +
-            "<svg class = 'graph'>" +
+            // "<svg class = 'graph'>" +
             "<div id ="+ 'my_dataviz'+(panelCount)+"></div>" +
-            "</svg>" +
+            // "</svg>" +
             "</div>" +
 
             "<div class='card-container graph-container'>" +
             "<h5>Named Entities als Multiple Line Chart</h5>" +
-            "<svg class = 'graph'>" +
+            // "<svg class = 'graph'>" +
             "<div id ="+ 'entitiesMulti'+ +(panelCount)+ "></div>" +
-            "</svg>" +
+            // "</svg>" +
             "</div>" +
 
             "<div class='card-container graph-container'>" +
             "<h5>Abstimmungsergebnisse</h5>" +
-            "<svg class = 'graph'>" +
+            // "<svg class = 'graph'>" +
             "<div id ="+ 'pie'+(panelCount)+"></div>" +
-            "</svg>" +
+            // "</svg>" +
             "</div>";
 
         panelEntity.appendChild(leftContainer);
