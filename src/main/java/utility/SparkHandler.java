@@ -479,7 +479,9 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "commentNetwork.ftl");
     };
-
+    /**
+     * returns a JSON containing
+     */
     private static final TemplateViewRoute getSpeechTopicNetwork = (Request request, Response response) -> {
         String von = request.queryParams("von") != null ? request.queryParams("von") : "";
         String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";

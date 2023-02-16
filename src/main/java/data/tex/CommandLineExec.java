@@ -10,7 +10,7 @@ public class CommandLineExec
     {
         if (args.length < 1)
         {
-            System.out.println("USAGE: java GoodWindowsExec <cmd>");
+            System.out.println("USAGE: java CommandLineExec <cmd>");
             System.exit(1);
         }
 
