@@ -37,18 +37,14 @@ public class Scraper {
         String path = Scraper.class.getClassLoader().getResource("").getPath();
 
         try {
-            /*
-             * Here a connection to the Bundestag website is established, where the required documents are located.
-             */
+            //Here a connection to the Bundestag website is established, where the required documents are located.
             Document opendataHTML = Jsoup.connect("https://www.bundestag.de/services/opendata").get();
 
             //get MDB-Stammdaten from Bundestagswebsite and the belonging dtd-file
             Elements furtherInfoElementS = opendataHTML.getElementsByClass("bt-link-dokument");
             for (Element furtherInfoElem : furtherInfoElementS) {
 
-                /*
-                 * case dtd-file
-                 */
+                //case dtd-file
                 if (Pattern.matches("DTD für Plenarprotokolle des Deutschen Bundestags, gültig ab 19\\. Wahlperiode.*", furtherInfoElem.attr("title"))) {
                     Element dtdElem = furtherInfoElem;
                     try {
@@ -65,10 +61,7 @@ public class Scraper {
                     }
                 }
 
-                /*
-                 * case for mdb-Stammdaten
-                 */
-
+                //case for mdb-Stammdaten
                 if (Pattern.matches("Stammdaten aller Abgeordneten seit 1949 im XML-Format.*", furtherInfoElem.attr("title"))) {
                     Element mdbElem = furtherInfoElem;
                     try {
@@ -115,10 +108,7 @@ public class Scraper {
                     while (true) {
                         String url = "https://www.bundestag.de/ajax/filterlist/de/services/opendata/" + modid + "-" + modid + "?limit=10&noFilterSet=true&offset=" + maxoffset;
 
-                        /*
-                         * counting maxoffset until url doesn't return results - then download backwards from the maxoffset
-                         */
-
+                        //counting maxoffset until url doesn't return results - then download backwards from the maxoffset
                         if (checkSite(url)) {
                             maxoffset += 10;
                         } else {
@@ -137,9 +127,7 @@ public class Scraper {
         }
     }
 
-    /*
-     * Download exact 10 xml-protocols from the section
-     */
+    //Download exact 10 xml-protocols from the section
     private static int downloadTenXML(String url) {
         String path = Scraper.class.getClassLoader().getResource("").getPath();
         int downloadCounter = 0;
