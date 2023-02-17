@@ -421,7 +421,7 @@ function updateCharts() {
             MultiLineEntities(entityData, "#entitiesMulti"+(panelCount));
             createLineChart(tokenData,"#tokenLine"+(panelCount));
             createBarChart(posdata, "#pos"+(panelCount));
-            //drawSpiderChart(sentimentData,"#spider"+(panelCount));
+            drawSpiderChart(sentimentData,"#spider"+(panelCount));
             drawStackedBarChart(voteData,"#pie"+(panelCount));
           speakerbarchart(speechData,"#my_dataviz"+(panelCount));
 
