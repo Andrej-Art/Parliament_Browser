@@ -366,8 +366,44 @@ function updateCharts() {
     // The person filter from the search field selecting the personFilter
     const person = document.getElementById("personInput").value;
     //The fraction and party filters
-    const fraction = document.getElementById("fractionInput").value;
-    const party = document.getElementById("partyInput").value;
+    let fraction = document.getElementById("fractionInput").value;
+    let party = document.getElementById("partyInput").value;
+
+    //Catch and "translate" fractions inputs
+    if (fraction === "CDU/CSU"){
+        fraction = "Fraktion der Christlich Demokratischen Union/Christlich - Sozialen Union"
+    }
+    else if (fraction === "SPD"){
+        fraction = "Fraktion der Sozialdemokratischen Partei Deutschlands"
+    }
+    else if(fraction === "DIE LINKE"){
+        fraction = "Fraktion DIE LINKE."
+    }
+    else if(fraction === "AfD"){
+        fraction = "Alternative für Deutschland"
+    }
+    else if(fraction === "BÜNDNIS 90/DIE GRÜNEN" || fraction === "DIE GRÜNEN"){
+        fraction = "Fraktion BÜNDNIS 90/DIE GRÜNEN"
+    }
+    else if(fraction === "fraktionslos"){
+        fraction = "Fraktionslos"
+    }
+    else if(fraction === "FDP"){
+        fraction = "Fraktion der Freien Demokratischen Partei"
+    }
+
+    //Catch some party spelling differences
+    if( party === "DIE GRÜNEN"){
+        party = "BÜNDNIS 90/DIE GRÜNEN"
+    }
+
+    if (party === "parteilos"){
+        party = "Parteilos"
+    }
+
+    if (party === "AFD"){
+        party = "AfD"
+    }
     $('#status-message-box').text('Waiting for response from DB ...');
 
     // Make an AJAX call to the backend
