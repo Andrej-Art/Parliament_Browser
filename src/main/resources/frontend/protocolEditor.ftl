@@ -14,19 +14,19 @@
 <#include "parliamentBrowser.ftl">
 
 <div class="protocol-editor">
-    <div class="select-box" style="background-color: mediumpurple">
+    <div class="select-box">
         <div>
             <button onclick="setProtocolEditorButtons()">Protokolle anzeigen</button>
             <button onclick="setPersonEditorButtons()">Personen anzeigen</button>
         </div>
         <ul id="button-list"></ul>
     </div>
-    <div class="editor-box" style="background-color: yellowgreen">
+    <div class="editor-box">
         <div id="input-area">
 
         </div>
     </div>
-    <div class="button-box" style="background-color: aquamarine">Editor-Modus:<br>
+    <div class="button-box">Editor-Modus:<br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="protocol" checked="checked">Protokoll</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="speech">Rede</label><br>
@@ -44,7 +44,7 @@
 
         </div>
     </div>
-    <div class="status-box" style="background-color: coral">
+    <div class="status-box">
         <div id="status-message-box"></div>
     </div>
 </div>
@@ -71,10 +71,7 @@ let people = protocolAgendaPersonData["people"];
 let personIDs = Object.keys(people);
 personIDs.sort((a, b) => parseInt(a) - parseInt(b));
 
-document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status-Benachrichtigungen:<br>' +
-    '<span style="color: blue">Achtung! Die ECHTE DB ist noch nicht wirklich angeschlossen, Daten werden zwar aus den echten ' +
-    'Collections geladen, aber Einfügen und Löschen wird in Testcollections gemacht.<br>' +
-    'Daher keine Sorgen machen dass der Editor behauptet Dinge wurden eingefügt!</span><br>';
+document.getElementById("status-message-box").innerHTML = new Date().toLocaleDateString('DE') + '<br>Status-Benachrichtigungen:<br>';
 document.querySelector('input[value="protocol"]').checked = true;
 fillWithData(oldEditMode, cachedProtocol);
 setProtocolEditorButtons();

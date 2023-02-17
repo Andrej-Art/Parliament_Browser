@@ -4,13 +4,13 @@
 
 .protocol-editor {
     box-sizing: border-box;
-    /*padding: 80px 30px;*/
     width: 100%;
     height: 100vh;
 }
 
 /* protocol loader container */
 .select-box {
+    background-color: #bbb;
     box-sizing: border-box;
     padding: 50px 20px 20px;
     overflow: auto;
