@@ -78,7 +78,6 @@ public class XMLProtocolParser {
 
                         if (sessionInfoNode.getNodeType() == Node.ELEMENT_NODE) {
                             Element sessionInfoElement = (Element) sessionInfoNode;
-                            //String _id = file.getName().replaceAll("-data\\.xml", " ");
 
                             NodeList contentTableElementList = getElementList(sessionInfoElement, "inhaltsverzeichnis").get(0).getChildNodes();
 
@@ -140,7 +139,6 @@ public class XMLProtocolParser {
                                                 addStatus = false;
                                                 commentList.clear();
 
-                                                // @Testing //Get sessionLeader
                                                 String sessionLeader = speechChild.getTextContent();
                                                 //removes ":" after each session leader
                                                 sessionLeader = sessionLeader.replaceFirst("\\:", "");
@@ -188,7 +186,6 @@ public class XMLProtocolParser {
 
                                             case "kommentar":
                                                 comment = speechChild.getTextContent();
-                                                // commentID soll sein die speechID + / + Kommentar#
                                                 commentNumber++;
                                                 commentID = speechID + "/" + commentNumber;
                                                 Integer commentPosition = speechText.length();
@@ -201,11 +198,6 @@ public class XMLProtocolParser {
 
                                                 String commentatorID = "N/A";
                                                 ArrayList<String> commentatorFractions = new ArrayList<>(0);
-                                                /*
-                                                hier wird eine Liste fullName benötigt/aus den Stammdaten generiert
-                                                jedes Mal, wenn eckige Klammern vorkommen, wird geprüft,
-                                                ob vor den Klammern der Name vorkommt.
-                                                   */
 
                                                 for (Person_Impl person : persons) {
                                                     String fullName = person.getFirstName() + " " + person.getLastName();
@@ -299,14 +291,6 @@ public class XMLProtocolParser {
                                                 break;
                                         }
                                     }
-                                    // aus den Protokollen: id, Titel, Vorname, namenszusatz, nachname, ortszusatz,
-                                    //fraktion, rolle
-
-                                    // aus den Stammdaten muss folgendes rein: Partei, Place (?)
-                                    /*
-                                    Person_Impl person = new Person_Impl(speakerProperties[0], speakerProperties[1], speakerProperties[2], speakerProperties[3], speakerProperties[4], speakerProperties[5], speakerProperties[6], speakerProperties[7], speakerProperties[8]);
-                                    personMap.put(person.getID(), person);
-                                    */
                                 }
 
 
