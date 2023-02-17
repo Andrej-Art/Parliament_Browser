@@ -18,8 +18,6 @@ import java.util.List;
  *
  * @author DavidJordan
  */
-@Testing
-@Unfinished("Generates a Latex String together with the other TEX classes' toTex() Methods")
 public class AgendaItem_TeX {
 
     private Document aiDoc;
@@ -37,22 +35,22 @@ public class AgendaItem_TeX {
     }
 
     /**
-     * Method to generate Latex formatted String containing the relevant data
-     *
-     * @param speeches
-     * @param targetDirectory
-     * @return
+     * Method to generate Latex formatted String containing the relevant data of the AgendaItem
+     * @param speeches the list of speeches contained in the AgendaItem
+     * @param targetDirectory the target directory for retrieving the images
+     * @return Latex formatted String
      * @author DavidJordan
      */
     public String insertSpeechToAgendaitem(List<Document> speeches, String targetDirectory) throws IOException {
         StringBuilder sb = new StringBuilder();
         for (Document speech : speeches) {
-
+            // Get relevant speker and speech data
             if (mdbh.getDocument("person", speech.getString("speakerID")) != null) {
                 Document speaker = mdbh.getDocument("person", speech.getString("speakerID"));
                 Speech_TeX speechTex = new Speech_TeX(mdbh);
                 LaTeXHandler laTeXHandler = new LaTeXHandler(mdbh,"");
 
+                // the image URL to download the jpg from
                 String imageURL = null;
                 try {
                     imageURL = speaker.getList("picture", String.class).get(0);
@@ -63,7 +61,7 @@ public class AgendaItem_TeX {
                 String speakerName = speaker.getString("fullName");
 
 
-
+                // if a speaker name exists download his image and rename it so latex can insert it
                 if (speakerName != null) {
                     String speakerImageName = speakerName.replaceAll("\\s+", "_") + ".jpg";
 
@@ -92,6 +90,7 @@ public class AgendaItem_TeX {
                 }
             }
         }
+        // Return the finished String built
         return sb.toString();
     }
 }

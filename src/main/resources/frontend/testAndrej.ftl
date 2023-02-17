@@ -41,6 +41,10 @@
 
         }
 
+        #db-response-status {
+            height: 64px;
+        }
+
 
         .box {
             display: block;
@@ -92,7 +96,6 @@
             height: 1000px;
             background-color: #fff;
             border: 1px solid #000;
-            margin: 10px;
             padding: 10px;
             position: relative;
             display: flex;
@@ -248,6 +251,8 @@
                 <button type="submit" id="submitBtn" class="submitBtn">Generate</button>
             </label>
         </form>
+        <br><br>
+        <div id="db-response-status"></div>
 
     </div>
 </div>
@@ -269,6 +274,7 @@
 <script>
 
     $(document).ready(function () {
+        window.scrollTo(0, 0);
         console.log("Im up and running!");
         // updateCharts();
     });
@@ -282,6 +288,8 @@
 
 
     function addPanel() {
+        document.getElementById("db-response-status").innerHTML =
+            'Auf Antwort von der DB warten... Bitte etwas Geduld. <img src="/loadIcon.gif" alt="" style="vertical-align: middle">';
 
         event.preventDefault(); // prevent form submission
 

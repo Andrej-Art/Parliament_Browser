@@ -3,8 +3,6 @@ package data.tex;
 import org.bson.Document;
 import utility.MongoDBHandler;
 import utility.TimeHelper;
-import utility.annotations.Testing;
-import utility.annotations.Unfinished;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ import java.util.List;
 
 /**
  * The {@code Protocl_TeX} class.
- *
  * @author DavidJordan
  */
 

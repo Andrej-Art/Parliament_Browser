@@ -4,8 +4,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
 import utility.MongoDBHandler;
-import utility.annotations.Testing;
-import utility.annotations.Unfinished;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +13,7 @@ import java.util.List;
 
 /**
  * Class to manage al TEX related classes and generate the pdf from the tex file.
+ *
  * @author DavidJordan
  */
 
@@ -27,6 +26,7 @@ public class LaTeXHandler {
 
     /**
      * Constructor
+     *
      * @param mongoDBHandler
      * @param targetDirectory
      * @throws IOException
@@ -39,6 +39,7 @@ public class LaTeXHandler {
 
     /**
      * Creates a LaTeX formatted String of the Protocol with the given ID
+     *
      * @param protocolID
      * @return The formatted String.
      * @author DavidJordan
@@ -48,14 +49,12 @@ public class LaTeXHandler {
         try {
             // Get the Protocol, aitems, and speeches from the db
             Document protocolDoc = mdbh.getDocument("protocol", protocolID);
-            //System.out.println(protocolDoc.get("agendaItems"));
             List<Document> agendaItemDocs = new ArrayList<>(0);
 
 
             for (String aitemID : protocolDoc.getList("agendaItems", String.class)) {
                 //Get all agendaItems by id
                 agendaItemDocs.add(mdbh.getDocument("agendaItem", aitemID));
-                //System.out.println(mdbh.getDocument("agendaItem", aitemID));
             }
 
             Protocol_TeX protocolTeX = new Protocol_TeX(protocolDoc, mdbh, targetDir);
@@ -69,14 +68,14 @@ public class LaTeXHandler {
     }
 
     /**
-     * Attempts to generate the .tex and the .pdf file from the generated String  does not run yet in its current form.
-     * @param latexString
+     * Creates the .tex file from the generated String. Stores it in the target directory and makes it available
+     * for the commandline pdflatex command to convert to .pdf
+     *
+     * @param latexString The latex formatted String
      * @throws IOException
      * @throws InterruptedException
      * @author DavidJordan
      */
-    @Testing
-    @Unfinished("Produces pdf now, has to be bound into the frontend now.")
     public void createPDF(String latexString) throws IOException, InterruptedException {
 
         // Writing the Generated String to a .tex file
@@ -115,6 +114,7 @@ public class LaTeXHandler {
         }
 
     }
+
     /**
      * returns a piechart for each party and for the total poll result in latex code
      *

@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * !!Unfinished!!
+ *
  * Class that implements the Person interface. It maps all "Abgeordnete" and Persons with
  * an ID appearing in the Stammdaten and Protocols.
  * @author DavidJordan
@@ -49,9 +49,7 @@ public class Person_Impl implements Person {
     }
 
     /**
-     * This is also a working idea for a constructor to generate the object from the DB document.
-     * Please everybody inspect these two interpretations of our results yesterday and make the necessary adjustments
-     * where necessary. Whoever needs setters for specific variables, please add those and modify the constructor accordingly.
+     * Constructor
      * @param document The BSON document retrieved from the database.
      * @author DavidJordan
      * @author Julian Ocker

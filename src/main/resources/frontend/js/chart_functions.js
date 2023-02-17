@@ -416,6 +416,7 @@ function updateCharts() {
             //console.log(sentimentData);
             //console.log(voteData);
 
+            document.getElementById("db-response-status").innerHTML = '';
 
             MultiLineEntities(entityData, "#entitiesMulti"+(panelCount));
             createLineChart(tokenData,"#tokenLine"+(panelCount));
@@ -446,7 +447,7 @@ function updateCharts() {
 
 
         } else {
-            console.log("Error: " + ajaxChartData.status);
+            console.error("Error; Request status " + ajaxChartData.status);
         }
     };
     ajaxChartData.send();

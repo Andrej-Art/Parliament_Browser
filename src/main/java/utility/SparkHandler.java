@@ -9,7 +9,6 @@ import org.bson.Document;
 import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
-import utility.annotations.*;
 import utility.webservice.EditorProtocolParser;
 import utility.webservice.User;
 
@@ -34,8 +33,7 @@ public class SparkHandler {
     private static EditorProtocolParser epParser;
 
     private static final Configuration cfg = Configuration.getDefaultConfiguration();
-    // the added string redirects to the /resources/ directory
-    private static final String frontendPath = /* SparkHandler.class.getClassLoader().getResource(".").getPath() + "../../" + */ "src/main/resources/frontend/";
+    private static final String frontendPath = "src/main/resources/frontend/";
 
     public static void main(String[] args) throws IOException, UIMAException {
         SparkHandler.init();
@@ -79,9 +77,6 @@ public class SparkHandler {
             if (!path.endsWith("/") && req.queryParams().size() == 0)
                 res.redirect(path + "/");
         });
-
-        // Test is for testing
-        get("/test/", getTest, new FreeMarkerEngine(cfg));
 
         get("/", getHome, new FreeMarkerEngine(cfg));
         post("/", "application/json", postHome);
@@ -128,26 +123,6 @@ public class SparkHandler {
      */
 
     /**
-     * Test page.
-     */
-    @Testing
-    private static final TemplateViewRoute getTest = (Request request, Response response) -> {
-        Map<String, Object> pageContent = new HashMap<>();
-        JSONObject obj = new JSONObject("{\"perEntity\":[{\"_id\":2,\"name\":\"butter\"},{\"_id\":5,\"name\":\"butter\"}]}");
-        ArrayList<JSONObject> objList = new ArrayList<>(0);
-        objList.add(new JSONObject("{\"_id\":2,\"name\":\"butter\"}"));
-        objList.add(new JSONObject("{\"_id\":5,\"name\":\"butter\"}"));
-
-        pageContent.put("title", "butter");
-        pageContent.put("obj", obj);
-        pageContent.put("objList", objList);
-
-        String userRank = "admin";
-        pageContent.put("userRank", userRank);
-        return new ModelAndView(pageContent, "test.ftl");
-    };
-
-    /**
      * Homepage.
      *
      * @author Eric Lakhter
@@ -179,7 +154,6 @@ public class SparkHandler {
      *
      * @author DavidJordan
      */
-
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         pageContent.put("protocolData", mongoDBHandler.getProtocolAgendaPersonData());
@@ -339,7 +313,8 @@ public class SparkHandler {
                     if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteAgendaItems")) {
                         epParser.deleteViaEditor("agendaItem", id);
                         return responseJSON("Tagesordnungspunkt \"" + id + "\" erfolgreich gelöscht", "null");
-                    } else throw new EditorException("Dieser Nutzer hat nicht das Recht Tagesordnungspunkte zu löschen");
+                    } else
+                        throw new EditorException("Dieser Nutzer hat nicht das Recht Tagesordnungspunkte zu löschen");
                 case "speech":
                     if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "deleteSpeeches")) {
                         epParser.deleteViaEditor(col, id);
@@ -358,6 +333,9 @@ public class SparkHandler {
         }
     };
 
+    /**
+     * Main dashboard page.
+     */
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
@@ -462,6 +440,11 @@ public class SparkHandler {
         return mongoDBHandler.findSpeech(text);
     };
 
+    /**
+     * Speech network visualisation page.
+     *
+     * @author Edvin Nise
+     */
     private static final TemplateViewRoute getSpeechNetwork = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         String von = request.queryParams("von") != null ? request.queryParams("von") : "";
@@ -473,6 +456,12 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "speechNetwork.ftl");
     };
+
+    /**
+     * Comment network visualisation page.
+     *
+     * @author Edvin Nise
+     */
     private static final TemplateViewRoute getCommentNetwork = (Request request, Response response) -> {
         String von = request.queryParams("von") != null ? request.queryParams("von") : "";
         String bis = request.queryParams("bis") != null ? request.queryParams("bis") : "";
@@ -484,8 +473,11 @@ public class SparkHandler {
 
         return new ModelAndView(pageContent, "commentNetwork.ftl");
     };
+
     /**
-     * returns a JSON containing
+     * Speech/Topic network visualisation page.
+     *
+     * @author Edvin Nise
      */
     private static final TemplateViewRoute getSpeechTopicNetwork = (Request request, Response response) -> {
         String von = request.queryParams("von") != null ? request.queryParams("von") : "";
@@ -690,7 +682,6 @@ public class SparkHandler {
      * @author Julian Ocker
      */
     private static final TemplateViewRoute getProtocolCheckerLoader = (Request request, Response response) -> {
-
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
         if (cookie == null) {
@@ -700,10 +691,10 @@ public class SparkHandler {
         ArrayList options = new ArrayList<>(Arrays.asList(XMLProtocolParser.getAllFiles()));
 
         pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
-        if( mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "admin")) {
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "admin")) {
             pageContent.put("options", options);
             return new ModelAndView(pageContent, "protocolCheckerLoader.ftl");
-        }else{
+        } else {
             return new ModelAndView(pageContent, "noRights.ftl");
         }
     };
@@ -773,8 +764,8 @@ public class SparkHandler {
      * @author Eric Lakhter
      */
     public static void openInDefaultBrowser(String url) throws IOException {
-        String os = System.getProperty("os.name").toLowerCase();
         Runtime rt = Runtime.getRuntime();
+        String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains("win")) {
             rt.exec("rundll32 url.dll,FileProtocolHandler " + url);
