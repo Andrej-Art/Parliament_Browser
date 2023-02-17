@@ -1,3 +1,11 @@
+/**
+ * @author Andrej Artuschenko
+ * @author Eric Lakhter
+ * @param data
+ * @param target
+ *
+ */
+
 function drawStackedBarChart(data, target) {
     console.log(data);
 
@@ -103,11 +111,7 @@ function drawStackedBarChart(data, target) {
         .padding([0.2])
     svg.append("g")
         .attr("transform", "translate(0," +  height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0))
-        .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-20)")
-        .style("text-anchor", "end");
-
+        .call(d3.axisBottom(x).tickSizeOuter(0));
 
     // Add Y axis
     const y = d3.scaleLinear()
@@ -124,15 +128,44 @@ function drawStackedBarChart(data, target) {
     //'#4daf4a', '#FFFF00'
 
 
-
-
-
     //stack the data? --> stack per subgroup
     const stackedData = d3.stack()
         .keys(subgroups)
         (totalData)
 
+    // ----------------
+    // Create a tooltip
+    // ----------------
+    const tooltip = d3.select(target)
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
 
+    // functions that change the tooltip when user hover / move / leave a bar
+    const mouseover = function(event, d) {
+        const topic = d.data.topic;
+        const subgroupName = d3.select(this.parentNode).datum().key;
+        const subgroupValue = d.data[subgroupName];
+
+        tooltip
+            .html("Topic: " +topic+"<br>" +"Abstimmung: " + subgroupName + "<br>" + "Stimmen: " + subgroupValue)
+            .style("opacity", 1)
+
+    }
+    const mousemove = function(event, d) {
+        tooltip.style("transform","translateY(-55%)")
+            .style("left",(event.x)/2+"px")
+            .style("top",(event.y)/2-30+"px")
+    }
+    const mouseleave = function(event, d) {
+        tooltip
+            .style("opacity", 0)
+    }
 
     // Show the bars
     svg.append("g")
@@ -149,6 +182,9 @@ function drawStackedBarChart(data, target) {
         .attr("y", d => y(d[1]))
         .attr("height", d => y(d[0]) - y(d[1]))
         .attr("width", x.bandwidth())
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave)
 
 }
 
