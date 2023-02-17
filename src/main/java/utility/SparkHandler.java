@@ -116,6 +116,10 @@ public class SparkHandler {
         post("/post/applicationDataEditFeatures/", postEditFeatures);
 
         get("/ProtocolCheckerLoader/", getProtocolCheckerLoader, new FreeMarkerEngine(cfg));
+        post("/post/applicationDataLoadAll/", postLoadAll);
+        post("/post/applicationDataParseAll/", postParseAll);
+        post("/post/applicationDataParseNew/", postParseNew);
+        post("/post/applicationDataParseSingle/", postParseSingle);
     }
 
     /*
@@ -687,16 +691,92 @@ public class SparkHandler {
         if (cookie == null) {
             cookie = "";
         }
-
-        ArrayList options = new ArrayList<>(Arrays.asList(XMLProtocolParser.getAllFiles()));
-
         pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "admin")) {
+            ArrayList options = new ArrayList<>(Arrays.asList(XMLProtocolParser.getAllFiles()));
+            File[] files = XMLProtocolParser.getArrayOfNewProtocols();
+            List parsedProtocols = XMLProtocolParser.getListOfParsedProtocols();
+            Integer filesNumber = files.length;
+            Integer parsedProtocolNumber = parsedProtocols.size();
             pageContent.put("options", options);
+            pageContent.put("numberOfProtocols", filesNumber);
+            pageContent.put("numberOfParsedProtocols", parsedProtocolNumber);
             return new ModelAndView(pageContent, "protocolCheckerLoader.ftl");
         } else {
             return new ModelAndView(pageContent, "noRights.ftl");
         }
+    };
+
+    /**
+     * accepts trigger, starts loading all Files
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postLoadAll = (Request request, Response response) -> {
+        JSONObject req = new JSONObject(request.body());
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
+            XMLProtocolParser.getAllFiles();
+        }
+        answer.put("EditSuccess", true);
+        return answer;
+    };
+
+    /**
+     * accepts trigger, starts the parsing of all Files
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postParseAll = (Request request, Response response) -> {
+        XMLProtocolParser.getAllFiles();
+        JSONObject req = new JSONObject(request.body());
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
+            if (XMLProtocolParser.parserStarterGenerell()) {
+                answer.put("EditSuccess", true);
+                return answer;
+            }
+        }
+        answer.put("EditSuccess", false);
+        return answer;
+    };
+
+    /**
+     * accepts trigger, starts the Parsing of new Files
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postParseNew = (Request request, Response response) -> {
+        XMLProtocolParser.getAllFiles();
+        JSONObject req = new JSONObject(request.body());
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
+            if (XMLProtocolParser.parserStarterNewProtocols()) {
+                answer.put("EditSuccess", true);
+                return answer;
+            }
+        }
+        answer.put("EditSuccess", false);
+        return answer;
+    };
+
+    /**
+     * accepts trigger and filename, starts the Parsing the file
+     *
+     * @author Julian Ocker
+     */
+    private static final Route postParseSingle = (Request request, Response response) -> {
+        JSONObject req = new JSONObject(request.body());
+        String fileToParse = req.getString("fileToParse");
+        JSONObject answer = new JSONObject();
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
+            if (XMLProtocolParser.parserStarterSingle(fileToParse)) {
+                answer.put("EditSuccess", true);
+                return answer;
+            }
+        }
+        answer.put("EditSuccess", false);
+        return answer;
     };
 
 

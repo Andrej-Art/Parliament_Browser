@@ -495,13 +495,17 @@ public class XMLProtocolParser {
      * @return
      * @author Julian Ocker
      */
-    public static List getListOfParsedProtocols() {
+    public static List<String> getListOfParsedProtocols() {
         MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+        List<Integer> protocolNumbers = new ArrayList(0);
         List<String> protocols = new ArrayList(0);
-        mongoDBHandler.getDB().getCollection("protocols").find().forEach(
+        mongoDBHandler.getDB().getCollection("protocol").find().forEach(
                 (Consumer<? super org.bson.Document>) procBlock
-                        -> protocols.add((procBlock.getInteger("electionPeriod") * 10000
-                        + procBlock.getInteger("protocolNumber")) + "-data.xml"));
+                        -> protocolNumbers.add((procBlock.getInteger("electionPeriod") * 1000
+                        + procBlock.getInteger("protocolNumber"))));
+        for (int i = 0; i < protocolNumbers.size(); i++) {
+            protocols.add(protocolNumbers.get(i) + "-data.xml");
+        }
         return protocols;
     }
 
@@ -513,16 +517,31 @@ public class XMLProtocolParser {
      */
     public static File[] getAllFiles() {
         File[] files = new File[0];
+        File[] newFiles = new File[0];
         try {
             //Parsing all XMLs-protocols from last to first one
             DocumentBuilder db = dbf.newDocumentBuilder();
             //access to our downloaded protocol-files
             String path = XMLProtocolParser.class.getClassLoader().getResource("").getPath();
             files = new File(path + "ProtokollXMLs/Protokolle/").listFiles();
+            List<File> fileList = Arrays.asList(files);
+            List<File> newFileList = new ArrayList<>(0);
+            int i = 0;
+            while (i < fileList.size()) {
+                String fileName = fileList.get(i).getName();
+                if (fileName.contains("-data.xml")) {
+                    newFileList.add(fileList.get(i));
+                }
+                i++;
+            }
+            newFiles = new File[newFileList.size()];
+            for (int k = 0; k < newFileList.size(); k++) {
+                newFiles[k] = newFileList.get(k);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return files;
+        return newFiles;
     }
 
     /**
@@ -538,15 +557,7 @@ public class XMLProtocolParser {
         try {
             File[] files = getAllFiles();
             for (int i = 0; i < files.length; i++) {
-                boolean check = true;
-                for (int k = 0; k < protocols.size(); k++) {
-                    if (files[i].getName().equals(protocols.get(k))) {
-                        check = false;
-                        System.out.println(files[i].getName());
-                        System.out.println(protocols.get(k));
-                    }
-                }
-                if (check) {
+                if (!protocols.contains(files[i].getName().toString())) {
                     fileIndices.add(i);
                 }
             }

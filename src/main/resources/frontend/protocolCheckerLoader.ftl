@@ -21,6 +21,11 @@
 <br>
 <h3>Administration der Protokolle</h3>
 <br>
+<br>
+Es sind ${numberOfParsedProtocols} Protokolle in der DB.
+Es sind ${numberOfProtocols} zum parsen verfügbar.
+<br>
+<br>
 <form onsubmit="loadAll(); return false;">
     Drücken Sie diesen Knopf um alle Protokolle zu laden. <br><br>
     <button type="submit">Alle Protokolle laden</button>
@@ -46,7 +51,7 @@
             </option>
         </#list>
     </select>
-    <button type="submit">Alle Protokolle parsen</button>
+    <button type="submit">Dieses Protokoll parsen</button>
 </form>
 <br><br>
 <SCRIPT>
