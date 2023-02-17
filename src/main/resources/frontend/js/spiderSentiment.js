@@ -7,22 +7,22 @@ function drawSpiderChart(data, target) {
 
 
     //parse string data into Floats
-    function parseSentimentValues(sentimentObj){
-        const parsedObj={};
-        for (let [key, value] of Object.entries(sentimentObj)) {
-            parsedObj[key] = parseFloat(value.replace(',', '.'));
-        }
-        return parsedObj;
-    }
+    // function parseSentimentValues(sentimentObj){
+    //     const parsedObj={};
+    //     for (let [key, value] of Object.entries(sentimentObj)) {
+    //         parsedObj[key] = parseFloat(value.toFixed(4));
+    //     }
+    //     return parsedObj;
+    // }
 
-    const parsedData = parseSentimentValues(data);
+    // const parsedData = parseSentimentValues(data);
 
     let data2 = [];
     let features = ["Positiv", "Neutral", "Negativ"];
 
 
-    let speechSentiment = {Positiv: parsedData.speechPos, Neutral: parsedData.speechNeu, Negativ: parsedData.speechNeg};
-    let commentSentiment = {Positiv: parsedData.commentPos, Neutral: parsedData.commentNeu, Negativ: parsedData.commentNeg};
+    let speechSentiment = {Positiv: data.speechPos, Neutral: data.speechNeu, Negativ: data.speechNeg};
+    let commentSentiment = {Positiv: data.commentPos, Neutral: data.commentNeu, Negativ: data.commentNeg};
 
 
 

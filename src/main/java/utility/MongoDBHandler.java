@@ -1034,16 +1034,23 @@ public class MongoDBHandler {
         JSONObject obj = new JSONObject();
         db.getCollection("speech").aggregate(pipelineSpeech).forEach((Consumer<? super Document>) procBlock ->
         {
-            obj.put("speechPos", DECIMAL_FORMAT.format(procBlock.getDouble("posPercent") * 100));
-            obj.put("speechNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
-            obj.put("speechNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
+//            obj.put("speechPos", DECIMAL_FORMAT.format(procBlock.getDouble("posPercent") * 100));
+//            obj.put("speechNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
+//            obj.put("speechNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
+            obj.put("speechPos", (procBlock.getDouble("posPercent") * 100));
+            obj.put("speechNeg", (procBlock.getDouble("negPercent") * 100));
+            obj.put("speechNeu", (procBlock.getDouble("neuPercent") * 100));
         });
         db.getCollection("comment").aggregate(pipelineComment).forEach((Consumer<? super Document>) procBlock -> {
 
-            obj.put("commentPos", DECIMAL_FORMAT.format(procBlock.getDouble("posPercent") * 100));
-            obj.put("commentNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
-            obj.put("commentNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
+//            obj.put("commentPos", DECIMAL_FORMAT.format(procBlock.getDouble("posPercent") * 100));
+//            obj.put("commentNeg", DECIMAL_FORMAT.format(procBlock.getDouble("negPercent") * 100));
+//            obj.put("commentNeu", DECIMAL_FORMAT.format(procBlock.getDouble("neuPercent") * 100));
+            obj.put("commentPos", (procBlock.getDouble("posPercent") * 100));
+            obj.put("commentNeg", (procBlock.getDouble("negPercent") * 100));
+            obj.put("commentNeu", (procBlock.getDouble("neuPercent") * 100));
         });
+
         return obj;
     }
 

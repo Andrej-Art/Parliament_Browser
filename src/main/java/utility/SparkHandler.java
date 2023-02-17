@@ -398,7 +398,7 @@ public class SparkHandler {
         List<JSONObject> speechesCountData = mongoDBHandler.getSpeechesBySpeakerCount(von, bis, fraction, party, person, 15);
         newDBData.put("speechesNumber", speechesCountData);
 
-        JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, "", party, person);
+        JSONObject sentimentData = mongoDBHandler.getSentimentData(von, bis, fraction, person, party);
         newDBData.put("sentiment", sentimentData);
 
         ArrayList<JSONObject> votes = mongoDBHandler.getPollResults(von, bis, fraction, party, person);
