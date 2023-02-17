@@ -2,16 +2,12 @@ package utility;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import utility.annotations.Testing;
 
 import java.io.IOException;
 
 /**
  * @author Andrej Artuschenko
  */
-@Testing
 public class PictureScraper {
 
     /**

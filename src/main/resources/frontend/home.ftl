@@ -24,7 +24,7 @@
 
         Das hier ist die Implementierung der Abschlussaufgabe <b>PARLIAMENT BROWSER</b> der Gruppe 9_4 für PPR WiSe 22/23.
 
-        <h1><a href="dashboard/">Dashboard</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="/testAndrej/">TestAndrej</a></h1>
+        <h1><a href="dashboard/">Dashboard</a></h1>
 
         Zeigt Redner als Bar Chart, POS als vertikalen Bar Chart,
         Named Entities als Multiple Line Chart, Tokens als Line Chart, Abstimmungsergebnisse und das Sentiment als Radar Chart an.<br>

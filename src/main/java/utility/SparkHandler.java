@@ -82,9 +82,6 @@ public class SparkHandler {
         post("/", "application/json", postHome);
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
-        // get("/update-charts/", getChartUpdates);
-
-        get("/testAndrej/", getTestAndrej, new FreeMarkerEngine(cfg));
         get("/update-charts/", getChartUpdates);
 
         get("/reden/", getReden, new FreeMarkerEngine(cfg));
@@ -340,38 +337,13 @@ public class SparkHandler {
 
     /**
      * Main dashboard page.
+     *
+     * @author Andrej Artuschenko
      */
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 
-        ArrayList<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
-
-
         return new ModelAndView(pageContent, "dashboard.ftl");
-    };
-
-    private static final TemplateViewRoute getTestAndrej = (Request request, Response response) -> {
-        Map<String, Object> pageContent = new HashMap<>();
-
-//        List<JSONObject> posAndCounts = mongoDBHandler.getPOSCount("", "","", "", "");
-//        pageContent.put("pos", posAndCounts);
-//
-//        List<JSONObject> tokenAndCounts = mongoDBHandler.getTokenCount(30,"", "","", "", "");
-//        pageContent.put("token", tokenAndCounts);
-//
-//        JSONObject datesAndNamedEntities = mongoDBHandler.getNamedEntityCount("", "","","", "");
-//        pageContent.put("entities", datesAndNamedEntities);
-//
-//        List<JSONObject> speechesCounts = mongoDBHandler.getSpeechesBySpeakerCount("", "", "", "", "", 15);
-//        pageContent.put("speechesNumber", speechesCounts);
-//
-//        //JSONObject sentiments = mongoDBHandler.getSentimentData("", "", "", "");
-//        //pageContent.put("sentiments", sentiments);
-//
-        ArrayList<JSONObject> votes = mongoDBHandler.getPollResults("", "", "", "", "");
-//        pageContent.put("votes", votes);
-
-        return new ModelAndView(pageContent, "testAndrej.ftl");
     };
 
     /**
@@ -694,9 +666,10 @@ public class SparkHandler {
         }
         pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "admin")) {
-            ArrayList options = new ArrayList<>(Arrays.asList(XMLProtocolParser.getAllFiles()));
+            ArrayList<File> options = new ArrayList<>(Arrays.asList(XMLProtocolParser.getAllFiles()));
             File[] files = XMLProtocolParser.getArrayOfNewProtocols();
-            List parsedProtocols = XMLProtocolParser.getListOfParsedProtocols();
+            List<String> parsedProtocols = XMLProtocolParser.getListOfParsedProtocols();
+
             Integer filesNumber = files.length;
             Integer parsedProtocolNumber = parsedProtocols.size();
             pageContent.put("options", options);
@@ -768,6 +741,9 @@ public class SparkHandler {
         JSONObject req = new JSONObject(request.body());
         String fileToParse = req.getString("protocolToParse");
         JSONObject answer = new JSONObject();
+        if (fileToParse == null || fileToParse.isEmpty() || fileToParse.equals("undefined")) {
+            return answer.put("EditSuccess", false);
+        }
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
             if (XMLProtocolParser.parserStarterSingle(fileToParse)) {
                 answer.put("EditSuccess", true);

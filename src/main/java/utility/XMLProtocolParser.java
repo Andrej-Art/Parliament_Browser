@@ -7,8 +7,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import utility.annotations.Testing;
-import utility.annotations.Unfinished;
 import utility.uima.ProcessedSpeech;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -452,7 +450,6 @@ public class XMLProtocolParser {
      * @param date
      * @author Andrej Artuschenko
      */
-    @Testing
     public static int addToSpeechMap(String speechID, String speakerID, String speechText, Boolean addStatus, MongoDBHandler mongoDBHandler, int sameSpeechCounter, LocalDate date) {
         if (((!(speakerID.equals(""))) && (!(speechText.equals(""))) && (!(speechMap.containsKey(speechID))) && addStatus)) {
             sameSpeechCounter = sameSpeechCounter + 1;
@@ -521,6 +518,9 @@ public class XMLProtocolParser {
             //access to our downloaded protocol-files
             String path = XMLProtocolParser.class.getClassLoader().getResource("").getPath();
             files = new File(path + "ProtokollXMLs/Protokolle/").listFiles();
+            if (files == null) {
+                files = new File[0];
+            }
             List<File> fileList = Arrays.asList(files);
             List<File> newFileList = new ArrayList<>(0);
             int i = 0;

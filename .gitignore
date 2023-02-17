@@ -8,7 +8,6 @@
 /target/
 
 # resource dir test files
-/src/main/resources/frontend/public/pdfOutput/
 /src/main/resources/frontend/test.ftl
 /src/main/resources/frontend/js/test.js
 /src/main/resources/frontend/js/ajax_functions_test.js
