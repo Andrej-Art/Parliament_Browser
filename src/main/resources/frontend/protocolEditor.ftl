@@ -14,19 +14,19 @@
 <#include "parliamentBrowser.ftl">
 
 <div class="protocol-editor">
-    <div class="select-box" style="background-color: mediumpurple">
+    <div class="select-box">
         <div>
             <button onclick="setProtocolEditorButtons()">Protokolle anzeigen</button>
             <button onclick="setPersonEditorButtons()">Personen anzeigen</button>
         </div>
         <ul id="button-list"></ul>
     </div>
-    <div class="editor-box" style="background-color: yellowgreen">
+    <div class="editor-box">
         <div id="input-area">
 
         </div>
     </div>
-    <div class="button-box" style="background-color: aquamarine">Editor-Modus:<br>
+    <div class="button-box">Editor-Modus:<br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="protocol" checked="checked">Protokoll</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="aItem">Tagesordnungspunkt</label><br>
         <label><input type="radio" onclick="changeLayout()" name="edit-mode" value="speech">Rede</label><br>
@@ -44,7 +44,7 @@
 
         </div>
     </div>
-    <div class="status-box" style="background-color: coral">
+    <div class="status-box">
         <div id="status-message-box"></div>
     </div>
 </div>
