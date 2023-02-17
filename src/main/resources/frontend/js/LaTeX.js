@@ -1,8 +1,7 @@
 
 /**
  * Tries to generate a pdf based on user input.
- * @author Eric Lakhter
- * @author DavidJordan
+ * @author DavidJordan, Eric Lakhter
  */
 async function parseLaTeX() {
     document.getElementById('status-message-box').innerHTML = "Attempting to convert Latex String to .pdf file";

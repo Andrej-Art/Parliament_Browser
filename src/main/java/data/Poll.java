@@ -12,7 +12,7 @@ import java.time.LocalDate;
  */
 public interface Poll {
     /**
-     *
+     * Gets the date of the poll.
      * @return LocalDate of the poll.
      * @author Eric Lakhter
      */

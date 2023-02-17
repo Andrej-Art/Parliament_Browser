@@ -534,8 +534,6 @@ public class XMLProtocolParser {
             files = new File[newFileList.size()];
             for (int k = 0; k < newFileList.size(); k++) {
                 files[k] = newFileList.get(k);
-                System.out.println(files[k].getName());
-                System.out.println(files[k].getPath());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -619,7 +617,6 @@ public class XMLProtocolParser {
                 fileToParse[0] = files[i];
             }
         }
-        System.out.println(fileToParse[0]);
         try {
             return speechParse(fileToParse);
         } catch (Exception e) {

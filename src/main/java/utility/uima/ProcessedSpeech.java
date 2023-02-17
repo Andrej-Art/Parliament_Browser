@@ -55,8 +55,8 @@ public class ProcessedSpeech {
     }
 
     /**
-     *
-     * @return
+     * Gets the speech ID.
+     * @return Speech ID.
      * @author Eric Lakhter
      */
     public String getID() {
@@ -73,8 +73,8 @@ public class ProcessedSpeech {
     }
 
     /**
-     *
-     * @return
+     * Gets the processed speech's full CAS string.
+     * @return Full CAS string.
      * @author Eric Lakhter
      */
     public String getFullCas() {
