@@ -46,7 +46,7 @@ Warten sie nach dem Drücken eines Knopfes bitte auf die Erfolgs oder Fehlermeld
 </form>
 <br><br>
 <form onsubmit="parseNew(); return false;">
-    Drücken Sie diesen Knopf um nur die noch nicht geladenen Protokolle zu laden und neuzuparsen. <br><br>
+    Drücken Sie diesen Knopf um nur die neuen Protokolle zu parsen. <br><br>
     <button type="submit">Neue Protokolle parsen</button>
     <div id="new-Status">
 

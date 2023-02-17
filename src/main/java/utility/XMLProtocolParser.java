@@ -515,7 +515,6 @@ public class XMLProtocolParser {
      */
     public static File[] getAllFiles() {
         File[] files = new File[0];
-        File[] newFiles = new File[0];
         try {
             //Parsing all XMLs-protocols from last to first one
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -532,14 +531,16 @@ public class XMLProtocolParser {
                 }
                 i++;
             }
-            newFiles = new File[newFileList.size()];
+            files = new File[newFileList.size()];
             for (int k = 0; k < newFileList.size(); k++) {
-                newFiles[k] = newFileList.get(k);
+                files[k] = newFileList.get(k);
+                System.out.println(files[k].getName());
+                System.out.println(files[k].getPath());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return newFiles;
+        return files;
     }
 
     /**

@@ -729,7 +729,6 @@ public class SparkHandler {
      * @author Julian Ocker
      */
     private static final Route postParseAll = (Request request, Response response) -> {
-        Scraper.downloadAllXMLs();
         JSONObject req = new JSONObject(request.body());
         JSONObject answer = new JSONObject();
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
