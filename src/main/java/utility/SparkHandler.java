@@ -87,7 +87,7 @@ public class SparkHandler {
         post("/", "application/json", postHome);
 
         get("/dashboard/", getDashboard, new FreeMarkerEngine(cfg));
-       // get("/update-charts/", getChartUpdates);
+        // get("/update-charts/", getChartUpdates);
 
         get("/testAndrej/", getTestAndrej, new FreeMarkerEngine(cfg));
         get("/update-charts/", getChartUpdates);
@@ -119,6 +119,8 @@ public class SparkHandler {
 
         get("/featureManagement/", getFeatureManagement, new FreeMarkerEngine(cfg));
         post("/post/applicationDataEditFeatures/", postEditFeatures);
+
+        get("/ProtocolCheckerLoader/", getProtocolCheckerLoader, new FreeMarkerEngine(cfg));
     }
 
     /*
@@ -187,6 +189,7 @@ public class SparkHandler {
 
     /**
      * Delivers the required String in LaTeX format to the frontend.
+     *
      * @author DavidJordan
      */
     private static final Route getLaTeXString = (Request request, Response response) -> {
@@ -215,7 +218,7 @@ public class SparkHandler {
         System.out.println(request.body()); // this will be the LaTeX text field
 
         LaTeXHandler texHandler = new LaTeXHandler(mongoDBHandler, "src/main/resources/frontend/public/pdfOutput/");
-        String editedLatexString =  request.body();
+        String editedLatexString = request.body();
 
         // Comand Line that runs the pdflatex command on
         texHandler.createPDF(editedLatexString);
@@ -314,6 +317,7 @@ public class SparkHandler {
 
     /**
      * Deletes a protocol/agenda item/speech/person from the database if the user has permission to do so.
+     *
      * @author Eric Lakhter
      */
     private static final Route postProtokollEditorDelete = (Request request, Response response) -> {
@@ -389,6 +393,7 @@ public class SparkHandler {
 
     /**
      * Route which delivers the data according to the provided query parameters
+     *
      * @author DavidJordan
      */
     private static final Route getChartUpdates = (Request request, Response response) -> {
@@ -502,7 +507,9 @@ public class SparkHandler {
     private static final TemplateViewRoute getLoginSite = (request, response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
-        if (cookie == null){ cookie = ""; }
+        if (cookie == null) {
+            cookie = "";
+        }
         if (mongoDBHandler.checkIfCookieExists(cookie)) {
             pageContent.put("loginStatus", true);
         } else {
@@ -634,16 +641,27 @@ public class SparkHandler {
         return answer;
     };
 
+    /**
+     * provides the feature.ftl as website if the user is allowed to see it.
+     *
+     * @author Julian Ocker
+     */
     private static final TemplateViewRoute getFeatureManagement = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
-        if (cookie == null){ cookie = ""; }
+        if (cookie == null) {
+            cookie = "";
+        }
         ArrayList<String> featureList = new ArrayList<>(0);
         mongoDBHandler.getDB().getCollection("features").find().forEach(
                 (Consumer<? super Document>) procBlock -> featureList.add(procBlock.getString("_id")));
         pageContent.put("featureList", featureList);
         pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
-        return new ModelAndView(pageContent, "feature.ftl");
+        if (mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures")) {
+            return new ModelAndView(pageContent, "feature.ftl");
+        } else {
+            return new ModelAndView(pageContent, "noRights.ftl");
+        }
     };
 
     /**
@@ -657,13 +675,34 @@ public class SparkHandler {
         String editRank = req.getString("editRank");
         JSONObject answer = new JSONObject();
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "editFeatures")) {
-            if (mongoDBHandler.editFeature(featureToEdit,editRank)) {
+            if (mongoDBHandler.editFeature(featureToEdit, editRank)) {
                 answer.put("EditSuccess", true);
                 return answer;
             }
         }
         answer.put("EditSuccess", false);
         return answer;
+    };
+
+    /**
+     * provides the protocolCheckerLoader as website if the User is an Admin.
+     *
+     * @author Julian Ocker
+     */
+    private static final TemplateViewRoute getProtocolCheckerLoader = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>(0);
+        String cookie = request.cookie("key");
+        if (cookie == null) {
+            cookie = "";
+        }
+
+
+        pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
+        if( mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "admin")) {
+            return new ModelAndView(pageContent, "protocolCheckerLoader.ftl");
+        }else{
+            return new ModelAndView(pageContent, "noRights.ftl");
+        }
     };
 
 
@@ -688,6 +727,7 @@ public class SparkHandler {
 
     /**
      * Puts all editor-related permissions into the given map based on given user rank.
+     *
      * @param cookie Rank of the user requesting permissions.
      * @return JSON with permissions
      * @author Eric Lakhter

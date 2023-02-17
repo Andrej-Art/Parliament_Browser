@@ -20,8 +20,9 @@
     <a href="/reden/">Reden-Visualisierung</a>
     <a href="/protokolleditor/">Protokoll-Editor</a>
     <a href="/latex/">PDF-Export</a>
-    <a href="/loginSite/">Login-Management</a>
     <a href="/featureManagement/">Feature Management</a>
+    <a href="/ProtocolCheckerLoader/">Protokolllademenü</a>
+    <a href="/loginSite/">Login-Management</a>
 </div>
 <script>
 /**

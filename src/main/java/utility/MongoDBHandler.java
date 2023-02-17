@@ -1649,7 +1649,12 @@ public class MongoDBHandler {
      */
     public Boolean checkIfCookieIsAllowedAFeature(String cookie, String feature) {
         String rank = getRankOfCookie(cookie);
-        String featureRank = getRankOfFeature(feature);
+        String featureRank = "";
+        if (!(feature.equals("admin")||feature.equals("manager")||feature.equals("user"))) {
+            featureRank = getRankOfFeature(feature);
+        } else {
+            featureRank = feature;
+        }
         switch (featureRank) {
             case "everyone":
                 return true;

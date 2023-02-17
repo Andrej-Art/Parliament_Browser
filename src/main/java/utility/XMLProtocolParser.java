@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * This class is currently only for testing purposes. At the end there will be one class for parsing.
@@ -37,7 +38,7 @@ public class XMLProtocolParser {
     //Create New Instance of DocumentBuilderFactory
     private static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
-    public static void speechParse() throws FileNotFoundException, UIMAException {
+    public static Boolean speechParse(File[] files) throws FileNotFoundException, UIMAException {
 
         speechMap = new HashMap<>();
         commentMap = new HashMap<>();
@@ -55,7 +56,6 @@ public class XMLProtocolParser {
             DocumentBuilder db = dbf.newDocumentBuilder();
             //access to our downloaded protocol-files
             String path = XMLProtocolParser.class.getClassLoader().getResource("").getPath();
-            File[] files = new File(path + "ProtokollXMLs/Protokolle/").listFiles();
 
 
             // iterating over all xml-protocols
@@ -116,7 +116,9 @@ public class XMLProtocolParser {
                                 for (Element speech : speechElementList) {
 
                                     String speechID = speech.getAttribute("id");
-                                    if(!speechIDs.contains(speechID)){speechIDs.add(speechID);}
+                                    if (!speechIDs.contains(speechID)) {
+                                        speechIDs.add(speechID);
+                                    }
                                     String speakerID = "";
                                     String speechText = "";
                                     Integer commentNumber = 0;
@@ -239,8 +241,8 @@ public class XMLProtocolParser {
 
                                 String trueAiID = electionPeriod + "/" + protocolNumber + "/" + topid;
 
-                                if (incompleteAiMap.containsKey(topid)){
-                                    completeAis.add(new AgendaItem_Impl(trueAiID,date,incompleteAiMap.get(topid),speechIDs));
+                                if (incompleteAiMap.containsKey(topid)) {
+                                    completeAis.add(new AgendaItem_Impl(trueAiID, date, incompleteAiMap.get(topid), speechIDs));
                                 } else {
                                     completeAis.add(new AgendaItem_Impl(trueAiID, date, topid, speechIDs));
                                 }
@@ -339,7 +341,9 @@ public class XMLProtocolParser {
             }
         } catch (ParserConfigurationException | IOException | SAXException ex) {
             ex.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -347,7 +351,6 @@ public class XMLProtocolParser {
      *
      * @param contentTableElementList
      * @return
-     *
      * @author Julian Ocker
      */
     private static Map<String, String> getAiElements(NodeList contentTableElementList) {
@@ -372,10 +375,12 @@ public class XMLProtocolParser {
                             if (contentOfContentElements.item(l).getNodeName().equals("ivz-eintrag-inhalt")) {
                                 contentOfContentElement = contentOfContentElements.item(l).getTextContent();
                             }
-                            if (contentOfContentElements.item(l).getNodeName().equals("xref")) {check = false;}
+                            if (contentOfContentElements.item(l).getNodeName().equals("xref")) {
+                                check = false;
+                            }
                         }
                         if (check) {
-                            if(first){
+                            if (first) {
                                 aiSubject = aiSubject + contentOfContentElement;
                                 first = false;
                             } else {
@@ -483,5 +488,133 @@ public class XMLProtocolParser {
             commentMap.put(commentID, new Comment_Impl(commentID, speechID, speakerID, commentatorID, commentPosition, comment, date, commentatorFractions));
         }
     }
-}
 
+    /**
+     * This Method returns a list of all parsed protocols.
+     *
+     * @return
+     * @author Julian Ocker
+     */
+    public static List getListOfParsedProtocols() {
+        MongoDBHandler mongoDBHandler = MongoDBHandler.getHandler();
+        List<String> protocols = new ArrayList(0);
+        mongoDBHandler.getDB().getCollection("protocols").find().forEach(
+                (Consumer<? super org.bson.Document>) procBlock
+                        -> protocols.add((procBlock.getInteger("electionPeriod") * 10000
+                        + procBlock.getInteger("protocolNumber")) + "-data.xml"));
+        return protocols;
+    }
+
+    /**
+     * This method gets and returns a List containing all Protocol-Files.
+     *
+     * @return
+     * @author Julian Ocker
+     */
+    public static File[] getAllFiles() {
+        Scraper.downloadAllXMLs();
+        File[] files = new File[0];
+        try {
+            //Parsing all XMLs-protocols from last to first one
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            //access to our downloaded protocol-files
+            String path = XMLProtocolParser.class.getClassLoader().getResource("").getPath();
+            files = new File(path + "ProtokollXMLs/Protokolle/").listFiles();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return files;
+    }
+
+    /**
+     * This function returns a FileArray of all new Files.
+     *
+     * @return
+     * @author Julian Ocker
+     */
+    public static File[] getArrayOfNewProtocols() {
+        List<String> protocols = getListOfParsedProtocols();
+        File[] newFiles = new File[0];
+        List<Integer> fileIndices = new ArrayList(0);
+        try {
+            File[] files = getAllFiles();
+            for (int i = 0; i < files.length; i++) {
+                boolean check = true;
+                for (int k = 0; k < protocols.size(); k++) {
+                    if (files[i].getName().equals(protocols.get(k))) {
+                        check = false;
+                        System.out.println(files[i].getName());
+                        System.out.println(protocols.get(k));
+                    }
+                }
+                if (check) {
+                    fileIndices.add(i);
+                }
+            }
+            newFiles = new File[fileIndices.size()];
+            for (int i = 0; i < fileIndices.size(); i++) {
+                newFiles[i] = files[fileIndices.get(i)];
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return newFiles;
+    }
+
+    /**
+     * This method starts the parser with all protocols
+     *
+     * @return
+     * @author Julian Ocker
+     */
+    public static Boolean parserStarterGenerell() {
+        File[] files = getAllFiles();
+        try {
+            return speechParse(files);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    /**
+     * This method starts the parser with all files that aren't part of the database
+     *
+     * @return
+     * @author Julian Ocker
+     */
+    public static Boolean parserStarterNewProtocols() {
+        File[] files = getArrayOfNewProtocols();
+        try {
+            return speechParse(files);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * This method starts the parser with a single specific file.
+     *
+     * @param filename
+     * @return
+     * @author Julian Ocker
+     */
+    public static Boolean parserStarterSingle(String filename) {
+        File[] files = getAllFiles();
+        File[] fileToParse = new File[1];
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getName().equals(filename)) {
+                fileToParse[0] = files[i];
+            }
+        }
+        try {
+            return speechParse(fileToParse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
