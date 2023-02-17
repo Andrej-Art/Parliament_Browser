@@ -434,5 +434,7 @@
     <#include  "js/barSpeaker.js">
     <#include "js/chart_functions.js">
     <#include "js/pollStackBar.js">
+    <#include "js/spiderSentiment.js">
+
 
 </script>

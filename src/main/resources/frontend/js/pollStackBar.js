@@ -6,7 +6,7 @@ function drawStackedBarChart(data, target) {
         return;
     }
 
-    // hier sind die Abstimmungen für total und die einzelnen Fraktionen
+    // votes for total and the fractions
     let totalData = data.map(d =>{
             switch (document.getElementById("fractionInput").value) {
                 case "SPD":
@@ -103,7 +103,11 @@ function drawStackedBarChart(data, target) {
         .padding([0.2])
     svg.append("g")
         .attr("transform", "translate(0," +  height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0));
+        .call(d3.axisBottom(x).tickSizeOuter(0))
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-20)")
+        .style("text-anchor", "end");
+
 
     // Add Y axis
     const y = d3.scaleLinear()
@@ -145,7 +149,6 @@ function drawStackedBarChart(data, target) {
         .attr("y", d => y(d[1]))
         .attr("height", d => y(d[0]) - y(d[1]))
         .attr("width", x.bandwidth())
-
 
 }
 
