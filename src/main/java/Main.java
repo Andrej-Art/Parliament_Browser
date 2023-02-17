@@ -55,7 +55,6 @@ public class Main {
 
                 case "2":
                     System.out.println("Parsing the protocols");
-
                     XMLProtocolParser.parserStarterGenerell();
 
                     break;

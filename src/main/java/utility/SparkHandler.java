@@ -690,15 +690,18 @@ public class SparkHandler {
      * @author Julian Ocker
      */
     private static final TemplateViewRoute getProtocolCheckerLoader = (Request request, Response response) -> {
+
         Map<String, Object> pageContent = new HashMap<>(0);
         String cookie = request.cookie("key");
         if (cookie == null) {
             cookie = "";
         }
 
+        ArrayList options = new ArrayList<>(Arrays.asList(XMLProtocolParser.getAllFiles()));
 
         pageContent.put("editFeatureRight", mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "editFeatures"));
         if( mongoDBHandler.checkIfCookieIsAllowedAFeature(cookie, "admin")) {
+            pageContent.put("options", options);
             return new ModelAndView(pageContent, "protocolCheckerLoader.ftl");
         }else{
             return new ModelAndView(pageContent, "noRights.ftl");

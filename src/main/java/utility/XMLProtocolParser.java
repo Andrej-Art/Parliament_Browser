@@ -512,7 +512,6 @@ public class XMLProtocolParser {
      * @author Julian Ocker
      */
     public static File[] getAllFiles() {
-        Scraper.downloadAllXMLs();
         File[] files = new File[0];
         try {
             //Parsing all XMLs-protocols from last to first one

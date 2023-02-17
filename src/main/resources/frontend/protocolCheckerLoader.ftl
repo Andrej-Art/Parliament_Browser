@@ -17,7 +17,40 @@
 <br>
 <#include "parliamentBrowser.ftl">
 <br>
-
-
+<br>
+<br>
+<h3>Administration der Protokolle</h3>
+<br>
+<form onsubmit="loadAll(); return false;">
+    Drücken Sie diesen Knopf um alle Protokolle zu laden. <br><br>
+    <button type="submit">Alle Protokolle laden</button>
+</form>
+<br><br>
+<form onsubmit="parseAll(); return false;">
+    Drücken Sie diesen Knopf um alle Protokolle neuzuparsen. <br><br>
+    <button type="submit">Alle Protokolle parsen</button>
+</form>
+<br><br>
+<form onsubmit="parseNew(); return false;">
+    Drücken Sie diesen Knopf um nur die noch nicht geladenen Protokolle zu laden und neuzuparsen. <br><br>
+    <button type="submit">Neue Protokolle parsen</button>
+</form>
+<br><br>
+<form onsubmit="parseSingle(); return false;">
+    Wählen Sie ein Protokoll aus dem Dropdownmenü und drücken sie den Knopf um das spezifische Protokoll parsen zu lassen. <br>
+    (Hinweis die Protokolle sind benannt in dem Schema (Wahlperiode * 10000 + (Protokollnummer in der Wahlperiode)) gefolgt von der Zeichenkette "-data.xml" . )<br><br>
+    <select id="protocolToParse">
+        <#list options as option>
+            <option value=${option}>
+                ${option.getName()}
+            </option>
+        </#list>
+    </select>
+    <button type="submit">Alle Protokolle parsen</button>
+</form>
+<br><br>
+<SCRIPT>
+    <#include "js/protocolLoaderChecker.js">
+</SCRIPT>
 
 </html>
