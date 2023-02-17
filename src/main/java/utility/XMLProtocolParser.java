@@ -51,12 +51,10 @@ public class XMLProtocolParser {
 
         try {
             ArrayList<Person_Impl> persons = mongoDBHandler.getPersons();
-
             //Parsing all XMLs-protocols from last to first one
             DocumentBuilder db = dbf.newDocumentBuilder();
             //access to our downloaded protocol-files
             String path = XMLProtocolParser.class.getClassLoader().getResource("").getPath();
-
 
             // iterating over all xml-protocols
             for (int i = 0; i < files.length; i++) {
@@ -616,10 +614,11 @@ public class XMLProtocolParser {
         File[] files = getAllFiles();
         File[] fileToParse = new File[1];
         for (int i = 0; i < files.length; i++) {
-            if (files[i].getName().equals(filename)) {
+            if (files[i].getPath().contains(filename)) {
                 fileToParse[0] = files[i];
             }
         }
+        System.out.println(fileToParse[0]);
         try {
             return speechParse(fileToParse);
         } catch (Exception e) {

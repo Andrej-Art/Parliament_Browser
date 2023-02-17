@@ -24,25 +24,38 @@
 Es sind ${numberOfParsedProtocols} Protokolle in der DB. <br>
 Es sind ${numberOfProtocols} zum Parsen verfügbar.<br>
 <br>
+Warten sie nach dem Drücken eines Knopfes bitte auf die Erfolgs oder Fehlermeldung.
 <br>
+<br>
+<br>
+
 <form onsubmit="loadAll(); return false;">
     Drücken Sie diesen Knopf um alle Protokolle zu laden. <br><br>
     <button type="submit">Alle Protokolle laden</button>
+    <div id="load-Status">
+
+    </div>
 </form>
 <br><br>
 <form onsubmit="parseAll(); return false;">
     Drücken Sie diesen Knopf um alle Protokolle neuzuparsen. <br><br>
     <button type="submit">Alle Protokolle parsen</button>
+    <div id="all-Status">
+
+    </div>
 </form>
 <br><br>
 <form onsubmit="parseNew(); return false;">
     Drücken Sie diesen Knopf um nur die noch nicht geladenen Protokolle zu laden und neuzuparsen. <br><br>
     <button type="submit">Neue Protokolle parsen</button>
+    <div id="new-Status">
+
+    </div>
 </form>
 <br><br>
 <form onsubmit="parseSingle(); return false;">
     Wählen Sie ein Protokoll aus dem Dropdownmenü und drücken sie den Knopf um das spezifische Protokoll parsen zu lassen. <br>
-    (Hinweis die Protokolle sind benannt in dem Schema (Wahlperiode * 10000 + (Protokollnummer in der Wahlperiode)) gefolgt von der Zeichenkette "-data.xml" . )<br><br>
+    (Hinweis die Protokolle sind benannt in dem Schema (Wahlperiode * 1000 + (Protokollnummer in der Wahlperiode)) gefolgt von der Zeichenkette "-data.xml" . )<br><br>
     <select id="protocolToParse">
         <#list options as option>
             <option value=${option}>
@@ -51,6 +64,9 @@ Es sind ${numberOfProtocols} zum Parsen verfügbar.<br>
         </#list>
     </select>
     <button type="submit">Dieses Protokoll parsen</button>
+    <div id="single-Status">
+
+    </div>
 </form>
 <br><br>
 <SCRIPT>

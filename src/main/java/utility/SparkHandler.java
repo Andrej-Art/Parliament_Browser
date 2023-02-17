@@ -715,8 +715,9 @@ public class SparkHandler {
     private static final Route postLoadAll = (Request request, Response response) -> {
         JSONObject req = new JSONObject(request.body());
         JSONObject answer = new JSONObject();
+        System.out.println(mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin"));
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
-            XMLProtocolParser.getAllFiles();
+            Scraper.downloadAllXMLs();
         }
         answer.put("EditSuccess", true);
         return answer;
@@ -728,7 +729,7 @@ public class SparkHandler {
      * @author Julian Ocker
      */
     private static final Route postParseAll = (Request request, Response response) -> {
-        XMLProtocolParser.getAllFiles();
+        Scraper.downloadAllXMLs();
         JSONObject req = new JSONObject(request.body());
         JSONObject answer = new JSONObject();
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
@@ -747,7 +748,6 @@ public class SparkHandler {
      * @author Julian Ocker
      */
     private static final Route postParseNew = (Request request, Response response) -> {
-        XMLProtocolParser.getAllFiles();
         JSONObject req = new JSONObject(request.body());
         JSONObject answer = new JSONObject();
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
@@ -767,7 +767,7 @@ public class SparkHandler {
      */
     private static final Route postParseSingle = (Request request, Response response) -> {
         JSONObject req = new JSONObject(request.body());
-        String fileToParse = req.getString("fileToParse");
+        String fileToParse = req.getString("protocolToParse");
         JSONObject answer = new JSONObject();
         if (mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "admin")) {
             if (XMLProtocolParser.parserStarterSingle(fileToParse)) {
