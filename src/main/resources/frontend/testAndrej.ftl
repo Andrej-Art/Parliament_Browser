@@ -423,12 +423,8 @@
         }
     }
 
-
-
-
-
-    <#include "js/spiderSentiment.js">
-    <#include "js/chart_functions.js">
     <#include  "js/barSpeaker.js">
+    <#include "js/chart_functions.js">
     <#include "js/pollStackBar.js">
+
 </script>

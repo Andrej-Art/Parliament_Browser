@@ -1,8 +1,9 @@
+
 /**
  * @author Andrej Artuschenko
+ * @param data
+ * @param target
  */
-
-
 function speakerbarchart(data, target) {
 
 
@@ -26,20 +27,6 @@ function speakerbarchart(data, target) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-    // sort data
-
-
-    //d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv").then(function (data3) {
-
-    // sort data
-    /*
-data.sort(function (b, a) {
-    return a.Value - b.Value;
-});
-
-     */
-
     // Selecting the right fields from the returned JSON object to match the right values
     let apliedData = Object.entries(data).map(d => {
         return {
@@ -49,16 +36,10 @@ data.sort(function (b, a) {
         }
     });
 
-
-
     // sort data by speechcount
     apliedData.sort(function (b, a) {
         return a.speechCount - b.speechCount;
     });
-
-
-
-
 
     // extracting the data and setting the key and value
     // set speakerName as key
@@ -67,33 +48,14 @@ data.sort(function (b, a) {
         d.speakerName = d[d.key]
         d.value = d.speechCount;
         d.speakerPic = d.picture
-
-
     });
-
-
 
     // Adjusting the scaling of the axes to fit the dataset scope
     // speakerName on x-Axis and speechCount in y-Axis
     x.domain(apliedData.map(function(d) { return d.speakerName; }));
     y.domain([0, d3.max(apliedData, function(d) { return d.speechCount; })]);
 
-/*
-
-    // Scale the range of the data in the domains. We set the x and y axis here
-    // We tell the X axis to render the name and we tell the y axis to render the count
-    x.domain(apliedData.map(function (d) {
-        return d.speakerName;
-    }));
-
-    y.domain([0, d3.max(apliedData, function (d) {
-        return d.speechCount;
-    })]);
-
- */
-
-
-
+    //hover effect and tooltip
     var tooltip = d3.select("body")
         .append("div")
         .attr("id", "mytooltip")
@@ -143,42 +105,9 @@ data.sort(function (b, a) {
             d3.select(this).transition().attr('fill', "#69b3a2");
         });
 
-           // var xPos = parseFloat(d3.select(this).attr("x")) / 2 ;
-            //var yPos = parseFloat(d3.select(this).attr("y")) / 2 + height / 2;
-
-            //Update Tooltip
-            /*
-            d3.select('#tooltip')
-                .style('left', xPos + 'px')
-                .style('top', yPos + 'px')
-                .select('#value').text(d.speakerName)
-
-            d3.select(this)
-                .style("opacity", 0.5)
-                .style(d.picture);
-            svg.append("text")
-                .attr("id", "tooltip")
-                .attr("x", x(d.speakerName) + x.bandwidth() / 2)
-                .attr("y", y(d.speechCount) - 5)
-                .text(d.speakerName);
-
-             */
-    // And now, after we got our bars, lets append the x and y axis
-    // Add x axis
-
-    /*
-
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
-
-     */
-
     // Add y axis
     svg.append("g")
         .call(d3.axisLeft(y))
-
-
 
     // Add x axis
     svg.append("g")
@@ -190,6 +119,5 @@ data.sort(function (b, a) {
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
         .attr("transform", "rotate(-20)");
-
 
 }

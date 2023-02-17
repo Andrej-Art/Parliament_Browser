@@ -80,6 +80,9 @@ public class SparkHandler {
                 res.redirect(path + "/");
         });
 
+        // Test is for testing
+        get("/test/", getTest, new FreeMarkerEngine(cfg));
+
         get("/", getHome, new FreeMarkerEngine(cfg));
         post("/", "application/json", postHome);
 
@@ -121,6 +124,26 @@ public class SparkHandler {
     /*
      * Routes:
      */
+
+    /**
+     * Test page.
+     */
+    @Testing
+    private static final TemplateViewRoute getTest = (Request request, Response response) -> {
+        Map<String, Object> pageContent = new HashMap<>();
+        JSONObject obj = new JSONObject("{\"perEntity\":[{\"_id\":2,\"name\":\"butter\"},{\"_id\":5,\"name\":\"butter\"}]}");
+        ArrayList<JSONObject> objList = new ArrayList<>(0);
+        objList.add(new JSONObject("{\"_id\":2,\"name\":\"butter\"}"));
+        objList.add(new JSONObject("{\"_id\":5,\"name\":\"butter\"}"));
+
+        pageContent.put("title", "butter");
+        pageContent.put("obj", obj);
+        pageContent.put("objList", objList);
+
+        String userRank = "admin";
+        pageContent.put("userRank", userRank);
+        return new ModelAndView(pageContent, "test.ftl");
+    };
 
     /**
      * Homepage.

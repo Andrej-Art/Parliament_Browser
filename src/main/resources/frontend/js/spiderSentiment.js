@@ -5,27 +5,32 @@
 
 function drawSpiderChart(data, target) {
 
-    let data2 = [];
-    let features = ["Positiv", "Neutral", "Negativ"];
-
-
-    let speechSentiment = {Positiv: data.speechPos, Neutral: data.speechNeu, Negativ: data.speechNeg};
-    let commentSentiment = {Positiv: data.commentPos, Neutral: data.commentNeu, Negativ: data.commentNeg};
 
     //parse string data into Floats
     function parseSentimentValues(sentimentObj){
-        const parsedObj=[];
+        const parsedObj={};
         for (let [key, value] of Object.entries(sentimentObj)) {
             parsedObj[key] = parseFloat(value.replace(',', '.'));
         }
         return parsedObj;
     }
 
-    const parsedSpeechSentiment = parseSentimentValues(speechSentiment);
-    const parsedCommentSentiment = parseSentimentValues(commentSentiment);
+    const parsedData = parseSentimentValues(data);
 
-    data2.push(parsedSpeechSentiment);
-    data2.push(parsedCommentSentiment);
+    let data2 = [];
+    let features = ["Positiv", "Neutral", "Negativ"];
+
+
+    let speechSentiment = {Positiv: parsedData.speechPos, Neutral: parsedData.speechNeu, Negativ: parsedData.speechNeg};
+    let commentSentiment = {Positiv: parsedData.commentPos, Neutral: parsedData.commentNeu, Negativ: parsedData.commentNeg};
+
+
+
+   // const parsedSpeechSentiment = parseSentimentValues(speechSentiment);
+    //const parsedCommentSentiment = parseSentimentValues(commentSentiment);
+
+    data2.push(speechSentiment);
+    data2.push(commentSentiment);
 
 
 

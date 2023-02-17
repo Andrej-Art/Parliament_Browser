@@ -352,6 +352,8 @@ function createLineChart(data, target) {
 
 }
 
+
+
 /**
  * Function to update the charts with data filtered by the user entry on the website.
  * @author DavidJordan
@@ -378,26 +380,28 @@ function updateCharts() {
         if (ajaxChartData.readyState === XMLHttpRequest.DONE && ajaxChartData.status === 200) {
 
             // Add the new chart to the div element of the acrual panel and card
-            /*
-            var chartDivIdArray = ["pos"+(panelCount +1), "tokenLine"+(panelCount +1), "spider"+(panelCount +1), "entitiesMulti"+(panelCount +1), "my_dataviz"+(panelCount +1), "pie"+(panelCount + 1)];
-            for(var i=0; i< chartDivIdArray.length; i++) {
-                let chart1Container = document.getElementById(chartDivIdArray[i]);
 
-             */
-
-
-            // Clears all the old charts out of the div elements
             var chartDivIdArray = ["pos", "tokenLine", "spider", "entitiesMulti", "my_dataviz", "pie"];
             for(var i=0; i< chartDivIdArray.length; i++) {
                 let chart1Container = document.getElementById(chartDivIdArray[i]);
-                //das muss für das neue Panel ganz entfernt werden, da charts nicht mehr gelöscht werden an der gleichen stelle,
-                // sondern neue Panels erstellt werden
-                /*
-                while (chart1Container.firstChild) {
-                    chart1Container.removeChild(chart1Container.firstChild);
-                }
 
-                 */
+
+                // Clears all the old charts out of the div elements
+                var chartDivIdArray = ["pos", "tokenLine", "spider", "entitiesMulti", "my_dataviz", "pie"];
+                for (var i = 0; i < chartDivIdArray.length; i++) {
+                    let chart1Container = document.getElementById(chartDivIdArray[i]);
+                    //das muss für das neue Panel ganz entfernt werden, da charts nicht mehr gelöscht werden an der gleichen stelle,
+                    // sondern neue Panels erstellt werden
+                    /*
+
+                    while (chart1Container.firstChild) {
+                        chart1Container.removeChild(chart1Container.firstChild);
+                    }
+
+                     */
+
+
+                }
             }
 
             let data = ajaxChartData.response
@@ -408,14 +412,17 @@ function updateCharts() {
             let speechData = data["speechesNumber"];
             let sentimentData = data["sentiment"];
             let voteData = data["votes"];
+           // console.log(speechData);
+            //console.log(sentimentData);
+            //console.log(voteData);
 
 
             MultiLineEntities(entityData, "#entitiesMulti"+(panelCount));
             createLineChart(tokenData,"#tokenLine"+(panelCount));
             createBarChart(posdata, "#pos"+(panelCount));
-            drawSpiderChart(sentimentData,"#spider"+(panelCount));
+            //drawSpiderChart(sentimentData,"#spider"+(panelCount));
             drawStackedBarChart(voteData,"#pie"+(panelCount));
-            speakerbarchart(speechData,"#my_dataviz"+(panelCount));
+          speakerbarchart(speechData,"#my_dataviz"+(panelCount));
 
 
 
