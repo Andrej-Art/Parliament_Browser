@@ -179,7 +179,6 @@ public class SparkHandler {
      *
      * @author DavidJordan
      */
-
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         pageContent.put("protocolData", mongoDBHandler.getProtocolAgendaPersonData());
@@ -189,7 +188,6 @@ public class SparkHandler {
 
     /**
      * Delivers the required String in LaTeX format to the frontend.
-     *
      * @author DavidJordan
      */
     private static final Route getLaTeXString = (Request request, Response response) -> {
@@ -358,6 +356,9 @@ public class SparkHandler {
         }
     };
 
+    /**
+     * Main dashboard page.
+     */
     private static final TemplateViewRoute getDashboard = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
 

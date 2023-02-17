@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * @author Andrej
  * @author Julian Ocker
  */
-@Unfinished("Some reason")
+
 public class XMLProtocolParser {
 
     private static Map<String, Speech_Impl> speechMap;
