@@ -3,7 +3,7 @@
  * @author Eric Lakhter
  * @param data
  * @param target
- *
+ * This function maps the voting results. The d3 Library was used as a reference.
  */
 
 function drawStackedBarChart(data, target) {
