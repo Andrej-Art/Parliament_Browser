@@ -407,8 +407,8 @@ function updateCharts() {
     $('#status-message-box').text('Waiting for response from DB ...');
 
     // Make an AJAX call to the backend
-    var ajaxChartData = new XMLHttpRequest();
-    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&personInput=" + person + "&fraction=" + fraction + "&party=" + party, true);
+    let ajaxChartData = new XMLHttpRequest();
+    ajaxChartData.open("GET", "/update-charts/?von=" + startDate + "&bis=" + endDate + "&fraction=" + fraction + "&personInput=" + person + "&party=" + party, true);
     ajaxChartData.responseType = "json";
     ajaxChartData.onreadystatechange = function() {
         $('#status-message-box').text('');
