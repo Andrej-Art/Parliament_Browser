@@ -161,6 +161,7 @@ public class SparkHandler {
     private static final TemplateViewRoute getLaTeX = (Request request, Response response) -> {
         Map<String, Object> pageContent = new HashMap<>();
         pageContent.put("protocolData", mongoDBHandler.getProtocolAgendaPersonData());
+        pageContent.put("canEdit", mongoDBHandler.checkIfCookieIsAllowedAFeature(request.cookie("key"), "manager"));
 
         return new ModelAndView(pageContent, "LaTeXEditor.ftl");
     };
