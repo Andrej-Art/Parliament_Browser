@@ -34,7 +34,7 @@
             <label> Editor
                 <button type="submit">Generate</button>
                 <br><br>
-                <textarea id="editor-textarea"></textarea>
+                <textarea id="editor-textarea" <#if !canEdit> readonly="readonly"</#if>></textarea>
             </label>
         </form>
     </div>
