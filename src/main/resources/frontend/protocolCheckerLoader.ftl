@@ -21,9 +21,8 @@
 <br>
 <h3>Administration der Protokolle</h3>
 <br>
-<br>
-Es sind ${numberOfParsedProtocols} Protokolle in der DB.
-Es sind ${numberOfProtocols} zum Parsen verfügbar.
+Es sind ${numberOfParsedProtocols} Protokolle in der DB. <br>
+Es sind ${numberOfProtocols} zum Parsen verfügbar.<br>
 <br>
 <br>
 <form onsubmit="loadAll(); return false;">
