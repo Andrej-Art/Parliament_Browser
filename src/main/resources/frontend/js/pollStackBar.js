@@ -133,9 +133,8 @@ function drawStackedBarChart(data, target) {
         .keys(subgroups)
         (totalData)
 
-    // ----------------
+
     // Create a tooltip
-    // ----------------
     const tooltip = d3.select(target)
         .append("div")
         .style("opacity", 0)

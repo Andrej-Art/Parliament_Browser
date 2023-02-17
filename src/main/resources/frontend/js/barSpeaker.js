@@ -3,6 +3,15 @@
  * @author Andrej Artuschenko
  * @param data
  * @param target
+ *
+ * This function generates a bar chart. On the x-axis the speakers are listed and on the y-axis
+ * the number of speeches. Due to the volume of over 1000 speakers,
+ * we decided to limit the x-axis to 15 speakers for better readability.
+ * If the mouse pointer is on a bar, a tooltip appears with the name of the speaker,
+ * the number of speeches and a picture.
+ *
+ * Assumption: The images do not always match because we had to rely
+ * on the image database of the Bundestag and always took the first image there.
  */
 function speakerbarchart(data, target) {
 
