@@ -23,7 +23,7 @@
 <br>
 <br>
 Es sind ${numberOfParsedProtocols} Protokolle in der DB.
-Es sind ${numberOfProtocols} zum parsen verfügbar.
+Es sind ${numberOfProtocols} zum Parsen verfügbar.
 <br>
 <br>
 <form onsubmit="loadAll(); return false;">
