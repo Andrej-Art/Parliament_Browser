@@ -426,16 +426,6 @@ function updateCharts() {
                 var chartDivIdArray = ["pos", "tokenLine", "spider", "entitiesMulti", "my_dataviz", "pie"];
                 for (var i = 0; i < chartDivIdArray.length; i++) {
                     let chart1Container = document.getElementById(chartDivIdArray[i]);
-                    //das muss für das neue Panel ganz entfernt werden, da charts nicht mehr gelöscht werden an der gleichen stelle,
-                    // sondern neue Panels erstellt werden
-                    /*
-
-                    while (chart1Container.firstChild) {
-                        chart1Container.removeChild(chart1Container.firstChild);
-                    }
-
-                     */
-
 
                 }
             }
@@ -448,9 +438,6 @@ function updateCharts() {
             let speechData = data["speechesNumber"];
             let sentimentData = data["sentiment"];
             let voteData = data["votes"];
-           // console.log(speechData);
-            //console.log(sentimentData);
-            //console.log(voteData);
 
             document.getElementById("db-response-status").innerHTML = '';
 
@@ -460,26 +447,6 @@ function updateCharts() {
             drawSpiderChart(sentimentData,"#spider"+(panelCount));
             drawStackedBarChart(voteData,"#pie"+(panelCount));
           speakerbarchart(speechData,"#my_dataviz"+(panelCount));
-
-
-
-            // Create and insert new charts
-
-            /*
-
-
-
-           MultiLineEntities(entityData, document.querySelector("#entitiesMulti"));
-            createLineChart(tokenData, document.querySelector("#tokenLine"));
-            createBarChart(posdata, document.querySelector("#pos"));
-            drawSpiderChart(sentimentData, document.querySelector("#spider"));
-            drawStackedBarChart(voteData,document.querySelector("#pie"));
-            speakerbarchart(speechData,document.querySelector("#my_dataviz"));
-
-             */
-
-
-
 
 
         } else {
