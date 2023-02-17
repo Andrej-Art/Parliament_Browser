@@ -47,7 +47,7 @@ public class PictureScraper {
         String urlWebsite = "https://bilddatenbank.bundestag.de/search/picture-result?query=" + fullName + "&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3";
         /*
         For Example:
-        https://bilddatenbank.bundestag.de/search/picture-result?query=marco+buschmann&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
+        https://bilddatenbank.bundestag.de/search/picture-result?query=wirth+christian&filterQuery%5Bort%5D%5B%5D=Reichstagsgebäude%2C+Plenarsaal&sortVal=3
         */
         // Connection to website
         //Thread Sleep for 250ms so that we dont get kicked off the bundestag server
@@ -65,17 +65,6 @@ public class PictureScraper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        /*
-        // search after pTag where we can find the message
-        Elements errors = picDatabase.select("p");
-        boolean error = false;
-        for (org.jsoup.nodes.Element element : errors) {
-            if (element.text().equals("Es wurden keine Bilder gefunden.")) {
-                error = true;
-            }
-        }
-         */
 
         // if they are no errors in the Bilddatenbank
         String[] metadata = new String[0];
@@ -111,8 +100,6 @@ public class PictureScraper {
         for(int i=0; i<pictureArray.length; i++ ){
             System.out.println(pictureArray[i]);
         }
-
-
 
         return pictureArray;
 
