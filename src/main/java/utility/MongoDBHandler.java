@@ -78,7 +78,7 @@ public class MongoDBHandler {
     /**
      * Returns the instance of the {@code MongoDBHandler}.
      *
-     * @return Singleton instance of {@code MongoDBHandler}.
+     * @return The singleton instance of {@code MongoDBHandler}.
      * @author Eric Lakhter
      */
     public static MongoDBHandler getHandler() {

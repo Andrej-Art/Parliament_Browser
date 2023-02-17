@@ -1,9 +1,8 @@
 /**
- * @author Andrej Artuschenko
- * @author Eric Lakhter
- * @param data
- * @param target
  * This function maps the voting results. The d3 Library was used as a reference.
+ * @param data Poll data.
+ * @param target ID of target container.
+ * @author Andrej Artuschenko, Eric Lakhter
  */
 
 function drawStackedBarChart(data, target) {
