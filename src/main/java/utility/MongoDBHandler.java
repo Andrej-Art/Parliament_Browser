@@ -1439,18 +1439,9 @@ public class MongoDBHandler {
 
 
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(addFieldsVotesData, addFieldsTotalVotes));
-        if (!dateFilterOne.isEmpty()) {
-            applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
-        }
-        if (!fractionFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, fractionFilter, "", "");
-        }
-        if (!personFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", personFilter, "");
-        }
-        if (!partyFilter.isEmpty()) {
-            applyPersonFractionFiltersToAggregation(pipeline, "", "", partyFilter);
-        }
+
+        applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
+
         ArrayList<JSONObject> objList = new ArrayList<>();
         String[] partyList = new String[]{"SPD", "AfD", "CxU", "B90", "FDP", "LINKE", "independent"};
         db.getCollection("poll").aggregate(pipeline).allowDiskUse(false).forEach((Consumer<? super Document>) procBlock -> {

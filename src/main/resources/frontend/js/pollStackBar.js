@@ -1,7 +1,86 @@
 function drawStackedBarChart(data, target) {
     console.log(data);
 
+    if (data.length === 0) {
+        console.log("Innerhalb der Filter gibt es keine keine Abstimmungsergebnisse.");
+        return;
+    }
 
+    // hier sind die Abstimmungen für total und die einzelnen Fraktionen
+    let totalData = data.map(d =>{
+            switch (document.getElementById("fractionInput").value) {
+                case "SPD":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.SPDNoVotes,
+                        totalAbstained: d.SPDAbstained,
+                        totalNo: d.SPDNo,
+                        totalYes: d.SPDYes,
+                    }
+                case "CDU/CSU":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.CxUNoVotes,
+                        totalAbstained: d.CxUAbstained,
+                        totalNo: d.CxUNo,
+                        totalYes: d.CxUYes,
+                    }
+                case "FDP":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.FDPNoVotes,
+                        totalAbstained: d.FDPAbstained,
+                        totalNo: d.FDPNo,
+                        totalYes: d.FDPYes,
+                    }
+                case "BÜNDNIS 90/DIE GRÜNEN":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.B90NoVotes,
+                        totalAbstained: d.B90Abstained,
+                        totalNo: d.B90No,
+                        totalYes: d.B90Yes,
+                    }
+                case "DIE LINKE.":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.LINKENoVotes,
+                        totalAbstained: d.LINKEAbstained,
+                        totalNo: d.LINKENo,
+                        totalYes: d.LINKEYes,
+                    }
+                case "AfD":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.AfDNoVotes,
+                        totalAbstained: d.AfDAbstained,
+                        totalNo: d.AfDNo,
+                        totalYes: d.AfDYes,
+                    }
+                case "fraktionslos":
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.independentNoVotes,
+                        totalAbstained: d.independentAbstained,
+                        totalNo: d.independentNo,
+                        totalYes: d.independentYes,
+                    }
+                default:
+                    return {
+                        topic: d.topic,
+                        totalNoVotes: d.totalNoVotes,
+                        totalAbstained: d.totalAbstained,
+                        totalNo: d.totalNo,
+                        totalYes: d.totalYes,
+                    }
+            }
+    })
+
+    // Subgroups sind die gestackten Abschnitte
+    let subgroups = Object.keys(totalData[0]);
+
+
+    let topics = data.map(d => d.topic);
 
 // set the dimensions and margins of the graph
     const margin = {top: 10, right: 30, bottom: 20, left: 50},
@@ -16,54 +95,10 @@ function drawStackedBarChart(data, target) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    //definiere meine daten, die ich brauche
-
-
-
-    // die pollID sind die IDs, der einzelnen Abstimmungen, die auf die x-Achse gehören.
-
-
-
-    let pollID = Object.entries(data).map(d =>{
-        return {
-            pollID: d[1].pollID
-        }
-    })
-    pollID.forEach(function (d) {
-        d.pollIDkey = Object.keys(d)[0];
-        d.pollIDValue = d[d.pollIDkey]
-
-    });
-    var pollIDs = d3.map(pollID, function (d){return(d.pollIDValue)})
-    const slicedpollIDs = pollIDs.slice(1, 5);
-    console.log(slicedpollIDs);
-
-
-
-    /*
-    Definition of Subgroups
-     */
-
-    // hier sind die Abstimmungen für total und die einzelnen Fraktionen
-    let totalData = Object.entries(data).map(d =>{
-        return{
-            // Total
-            totalYes: d[1].totalYes,
-            totalAbstained: d[1].totalAbstained,
-            totalNo: d[1].totalNo,
-            totalNoVotes: d[1].totalNoVotes,
-        }
-    })
-
-    // Subgroups sind die gestackten Abschnitte
-    let subgroups = Object.keys(totalData[1])
-    console.log(subgroups);
-    let subgroupvotes = Object.values(totalData[1])
-    console.log(subgroupvotes);
 
     // Add X axis
     const x = d3.scaleBand()
-        .domain(slicedpollIDs)
+        .domain(topics)
         .range([0, width])
         .padding([0.2])
     svg.append("g")
@@ -81,7 +116,7 @@ function drawStackedBarChart(data, target) {
     // color palette = one color per subgroup
     const color = d3.scaleOrdinal()
         .domain(subgroups)
-        .range(['#e41a1c', '#FFC0CB', '#FFFF00', '#4daf4a'])
+        .range(['#4daf4a', '#FFFF00', '#FFC0CB', '#e41a1c'])
     //'#4daf4a', '#FFFF00'
 
 
@@ -92,7 +127,6 @@ function drawStackedBarChart(data, target) {
     const stackedData = d3.stack()
         .keys(subgroups)
         (totalData)
-   console.log(stackedData);
 
 
 
@@ -107,7 +141,7 @@ function drawStackedBarChart(data, target) {
         // enter a second time = loop subgroup per subgroup to add all rectangles
         .data(d => d)
         .join("rect")
-        .attr("x", d => x(d.data.group))
+        .attr("x", d => x(d.data.topic))
         .attr("y", d => y(d[1]))
         .attr("height", d => y(d[0]) - y(d[1]))
         .attr("width", x.bandwidth())
