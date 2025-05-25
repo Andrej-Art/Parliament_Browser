@@ -1,0 +1,100 @@
+/*
+    Style for speech editing
+*/
+
+.protocol-editor {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+}
+
+/* protocol loader container */
+.select-box {
+    background-color: #bbb;
+    box-sizing: border-box;
+    padding: 50px 20px 20px;
+    overflow: auto;
+    float: left;
+    height: 100%;
+    width: 25%;
+}
+
+#button-list {
+    margin-left: -10px;
+}
+
+/* status output container */
+.status-box {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 25%;
+    width: 45%;
+    float: left;
+}
+
+#status-message-box {
+    background-color: white;
+    border-color: darkgray;
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+    cursor: text;
+    padding: 5px;
+    font-family: monospace;
+    overflow: auto;
+    resize: none;
+    height: 80%;
+    width: 80%;
+}
+
+/* radiobuttons/checkbox container */
+.button-box {
+    box-sizing: border-box;
+    padding: 50px 20px;
+    overflow: auto;
+    height: 100%;
+    width: 30%;
+    float: right;
+}
+
+/* protocol editing area container */
+.editor-box {
+    box-sizing: border-box;
+    overflow: auto;
+    float: left;
+    height: 75%;
+    width: 45%;
+}
+
+#input-area {
+    box-sizing: border-box;
+    padding: 40px 10px 0 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.input-row {
+    box-sizing: border-box;
+    padding: 0 5px;
+    display: flex;
+}
+
+.editor-label {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 0 10px;
+    text-align: right;
+    width: 30%;
+}
+
+.editor-input {
+    box-sizing: border-box;
+    resize: none;
+    width: 70%;
+}

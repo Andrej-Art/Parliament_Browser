@@ -1,0 +1,152 @@
+/* Style for speech visualisation sidebar*/
+
+.speech-vis-sidebar {
+    background-color: #bbb;
+    border-color: #333;
+    border-style: solid;
+    border-width: 0 1px 0 0;
+    box-shadow: 3px 0 5px #bbb;
+    height: 100vh;
+    width: 300px;
+    float: left;
+    overflow: auto;
+}
+
+.speech-vis-sidebar-button-container {
+    padding: 20px;
+}
+
+.speech-vis-sidebar-button {
+    text-align: left;
+    padding: 0 10px;
+    width: 180px;
+}
+
+#button-list {
+    margin-left: -10px;
+    margin-top: -10px;
+}
+
+.agenda-button {
+
+}
+
+/* Style for speech visualisation text field*/
+
+.speech-header-container {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+#speech-text {
+    text-align: justify;
+}
+
+.speech-vis-text {
+    box-sizing: border-box;
+    bottom: 0;
+    height: 95vh;
+    margin-left: 300px;
+    overflow: auto;
+    padding: 30px;
+}
+
+.speech-vis-legend {
+    background-color: #bbb;
+    border-color: #333;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    box-shadow: 0 3px 5px #bbb;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 5vh;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Style for pictures */
+
+.speaker-pic-comment {
+    height:40px;
+    width:60px;
+    vertical-align: middle;
+}
+
+.speaker-pic-header {
+    height:80px;
+    width:120px;
+    vertical-align: middle;
+}
+
+/* Style for Named Entities */
+
+.entity-per {
+    background-color: coral;
+}
+
+.entity-org {
+    background-color: aqua;
+}
+
+.entity-loc {
+    background-color: lime;
+}
+
+/* Style for comments */
+
+.comment {
+    color: darkgreen;
+}
+
+/* Style for sentiment info blob */
+
+.sentiment-pos {
+    color: cornflowerblue;
+}
+
+.sentiment-neu {
+    color: yellow;
+}
+
+.sentiment-neg {
+    color: indianred;
+}
+
+.sentiment {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.sentiment .hover-text {
+    visibility: hidden;
+    position: absolute;
+    bottom: 110%;
+    text-align: center;
+    background-color: black;
+    width: 60px;
+    padding: 5px 5px;
+    border-radius: 5px;
+    margin-left: -27.5px;
+    z-index: 2;
+}
+
+.sentiment:hover .hover-text {
+    visibility: visible;
+}
+
+.sentiment .hover-text::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    margin-left: -5px;
+    border-color: black transparent transparent transparent;
+    border-style: solid;
+    border-width: 5px;
+}

@@ -35,6 +35,9 @@ import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDesc
  */
 public class UIMAPerformer {
 
+    // ####################################################### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    XMLProtocolParser protocolParser = new XMLProtocolParser();
+
     private final AnalysisEngine analysisEngine;
     private final String[] ddcCategories;
 
@@ -42,6 +45,7 @@ public class UIMAPerformer {
      * Sets up the necessary resources to perform UIMA analysis on texts.
      * @throws UIMAException If an error occurs while building the {@code AnalysisEngine}.
      * @throws FileNotFoundException If {@code ddc3-names-de.csv} is not found in {@code /resources/}.
+     *
      */
     public UIMAPerformer() throws UIMAException, FileNotFoundException {
         analysisEngine = generateAnalysisEngine();

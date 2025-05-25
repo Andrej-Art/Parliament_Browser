@@ -791,6 +791,7 @@ public class MongoDBHandler {
         Bson sort = sort(descending("speechescount"));
         List<Bson> pipeline = new ArrayList<>(Arrays.asList(group, lookup, unwind, limit));
 
+
         if (!dateFilterOne.isEmpty()) {
             applyDateFiltersToAggregation(pipeline, dateFilterOne, dateFilterTwo);
         }

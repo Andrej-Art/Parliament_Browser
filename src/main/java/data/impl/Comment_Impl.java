@@ -47,6 +47,14 @@ public class Comment_Impl implements Comment {
         this.commentPosition = commentPosition;
     }
 
+    public Comment_Impl(String id, String speechID, String speakerID, String text, LocalDate date){
+        this._id = id;
+        this.speechID = speechID;
+        this.speakerID = speakerID;
+        this.text = text;
+        this.date = date;
+    }
+
     /**
      * Full {@code Comment} constructor which uses a BSON document to load the data for the variables.
      * @param document The BSON Document retrieved from the Database

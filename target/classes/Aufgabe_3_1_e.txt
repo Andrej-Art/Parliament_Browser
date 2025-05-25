@@ -1,0 +1,14 @@
+
+
+(3)
+
+Oberes layer ist eine skala von -1 bis 1 für sentiment
+
+mittleres layer sind knoten für reden
+
+unteres layer sind knoten für kategorien
+
+
+verbindung zwischen rede und kategorie wenn sie thema war
+verbindung zwischen reden und sentiment-skala an der stelle welches sentiment der rede ist
+verbindung zwischen kategorie und sentiment-skala an der stelle was der durchschnitt aller redesentiments mit dieser kategorie ist

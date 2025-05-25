@@ -35,6 +35,7 @@ public class Speech_Impl implements Speech {
         this.date = date;
     }
 
+
     /**
      * Full {@code Speech} Constructor to be used when the object is generated from a given BSON document.
      * @param document
@@ -47,6 +48,9 @@ public class Speech_Impl implements Speech {
         this.text = document.getString("text");
         this.date = LocalDate.parse(document.getString("date"));
     }
+
+
+
 
     @Override
     public String getID() {
